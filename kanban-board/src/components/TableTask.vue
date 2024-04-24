@@ -62,6 +62,7 @@ onMounted(async () => {
   </div>
 
   <AddEditTask @closeModal="closeModal" :showModal="showModal" />
+  
 </template>
 
 <style scoped></style>
