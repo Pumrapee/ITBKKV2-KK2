@@ -1,13 +1,31 @@
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import tasks from "../../data/task.json"
 import AddEditTask from "../components/AddEditTask.vue"
 
 const showModal = ref(false)
+const taskdata = ref([])
 
 const closeModal = () => {
   showModal.value = false
 }
+
+console.log(taskdata.value)
+
+onMounted(async () => {
+  try {
+    const response = await fetch(import.meta.env.VITE_BASE_URL)
+    if (!response.ok) {
+      throw new Error("Failed to fetch data")
+    }
+    const data = await response.json()
+    taskdata.value = data
+  } catch (error) {
+    console.error(error)
+  }
+    
+  console.log(taskdata.value)
+})
 </script>
 
 <template>
