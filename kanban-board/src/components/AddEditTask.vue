@@ -1,6 +1,11 @@
 <script setup>
 import { ref, defineProps } from "vue"
-const { showModal } = defineProps(["showModal"])
+const { showModal, taskId } = defineProps({
+  showModal: Boolean,
+  taskId: String,
+})
+
+console.log(taskId)
 defineEmits(["closeModal"])
 </script>
 
@@ -19,7 +24,7 @@ defineEmits(["closeModal"])
 
         <div class="border-2 col-start-4 row-start-2 row-end-4 rounded-lg">
           <p class="p-3 font-bold">Assignees</p>
-          <p class="pl-5">content</p>
+          <p class="pl-5">content {{ taskId }}</p>
         </div>
         <div class="border-2 col-start-4 row-start-4 row-end-5 rounded-lg">
           <p class="p-2 font-bold">Status</p>

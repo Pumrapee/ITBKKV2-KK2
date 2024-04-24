@@ -5,12 +5,16 @@ import AddEditTask from "../components/AddEditTask.vue"
 
 const showModal = ref(false)
 const taskdata = ref([])
+const taskIdtoEdit = ref()
 
 const closeModal = () => {
   showModal.value = false
 }
 
-console.log(taskdata.value)
+const openModal = (taskId) => {
+  taskIdtoEdit.value = taskId
+  showModal.value = true
+}
 
 onMounted(async () => {
   try {
@@ -23,7 +27,7 @@ onMounted(async () => {
   } catch (error) {
     console.error(error)
   }
-    
+
   console.log(taskdata.value)
 })
 </script>
@@ -42,10 +46,10 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(task, index) in tasks" :key="task.id">
+          <tr v-for="(task, index) in taskdata" :key="task.id">
             <th>{{ task.id }}</th>
             <td>
-              <button @click="showModal = true" class="btn btn-ghost">
+              <button @click="openModal(task.id)" class="btn btn-ghost">
                 {{ task.title }}
               </button>
             </td>
@@ -61,7 +65,11 @@ onMounted(async () => {
     </div>
   </div>
 
-  <AddEditTask @closeModal="closeModal" :showModal="showModal" />
+  <AddEditTask
+    @closeModal="closeModal"
+    :showModal="showModal"
+    :taskId="taskIdtoEdit"
+  />
 </template>
 
 <style scoped></style>
