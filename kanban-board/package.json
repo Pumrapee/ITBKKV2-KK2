@@ -13,6 +13,7 @@
     "test:unit:dev": "cypress open --component"
   },
   "dependencies": {
+    "json-server": "^1.0.0-alpha.23",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
