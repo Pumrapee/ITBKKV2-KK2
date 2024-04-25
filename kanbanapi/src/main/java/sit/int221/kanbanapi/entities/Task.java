@@ -1,12 +1,13 @@
 package sit.int221.kanbanapi.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 
 @Getter
@@ -15,12 +16,13 @@ import java.time.LocalDateTime;
 @Table(name = "tasks")
 public class Task {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String taskTitle;
     private String taskDescription;
     private String taskAssignees;
     @Enumerated(EnumType.STRING)
     private TaskStatus taskStatus;
-    private LocalDateTime createdOn;
-    private LocalDateTime updatedOn;
+    private Date createdOn;
+    private Date updatedOn;
 }
