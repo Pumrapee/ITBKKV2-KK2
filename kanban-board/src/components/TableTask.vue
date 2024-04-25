@@ -2,31 +2,27 @@
 import { ref, onMounted } from "vue"
 import tasks from "../../data/task.json"
 import AddEditTask from "../components/AddEditTask.vue"
+import { getItems,getItemById } from "../libs/fetchUtils"
+
 
 const showModal = ref(false)
 const taskdata = ref([])
-const taskIdtoEdit = ref()
+const task = ref()
 
 const closeModal = () => {
   showModal.value = false
 }
 
-const openModal = (taskId) => {
-  taskIdtoEdit.value = taskId
+const openModal = async (taskId) => {
+  console.log(taskId);
+  const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
+  task.value = await data
   showModal.value = true
 }
 
 onMounted(async () => {
-  try {
-    const response = await fetch(import.meta.env.VITE_BASE_URL)
-    if (!response.ok) {
-      throw new Error("Failed to fetch data")
-    }
-    const data = await response.json()
-    taskdata.value = data
-  } catch (error) {
-    console.error(error)
-  }
+  const data = await getItems(import.meta.env.VITE_BASE_URL)
+  taskdata.value = data
 
   console.log(taskdata.value)
 })
@@ -68,7 +64,7 @@ onMounted(async () => {
   <AddEditTask
     @closeModal="closeModal"
     :showModal="showModal"
-    :taskId="taskIdtoEdit"
+    :task="task"
   />
 </template>
 
