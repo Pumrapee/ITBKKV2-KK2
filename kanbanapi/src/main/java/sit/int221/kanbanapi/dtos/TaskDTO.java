@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
 
-import java.util.Date;
+import java.sql.Date;
+
 
 @Getter
 @Setter
@@ -15,8 +16,8 @@ public class TaskDTO {
     private String description;
     private String assignees;
     private TaskStatus status;
-    @JsonFormat(pattern="dd-MM-yyyy'T'HH:mm:ssXXX", timezone="UTC")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private Date createdOn;
-    @JsonFormat(pattern="dd-MM-yyyy'T'HH:mm:ssXXX", timezone="UTC")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private Date updatedOn;
 }

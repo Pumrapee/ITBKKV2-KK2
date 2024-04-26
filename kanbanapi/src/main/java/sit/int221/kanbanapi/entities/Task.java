@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
 
-import java.util.Date;
+import java.sql.Date;
 
 
 @Getter
