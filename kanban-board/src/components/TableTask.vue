@@ -9,8 +9,8 @@ const taskdata = ref([])
 const task = ref()
 
 const closeModal = () => {
-  showModal.value = false
   router.push("/task")
+  showModal.value = false
 }
 
 const openModal = async (taskId) => {
@@ -20,7 +20,7 @@ const openModal = async (taskId) => {
     if (data.status === 404) {
       alert("The requested task does not exist")
       //router.go(-1) // Redirect to previous page
-      //router.push("/task")
+      router.push("/task")
     } else {
       task.value = data
       showModal.value = true

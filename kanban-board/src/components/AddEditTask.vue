@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, onMounted } from "vue"
+import { ref, defineProps, defineEmits, onMounted, computed } from "vue"
 const { showModal, task } = defineProps({
   showModal: Boolean,
   task: Object,
@@ -35,13 +35,10 @@ const reformat = (status) => {
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
             class="itbkk-description textarea textarea-ghost p-4 h-3/4 w-11/12 ml-9"
-            v-model="task.description"
-            placeholder="No Description Provided"
             :class="
               task.description ? 'bg-white text-black' : 'italic text-gray-500'
             "
-          >
- {{ task.description }}  </textarea
+          >{{ task.description ? task.description : 'No Description Provided' }}</textarea
           >
           <!-- <p class="itbkk-description">No Description Provided</p> -->
         </div>
@@ -51,13 +48,11 @@ const reformat = (status) => {
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
-            v-model="task.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-3/5 w-11/12 ml-2"
-            :placeholder="task.assignees ? '' : 'Unassigned'"
             :class="
               task.assignees ? 'bg-white text-black' : 'italic text-gray-500'
             "
-          ></textarea>
+          >{{ task.assignees ? task.assignees : 'Unassigned' }}</textarea>
         </div>
 
         <div
