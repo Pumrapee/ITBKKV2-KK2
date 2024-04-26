@@ -17,7 +17,7 @@ import java.util.Date;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer taskId;
     private String taskTitle;
     private String taskDescription;
     private String taskAssignees;
