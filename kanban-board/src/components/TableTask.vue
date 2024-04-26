@@ -1,50 +1,159 @@
 <script setup>
-import { ref } from "vue"
-import tasks from "../../data/task.json"
+import { ref, onMounted } from "vue"
 import AddEditTask from "../components/AddEditTask.vue"
+import { getItems, getItemById } from "../libs/fetchUtils"
+import router from "@/router"
 
 const showModal = ref(false)
+const taskdata = ref([])
+const task = ref()
 
 const closeModal = () => {
   showModal.value = false
+  router.push("/task")
+}
+
+const openModal = async (taskId) => {
+  console.log(taskId)
+  if (taskId) {
+    const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
+    if (data.status === 404) {
+      alert("The requested task does not exist")
+      //router.go(-1) // Redirect to previous page
+      //router.push("/task")
+    } else {
+      task.value = data
+      showModal.value = true
+    }
+  }
+
+  console.log(task.value)
+}
+
+onMounted(async () => {
+  const data = await getItems(import.meta.env.VITE_BASE_URL)
+  taskdata.value = data
+
+  console.log(taskdata.value)
+
+  const format = () => {}
+})
+
+const reformat = (status) => {
+  const statusMap = {
+    NO_STATUS: "No Status",
+    TO_DO: "To Do",
+    DOING: "Doing",
+    DONE: "Done",
+  }
+  return statusMap[status] || status // ถ้าไม่มีค่าใน statusMap ให้ใช้ค่าเดิม
 }
 </script>
 
 <template>
   <!-- Task table -->
-  <div class="flex justify-center mt-40">
-    <div class="overflow-x-auto border-2 rounded-md w-4/5">
+  <div class="flex flex-col items-center mt-20">
+    <div class="flex justify-between w-4/5">
+      <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
+      <div class="dropdown dropdown-bottom dropdown-end">
+        <div
+          tabIndex="{0}"
+          role="button"
+          class="btn btn-border border-bg-white m-1"
+        >
+          filter <img src="/icons/filter.png" class="w-4" />
+        </div>
+        <ul
+          tabIndex="{0}"
+          class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+        >
+          <li>
+            <a
+              ><div class="border bg-gray-400 rounded-md p-2 text-white">
+                No Status
+              </div></a
+            >
+          </li>
+          <li>
+            <a
+              ><div class="border bg-yellow-400 rounded-md p-2 text-white">
+                To Do
+              </div></a
+            >
+          </li>
+          <li>
+            <a
+              ><div class="border bg-purple-400 rounded-md p-2 text-white">
+                Doing
+              </div></a
+            >
+          </li>
+          <li>
+            <a
+              ><div class="border bg-green-400 rounded-md p-2 text-white">
+                Done
+              </div></a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto border border-blue-400 rounded-md w-4/5 mt-4">
       <table class="table">
-        <thead class="bg-slate-100">
-          <tr>
+        <thead class="bg-blue-400">
+          <tr class="text-white text-sm">
             <th></th>
             <th>Title</th>
             <th>Assignees</th>
             <th>Status</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="(task, index) in tasks" :key="task.id">
-            <th>{{ task.id }}</th>
-            <td>
-              <button @click="showModal = true" class="btn btn-ghost">
-                {{ task.title }}
-              </button>
+        <tbody class="bg-white">
+          <tr
+            v-for="(task, index) in taskdata"
+            :key="task.id"
+            class="itbkk-item"
+          >
+            <th class="text-blue-400">{{ task.id }}</th>
+            <td class="itbkk-title">
+              <router-link :to="`/task/${task.id}`">
+                <button @click="openModal(task.id)" class="btn btn-ghost">
+                  {{ task.title }}
+                  <img src="/icons/pen.png" class="w-4" />
+                </button>
+              </router-link>
             </td>
-            <td>
-              <p v-for="(assignee, index) in task.assignees" :key="index">
-                {{ assignee }}
+            <td
+              class="itbkk-assignees"
+              :style="{ 'font-style': task.assignees ? 'normal' : 'italic' }"
+            >
+              <p v-if="task.assignees">
+                {{ task.assignees }}
               </p>
+              <p v-else class="text-gray-500">Unassigned</p>
             </td>
-            <td>{{ task.status }}</td>
+            <td class="itbkk-status">
+              <div
+                class="border rounded-md p-2 text-white w-24"
+                :class="{
+                  'bg-gray-400 font-bold':
+                    reformat(task.status) === 'No Status',
+                  'bg-yellow-400 font-bold': reformat(task.status) === 'To Do',
+                  'bg-purple-400 font-bold': reformat(task.status) === 'Doing',
+                  'bg-green-400 font-bold': reformat(task.status) === 'Done',
+                }"
+              >
+                {{ reformat(task.status) }}
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <AddEditTask @closeModal="closeModal" :showModal="showModal" />
-  
+  <AddEditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
 </template>
 
 <style scoped></style>

@@ -1,13 +1,19 @@
 import { createRouter, createWebHistory } from "vue-router"
-import HomeView from "../views/HomeView.vue"
+import HomeView from "@/views/HomeView.vue"
+import AddEditTask from "@/components/AddEditTask.vue"
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
-      path: "/",
-      name: "taskTable",
+      path: "/task",
+      name: "task",
       component: HomeView,
+      children: [{ path: "/task/:id", component: AddEditTask }],
+    },
+    {
+      path: "/",
+      redirect: "/task",
     },
   ],
 })
