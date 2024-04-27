@@ -50,48 +50,6 @@ const reformat = (status) => {
   <div class="flex flex-col items-center mt-20">
     <div class="flex justify-between w-4/5">
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
-      <div class="dropdown dropdown-bottom dropdown-end">
-        <div
-          tabIndex="{0}"
-          role="button"
-          class="btn btn-border border-bg-white m-1"
-        >
-          filter <img src="/icons/filter.png" class="w-4" />
-        </div>
-        <ul
-          tabIndex="{0}"
-          class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-        >
-          <li>
-            <a
-              ><div class="border bg-gray-400 rounded-md p-2 text-white">
-                No Status
-              </div></a
-            >
-          </li>
-          <li>
-            <a
-              ><div class="border bg-yellow-400 rounded-md p-2 text-white">
-                To Do
-              </div></a
-            >
-          </li>
-          <li>
-            <a
-              ><div class="border bg-purple-400 rounded-md p-2 text-white">
-                Doing
-              </div></a
-            >
-          </li>
-          <li>
-            <a
-              ><div class="border bg-green-400 rounded-md p-2 text-white">
-                Done
-              </div></a
-            >
-          </li>
-        </ul>
-      </div>
     </div>
 
     <div class="overflow-x-auto border border-blue-400 rounded-md w-4/5 mt-4">

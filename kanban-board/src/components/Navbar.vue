@@ -8,17 +8,6 @@
       </a>
       <img src="/icons/edit-table.png" class="w-6 m-2" />
     </div>
-    <div className="navbar-end">
-      <a className="btn border-red-500 bg-red-500 text-white mr-2"
-        ><img
-          src="/icons/delete.png"
-          class="w-5 text-orange-400"
-        />Delete</a
-      >
-      <a className="btn border-pink-400 bg-pink-400 text-white "
-        ><img src="/icons/plus.png" class="w-4" />Add Task</a
-      >
-    </div>
   </div>
 </template>
 
