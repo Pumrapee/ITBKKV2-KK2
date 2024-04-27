@@ -4,9 +4,7 @@ async function getItems(url) {
     const data = await fetch(url) //GET Method
     const items = await data.json()
     return items
-  } catch (error) {
-    console.log(`error: ${error}`)
-  }
+  } catch (error) {}
 }
 async function getItemById(url, id) {
   let data
@@ -15,15 +13,12 @@ async function getItemById(url, id) {
     const item = await data.json()
     return item
   } catch (error) {
-    console.log(data.status)
     if (data.status === 404) return 404
   }
 }
 
 async function deleteItemById(url, id) {
   //DELETE Method
-  console.log(`${url}/${id}`)
-
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",

@@ -14,7 +14,6 @@ const closeModal = () => {
 }
 
 const openModal = async (taskId) => {
-  console.log(taskId)
   if (taskId) {
     const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
     if (data.status === 404) {
@@ -24,15 +23,11 @@ const openModal = async (taskId) => {
       showModal.value = true
     }
   }
-
-  console.log(task.value)
 }
 
 onMounted(async () => {
   const data = await getItems(import.meta.env.VITE_BASE_URL)
   taskdata.value = data
-
-  console.log(taskdata.value)
 })
 
 const reformat = (status) => {

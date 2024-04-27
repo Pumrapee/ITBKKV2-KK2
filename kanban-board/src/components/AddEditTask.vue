@@ -88,8 +88,7 @@ const reformat = (status) => {
         </div>
 
         <div class="col-span-4 place-self-end rounded-lg">
-          <button class="btn m-3 bg-green-400 text-white">Save</button>
-          <button class="btn" @click="$emit('closeModal', false)">Close</button>
+          <button class="btn" @click="$emit('closeModal', false)">OK</button>
         </div>
       </div>
     </div>
