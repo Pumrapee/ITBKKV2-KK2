@@ -38,9 +38,10 @@ const reformat = (status) => {
             :class="
               task.description ? 'bg-white text-black' : 'italic text-gray-500'
             "
-          >{{ task.description ? task.description : 'No Description Provided' }}</textarea
+            >{{
+              task.description ? task.description : "No Description Provided"
+            }}</textarea
           >
-          <!-- <p class="itbkk-description">No Description Provided</p> -->
         </div>
 
         <div
@@ -52,7 +53,8 @@ const reformat = (status) => {
             :class="
               task.assignees ? 'bg-white text-black' : 'italic text-gray-500'
             "
-          >{{ task.assignees ? task.assignees : 'Unassigned' }}</textarea>
+            >{{ task.assignees ? task.assignees : "Unassigned" }}</textarea
+          >
         </div>
 
         <div

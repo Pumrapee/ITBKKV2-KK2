@@ -9,10 +9,14 @@ const router = createRouter({
       path: "/task",
       name: "task",
       component: HomeView,
-      children: [{ path: "/task/:id", component: AddEditTask }],
     },
     {
       path: "/",
+      redirect: "/task",
+    },
+    {
+      path: "/:catchAll(.*)",
+      name: "404",
       redirect: "/task",
     },
   ],

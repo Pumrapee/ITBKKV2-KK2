@@ -9,8 +9,8 @@ const taskdata = ref([])
 const task = ref()
 
 const closeModal = () => {
-  router.push("/task")
   showModal.value = false
+  router.push({ name: "task" })
 }
 
 const openModal = async (taskId) => {
@@ -19,8 +19,6 @@ const openModal = async (taskId) => {
     const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
     if (data.status === 404) {
       alert("The requested task does not exist")
-      //router.go(-1) // Redirect to previous page
-      router.push("/task")
     } else {
       task.value = data
       showModal.value = true
@@ -35,8 +33,6 @@ onMounted(async () => {
   taskdata.value = data
 
   console.log(taskdata.value)
-
-  const format = () => {}
 })
 
 const reformat = (status) => {
@@ -51,7 +47,6 @@ const reformat = (status) => {
 </script>
 
 <template>
-  <!-- Task table -->
   <div class="flex flex-col items-center mt-20">
     <div class="flex justify-between w-4/5">
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
@@ -117,12 +112,10 @@ const reformat = (status) => {
           >
             <th class="text-blue-400">{{ task.id }}</th>
             <td class="itbkk-title">
-              <router-link :to="`/task/${task.id}`">
-                <button @click="openModal(task.id)" class="btn btn-ghost">
-                  {{ task.title }}
-                  <img src="/icons/pen.png" class="w-4" />
-                </button>
-              </router-link>
+              <button @click="openModal(task.id)" class="btn btn-ghost">
+                {{ task.title }}
+                <img src="/icons/pen.png" class="w-4" />
+              </button>
             </td>
             <td
               class="itbkk-assignees"
