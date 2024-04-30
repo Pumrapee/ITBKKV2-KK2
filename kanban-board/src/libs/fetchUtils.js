@@ -41,8 +41,13 @@ async function addItem(url, newItem) {
         ...newItem,
       }),
     })
-    const addedItem = await res.json()
-    return addedItem
+    // Get the HTTP status code
+    const statusCode = res.status
+
+    const newTask = await res.json()
+
+    // Return both the added item and the status code
+    return { newTask, statusCode }
   } catch (error) {
     console.log(`error: ${error}`)
   }

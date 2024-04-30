@@ -4,28 +4,35 @@
       "id": "1",
       "title": "Create Project Proposal",
       "description": "Draft a project proposal outlining the scope, objectives, and timeline.",
-      "assignees": ["John Doe", "Jane Smith"],
-      "status": "In Progress",
-      "created_date": "2024-04-23",
-      "updated_date": "2024-04-23"
+      "assignees": "John Doe",
+      "status": "DOING",
+      "createdOn": "2024-04-22T09:00:00Z",
+      "updatedOn": "2024-04-22T09:00:00Z"
     },
     {
       "id": "2",
       "title": "Review Codebase",
       "description": "Conduct a thorough review of the latest codebase changes.",
-      "assignees": ["Alice Johnson", "Bob Anderson"],
-      "status": "Pending",
-      "created_date": "2024-04-20",
-      "updated_date": "2024-04-22"
+      "assignees": "Alice Johnson",
+      "status": "NO_STATUS",
+      "createdOn": "2024-04-22T09:00:00Z",
+      "updatedOn": "2024-04-22T09:00:00Z"
     },
     {
       "id": "3",
       "title": "Deploy Application Update",
       "description": "Deploy the latest application update to production servers.",
-      "assignees": ["Charlie Brown"],
-      "status": "Completed",
-      "created_date": "2024-04-15",
-      "updated_date": "2024-04-21"
+      "assignees": "Charlie Brown",
+      "status": "DONE",
+      "createdOn": "2024-04-22T09:00:00Z",
+      "updatedOn": "2024-04-22T09:00:00Z"
+    },
+    {
+      "id": "f227",
+      "title": "asd",
+      "description": "ssss",
+      "assignees": "aaaaa",
+      "status": "DOING"
     }
   ]
 }

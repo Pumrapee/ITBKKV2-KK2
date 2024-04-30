@@ -1,13 +1,13 @@
 import { ref } from "vue"
-import { defineStore } from "pinia"
-import { assign } from "cypress/types/lodash"
+import { defineStore, acceptHMRUpdate } from "pinia"
+// import { assign } from "cypress/types/lodash"
 
 export const useTaskStore = defineStore("task", () => {
   //state
   const task = ref([])
   //view
   const getTasks = () => {
-    return todos.value
+    return task.value
   }
   //actions
   const addTasks = (newTasks) => {
@@ -16,20 +16,19 @@ export const useTaskStore = defineStore("task", () => {
         newTask.id,
         newTask.title,
         newTask.description,
-        newTask.assigness,
+        newTask.assignees,
         newTask.status,
-        newTask,
-        createdOn,
-        updatedOn
+        newTask.createdOn,
+        newTask.updatedOn
       )
     )
   }
   const addTask = (id, title, desc, assign, sta, createdTime, updatedTime) => {
-    todos.value.push({
+    task.value.push({
       id: id,
       title: title,
       description: desc,
-      assigness: assign,
+      assignees: assign,
       status: sta,
       createdOn: createdTime,
       updatedOn: updatedTime,
@@ -38,3 +37,7 @@ export const useTaskStore = defineStore("task", () => {
 
   return { getTasks, addTasks, addTask }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useTaskStore, import.meta.hot))
+}

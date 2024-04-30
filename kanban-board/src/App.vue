@@ -1,10 +1,21 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router"
-import Navbar from "./components/Navbar.vue"
+import { onMounted } from "vue"
+import { RouterView } from "vue-router"
+import { useTaskStore } from "../src/stores/taskStore"
+import { getItems } from "./libs/fetchUtils"
+
+const myTask = useTaskStore()
+onMounted(async () => {
+  if (myTask.getTasks().length === 0) {
+    const listTasks = await getItems(import.meta.env.VITE_BASE_URL)
+    myTask.addTasks(listTasks)
+  }
+
+  console.log(myTask.getTasks())
+})
 </script>
 
 <template>
-  <Navbar />
   <RouterView />
 </template>
 

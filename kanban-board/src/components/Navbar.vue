@@ -1,14 +1,46 @@
-<script setup></script>
+<script setup>
+import { ref } from "vue"
+import AddTask from "../components/AddTask.vue"
+import router from "@/router"
+
+const showAdd = ref()
+
+const showModalAdd = () => {
+  showAdd.value = true
+}
+
+const closeAdd = () => {
+  showAdd.value = false
+  router.go(-1)
+}
+</script>
 
 <template>
-  <div className="navbar bg-blue-400 border-b border-gray">
-    <div className="navbar-start font-custom">
-      <a className=" pl-5 text-2xl text-white font-semibold"
+  <div class="navbar bg-blue-400 border-b border-gray">
+    <div class="navbar-start font-custom">
+      <a class="pl-5 text-2xl text-white font-semibold"
         >IT-BANGMOD KRADAN KANBAN
       </a>
       <img src="/icons/edit-table.png" class="w-6 m-2" />
     </div>
+
+    <div class="navbar-end">
+      <button class="btn border-red-500 bg-red-500 text-white mr-2">
+        <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
+      </button>
+
+      <router-link to="/task/add">
+        <button
+          @click="showModalAdd"
+          class="btn border-pink-400 bg-pink-400 text-white"
+        >
+          <img src="/icons/plus.png" class="w-4" />Add Task
+        </button>
+      </router-link>
+    </div>
   </div>
+
+  <AddTask @closeAddModal="closeAdd" :showAdd="showAdd" />
 </template>
 
 <style scoped>
