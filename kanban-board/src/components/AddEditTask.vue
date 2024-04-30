@@ -5,16 +5,6 @@ const { showModal, task } = defineProps({
   task: Object,
 })
 defineEmits(["closeModal"])
-
-const reformat = (status) => {
-  const statusMap = {
-    NO_STATUS: "No Status",
-    TO_DO: "To Do",
-    DOING: "Doing",
-    DONE: "Done",
-  }
-  return statusMap[status] || status // ถ้าไม่มีค่าใน statusMap ให้ใช้ค่าเดิม
-}
 </script>
 
 <template>

@@ -18,6 +18,7 @@ const openModal = async (taskId) => {
     const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
     if (data.status === 404) {
       alert("The requested task does not exist")
+      router.go()
     } else {
       task.value = data
       showModal.value = true
