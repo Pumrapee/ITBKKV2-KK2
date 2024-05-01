@@ -15,14 +15,19 @@ import java.time.LocalDateTime;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "taskId")
     private Integer id;
+    @Column(name = "taskTitle")
     private String title;
+    @Column(name = "taskDescription")
     private String description;
+    @Column(name = "taskAssignees")
     private String assignees;
     @Enumerated(EnumType.STRING)
+    @Column(name = "taskStatus")
     private TaskStatus status = TaskStatus.NO_STATUS;
-    @Column(insertable = false, updatable = false)
+    @Column(name = "createdOn", insertable = false, updatable = false)
     private LocalDateTime createdOn;
-    @Column(insertable = false, updatable = false)
+    @Column(name = "updatedOn", insertable = false, updatable = false)
     private LocalDateTime updatedOn;
 }
