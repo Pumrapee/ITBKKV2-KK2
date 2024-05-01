@@ -7,7 +7,6 @@ import sit.int221.kanbanapi.models.TaskStatus;
 
 import java.time.LocalDateTime;
 
-
 @Getter
 @Setter
 @Entity

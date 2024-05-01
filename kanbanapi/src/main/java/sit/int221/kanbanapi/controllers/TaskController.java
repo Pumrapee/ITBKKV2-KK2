@@ -43,15 +43,15 @@ public class TaskController {
         return ResponseEntity.ok(taskDTO);
     }
 
-    @PutMapping("/{taskId}")
-    public ResponseEntity<Object> updateTask(@RequestBody Task task, @PathVariable Integer taskId) {
-        Task updatedTask = service.updateTask(taskId, task);
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateTask(@RequestBody Task task, @PathVariable Integer id) {
+        Task updatedTask = service.updateTask(id, task);
         TaskListDTO taskDTO = modelMapper.map(updatedTask, TaskListDTO.class);
         return ResponseEntity.ok(taskDTO);
     }
-    @DeleteMapping("/{taskId}")
-    public ResponseEntity<Object> removeTask(@PathVariable Integer taskId) {
-        Task deletedTask = service.removeTask(taskId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> removeTask(@PathVariable Integer id) {
+        Task deletedTask = service.removeTask(id);
         TaskListDTO taskDTO = modelMapper.map(deletedTask, TaskListDTO.class);
         return ResponseEntity.ok(taskDTO);
     }
