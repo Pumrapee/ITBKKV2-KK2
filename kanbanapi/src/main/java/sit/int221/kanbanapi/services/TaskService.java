@@ -47,10 +47,10 @@ public class TaskService {
             Task existingTask = repository.findById(id).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "Task id " + id + " does not exist!!!"));
-            existingTask.setTaskTitle(task.getTaskTitle());
-            existingTask.setTaskDescription(task.getTaskDescription());
-            existingTask.setTaskAssignees(task.getTaskAssignees());
-            existingTask.setTaskStatus(task.getTaskStatus());
+            existingTask.setTitle(task.getTitle());
+            existingTask.setDescription(task.getDescription());
+            existingTask.setAssignees(task.getAssignees());
+            existingTask.setStatus(task.getStatus());
             return repository.save(existingTask);
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "failed to update task!!!");
