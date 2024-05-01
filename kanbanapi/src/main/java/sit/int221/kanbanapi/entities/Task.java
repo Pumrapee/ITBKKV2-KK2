@@ -20,7 +20,9 @@ public class Task {
     private String taskDescription;
     private String taskAssignees;
     @Enumerated(EnumType.STRING)
-    private TaskStatus taskStatus;
+    private TaskStatus taskStatus = TaskStatus.NO_STATUS;
+    @Column(insertable = false, updatable = false)
     private LocalDateTime createdOn;
+    @Column(insertable = false, updatable = false)
     private LocalDateTime updatedOn;
 }
