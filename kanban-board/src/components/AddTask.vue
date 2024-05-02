@@ -45,7 +45,7 @@ const saveNewTask = async () => {
     listNewTask.value.description = ""
     listNewTask.value.assignees = ""
     listNewTask.value.status = selected.value
-    emits("closeAddModal", false)
+    emits("closeAddModal")
 
     // alert("The task has been successfully added!!")
     deletePass.value = true
@@ -133,9 +133,7 @@ const changeTitle = computed(() => {
           >
             Save
           </button>
-          <button class="btn" @click="$emit('closeAddModal', false)">
-            Close
-          </button>
+          <button class="btn" @click="$emit('closeAddModal')">Close</button>
         </div>
       </div>
     </div>

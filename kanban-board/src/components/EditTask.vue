@@ -77,7 +77,7 @@ defineEmits(["closeModal"])
         </div>
 
         <div class="col-span-4 place-self-end rounded-lg">
-          <button class="btn" @click="$emit('closeModal', false)">OK</button>
+          <button class="btn" @click="$emit('closeModal')">OK</button>
         </div>
       </div>
     </div>
