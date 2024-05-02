@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, onMounted, computed } from "vue"
+import { ref, defineProps, defineEmits } from "vue"
 const { showModal, task } = defineProps({
   showModal: Boolean,
   task: Object,
@@ -12,7 +12,7 @@ defineEmits(["closeModal"])
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div
-        class=" grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-4/5"
+        class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-4/5"
       >
         <input
           type="text"
@@ -39,7 +39,7 @@ defineEmits(["closeModal"])
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
-            class="itbkk-assignees pl-5 textarea textarea-ghost h-2/5 w-11/12 ml-2"
+            class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
             :class="
               task.assignees ? 'bg-white text-black' : 'italic text-gray-500'
             "
@@ -68,7 +68,6 @@ defineEmits(["closeModal"])
           </p>
           <p class="itbkk-created-on pl-3 font-semibold text-sm text-blue-400">
             Created On :
-
             {{ new Date(task.createdOn).toLocaleString("en-GB") }}
           </p>
           <p class="itbkk-updated-on pl-3 font-semibold text-sm text-blue-400">

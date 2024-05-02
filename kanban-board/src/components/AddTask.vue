@@ -11,6 +11,8 @@ const emits = defineEmits(["closeAddModal"])
 
 const selected = ref("NO_STATUS")
 
+const deletePass = ref(false)
+
 const listNewTask = ref({
   title: "",
   description: "",
@@ -45,7 +47,8 @@ const saveNewTask = async () => {
     listNewTask.value.status = selected.value
     emits("closeAddModal", false)
 
-    alert("The task has been successfully added!!")
+    // alert("The task has been successfully added!!")
+    deletePass.value = true
   }
 }
 
@@ -55,6 +58,27 @@ const changeTitle = computed(() => {
 </script>
 
 <template>
+  <!-- Alert -->
+  <div v-show="deletePass" class="flex justify-center mt-3">
+    <div role="alert" class="alert alert-success w-2/3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="stroke-current shrink-0 h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>The task has been successfully added!!</span>
+      <button @click="deletePass = false">X</button>
+    </div>
+  </div>
+
   <!-- Modal window -->
   <div v-if="showAdd" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
@@ -82,7 +106,7 @@ const changeTitle = computed(() => {
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
             v-model="listNewTask.assignees"
-            class="itbkk-assignees pl-5 textarea textarea-ghost h-2/5 w-11/12 ml-2"
+            class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
           ></textarea>
         </div>
 

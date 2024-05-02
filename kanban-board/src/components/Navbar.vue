@@ -2,7 +2,7 @@
 import { ref } from "vue"
 import AddTask from "../components/AddTask.vue"
 import router from "@/router"
-
+import { useModalStore } from "../stores/modal"
 const showAdd = ref()
 
 const showModalAdd = () => {
@@ -11,7 +11,12 @@ const showModalAdd = () => {
 
 const closeAdd = () => {
   showAdd.value = false
-  router.go(-1)
+  router.push("/task")
+}
+
+const modal = useModalStore()
+const showbtnDelete = () => {
+  modal.showModal = !modal.showModal // สลับค่า showModal ระหว่าง true และ false
 }
 </script>
 
@@ -25,7 +30,10 @@ const closeAdd = () => {
     </div>
 
     <div class="navbar-end">
-      <button class="btn border-red-500 bg-red-500 text-white mr-2">
+      <button
+        @click="showbtnDelete"
+        class="btn border-red-500 bg-red-500 text-white mr-2"
+      >
         <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
       </button>
 
