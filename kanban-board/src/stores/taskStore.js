@@ -35,7 +35,31 @@ export const useTaskStore = defineStore("task", () => {
     })
   }
 
-  return { getTasks, addTasks, addTask }
+  const updateTask = (
+    id,
+    title,
+    desc,
+    assign,
+    sta,
+    createdTime,
+    updatedTime
+  ) => {
+    task.value = task.value.map((todo) => {
+      return todo.id === id
+        ? {
+            ...todo,
+            title: title,
+            description: desc,
+            assignees: assign,
+            status: sta,
+            createdOn: createdTime,
+            updatedOn: updatedTime,
+          }
+        : todo
+    })
+  }
+
+  return { getTasks, addTasks, addTask, updateTask }
 })
 
 if (import.meta.hot) {

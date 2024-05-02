@@ -11,7 +11,7 @@ const emits = defineEmits(["closeAddModal"])
 
 const selected = ref("NO_STATUS")
 
-const deletePass = ref(false)
+const addPass = ref(false)
 
 const listNewTask = ref({
   title: "",
@@ -47,8 +47,7 @@ const saveNewTask = async () => {
     listNewTask.value.status = selected.value
     emits("closeAddModal")
 
-    // alert("The task has been successfully added!!")
-    deletePass.value = true
+    addPass.value = true
   }
 }
 
@@ -58,8 +57,8 @@ const changeTitle = computed(() => {
 </script>
 
 <template>
-  <!-- Alert -->
-  <div v-show="deletePass" class="flex justify-center mt-3">
+  <!-- Alert Pass Add-->
+  <div v-show="addPass" class="flex justify-center mt-3">
     <div role="alert" class="alert alert-success w-2/3">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -75,7 +74,7 @@ const changeTitle = computed(() => {
         />
       </svg>
       <span>The task has been successfully added!!</span>
-      <button @click="deletePass = false">X</button>
+      <button @click="addPass = false">X</button>
     </div>
   </div>
 
@@ -88,14 +87,14 @@ const changeTitle = computed(() => {
         <input
           type="text"
           className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model="listNewTask.title"
+          v-model.trim="listNewTask.title"
           placeholder="Enter Title here..."
         />
 
         <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
-            v-model="listNewTask.description"
+            v-model.trim="listNewTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
           ></textarea>
         </div>
@@ -105,7 +104,7 @@ const changeTitle = computed(() => {
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
-            v-model="listNewTask.assignees"
+            v-model.trim="listNewTask.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
           ></textarea>
         </div>

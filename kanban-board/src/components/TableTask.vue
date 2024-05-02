@@ -51,6 +51,9 @@ const openDeleteModal = () => {
 </script>
 
 <template>
+  <EditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
+  <Delete @closeDeleteModal="closeModal" :showModal="showModalDelte" />
+
   <!-- Task Table -->
   <div class="flex flex-col items-center mt-20">
     <div class="flex justify-between w-4/5">
@@ -76,10 +79,11 @@ const openDeleteModal = () => {
           >
             <th class="text-blue-400">{{ index + 1 }}</th>
             <td class="itbkk-title">
-              <button @click="openModal(task.id)" class="btn btn-ghost">
-                {{ task.title }}
-                <img src="/icons/pen.png" class="w-4" />
-              </button>
+              <router-link :to="{ name: 'edit', params: { id: task.id } }">
+                <button @click="openModal(task.id)" class="btn btn-ghost">
+                  {{ task.title }}
+                  <img src="/icons/pen.png" class="w-4" /></button
+              ></router-link>
             </td>
             <td
               class="itbkk-assignees"
@@ -118,9 +122,6 @@ const openDeleteModal = () => {
       </table>
     </div>
   </div>
-
-  <EditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
-  <Delete @closeDeleteModal="closeModal" :showModal="showModalDelte" />
 </template>
 
 <style scoped></style>

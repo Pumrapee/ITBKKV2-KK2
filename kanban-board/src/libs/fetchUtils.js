@@ -64,8 +64,10 @@ async function editItem(url, id, editItem) {
         ...editItem,
       }),
     })
+    const statusCode = res.status
+
     const editedItem = await res.json()
-    return editedItem
+    return { editedItem, statusCode }
   } catch (error) {
     console.log(`error: ${error}`)
   }
