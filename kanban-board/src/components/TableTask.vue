@@ -1,15 +1,22 @@
 <script setup>
-import { ref, onMounted } from "vue"
-import AddEditTask from "../components/AddEditTask.vue"
-import { getItems, getItemById } from "../libs/fetchUtils"
+import { ref } from "vue"
+import EditTask from "../components/EditTask.vue"
+import { getItemById } from "../libs/fetchUtils"
+import { useTaskStore } from "../stores/taskStore"
 import router from "@/router"
+import { useModalStore } from "../stores/modal"
+import Delete from "../components/Delete.vue"
 
 const showModal = ref(false)
-const taskdata = ref([])
+const showModalDelte = ref(false)
 const task = ref()
+
+const myTask = useTaskStore()
+console.log(myTask.getTasks())
 
 const closeModal = () => {
   showModal.value = false
+  showModalDelte.value = false
   router.push({ name: "task" })
 }
 
@@ -26,11 +33,6 @@ const openModal = async (taskId) => {
   }
 }
 
-onMounted(async () => {
-  const data = await getItems(import.meta.env.VITE_BASE_URL)
-  taskdata.value = data
-})
-
 const reformat = (status) => {
   const statusMap = {
     NO_STATUS: "No Status",
@@ -40,9 +42,16 @@ const reformat = (status) => {
   }
   return statusMap[status] || status // ถ้าไม่มีค่าใน statusMap ให้ใช้ค่าเดิม
 }
+
+const modal = useModalStore()
+
+const openDeleteModal = () => {
+  showModalDelte.value = true
+}
 </script>
 
 <template>
+  <!-- Task Table -->
   <div class="flex flex-col items-center mt-20">
     <div class="flex justify-between w-4/5">
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
@@ -56,15 +65,16 @@ const reformat = (status) => {
             <th>Title</th>
             <th>Assignees</th>
             <th>Status</th>
+            <th></th>
           </tr>
         </thead>
         <tbody class="bg-white">
           <tr
-            v-for="(task, index) in taskdata"
+            v-for="(task, index) in myTask.getTasks()"
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-blue-400">{{ task.id }}</th>
+            <th class="text-blue-400">{{ index + 1 }}</th>
             <td class="itbkk-title">
               <button @click="openModal(task.id)" class="btn btn-ghost">
                 {{ task.title }}
@@ -94,13 +104,23 @@ const reformat = (status) => {
                 {{ reformat(task.status) }}
               </div>
             </td>
+            <td>
+              <button
+                @click="openDeleteModal()"
+                v-if="modal.showModal"
+                class="btn bg-red-500"
+              >
+                <img src="/icons/delete.png" class="w-3" />
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <AddEditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
+  <EditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
+  <Delete @closeDeleteModal="closeModal" :showModal="showModalDelte" />
 </template>
 
 <style scoped></style>
