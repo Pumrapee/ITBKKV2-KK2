@@ -6,6 +6,7 @@ import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -26,7 +27,7 @@ public class Task {
     @Column(name = "taskStatus")
     private TaskStatus status = TaskStatus.NO_STATUS;
     @Column(name = "createdOn", insertable = false, updatable = false)
-    private LocalDateTime createdOn;
+    private OffsetDateTime createdOn;
     @Column(name = "updatedOn", insertable = false, updatable = false)
-    private LocalDateTime updatedOn;
+    private OffsetDateTime updatedOn;
 }

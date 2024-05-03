@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed } from "vue"
+import { ref, defineProps, defineEmits, computed, watch } from "vue"
 import { editItem } from "../libs/fetchUtils"
 import { useTaskStore } from "@/stores/taskStore"
 
@@ -8,29 +8,34 @@ const { showModal, task } = defineProps({
   task: Object,
 })
 const emits = defineEmits(["closeModal"])
-
 const editPass = ref(false)
-
-console.log(task)
+let oldTask;
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
-  console.log(task)
-
+  const editedTask = {...task}
+  editedTask.title = editedTask.title.trim()
+  editedTask.description = editedTask.description.trim()
+  editedTask.assignees = editedTask.assignees.trim()
   const editedItem = await editItem(
     import.meta.env.VITE_BASE_URL,
-    task.id,
-    task
+    editedTask.id, 
+    {
+      title: editedTask.title, 
+      description: editedTask.description, 
+      assignees: editedTask.assignees, 
+      status: editedTask.status
+    }
   )
 
   myTask.updateTask(
-    task.id,
-    task.title,
-    task.description,
-    task.assignees,
-    task.status,
-    task.createdTime,
-    task.updatedTime
+    editedTask.id,
+    editedTask.title,
+    editedTask.description,
+    editedTask.assignees,
+    editedTask.status,
+    editedTask.createdTime,
+    editedTask.updatedTime
   )
 
   emits("closeModal")
@@ -71,14 +76,14 @@ const changeTask = computed(() => {})
         <input
           type="text"
           className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model.trim="task.title"
+          v-model="task.title"
           placeholder="Enter Title here..."
         />
 
         <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
-            v-model.trim="task.description"
+            v-model="task.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
               task.description ? 'bg-white text-black' : 'italic text-gray-500'
@@ -92,7 +97,7 @@ const changeTask = computed(() => {})
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
-            v-model.trim="task.assignees"
+            v-model="task.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
             :class="
               task.assignees ? 'bg-white text-black' : 'italic text-gray-500'
