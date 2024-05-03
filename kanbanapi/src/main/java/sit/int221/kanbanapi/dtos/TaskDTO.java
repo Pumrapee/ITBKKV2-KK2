@@ -16,8 +16,8 @@ public class TaskDTO {
     private String description;
     private String assignees;
     private TaskStatus status;
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private LocalDateTime createdOn;
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss'Z'", timezone="UTC")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private LocalDateTime updatedOn;
 }

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.TaskDTO;
 import sit.int221.kanbanapi.dtos.TaskListDTO;
 import sit.int221.kanbanapi.entities.Task;
@@ -39,14 +40,14 @@ public class TaskController {
     @PostMapping("")
     public ResponseEntity<Object> addNewTask(@RequestBody Task task) {
         Task newTask = service.createTask(task);
-        TaskListDTO taskDTO = modelMapper.map(newTask, TaskListDTO.class);
+        TaskCreateUpdateDTO taskDTO = modelMapper.map(newTask, TaskCreateUpdateDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateTask(@RequestBody Task task, @PathVariable Integer id) {
         Task updatedTask = service.updateTask(id, task);
-        TaskListDTO taskDTO = modelMapper.map(updatedTask, TaskListDTO.class);
+        TaskCreateUpdateDTO taskDTO = modelMapper.map(updatedTask, TaskCreateUpdateDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
