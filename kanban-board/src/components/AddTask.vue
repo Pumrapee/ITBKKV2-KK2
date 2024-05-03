@@ -19,12 +19,16 @@ const listNewTask = ref({
   assignees: "",
   status: selected.value,
 })
-console.log(listNewTask.value.title)
 
 const myTask = useTaskStore()
 console.log(myTask.getTasks())
 
 const saveNewTask = async () => {
+  //trim
+  listNewTask.value.title = listNewTask.value.title.trim()
+  listNewTask.value.description = listNewTask.value.description.trim()
+  listNewTask.value.assignees = listNewTask.value.assignees.trim()
+
   const { newTask, statusCode } = await addItem(
     import.meta.env.VITE_BASE_URL,
     listNewTask.value

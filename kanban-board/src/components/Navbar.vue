@@ -21,9 +21,9 @@ const showbtnDelete = () => {
 </script>
 
 <template>
-  <div class="navbar bg-blue-400 border-b border-gray">
+  <div class="navbar bg-white border-b border-gray">
     <div class="navbar-start font-custom">
-      <a class="pl-5 text-2xl text-white font-semibold"
+      <a class="pl-5 text-2xl text-blue-400 font-semibold"
         >IT-BANGMOD KRADAN KANBAN
       </a>
       <img src="/icons/edit-table.png" class="w-6 m-2" />
@@ -40,7 +40,7 @@ const showbtnDelete = () => {
       <router-link to="/task/add">
         <button
           @click="showModalAdd"
-          class="btn border-pink-400 bg-pink-400 text-white"
+          class="btn border-blue-400 bg-blue-400 text-white hover:bg-pink-400"
         >
           <img src="/icons/plus.png" class="w-4" />Add Task
         </button>

@@ -8,16 +8,13 @@ import { useModalStore } from "../stores/modal"
 import Delete from "../components/Delete.vue"
 
 const showModal = ref(false)
-const showModalDelte = ref(false)
 const task = ref()
 const editfail = ref(false)
 
 const myTask = useTaskStore()
-console.log(myTask.getTasks())
 
 const closeModal = () => {
   showModal.value = false
-  showModalDelte.value = false
   router.push({ name: "task" })
 }
 
@@ -49,14 +46,16 @@ const reformat = (status) => {
 
 const modal = useModalStore()
 
-const openDeleteModal = () => {
-  showModalDelte.value = true
+const openDeleteModal = (id, title) => {
+  modal.showDelete = true
+  modal.deleteId = id
+  modal.deleteTitle = title
 }
 </script>
 
 <template>
   <EditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
-  <Delete @closeDeleteModal="closeModal" :showModal="showModalDelte" />
+  <Delete />
 
   <!-- Alert fail Edit-->
   <div v-if="editfail" class="flex justify-center mt-3">
@@ -135,11 +134,11 @@ const openDeleteModal = () => {
             </td>
             <td>
               <button
-                @click="openDeleteModal()"
+                @click="openDeleteModal(task.id, task.title)"
                 v-if="modal.showModal"
                 class="btn bg-red-500"
               >
-                <img src="/icons/delete.png" class="w-3" />
+                <img src="/icons/delete.png" class="w-48" />
               </button>
             </td>
           </tr>

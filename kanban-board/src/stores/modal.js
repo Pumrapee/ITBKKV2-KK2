@@ -3,4 +3,7 @@ import { defineStore } from "pinia"
 
 export const useModalStore = defineStore("modals", () => {
   const showModal = false
+  const showDelete = false
+  const deleteId = 0
+  const deleteTitle = null
 })
