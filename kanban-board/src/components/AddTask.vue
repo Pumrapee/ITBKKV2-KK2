@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref, computed } from "vue"
+import { defineProps, defineEmits, ref, computed, watch } from "vue"
 import { addItem } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
 
@@ -19,7 +19,7 @@ const listNewTask = ref({
   assignees: "",
   status: selected.value,
 })
-console.log(listNewTask.value)
+console.log(listNewTask.value.title)
 
 const myTask = useTaskStore()
 console.log(myTask.getTasks())
@@ -87,14 +87,14 @@ const changeTitle = computed(() => {
         <input
           type="text"
           className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model.trim="listNewTask.title"
+          v-model="listNewTask.title"
           placeholder="Enter Title here..."
         />
 
         <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
-            v-model.trim="listNewTask.description"
+            v-model="listNewTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
           ></textarea>
         </div>
@@ -104,7 +104,7 @@ const changeTitle = computed(() => {
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
-            v-model.trim="listNewTask.assignees"
+            v-model="listNewTask.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
           ></textarea>
         </div>

@@ -10,6 +10,7 @@ import Delete from "../components/Delete.vue"
 const showModal = ref(false)
 const showModalDelte = ref(false)
 const task = ref()
+const editfail = ref(false)
 
 const myTask = useTaskStore()
 console.log(myTask.getTasks())
@@ -24,8 +25,11 @@ const openModal = async (taskId) => {
   if (taskId) {
     const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
     if (data.status === 404) {
+      //require PBI2
       alert("The requested task does not exist")
-      router.go()
+      // router.go()
+      editfail.value = true
+      router.push("/task")
     } else {
       task.value = data
       showModal.value = true
@@ -53,6 +57,27 @@ const openDeleteModal = () => {
 <template>
   <EditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
   <Delete @closeDeleteModal="closeModal" :showModal="showModalDelte" />
+
+  <!-- Alert fail Edit-->
+  <div v-if="editfail" class="flex justify-center mt-3">
+    <div role="alert" class="alert alert-error w-2/3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="stroke-current shrink-0 h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>The task does not exist</span>
+      <button @click="editfail = false">X</button>
+    </div>
+  </div>
 
   <!-- Task Table -->
   <div class="flex flex-col items-center mt-20">

@@ -11,8 +11,12 @@ const emits = defineEmits(["closeModal"])
 
 const editPass = ref(false)
 
+console.log(task)
+
 const myTask = useTaskStore()
 const editSave = async (task) => {
+  console.log(task)
+
   const editedItem = await editItem(
     import.meta.env.VITE_BASE_URL,
     task.id,
@@ -32,6 +36,8 @@ const editSave = async (task) => {
   emits("closeModal")
   editPass.value = true
 }
+
+const changeTask = computed(() => {})
 </script>
 
 <template>
@@ -55,27 +61,6 @@ const editSave = async (task) => {
       <button @click="editPass = false">X</button>
     </div>
   </div>
-
-  <!-- Alert fail Edit-->
-  <!-- <div v-if="editfail" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-error w-2/3">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>The update was unsuccessful</span>
-      <button @click="editfail = false">X</button>
-    </div>
-  </div> -->
 
   <!-- Modal window -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
@@ -149,6 +134,7 @@ const editSave = async (task) => {
           <button
             class="btn mr-3 bg-green-400 disabled:bg-green-200"
             @click="editSave(task)"
+            :disabled="changeTask"
           >
             Save
           </button>
