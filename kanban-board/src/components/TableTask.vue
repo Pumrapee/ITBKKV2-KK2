@@ -105,8 +105,8 @@ const openDeleteModal = (id, title) => {
             <td class="itbkk-title">
               <router-link :to="{ name: 'edit', params: { id: task.id } }">
                 <button @click="openModal(task.id)" class="btn btn-ghost">
-                  {{ task.title }}
-                  <img src="/icons/pen.png" class="w-4" /></button
+                  {{ task.title
+                  }}<img src="/icons/pen.png" class="w-4" /></button
               ></router-link>
             </td>
             <td
@@ -138,7 +138,7 @@ const openDeleteModal = (id, title) => {
                 v-if="modal.showModal"
                 class="btn bg-red-500"
               >
-                <img src="/icons/delete.png" class="w-48" />
+                <img src="/icons/delete.png" class="w-5" />
               </button>
             </td>
           </tr>
@@ -148,4 +148,10 @@ const openDeleteModal = (id, title) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbkk-title {
+  /* กำหนดความกว้างสูงสุดของ column title */
+  max-width: 900px; /* ปรับค่าตามต้องการ */
+  word-break: break-all;
+}
+</style>

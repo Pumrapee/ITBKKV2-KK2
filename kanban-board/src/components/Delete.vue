@@ -25,6 +25,7 @@ const confirmDelete = async () => {
     deletePass.value = true
     modal.showDelete = false
   } else if (deleteItem === 404) {
+    mytasks.removeTasks(modal.deleteId)
     deleteFail.value = true
     modal.showDelete = false
   }
@@ -35,7 +36,6 @@ const cancelDelete = () => {
 }
 
 const closeFailDelete = () => {
-  mytasks.removeTasks(modal.deleteId)
   deleteFail.value = false
 }
 </script>
@@ -94,16 +94,18 @@ const closeFailDelete = () => {
   <!-- Modal Delete -->
   <div v-if="modal.showDelete" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="grid grid-rows-2 grid-cols-2 bg-white p-10 rounded-lg w-1/3">
-        <div class="itbkk-message col-span-full text-center">
-          <p class="text-lg font-semibold mb-4">
-            Are you sure you want to delete
-            <span class="text-blue-400">"{{ modal.deleteTitle }}"</span>
-            <span>?</span>
+      <div class="bg-white p-10 rounded-lg w-1/3">
+        <div class="itbkk-message text-lg font-semibold text-center">
+          <p style="word-wrap: break-word">
+            Do you want to delete the task <br />
+            <span class="text-blue-400"
+              >"number {{ modal.deleteId }} - {{ modal.deleteTitle }}"</span
+            >
+            <span> ?</span>
           </p>
         </div>
 
-        <div class="itbkk-button-confirm col-span-4 place-self-end rounded-lg">
+        <div class="itbkk-button-confirm mt-4 flex justify-end">
           <button
             class="btn mr-4 bg-red-500 text-white"
             @click="confirmDelete()"
