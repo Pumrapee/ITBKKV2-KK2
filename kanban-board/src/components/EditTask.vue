@@ -1,13 +1,67 @@
 <script setup>
-import { ref, defineProps, defineEmits } from "vue"
+import { ref, defineProps, defineEmits, computed } from "vue"
+import { editItem } from "../libs/fetchUtils"
+import { useTaskStore } from "@/stores/taskStore"
+
 const { showModal, task } = defineProps({
   showModal: Boolean,
   task: Object,
 })
-defineEmits(["closeModal"])
+const emits = defineEmits(["closeModal"])
+
+const editPass = ref(false)
+
+console.log(task)
+
+const myTask = useTaskStore()
+const editSave = async (task) => {
+  console.log(task)
+
+  const editedItem = await editItem(
+    import.meta.env.VITE_BASE_URL,
+    task.id,
+    task
+  )
+
+  myTask.updateTask(
+    task.id,
+    task.title,
+    task.description,
+    task.assignees,
+    task.status,
+    task.createdTime,
+    task.updatedTime
+  )
+
+  emits("closeModal")
+  editPass.value = true
+}
+
+const changeTask = computed(() => {})
 </script>
 
 <template>
+  <!-- Alert Pass Edit-->
+  <div v-if="editPass" class="flex justify-center mt-3">
+    <div role="alert" class="alert alert-success w-2/3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="stroke-current shrink-0 h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>The task has been updated</span>
+      <button @click="editPass = false">X</button>
+    </div>
+  </div>
+
   <!-- Modal window -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
@@ -17,21 +71,20 @@ defineEmits(["closeModal"])
         <input
           type="text"
           className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model="task.title"
+          v-model.trim="task.title"
           placeholder="Enter Title here..."
         />
 
         <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
+            v-model.trim="task.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
               task.description ? 'bg-white text-black' : 'italic text-gray-500'
             "
-            >{{
-              task.description ? task.description : "No Description Provided"
-            }}</textarea
-          >
+            placeholder="No Description Provided"
+          ></textarea>
         </div>
 
         <div
@@ -39,12 +92,13 @@ defineEmits(["closeModal"])
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
+            v-model.trim="task.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
             :class="
               task.assignees ? 'bg-white text-black' : 'italic text-gray-500'
             "
-            >{{ task.assignees ? task.assignees : "Unassigned" }}</textarea
-          >
+            placeholder="Unassigned"
+          ></textarea>
         </div>
 
         <div
@@ -77,7 +131,14 @@ defineEmits(["closeModal"])
         </div>
 
         <div class="col-span-4 place-self-end rounded-lg">
-          <button class="btn" @click="$emit('closeModal', false)">OK</button>
+          <button
+            class="btn mr-3 bg-green-400 disabled:bg-green-200"
+            @click="editSave(task)"
+            :disabled="changeTask"
+          >
+            Save
+          </button>
+          <button class="btn" @click="$emit('closeModal')">Close</button>
         </div>
       </div>
     </div>

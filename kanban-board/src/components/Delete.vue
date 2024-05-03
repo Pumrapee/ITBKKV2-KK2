@@ -7,16 +7,6 @@ const { showModal } = defineProps({
 
 const emits = defineEmits(["closeDeleteModal"])
 
-const confirmDelete = () => {
-  // ปิด Modal
-  modal.showModal = false
-  // ทำการลบข้อมูล
-}
-
-const cancelDelete = () => {
-  // ปิด Modal
-  modal.showModal = false
-}
 </script>
 
 <template>

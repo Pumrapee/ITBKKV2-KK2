@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref, computed } from "vue"
+import { defineProps, defineEmits, ref, computed, watch } from "vue"
 import { addItem } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
 
@@ -11,7 +11,7 @@ const emits = defineEmits(["closeAddModal"])
 
 const selected = ref("NO_STATUS")
 
-const deletePass = ref(false)
+const addPass = ref(false)
 
 const listNewTask = ref({
   title: "",
@@ -19,7 +19,7 @@ const listNewTask = ref({
   assignees: "",
   status: selected.value,
 })
-console.log(listNewTask.value)
+console.log(listNewTask.value.title)
 
 const myTask = useTaskStore()
 console.log(myTask.getTasks())
@@ -45,10 +45,9 @@ const saveNewTask = async () => {
     listNewTask.value.description = ""
     listNewTask.value.assignees = ""
     listNewTask.value.status = selected.value
-    emits("closeAddModal", false)
+    emits("closeAddModal")
 
-    // alert("The task has been successfully added!!")
-    deletePass.value = true
+    addPass.value = true
   }
 }
 
@@ -58,8 +57,8 @@ const changeTitle = computed(() => {
 </script>
 
 <template>
-  <!-- Alert -->
-  <div v-show="deletePass" class="flex justify-center mt-3">
+  <!-- Alert Pass Add-->
+  <div v-show="addPass" class="flex justify-center mt-3">
     <div role="alert" class="alert alert-success w-2/3">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -75,7 +74,7 @@ const changeTitle = computed(() => {
         />
       </svg>
       <span>The task has been successfully added!!</span>
-      <button @click="deletePass = false">X</button>
+      <button @click="addPass = false">X</button>
     </div>
   </div>
 
@@ -133,9 +132,7 @@ const changeTitle = computed(() => {
           >
             Save
           </button>
-          <button class="btn" @click="$emit('closeAddModal', false)">
-            Close
-          </button>
+          <button class="btn" @click="$emit('closeAddModal')">Close</button>
         </div>
       </div>
     </div>
