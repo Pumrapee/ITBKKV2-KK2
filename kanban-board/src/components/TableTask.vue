@@ -134,7 +134,7 @@ modal.deleteTitle = title
             </td>
             <td class="">
               <button @click="openDeleteModal(task.id, task.title)" v-if="modal.showModal" class="btn bg-red-500">
-                <img src="/icons/delete.png" class="w-5">
+                <img src="/icons/delete.png" class="w-6">
               </button>
             </td>
           </tr>
