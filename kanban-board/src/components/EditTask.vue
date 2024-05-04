@@ -13,43 +13,62 @@ const newTask = ref({})
 const changeTask = computed(() => {
   const trimAndCheckNull = (value) => {
     if (value === null) return null
-    else { return value?.trim().length === 0 ? null : value?.trim() }
+
+    else {
+      return value?.trim().length === 0 ? null : value?.trim()
+    }
+
   }
 
   const oldTask = {
     title: props.task.title,
     description: props.task.description,
     assignees: props.task.assignees,
-    status: props.task.status
+
+    status: props.task.status,
   }
 
-  const newTitle = trimAndCheckNull(newTask.value.title);
-  const newDescription = trimAndCheckNull(newTask.value.description);
-  const newAssignees = trimAndCheckNull(newTask.value.assignees);
-  const newStatus = newTask.value.status;
+  const newTitle = trimAndCheckNull(newTask.value.title)
+  const newDescription = trimAndCheckNull(newTask.value.description)
+  const newAssignees = trimAndCheckNull(newTask.value.assignees)
+  const newStatus = newTask.value.status
   return (
-    oldTask.title === newTitle &&
-    oldTask.description === newDescription &&
-    oldTask.assignees === newAssignees &&
-    oldTask.status === newStatus ||
+    (oldTask.title === newTitle &&
+      oldTask.description === newDescription &&
+      oldTask.assignees === newAssignees &&
+      oldTask.status === newStatus) ||
+
     newTitle === null
   )
 })
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
-  const editedTask = {...task}
+
+  const editedTask = { ...task }
   editedTask.title = editedTask.title?.trim()
   editedTask.description = editedTask.description?.trim()
   editedTask.assignees = editedTask.assignees?.trim()
+
+  if (editedTask.title === "") {
+    editedTask.title = null
+  }
+  if (editedTask.description === "") {
+    editedTask.description = null
+  }
+  if (editedTask.assignees === "") {
+    editedTask.assignees = null
+  }
+
   const editedItem = await editItem(
     import.meta.env.VITE_BASE_URL,
-    editedTask.id, 
+    editedTask.id,
     {
-      title: editedTask.title, 
-      description: editedTask.description, 
-      assignees: editedTask.assignees, 
-      status: editedTask.status
+      title: editedTask.title,
+      description: editedTask.description,
+      assignees: editedTask.assignees,
+      status: editedTask.status,
+
     }
   )
 
@@ -77,10 +96,10 @@ watch(props, () => {
 <template>
   <!-- Alert Pass Edit-->
   <div v-if="editPass" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-success w-2/3">
+    <div role="alert" class="alert alert-success shadow-lg w-2/5">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6"
+        class="stroke-current shrink-0 h-6 w-6 text-white"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -91,8 +110,8 @@ watch(props, () => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span>The task has been updated</span>
-      <button @click="editPass = false">X</button>
+      <span class="text-white">The task has been updated</span>
+      <button class="text-white" @click="editPass = false">X</button>
     </div>
   </div>
 
@@ -115,7 +134,11 @@ watch(props, () => {
             v-model="newTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
-              newTask.description ? 'bg-white text-black' : 'italic text-gray-500'
+
+              newTask.description
+                ? 'bg-white text-black'
+                : 'italic text-gray-500'
+
             "
             placeholder="No Description Provided"
           ></textarea>

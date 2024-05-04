@@ -59,7 +59,13 @@ export const useTaskStore = defineStore("task", () => {
     })
   }
 
-  return { getTasks, addTasks, addTask, updateTask }
+  const removeTasks = (removeId) => {
+    task.value.splice(
+      task.value.findIndex((todo) => todo.id === removeId),
+      1
+    )
+  }
+  return { getTasks, addTasks, addTask, updateTask , removeTasks}
 })
 
 if (import.meta.hot) {
