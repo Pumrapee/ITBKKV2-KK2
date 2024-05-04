@@ -43,7 +43,7 @@ const closeFailDelete = () => {
 <template>
   <!-- Alert pass -->
   <div v-show="deletePass" class="flex justify-center mt-3 mb-3">
-    <div role="alert" class="alert shadow-lg w-1/3">
+    <div role="alert" class="alert shadow-lg w-2/5">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="stroke-current shrink-0 h-6 w-6"
