@@ -63,10 +63,10 @@ const changeTitle = computed(() => {
 <template>
   <!-- Alert Pass Add-->
   <div v-show="addPass" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-success w-2/3">
+    <div role="alert" class="alert alert-success shadow-lg w-2/5">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6"
+        class="stroke-current shrink-0 h-6 w-6 text-white"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -77,8 +77,8 @@ const changeTitle = computed(() => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span>The task has been successfully added!!</span>
-      <button @click="addPass = false">X</button>
+      <span class="text-white">The task has been successfully added!!</span>
+      <button class="text-white" @click="addPass = false">X</button>
     </div>
   </div>
 
