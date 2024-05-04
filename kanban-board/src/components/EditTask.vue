@@ -13,15 +13,18 @@ const newTask = ref({})
 const changeTask = computed(() => {
   const trimAndCheckNull = (value) => {
     if (value === null) return null
+
     else {
       return value?.trim().length === 0 ? null : value?.trim()
     }
+
   }
 
   const oldTask = {
     title: props.task.title,
     description: props.task.description,
     assignees: props.task.assignees,
+
     status: props.task.status,
   }
 
@@ -34,12 +37,14 @@ const changeTask = computed(() => {
       oldTask.description === newDescription &&
       oldTask.assignees === newAssignees &&
       oldTask.status === newStatus) ||
+
     newTitle === null
   )
 })
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
+
   const editedTask = { ...task }
   editedTask.title = editedTask.title?.trim()
   editedTask.description = editedTask.description?.trim()
@@ -63,6 +68,7 @@ const editSave = async (task) => {
       description: editedTask.description,
       assignees: editedTask.assignees,
       status: editedTask.status,
+
     }
   )
 
@@ -128,9 +134,11 @@ watch(props, () => {
             v-model="newTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
+
               newTask.description
                 ? 'bg-white text-black'
                 : 'italic text-gray-500'
+
             "
             placeholder="No Description Provided"
           ></textarea>

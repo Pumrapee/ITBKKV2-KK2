@@ -1,7 +1,10 @@
 package sit.int221.kanbanapi.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.entities.Task;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.repositories.TaskRepository;
@@ -19,6 +22,28 @@ public class TaskService {
 
     public Task getTaskById(Integer id) {
         return repository.findById(id).orElseThrow(
-                () -> new ItemNotFoundException("Task id " + id + " does not exist"));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task id " + id + " does not exist !!!"));
+    }
+
+    @Transactional
+    public Task createTask(Task task) {
+            return repository.save(task);
+    }
+
+    @Transactional
+    public Task removeTask(Integer id) {
+        Task task = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        repository.delete(task);
+        return task;
+    }
+
+    @Transactional
+    public Task updateTask(Integer id, Task task) {
+        Task existingTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        existingTask.setTitle(task.getTitle());
+        existingTask.setDescription(task.getDescription());
+        existingTask.setAssignees(task.getAssignees());
+        existingTask.setStatus(task.getStatus());
+        return repository.save(existingTask);
     }
 }

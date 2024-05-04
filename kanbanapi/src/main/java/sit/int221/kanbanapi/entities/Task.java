@@ -6,7 +6,7 @@ import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
 
 import java.time.LocalDateTime;
-
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -15,12 +15,19 @@ import java.time.LocalDateTime;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer taskId;
-    private String taskTitle;
-    private String taskDescription;
-    private String taskAssignees;
+    @Column(name = "taskId")
+    private Integer id;
+    @Column(name = "taskTitle")
+    private String title;
+    @Column(name = "taskDescription")
+    private String description;
+    @Column(name = "taskAssignees")
+    private String assignees;
     @Enumerated(EnumType.STRING)
-    private TaskStatus taskStatus;
-    private LocalDateTime createdOn;
-    private LocalDateTime updatedOn;
+    @Column(name = "taskStatus")
+    private TaskStatus status = TaskStatus.NO_STATUS;
+    @Column(name = "createdOn", insertable = false, updatable = false)
+    private OffsetDateTime createdOn;
+    @Column(name = "updatedOn", insertable = false, updatable = false)
+    private OffsetDateTime updatedOn;
 }
