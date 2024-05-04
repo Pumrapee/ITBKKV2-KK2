@@ -19,7 +19,7 @@ const confirmDelete = async () => {
     import.meta.env.VITE_BASE_URL,
     modal.deleteId
   )
- 
+
   if (deleteItem === 200) {
     mytasks.removeTasks(modal.deleteId)
     deletePass.value = true
@@ -72,7 +72,7 @@ const closeFailDelete = () => {
 
   <!-- Alert fail -->
   <div v-if="deleteFail" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-error w-2/3">
+    <div role="alert" class="alert alert-error shadow-lg w-2/5">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="stroke-current shrink-0 h-6 w-6 text-white"
@@ -86,7 +86,9 @@ const closeFailDelete = () => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span class="text-white">An error has occurred, the task does not exist.</span>
+      <span class="text-white"
+        >An error has occurred, the task does not exist.</span
+      >
       <button class="text-white" @click="closeFailDelete()">X</button>
     </div>
   </div>

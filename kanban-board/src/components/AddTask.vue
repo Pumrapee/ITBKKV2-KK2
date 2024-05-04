@@ -24,10 +24,21 @@ const myTask = useTaskStore()
 console.log(myTask.getTasks())
 
 const saveNewTask = async () => {
-  //trim
+  // Trim
   listNewTask.value.title = listNewTask.value.title.trim()
   listNewTask.value.description = listNewTask.value.description.trim()
   listNewTask.value.assignees = listNewTask.value.assignees.trim()
+
+  // Replace empty strings with null
+  if (listNewTask.value.title === "") {
+    listNewTask.value.title = null
+  }
+  if (listNewTask.value.description === "") {
+    listNewTask.value.description = null
+  }
+  if (listNewTask.value.assignees === "") {
+    listNewTask.value.assignees = null
+  }
 
   const { newTask, statusCode } = await addItem(
     import.meta.env.VITE_BASE_URL,

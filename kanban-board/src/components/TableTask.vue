@@ -5,17 +5,17 @@ import { getItemById } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
 import router from "@/router"
 import { useModalStore } from "../stores/modal"
-import Delete  from "../components/Delete.vue"
+import Delete from "../components/Delete.vue"
 
 const showModal = ref(false)
 const task = ref()
+const mytasks = useTaskStore()
 
 const editFail = ref(false)
 
 const myTask = useTaskStore()
 
 const modal = useModalStore()
-
 
 const closeModal = () => {
   showModal.value = false
@@ -26,9 +26,11 @@ const openModal = async (taskId) => {
   if (taskId) {
     const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
     if (data.status === 404) {
+      //PBI2
       alert("The requested task does not exist")
       editFail.value = true
-      router.push("./task")
+      mytasks.removeTasks(modal.deleteId)
+      router.push("/task")
     } else {
       task.value = data
       showModal.value = true
@@ -46,12 +48,11 @@ const reformat = (status) => {
   return statusMap[status] || status // ถ้าไม่มีค่าใน statusMap ให้ใช้ค่าเดิม
 }
 
-const openDeleteModal = (id,title) => {
-modal.showDelete = true // เปิด Modal Delete
-modal.deleteId = id
-modal.deleteTitle = title
+const openDeleteModal = (id, title) => {
+  modal.showDelete = true // เปิด Modal Delete
+  modal.deleteId = id
+  modal.deleteTitle = title
 }
-
 </script>
 
 <template>
@@ -59,7 +60,7 @@ modal.deleteTitle = title
   <Delete />
 
   <!-- Alert fail Edit-->
-  <div v-if="editfail" class="flex justify-center mt-3">
+  <div v-if="editFail" class="flex justify-center mt-3">
     <div role="alert" class="alert alert-error w-2/3">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -75,7 +76,7 @@ modal.deleteTitle = title
         />
       </svg>
       <span class="text-white">The update was unsuccessful</span>
-      <button class="text-white" @click="editfail = false">X</button>
+      <button class="text-white" @click="editFail = false">X</button>
     </div>
   </div>
 
@@ -85,7 +86,7 @@ modal.deleteTitle = title
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
     </div>
 
-    <div class="overflow-x-auto border border-blue-400 rounded-md w-3/5 mt-4">
+    <div class="overflow-x-auto border border-blue-400 rounded-md w-4/5 mt-4">
       <table class="table">
         <thead class="bg-blue-400">
           <tr class="text-white text-sm">
@@ -102,11 +103,14 @@ modal.deleteTitle = title
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
+            <th class="text-blue-400 pl-10">{{ index + 1 }}</th>
             <td class="itbkk-title pl-20">
-              <button @click="openModal(100)" class="btn btn-ghost">
-                {{ task.title }}
-                <img src="/icons/pen.png" class="w-4" />
+              <button
+                @click="openModal(task.id)"
+                class="btn btn-ghost h-auto"
+                style="text-align: left"
+              >
+                {{ task.title }}<img src="/icons/pen.png" class="w-4" />
               </button>
             </td>
             <td
@@ -124,30 +128,44 @@ modal.deleteTitle = title
                 :class="{
                   'bg-gray-400 font-semibold':
                     reformat(task.status) === 'No Status',
-                  'bg-yellow-400 font-semibold': reformat(task.status) === 'To Do',
-                  'bg-purple-400 font-semibold': reformat(task.status) === 'Doing',
-                  'bg-green-400 font-semibold': reformat(task.status) === 'Done',
+                  'bg-yellow-400 font-semibold':
+                    reformat(task.status) === 'To Do',
+                  'bg-purple-400 font-semibold':
+                    reformat(task.status) === 'Doing',
+                  'bg-green-400 font-semibold':
+                    reformat(task.status) === 'Done',
                 }"
               >
                 {{ reformat(task.status) }}
               </div>
             </td>
             <td class="">
-              <button @click="openDeleteModal(task.id, task.title)" v-if="modal.showModal" class="btn bg-red-500">
-                <img src="/icons/delete.png" class="w-6">
+              <button
+                @click="openDeleteModal(task.id, task.title)"
+                v-if="modal.showModal"
+                class="btn bg-red-500"
+              >
+                <img src="/icons/delete.png" class="w-6" />
               </button>
             </td>
           </tr>
         </tbody>
         <tbody v-else>
           <tr>
-            <td colspan="5" class="text-center py-4 text-gray-500 font-medium">No task</td>
+            <td colspan="5" class="text-center py-4 text-gray-500 font-medium">
+              No task
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
-  
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbkk-title {
+  /* กำหนดความกว้างสูงสุดของ column title */
+  max-width: 600px; /* ปรับค่าตามต้องการ */
+  word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
+}
+</style>
