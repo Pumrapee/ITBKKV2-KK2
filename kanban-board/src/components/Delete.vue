@@ -75,7 +75,7 @@ const closeFailDelete = () => {
     <div role="alert" class="alert alert-error w-2/3">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6"
+        class="stroke-current shrink-0 h-6 w-6 text-white"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -86,8 +86,8 @@ const closeFailDelete = () => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span>An error has occurred, the task does not exist.</span>
-      <button @click="closeFailDelete()">X</button>
+      <span class="text-white">An error has occurred, the task does not exist.</span>
+      <button class="text-white" @click="closeFailDelete()">X</button>
     </div>
   </div>
 
