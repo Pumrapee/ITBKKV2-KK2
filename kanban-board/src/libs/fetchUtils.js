@@ -24,9 +24,7 @@ async function deleteItemById(url, id) {
       method: "DELETE",
     })
     return res.status
-  } catch (error) {
-    console.log(`error: ${error}`)
-  }
+  } catch (error) {}
 }
 
 async function addItem(url, newItem) {
@@ -48,9 +46,7 @@ async function addItem(url, newItem) {
 
     // Return both the added item and the status code
     return { newTask, statusCode }
-  } catch (error) {
-    console.log(`error: ${error}`)
-  }
+  } catch (error) {}
 }
 
 async function editItem(url, id, editItem) {
@@ -68,8 +64,6 @@ async function editItem(url, id, editItem) {
 
     const editedItem = await res.json()
     return editedItem
-  } catch (error) {
-    console.log(`error: ${error}`)
-  }
+  } catch (error) {}
 }
 export { getItems, getItemById, deleteItemById, addItem, editItem }

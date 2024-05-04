@@ -21,8 +21,6 @@ const listNewTask = ref({
 })
 
 const myTask = useTaskStore()
-console.log(myTask.getTasks())
-
 const saveNewTask = async () => {
   // Trim
   listNewTask.value.title = listNewTask.value.title.trim()

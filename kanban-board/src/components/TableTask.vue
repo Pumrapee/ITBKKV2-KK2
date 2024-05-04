@@ -26,8 +26,9 @@ const openModal = async (taskId) => {
   if (taskId) {
     const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
     if (data.status === 404) {
-      //PBI2
+      //require PBI2
       alert("The requested task does not exist")
+      //require PBI5
       editFail.value = true
       mytasks.removeTasks(modal.deleteId)
       router.push("/task")
@@ -48,10 +49,11 @@ const reformat = (status) => {
   return statusMap[status] || status // ถ้าไม่มีค่าใน statusMap ให้ใช้ค่าเดิม
 }
 
-const openDeleteModal = (id, title) => {
+const openDeleteModal = (id, title, index) => {
   modal.showDelete = true // เปิด Modal Delete
   modal.deleteId = id
   modal.deleteTitle = title
+  modal.indexNumber = index + 1
 }
 </script>
 
@@ -105,13 +107,15 @@ const openDeleteModal = (id, title) => {
           >
             <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title pl-20">
-              <button
-                @click="openModal(task.id)"
-                class="btn btn-ghost h-auto"
-                style="text-align: left"
-              >
-                {{ task.title }}<img src="/icons/pen.png" class="w-4" />
-              </button>
+              <router-link :to="{ name: 'edit', params: { id: task.id } }">
+                <button
+                  @click="openModal(task.id)"
+                  class="btn btn-ghost h-auto"
+                  style="text-align: left"
+                >
+                  {{ task.title }}<img src="/icons/pen.png" class="w-4" />
+                </button>
+              </router-link>
             </td>
             <td
               class="itbkk-assignees pl-20"
@@ -141,7 +145,7 @@ const openDeleteModal = (id, title) => {
             </td>
             <td class="">
               <button
-                @click="openDeleteModal(task.id, task.title)"
+                @click="openDeleteModal(task.id, task.title, index)"
                 v-if="modal.showModal"
                 class="btn bg-red-500"
               >

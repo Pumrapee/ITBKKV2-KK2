@@ -1,24 +1,59 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed, watch, onMounted } from "vue"
+import { ref, defineProps, defineEmits, computed, watch } from "vue"
 import { editItem } from "../libs/fetchUtils"
 import { useTaskStore } from "@/stores/taskStore"
 
-const { showModal, task } = defineProps({
+const props = defineProps({
   showModal: Boolean,
   task: Object,
 })
 const emits = defineEmits(["closeModal"])
-
 const editPass = ref(false)
-// const changeTask = ref(false)
+const newTask = ref({})
+const changeTask = computed(() => {
+  const trimAndCheckNull = (value) => {
+    if (value === null) return null
+    else {
+      return value?.trim().length === 0 ? null : value?.trim()
+    }
+  }
+
+  const oldTask = {
+    title: props.task.title,
+    description: props.task.description,
+    assignees: props.task.assignees,
+    status: props.task.status,
+  }
+
+  const newTitle = trimAndCheckNull(newTask.value.title)
+  const newDescription = trimAndCheckNull(newTask.value.description)
+  const newAssignees = trimAndCheckNull(newTask.value.assignees)
+  const newStatus = newTask.value.status
+  return (
+    (oldTask.title === newTitle &&
+      oldTask.description === newDescription &&
+      oldTask.assignees === newAssignees &&
+      oldTask.status === newStatus) ||
+    newTitle === null
+  )
+})
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
-  //trim
   const editedTask = { ...task }
-  editedTask.title = editedTask.title.trim()
-  editedTask.description = editedTask.description.trim()
-  editedTask.assignees = editedTask.assignees.trim()
+  editedTask.title = editedTask.title?.trim()
+  editedTask.description = editedTask.description?.trim()
+  editedTask.assignees = editedTask.assignees?.trim()
+
+  if (editedTask.title === "") {
+    editedTask.title = null
+  }
+  if (editedTask.description === "") {
+    editedTask.description = null
+  }
+  if (editedTask.assignees === "") {
+    editedTask.assignees = null
+  }
 
   const editedItem = await editItem(
     import.meta.env.VITE_BASE_URL,
@@ -40,31 +75,22 @@ const editSave = async (task) => {
     editedTask.createdTime,
     editedTask.updatedTime
   )
+
   emits("closeModal")
   editPass.value = true
 }
 
-watch(
-  () => task,
-  (newTask, oldTask) => {
-    // เมื่อ task มีการเปลี่ยนแปลง
-    // ทำสิ่งที่คุณต้องการทำ
-    console.log("Task has changed:", newTask, oldTask)
+watch(props, () => {
+  if (props.showModal) {
+    Object.assign(newTask.value, props.task)
   }
-)
-
-// const changeTask = watch(
-//   () => task,
-//   (newValue, oldValue) => {
-//     return newValue !== oldValue
-//   }
-// )
+})
 </script>
 
 <template>
   <!-- Alert Pass Edit-->
   <div v-if="editPass" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-success w-2/3">
+    <div role="alert" class="alert alert-success shadow-lg w-2/5">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="stroke-current shrink-0 h-6 w-6 text-white"
@@ -92,17 +118,19 @@ watch(
         <input
           type="text"
           className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model="task.title"
+          v-model="newTask.title"
           placeholder="Enter Title here..."
         />
 
         <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
-            v-model="task.description"
+            v-model="newTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
-              task.description ? 'bg-white text-black' : 'italic text-gray-500'
+              newTask.description
+                ? 'bg-white text-black'
+                : 'italic text-gray-500'
             "
             placeholder="No Description Provided"
           ></textarea>
@@ -113,10 +141,10 @@ watch(
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
-            v-model="task.assignees"
+            v-model="newTask.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
             :class="
-              task.assignees ? 'bg-white text-black' : 'italic text-gray-500'
+              newTask.assignees ? 'bg-white text-black' : 'italic text-gray-500'
             "
             placeholder="Unassigned"
           ></textarea>
@@ -127,7 +155,7 @@ watch(
         >
           <label for="status" class="p-2 font-bold text-blue-400">Status</label>
           <select
-            v-model="task.status"
+            v-model="newTask.status"
             class="itbkk-status pl-5 border-2 rounded-md h-10 pr-5"
           >
             <option value="NO_STATUS">No Status</option>
@@ -154,7 +182,8 @@ watch(
         <div class="col-span-4 place-self-end rounded-lg">
           <button
             class="btn mr-3 bg-green-400 disabled:bg-green-200"
-            @click="editSave(task)"
+            @click="editSave(newTask)"
+            :disabled="changeTask"
           >
             Save
           </button>

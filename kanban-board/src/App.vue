@@ -10,8 +10,6 @@ onMounted(async () => {
     const listTasks = await getItems(import.meta.env.VITE_BASE_URL)
     myTask.addTasks(listTasks)
   }
-
-  console.log(myTask.getTasks())
 })
 </script>
 

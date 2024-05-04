@@ -101,7 +101,7 @@ const closeFailDelete = () => {
           <p style="word-wrap: break-word">
             Do you want to delete the task <br />
             <span class="text-blue-400"
-              >"number {{ modal.deleteId }} - {{ modal.deleteTitle }}"</span
+              >"number {{ modal.indexNumber }} - {{ modal.deleteTitle }}"</span
             >
             <span> ?</span>
           </p>
