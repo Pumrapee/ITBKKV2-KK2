@@ -103,7 +103,7 @@ const openDeleteModal = (id, title) => {
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-blue-400 pl-10">{{ index + 1 }}</th>
+            <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title pl-20">
               <button
                 @click="openModal(task.id)"
@@ -145,7 +145,7 @@ const openDeleteModal = (id, title) => {
                 v-if="modal.showModal"
                 class="btn bg-red-500"
               >
-                <img src="/icons/delete.png" class="w-6" />
+                <img src="/icons/delete.png" class="w-4" />
               </button>
             </td>
           </tr>
