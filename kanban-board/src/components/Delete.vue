@@ -112,7 +112,7 @@ const closeFailDelete = () => {
             class="btn mr-4 bg-red-500 text-white"
             @click="confirmDelete()"
           >
-            Delete
+            Confirm
           </button>
           <button class="itbkk-button-cancel btn" @click="cancelDelete()">
             Close
