@@ -10,21 +10,24 @@ const props = defineProps({
 const emits = defineEmits(["closeModal"])
 const editPass = ref(false)
 const newTask = ref({})
+const errorTask = ref({
+  title: "",
+  description: "",
+  assignees: "",
+})
+
 const changeTask = computed(() => {
   const trimAndCheckNull = (value) => {
     if (value === null) return null
-
     else {
       return value?.trim().length === 0 ? null : value?.trim()
     }
-
   }
 
   const oldTask = {
     title: props.task.title,
     description: props.task.description,
     assignees: props.task.assignees,
-
     status: props.task.status,
   }
 
@@ -32,19 +35,32 @@ const changeTask = computed(() => {
   const newDescription = trimAndCheckNull(newTask.value.description)
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
   const newStatus = newTask.value.status
+
+  newTask.value.title?.length > 100
+    ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
+    : (errorTask.value.title = "")
+
+  newTask.value.description?.length > 500
+    ? (errorTask.value.description =
+        "Description exceeds the limit of 500 characters.")
+    : (errorTask.value.description = "")
+
+  newTask.value.assignees?.length > 30
+    ? (errorTask.value.assignees =
+        "Assignees exceeds the limit of 30 characters.")
+    : (errorTask.value.assignees = "")
+
   return (
     (oldTask.title === newTitle &&
       oldTask.description === newDescription &&
       oldTask.assignees === newAssignees &&
       oldTask.status === newStatus) ||
-
     newTitle === null
   )
 })
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
-
   const editedTask = { ...task }
   editedTask.title = editedTask.title?.trim()
   editedTask.description = editedTask.description?.trim()
@@ -60,7 +76,7 @@ const editSave = async (task) => {
     editedTask.assignees = null
   }
 
-  const editedItem = await editItem(
+  const { editedItem, statusCode } = await editItem(
     import.meta.env.VITE_BASE_URL,
     editedTask.id,
     {
@@ -68,22 +84,26 @@ const editSave = async (task) => {
       description: editedTask.description,
       assignees: editedTask.assignees,
       status: editedTask.status,
-
     }
   )
 
-  myTask.updateTask(
-    editedTask.id,
-    editedTask.title,
-    editedTask.description,
-    editedTask.assignees,
-    editedTask.status,
-    editedTask.createdTime,
-    editedTask.updatedTime
-  )
+  if (statusCode === 200) {
+    myTask.updateTask(
+      editedItem.id,
+      editedItem.title,
+      editedItem.description,
+      editedItem.assignees,
+      editedItem.status,
+      editedItem.createdTime,
+      editedItem.updatedTime
+    )
 
-  emits("closeModal")
-  editPass.value = true
+    emits("closeModal")
+    editPass.value = true
+  }
+  if (statusCode === 400) {
+    alert("There are some fields that exceed the limit.")
+  }
 }
 
 watch(props, () => {
@@ -134,11 +154,9 @@ watch(props, () => {
             v-model="newTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
-
               newTask.description
                 ? 'bg-white text-black'
                 : 'italic text-gray-500'
-
             "
             placeholder="No Description Provided"
           ></textarea>
@@ -184,6 +202,14 @@ watch(props, () => {
           <p class="itbkk-updated-on pl-3 font-semibold text-sm text-blue-400">
             Updated On :
             {{ new Date(task.updatedOn).toLocaleString("en-GB") }}
+          </p>
+        </div>
+
+        <div class="col-start-1 row-start-6 col-span-2">
+          <p class="text-red-500">
+            {{
+              errorTask.title || errorTask.description || errorTask.assignees
+            }}
           </p>
         </div>
 

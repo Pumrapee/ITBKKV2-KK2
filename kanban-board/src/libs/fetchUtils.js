@@ -51,19 +51,18 @@ async function addItem(url, newItem) {
 
 async function editItem(url, id, editItem) {
   try {
-    const res = fetch(`${url}/${id}`, {
+    const res = await fetch(`${url}/${id}`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({
-        ...editItem,
-      }),
+      body: JSON.stringify(editItem),
     })
     const statusCode = res.status
 
     const editedItem = await res.json()
-    return editedItem
+    return { editedItem, statusCode }
   } catch (error) {}
 }
+
 export { getItems, getItemById, deleteItemById, addItem, editItem }
