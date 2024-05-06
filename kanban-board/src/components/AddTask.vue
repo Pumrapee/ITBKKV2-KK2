@@ -20,6 +20,12 @@ const listNewTask = ref({
   status: selected.value,
 })
 
+const errorTask = ref({
+  title: "",
+  description: "",
+  assignees: "",
+})
+
 const myTask = useTaskStore()
 const saveNewTask = async () => {
   // Trim
@@ -62,9 +68,42 @@ const saveNewTask = async () => {
 
     addPass.value = true
   }
+
+  if (statusCode === 400) {
+    alert("There are some fields that exceed the limit.")
+    listNewTask.value.title = ""
+    listNewTask.value.description = ""
+    listNewTask.value.assignees = ""
+    listNewTask.value.status = selected.value
+  }
+}
+
+const closeAddModal = () => {
+  // ทำการเคลียร์ค่าในฟอร์ม
+  listNewTask.value.title = ""
+  listNewTask.value.description = ""
+  listNewTask.value.assignees = ""
+  listNewTask.value.status = selected.value
+
+  // ปิด Modal
+  emits("closeAddModal")
 }
 
 const changeTitle = computed(() => {
+  listNewTask.value.title?.length > 100
+    ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
+    : (errorTask.value.title = "")
+
+  listNewTask.value.description?.length > 500
+    ? (errorTask.value.description =
+        "Description exceeds the limit of 500 characters.")
+    : (errorTask.value.description = "")
+
+  listNewTask.value.assignees?.length > 30
+    ? (errorTask.value.assignees =
+        "Assignees exceeds the limit of 30 characters.")
+    : (errorTask.value.assignees = "")
+
   return !listNewTask.value.title
 })
 </script>
@@ -137,15 +176,25 @@ const changeTitle = computed(() => {
           </select>
         </div>
 
-        <div class="col-span-4 place-self-end rounded-lg">
+        <div class="col-start-1 row-start-6 col-span-2">
+          <p class="text-red-500">
+            {{
+              errorTask.title || errorTask.description || errorTask.assignees
+            }}
+          </p>
+        </div>
+
+        <div class="row-start-6 col-span-4 place-self-end rounded-lg">
           <button
-            class="btn mr-3 bg-green-400 disabled:bg-green-200"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
             @click="saveNewTask"
             :disabled="changeTitle"
           >
             Save
           </button>
-          <button class="btn" @click="$emit('closeAddModal')">Close</button>
+          <button class="itbkk-button-cancel btn" @click="closeAddModal">
+            Close
+          </button>
         </div>
       </div>
     </div>

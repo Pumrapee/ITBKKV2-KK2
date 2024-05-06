@@ -77,7 +77,7 @@ const openDeleteModal = (id, title, index) => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span class="text-white">The update was unsuccessful</span>
+      <span class="itbkk-message text-white">The update was unsuccessful</span>
       <button class="text-white" @click="editFail = false">X</button>
     </div>
   </div>
@@ -106,7 +106,7 @@ const openDeleteModal = (id, title, index) => {
             class="itbkk-item"
           >
             <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
-            <td class="itbkk-title pl-20">
+            <td class="itbkk-title itbkk-button-action itbkk-button-edit pl-20">
               <router-link :to="{ name: 'edit', params: { id: task.id } }">
                 <button
                   @click="openModal(task.id)"
@@ -143,11 +143,11 @@ const openDeleteModal = (id, title, index) => {
                 {{ reformat(task.status) }}
               </div>
             </td>
-            <td class="">
+            <td>
               <button
                 @click="openDeleteModal(task.id, task.title, index)"
                 v-if="modal.showModal"
-                class="btn bg-red-500"
+                class="itbkk-button-delete btn bg-red-500"
               >
                 <img src="/icons/delete.png" class="w-4" />
               </button>
