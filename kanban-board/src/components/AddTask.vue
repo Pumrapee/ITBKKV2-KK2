@@ -90,16 +90,16 @@ const closeAddModal = () => {
 }
 
 const changeTitle = computed(() => {
-  listNewTask.value.title?.length > 100
+  listNewTask.value.title?.trim()?.length > 100
     ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
     : (errorTask.value.title = "")
 
-  listNewTask.value.description?.length > 500
+  listNewTask.value.description?.trim()?.length > 500
     ? (errorTask.value.description =
         "Description exceeds the limit of 500 characters.")
     : (errorTask.value.description = "")
 
-  listNewTask.value.assignees?.length > 30
+  listNewTask.value.assignees?.trim()?.length > 30
     ? (errorTask.value.assignees =
         "Assignees exceeds the limit of 30 characters.")
     : (errorTask.value.assignees = "")
@@ -145,9 +145,9 @@ const changeTitle = computed(() => {
           />
           <p
             class="text-gray-300 p-2 ml-2 whitespace-nowrap text-sm"
-            :class="{ 'text-red-400': listNewTask.title?.length > 100 }"
+            :class="{ 'text-red-400': listNewTask.title?.trim()?.length > 100 }"
           >
-            {{ listNewTask.title?.length }} / 100
+            {{ listNewTask.title?.trim()?.length }} / 100
           </p>
         </div>
 
@@ -161,9 +161,9 @@ const changeTitle = computed(() => {
           ></textarea>
           <p
             class="text-gray-300 p-4 self-end text-sm"
-            :class="{ 'text-red-400': listNewTask.description?.length > 500 }"
+            :class="{ 'text-red-400': listNewTask.description?.trim()?.length > 500 }"
           >
-            {{ listNewTask.description?.length }} / 500
+            {{ listNewTask.description?.trim()?.length }} / 500
           </p>
         </div>
 
@@ -177,9 +177,9 @@ const changeTitle = computed(() => {
           ></textarea>
           <p
             class="text-gray-300 p-4 self-end text-sm"
-            :class="{ 'text-red-400': listNewTask.assignees?.length > 30 }"
+            :class="{ 'text-red-400': listNewTask.assignees?.trim()?.length > 30 }"
           >
-            {{ listNewTask.assignees?.length }} / 30
+            {{ listNewTask.assignees?.trim()?.length }} / 30
           </p>
         </div>
 
