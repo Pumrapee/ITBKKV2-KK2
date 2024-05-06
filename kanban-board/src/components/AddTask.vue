@@ -186,13 +186,15 @@ const changeTitle = computed(() => {
 
         <div class="row-start-6 col-span-4 place-self-end rounded-lg">
           <button
-            class="btn mr-3 bg-green-400 disabled:bg-green-200"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
             @click="saveNewTask"
             :disabled="changeTitle"
           >
             Save
           </button>
-          <button class="btn" @click="closeAddModal">Close</button>
+          <button class="itbkk-button-cancel btn" @click="closeAddModal">
+            Close
+          </button>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 import { ref } from "vue"
 import AddTask from "../components/AddTask.vue"
 import router from "@/router"
-import { useModalStore } from "@/stores/modal";
+import { useModalStore } from "@/stores/modal"
 
 const showAdd = ref()
 
@@ -19,7 +19,6 @@ const modal = useModalStore()
 const showbtnDelete = () => {
   modal.showModal = !modal.showModal
 }
-
 </script>
 
 <template>
@@ -32,16 +31,17 @@ const showbtnDelete = () => {
     </div>
 
     <div class="navbar-end">
-      <button 
-      @click="showbtnDelete"
-      class="btn border-red-500 bg-red-500 text-white mr-2">
+      <button
+        @click="showbtnDelete"
+        class="itbkk-button-action btn border-red-500 bg-red-500 text-white mr-2"
+      >
         <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
       </button>
 
       <router-link to="/task/add">
         <button
           @click="showModalAdd"
-          class="btn border-blue-400 bg-blue-400 text-white hover:bg-pink-400"
+          class="itbkk-button-add btn border-blue-400 bg-blue-400 text-white hover:bg-pink-400"
         >
           <img src="/icons/plus.png" class="w-4" />Add Task
         </button>

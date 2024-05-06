@@ -58,7 +58,7 @@ const closeFailDelete = () => {
         />
       </svg>
 
-      <span
+      <span class="itbkk-message"
         >The task
         <span class="font-semibold text-red-500"
           >"{{ modal.deleteTitle }}"</span
@@ -86,7 +86,7 @@ const closeFailDelete = () => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span class="text-white"
+      <span class="itbkk-message text-white"
         >An error has occurred, the task does not exist.</span
       >
       <button class="text-white" @click="closeFailDelete()">X</button>
@@ -107,9 +107,9 @@ const closeFailDelete = () => {
           </p>
         </div>
 
-        <div class="itbkk-button-confirm mt-4 flex justify-end">
+        <div class="mt-4 flex justify-end">
           <button
-            class="btn mr-4 bg-red-500 text-white"
+            class="itbkk-button-confirm btn mr-4 bg-red-500 text-white"
             @click="confirmDelete()"
           >
             Confirm

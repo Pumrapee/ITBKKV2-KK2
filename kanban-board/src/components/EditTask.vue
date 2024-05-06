@@ -130,7 +130,7 @@ watch(props, () => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span class="text-white">The task has been updated</span>
+      <span class="itbkk-message text-white">The task has been updated</span>
       <button class="text-white" @click="editPass = false">X</button>
     </div>
   </div>
@@ -215,13 +215,15 @@ watch(props, () => {
 
         <div class="col-span-4 place-self-end rounded-lg">
           <button
-            class="btn mr-3 bg-green-400 disabled:bg-green-200"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
             @click="editSave(newTask)"
             :disabled="changeTask"
           >
             Save
           </button>
-          <button class="btn" @click="$emit('closeModal')">Close</button>
+          <button class="itbkk-button-cancle btn" @click="$emit('closeModal')">
+            Close
+          </button>
         </div>
       </div>
     </div>
