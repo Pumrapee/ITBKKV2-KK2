@@ -139,7 +139,7 @@ watch(props, () => {
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div
-        class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-4/5"
+        class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-3/3"
       >
         <input
           type="text"
