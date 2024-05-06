@@ -145,9 +145,9 @@ const changeTitle = computed(() => {
           />
           <p
             class="text-gray-300 p-2 ml-2 whitespace-nowrap text-sm"
-            :class="{ 'text-red-400': listNewTask.title.length > 100 }"
+            :class="{ 'text-red-400': listNewTask.title?.length > 100 }"
           >
-            {{ listNewTask.title.length }} / 100
+            {{ listNewTask.title?.length }} / 100
           </p>
         </div>
 
@@ -161,9 +161,9 @@ const changeTitle = computed(() => {
           ></textarea>
           <p
             class="text-gray-300 p-4 self-end text-sm"
-            :class="{ 'text-red-400': listNewTask.description.length > 500 }"
+            :class="{ 'text-red-400': listNewTask.description?.length > 500 }"
           >
-            {{ listNewTask.description.length }} / 500
+            {{ listNewTask.description?.length }} / 500
           </p>
         </div>
 
@@ -177,9 +177,9 @@ const changeTitle = computed(() => {
           ></textarea>
           <p
             class="text-gray-300 p-4 self-end text-sm"
-            :class="{ 'text-red-400': listNewTask.assignees.length > 30 }"
+            :class="{ 'text-red-400': listNewTask.assignees?.length > 30 }"
           >
-            {{ listNewTask.assignees.length }} / 30
+            {{ listNewTask.assignees?.length }} / 30
           </p>
         </div>
 
