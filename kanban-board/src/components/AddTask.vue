@@ -136,29 +136,51 @@ const changeTitle = computed(() => {
       <div
         class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-2/3"
       >
-        <input
-          type="text"
-          className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model="listNewTask.title"
-          placeholder="Enter Title here..."
-        />
+        <div class="flex items-center col-span-4">
+          <input
+            type="text"
+            className="itbkk-title input pl-2 font-semibold text-3xl text-blue-400 rounded-lg w-11/12"
+            v-model="listNewTask.title"
+            placeholder="Enter Title here..."
+          />
+          <p
+            class="text-gray-300 p-2 ml-2 whitespace-nowrap text-sm"
+            :class="{ 'text-red-400': listNewTask.title.length > 100 }"
+          >
+            {{ listNewTask.title.length }} / 100
+          </p>
+        </div>
 
-        <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
+        <div
+          class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg flex flex-col justify-between"
+        >
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
             v-model="listNewTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
           ></textarea>
+          <p
+            class="text-gray-300 p-4 self-end text-sm"
+            :class="{ 'text-red-400': listNewTask.description.length > 500 }"
+          >
+            {{ listNewTask.description.length }} / 500
+          </p>
         </div>
 
         <div
-          class="border-2 border-blue-400 col-start-4 row-start-2 row-end-4 rounded-lg"
+          class="border-2 border-blue-400 col-start-4 row-start-2 row-end-4 rounded-lg flex flex-col justify-between"
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
             v-model="listNewTask.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
           ></textarea>
+          <p
+            class="text-gray-300 p-4 self-end text-sm"
+            :class="{ 'text-red-400': listNewTask.assignees.length > 30 }"
+          >
+            {{ listNewTask.assignees.length }} / 30
+          </p>
         </div>
 
         <div
