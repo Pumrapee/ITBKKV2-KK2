@@ -30,4 +30,32 @@ public class Task {
     private OffsetDateTime createdOn;
     @Column(name = "updatedOn", insertable = false, updatable = false)
     private OffsetDateTime updatedOn;
+
+    public void setTitle(String title) {
+        if (title != null) {
+            title = title.trim();
+        }
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        if (description != null) {
+            description = description.trim();
+        }
+        this.description = description;
+    }
+
+    public void setAssignees(String assignees) {
+        if (assignees != null) {
+            assignees = assignees.trim();
+        }
+        this.assignees = assignees;
+    }
+
+    public void setStatus(TaskStatus status) {
+        if (status == null) {
+            status = TaskStatus.NO_STATUS;
+        }
+        this.status = status;
+    }
 }
