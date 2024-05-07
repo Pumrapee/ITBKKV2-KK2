@@ -20,6 +20,12 @@ const listNewTask = ref({
   status: selected.value,
 })
 
+const errorTask = ref({
+  title: "",
+  description: "",
+  assignees: "",
+})
+
 const myTask = useTaskStore()
 const saveNewTask = async () => {
   // Trim
@@ -62,9 +68,42 @@ const saveNewTask = async () => {
 
     addPass.value = true
   }
+
+  if (statusCode === 400) {
+    alert("There are some fields that exceed the limit.")
+    listNewTask.value.title = ""
+    listNewTask.value.description = ""
+    listNewTask.value.assignees = ""
+    listNewTask.value.status = selected.value
+  }
+}
+
+const closeAddModal = () => {
+  // ทำการเคลียร์ค่าในฟอร์ม
+  listNewTask.value.title = ""
+  listNewTask.value.description = ""
+  listNewTask.value.assignees = ""
+  listNewTask.value.status = selected.value
+
+  // ปิด Modal
+  emits("closeAddModal")
 }
 
 const changeTitle = computed(() => {
+  listNewTask.value.title?.trim()?.length > 100
+    ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
+    : (errorTask.value.title = "")
+
+  listNewTask.value.description?.trim()?.length > 500
+    ? (errorTask.value.description =
+        "Description exceeds the limit of 500 characters.")
+    : (errorTask.value.description = "")
+
+  listNewTask.value.assignees?.trim()?.length > 30
+    ? (errorTask.value.assignees =
+        "Assignees exceeds the limit of 30 characters.")
+    : (errorTask.value.assignees = "")
+
   return !listNewTask.value.title
 })
 </script>
@@ -97,29 +136,51 @@ const changeTitle = computed(() => {
       <div
         class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-2/3"
       >
-        <input
-          type="text"
-          className="itbkk-title input pl-2 col-span-4 font-semibold text-3xl text-blue-400 rounded-lg "
-          v-model="listNewTask.title"
-          placeholder="Enter Title here..."
-        />
+        <div class="flex items-center col-span-4">
+          <input
+            type="text"
+            className="itbkk-title input pl-2 font-semibold text-3xl text-blue-400 rounded-lg w-11/12"
+            v-model="listNewTask.title"
+            placeholder="Enter Title here..."
+          />
+          <p
+            class="text-gray-300 p-2 ml-2 whitespace-nowrap text-sm"
+            :class="{ 'text-red-400': listNewTask.title?.trim()?.length > 100 }"
+          >
+            {{ listNewTask.title?.trim()?.length }} / 100
+          </p>
+        </div>
 
-        <div class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg">
+        <div
+          class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg flex flex-col justify-between"
+        >
           <p class="p-5 font-bold text-blue-400">Description</p>
           <textarea
             v-model="listNewTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
           ></textarea>
+          <p
+            class="text-gray-300 p-4 self-end text-sm"
+            :class="{ 'text-red-400': listNewTask.description?.trim()?.length > 500 }"
+          >
+            {{ listNewTask.description?.trim()?.length }} / 500
+          </p>
         </div>
 
         <div
-          class="border-2 border-blue-400 col-start-4 row-start-2 row-end-4 rounded-lg"
+          class="border-2 border-blue-400 col-start-4 row-start-2 row-end-4 rounded-lg flex flex-col justify-between"
         >
           <p class="p-3 font-bold text-blue-400">Assignees</p>
           <textarea
             v-model="listNewTask.assignees"
             class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
           ></textarea>
+          <p
+            class="text-gray-300 p-4 self-end text-sm"
+            :class="{ 'text-red-400': listNewTask.assignees?.trim()?.length > 30 }"
+          >
+            {{ listNewTask.assignees?.trim()?.length }} / 30
+          </p>
         </div>
 
         <div
@@ -137,15 +198,25 @@ const changeTitle = computed(() => {
           </select>
         </div>
 
-        <div class="col-span-4 place-self-end rounded-lg">
+        <div class="col-start-1 row-start-6 col-span-2">
+          <p class="text-red-500">
+            {{
+              errorTask.title || errorTask.description || errorTask.assignees
+            }}
+          </p>
+        </div>
+
+        <div class="row-start-6 col-span-4 place-self-end rounded-lg">
           <button
-            class="btn mr-3 bg-green-400 disabled:bg-green-200"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
             @click="saveNewTask"
             :disabled="changeTitle"
           >
             Save
           </button>
-          <button class="btn" @click="$emit('closeAddModal')">Close</button>
+          <button class="itbkk-button-cancel btn" @click="closeAddModal">
+            Close
+          </button>
         </div>
       </div>
     </div>

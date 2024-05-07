@@ -10,21 +10,24 @@ const props = defineProps({
 const emits = defineEmits(["closeModal"])
 const editPass = ref(false)
 const newTask = ref({})
+const errorTask = ref({
+  title: "",
+  description: "",
+  assignees: "",
+})
+
 const changeTask = computed(() => {
   const trimAndCheckNull = (value) => {
     if (value === null) return null
-
     else {
       return value?.trim().length === 0 ? null : value?.trim()
     }
-
   }
 
   const oldTask = {
     title: props.task.title,
     description: props.task.description,
     assignees: props.task.assignees,
-
     status: props.task.status,
   }
 
@@ -32,19 +35,32 @@ const changeTask = computed(() => {
   const newDescription = trimAndCheckNull(newTask.value.description)
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
   const newStatus = newTask.value.status
+
+  newTask.value.title?.length > 100
+    ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
+    : (errorTask.value.title = "")
+
+  newTask.value.description?.length > 500
+    ? (errorTask.value.description =
+        "Description exceeds the limit of 500 characters.")
+    : (errorTask.value.description = "")
+
+  newTask.value.assignees?.length > 30
+    ? (errorTask.value.assignees =
+        "Assignees exceeds the limit of 30 characters.")
+    : (errorTask.value.assignees = "")
+
   return (
     (oldTask.title === newTitle &&
       oldTask.description === newDescription &&
       oldTask.assignees === newAssignees &&
       oldTask.status === newStatus) ||
-
     newTitle === null
   )
 })
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
-
   const editedTask = { ...task }
   editedTask.title = editedTask.title?.trim()
   editedTask.description = editedTask.description?.trim()
@@ -60,7 +76,7 @@ const editSave = async (task) => {
     editedTask.assignees = null
   }
 
-  const editedItem = await editItem(
+  const { editedItem, statusCode } = await editItem(
     import.meta.env.VITE_BASE_URL,
     editedTask.id,
     {
@@ -68,22 +84,26 @@ const editSave = async (task) => {
       description: editedTask.description,
       assignees: editedTask.assignees,
       status: editedTask.status,
-
     }
   )
 
-  myTask.updateTask(
-    editedTask.id,
-    editedTask.title,
-    editedTask.description,
-    editedTask.assignees,
-    editedTask.status,
-    editedTask.createdTime,
-    editedTask.updatedTime
-  )
+  if (statusCode === 200) {
+    myTask.updateTask(
+      editedItem.id,
+      editedItem.title,
+      editedItem.description,
+      editedItem.assignees,
+      editedItem.status,
+      editedItem.createdTime,
+      editedItem.updatedTime
+    )
 
-  emits("closeModal")
-  editPass.value = true
+    emits("closeModal")
+    editPass.value = true
+  }
+  if (statusCode === 400) {
+    alert("There are some fields that exceed the limit.")
+  }
 }
 
 watch(props, () => {
@@ -110,7 +130,7 @@ watch(props, () => {
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span class="text-white">The task has been updated</span>
+      <span class="itbkk-message text-white">The task has been updated</span>
       <button class="text-white" @click="editPass = false">X</button>
     </div>
   </div>
@@ -119,7 +139,7 @@ watch(props, () => {
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div
-        class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-4/5"
+        class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-3/3"
       >
         <input
           type="text"
@@ -134,11 +154,9 @@ watch(props, () => {
             v-model="newTask.description"
             class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
             :class="
-
               newTask.description
                 ? 'bg-white text-black'
                 : 'italic text-gray-500'
-
             "
             placeholder="No Description Provided"
           ></textarea>
@@ -187,15 +205,25 @@ watch(props, () => {
           </p>
         </div>
 
+        <div class="col-start-1 row-start-6 col-span-2">
+          <p class="text-red-500">
+            {{
+              errorTask.title || errorTask.description || errorTask.assignees
+            }}
+          </p>
+        </div>
+
         <div class="col-span-4 place-self-end rounded-lg">
           <button
-            class="btn mr-3 bg-green-400 disabled:bg-green-200"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
             @click="editSave(newTask)"
             :disabled="changeTask"
           >
             Save
           </button>
-          <button class="btn" @click="$emit('closeModal')">Close</button>
+          <button class="itbkk-button-cancle btn" @click="$emit('closeModal')">
+            Close
+          </button>
         </div>
       </div>
     </div>
