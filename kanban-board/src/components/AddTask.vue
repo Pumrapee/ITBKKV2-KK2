@@ -90,9 +90,19 @@ const closeAddModal = () => {
 }
 
 const changeTitle = computed(() => {
-  listNewTask.value.title?.trim()?.length > 100
-    ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
-    : (errorTask.value.title = "")
+  const trimmedTitleLength = listNewTask.value.title.trim().length
+
+  // ตรวจสอบว่า title มีความยาวมากกว่า 100 หรือมีช่องว่างหรือไม่
+  if (trimmedTitleLength > 100 || trimmedTitleLength === 0) {
+    errorTask.value.title =
+      trimmedTitleLength === 0
+        ? "Title is required."
+        : "Title exceeds the limit of 100 characters."
+    return true // ให้มีค่าเป็น true เมื่อ title มีความยาวเกิน 100 หรือมีช่องว่าง
+  } else {
+    // กรณีที่ไม่เข้าเงื่อนไขด้านบน ให้เคลียร์ข้อผิดพลาดของ title
+    errorTask.value.title = ""
+  }
 
   listNewTask.value.description?.trim()?.length > 500
     ? (errorTask.value.description =
@@ -136,7 +146,7 @@ const changeTitle = computed(() => {
       <div
         class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-2/3"
       >
-        <div class="flex items-center col-span-4">
+        <div class="flex col-span-4 items-center">
           <input
             type="text"
             className="itbkk-title input pl-2 font-semibold text-3xl text-blue-400 rounded-lg w-11/12"
@@ -145,7 +155,11 @@ const changeTitle = computed(() => {
           />
           <p
             class="text-gray-300 p-2 ml-2 whitespace-nowrap text-sm"
-            :class="{ 'text-red-400': listNewTask.title?.trim()?.length > 100 }"
+            :class="{
+              'text-red-400':
+                listNewTask.title?.length > 100 ||
+                listNewTask.title?.length === 0,
+            }"
           >
             {{ listNewTask.title?.trim()?.length }} / 100
           </p>
@@ -161,7 +175,9 @@ const changeTitle = computed(() => {
           ></textarea>
           <p
             class="text-gray-300 p-4 self-end text-sm"
-            :class="{ 'text-red-400': listNewTask.description?.trim()?.length > 500 }"
+            :class="{
+              'text-red-400': listNewTask.description?.trim()?.length > 500,
+            }"
           >
             {{ listNewTask.description?.trim()?.length }} / 500
           </p>
@@ -177,7 +193,9 @@ const changeTitle = computed(() => {
           ></textarea>
           <p
             class="text-gray-300 p-4 self-end text-sm"
-            :class="{ 'text-red-400': listNewTask.assignees?.trim()?.length > 30 }"
+            :class="{
+              'text-red-400': listNewTask.assignees?.trim()?.length > 30,
+            }"
           >
             {{ listNewTask.assignees?.trim()?.length }} / 30
           </p>
