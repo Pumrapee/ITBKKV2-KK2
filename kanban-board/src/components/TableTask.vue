@@ -19,7 +19,7 @@ const modal = useModalStore()
 
 const closeModal = () => {
   showModal.value = false
-  router.push({ name: "task" })
+  router.go(-1)
 }
 
 const openModal = async (taskId) => {
@@ -31,7 +31,7 @@ const openModal = async (taskId) => {
       //require PBI5
       editFail.value = true
       mytasks.removeTasks(modal.deleteId)
-      router.push("/task")
+      router.go(-1)
     } else {
       task.value = data
       showModal.value = true
