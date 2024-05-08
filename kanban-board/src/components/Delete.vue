@@ -60,7 +60,7 @@ const closeFailDelete = () => {
 
       <span class="itbkk-message"
         >The task
-        <span class="font-semibold text-red-500"
+        <span class="font-semibold text-red-500 break-all ..."
           >"{{ modal.deleteTitle }}"</span
         >
         has been <span class="font-semibold text-red-500">deleted</span></span
