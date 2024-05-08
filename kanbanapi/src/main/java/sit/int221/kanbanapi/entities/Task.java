@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -41,18 +42,12 @@ public class Task {
         if (description != null) {
             description = description.trim();
         }
-        if (description.isEmpty()) {
-            description = null;
-        }
         this.description = description;
     }
 
     public void setAssignees(String assignees) {
         if (assignees != null) {
             assignees = assignees.trim();
-        }
-        if (assignees.isEmpty()) {
-            assignees = null;
         }
         this.assignees = assignees;
     }
