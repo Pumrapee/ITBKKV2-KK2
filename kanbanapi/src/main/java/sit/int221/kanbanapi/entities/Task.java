@@ -41,6 +41,9 @@ public class Task {
     public void setDescription(String description) {
         if (description != null) {
             description = description.trim();
+            if (description.isBlank()) {
+                description = null;
+            }
         }
         this.description = description;
     }
@@ -48,6 +51,9 @@ public class Task {
     public void setAssignees(String assignees) {
         if (assignees != null) {
             assignees = assignees.trim();
+            if (assignees.isBlank()) {
+                assignees = null;
+            }
         }
         this.assignees = assignees;
     }
