@@ -2,6 +2,7 @@ package sit.int221.kanbanapi.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,9 +27,7 @@ public class TaskService {
     }
 
     @Transactional
-    public Task createTask(Task task) {
-            return repository.save(task);
-    }
+    public Task createTask(Task task) { return repository.save(task); }
 
     @Transactional
     public Task removeTask(Integer id) {
@@ -45,5 +44,13 @@ public class TaskService {
         existingTask.setAssignees(task.getAssignees());
         existingTask.setStatus(task.getStatus());
         return repository.save(existingTask);
+    }
+
+    public void transferTaskStatus(Integer id, Integer newId) {
+        try {
+            repository.transferTaskStatus(id, newId);
+        } catch (Exception ex) {
+            throw new ItemNotFoundException("NOT FOUND");
+        }
     }
 }

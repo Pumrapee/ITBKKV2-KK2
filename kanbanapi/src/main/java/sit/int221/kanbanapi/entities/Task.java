@@ -1,11 +1,12 @@
 package sit.int221.kanbanapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import sit.int221.kanbanapi.models.TaskStatus;
+import sit.int221.kanbanapi.repositories.StatusRepository;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -23,17 +24,22 @@ public class Task {
     private String description;
     @Column(name = "taskAssignees")
     private String assignees;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "taskStatus")
-    private TaskStatus status = TaskStatus.NO_STATUS;
+    @ManyToOne
+    @JoinColumn(name = "taskStatus", referencedColumnName = "statusId")
+    private Status status;
     @Column(name = "createdOn", insertable = false, updatable = false)
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private OffsetDateTime createdOn;
     @Column(name = "updatedOn", insertable = false, updatable = false)
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private OffsetDateTime updatedOn;
 
     public void setTitle(String title) {
         if (title != null) {
             title = title.trim();
+            if (title.isBlank()) {
+                title = null;
+            }
         }
         this.title = title;
     }
@@ -56,12 +62,5 @@ public class Task {
             }
         }
         this.assignees = assignees;
-    }
-
-    public void setStatus(TaskStatus status) {
-        if (status == null) {
-            status = TaskStatus.NO_STATUS;
-        }
-        this.status = status;
     }
 }
