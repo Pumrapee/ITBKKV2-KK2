@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.entities.Status;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -25,7 +26,7 @@ public class StatusService {
         try {
             return repository.save(status);
         } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         }
     }
 
