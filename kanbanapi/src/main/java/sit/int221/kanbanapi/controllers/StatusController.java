@@ -1,20 +1,14 @@
 package sit.int221.kanbanapi.controllers;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
-import sit.int221.kanbanapi.dtos.StatusDTO;
-import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.entities.Status;
-import sit.int221.kanbanapi.entities.Task;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/statuses")
@@ -23,14 +17,18 @@ public class StatusController {
     private StatusService statusService;
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private ModelMapper modelMapper;
 
     @GetMapping("")
     public ResponseEntity<Object> getAllStatus() {
         List<Status> statuses = statusService.getStatus();
         return new ResponseEntity<>(statuses, HttpStatus.OK);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getStatusById(@PathVariable Integer id) {
+        Status status = statusService.getStatusById(id);
+        return new ResponseEntity<>(status, HttpStatus.OK);
+    }
+
 
     @PostMapping("")
     public ResponseEntity<Object> addNewStatus(@RequestBody Status status) {

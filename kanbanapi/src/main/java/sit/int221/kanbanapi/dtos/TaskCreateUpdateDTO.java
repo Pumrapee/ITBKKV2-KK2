@@ -2,7 +2,6 @@ package sit.int221.kanbanapi.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
-import sit.int221.kanbanapi.entities.Status;
 
 
 @Getter

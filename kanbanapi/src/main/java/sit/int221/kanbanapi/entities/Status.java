@@ -2,7 +2,6 @@ package sit.int221.kanbanapi.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter

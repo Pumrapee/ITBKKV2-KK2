@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.entities.Status;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -19,6 +18,11 @@ public class StatusService {
 
     public List<Status> getStatus() {
         return repository.findAll();
+    }
+
+    public Status getStatusById(Integer id) {
+        return repository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Status id " + id + " does not exist !!!"));
     }
 
     @Transactional
