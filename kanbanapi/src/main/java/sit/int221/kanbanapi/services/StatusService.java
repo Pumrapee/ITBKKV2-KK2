@@ -27,34 +27,38 @@ public class StatusService {
 
     @Transactional
     public Status createStatus(Status status) {
-        try {
-            return repository.save(status);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
-        }
+        return repository.save(status);
     }
 
     @Transactional
     public Status removeStatus(Integer id) {
         Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        repository.delete(status);
-        return status;
+        if (status.getName() == "No Status") {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Deletion of record with No Status is not allowed.");
+        } else {
+            repository.delete(status);
+            return status;
+        }
     }
 
     @Transactional
     public Status updateStatus(Integer id, Status status) {
         Status existingStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        existingStatus.setName(status.getName());
-        existingStatus.setDescription(status.getDescription());
-        return repository.save(existingStatus);
+        if (existingStatus.getName() == "No Status") {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Updation of record with No Status is not allowed.");
+        } else {
+            existingStatus.setName(status.getName());
+            existingStatus.setDescription(status.getDescription());
+            return repository.save(existingStatus);
+        }
     }
 
     public Status getStatusByName(String statusName) {
         try {
-            if (statusName == null) {
-                return repository.findByName("No Status");
+            if (statusName == null || statusName.isBlank()) {
+                return repository.findByName("No Status").orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
             }
-            return repository.findByName(statusName);
+            return repository.findByName(statusName).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         } catch (Exception ex) {
             throw new ItemNotFoundException("NOT FOUND");
         }
