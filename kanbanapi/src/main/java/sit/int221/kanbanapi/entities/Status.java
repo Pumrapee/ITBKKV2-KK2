@@ -17,6 +17,8 @@ public class Status {
     private String name;
     @Column(name = "statusDescription")
     private String description;
+    @Column(name = "statusColor")
+    private String color = "#FFFFFF";
 
     public void setName(String name) {
         if (name != null) {
@@ -36,5 +38,12 @@ public class Status {
             }
         }
         this.description = description;
+    }
+
+    public void setColor(String color) {
+        if (color == null || color.isBlank() || color.length() != 7) {
+            color = "#FFFFFF";
+        }
+        this.color = color;
     }
 }
