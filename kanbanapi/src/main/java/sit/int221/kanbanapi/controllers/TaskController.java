@@ -71,4 +71,14 @@ public class TaskController {
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);
     }
+
+    @GetMapping("/status/{id}")
+    public ResponseEntity<Object> findTaskStatus(@PathVariable Integer id) {
+        boolean findStatus = taskService.findTaskStatus(id);
+        if (findStatus) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

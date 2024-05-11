@@ -52,4 +52,8 @@ public class TaskService {
             throw new ItemNotFoundException("NOT FOUND");
         }
     }
+
+    public boolean findTaskStatus(Integer id) {
+        return (repository.existsByStatus(id) != 0);
+    }
 }

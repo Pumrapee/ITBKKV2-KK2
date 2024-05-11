@@ -12,4 +12,8 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     @Transactional
     @Query("UPDATE Task t SET t.status.id = :newId WHERE t.status.id = :id")
     void transferTaskStatus(Integer id, Integer newId);
+
+
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.status.id = :statusId")
+    Integer existsByStatus(Integer statusId);
 }
