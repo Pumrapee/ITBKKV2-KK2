@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
+import sit.int221.kanbanapi.dtos.TaskDTO;
 import sit.int221.kanbanapi.entities.Task;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
@@ -40,7 +41,9 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getTaskById(@PathVariable Integer id) {
         Task task = taskService.getTaskById(id);
-        return new ResponseEntity<>(task, HttpStatus.OK);
+        TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
+        taskDTO.setStatus(task.getStatus().getName());
+        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
     }
 
     @PostMapping("")
