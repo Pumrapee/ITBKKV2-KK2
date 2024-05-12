@@ -22,25 +22,25 @@ public class StatusController {
     @GetMapping("")
     public ResponseEntity<Object> getAllStatus() {
         List<Status> statuses = statusService.getStatus();
-        return new ResponseEntity<>(statuses, HttpStatus.OK);
+        return new ResponseEntity(statuses, HttpStatus.OK);
     }
     @GetMapping("/{id}")
     public ResponseEntity<Object> getStatusById(@PathVariable Integer id) {
         Status status = statusService.getStatusById(id);
-        return new ResponseEntity<>(status, HttpStatus.OK);
+        return new ResponseEntity(status, HttpStatus.OK);
     }
 
 
     @PostMapping("")
     public ResponseEntity<Object> addNewStatus(@RequestBody Status status) {
         Status createdStatus = statusService.createStatus(status);
-        return new ResponseEntity<>(createdStatus, HttpStatus.CREATED);
+        return new ResponseEntity(createdStatus, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateStatus(@RequestBody Status status, @PathVariable Integer id) {
         Status updatedStatus = statusService.updateStatus(id, status);
-        return new ResponseEntity<>(updatedStatus, HttpStatus.OK);
+        return new ResponseEntity(updatedStatus, HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
     public void removeTask(@PathVariable Integer id) {

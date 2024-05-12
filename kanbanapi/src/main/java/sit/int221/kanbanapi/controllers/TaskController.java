@@ -35,7 +35,7 @@ public class TaskController {
                     taskDTO.setStatus(task.getStatus().getName());
                     return taskDTO;
                 }).collect(Collectors.toList());
-        return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
+        return new ResponseEntity(taskDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -43,7 +43,7 @@ public class TaskController {
         Task task = taskService.getTaskById(id);
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
         taskDTO.setStatus(task.getStatus().getName());
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        return new ResponseEntity(taskDTO, HttpStatus.OK);
     }
 
     @PostMapping("")
@@ -53,7 +53,7 @@ public class TaskController {
         Task createdTask = taskService.createTask(newTask);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(createdTask, TaskCreateUpdateDTO.class);
         taskDTO.setStatus(createdTask.getStatus().getName());
-        return new ResponseEntity<>(taskDTO, HttpStatus.CREATED);
+        return new ResponseEntity(taskDTO, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -63,22 +63,22 @@ public class TaskController {
         Task updatedTask = taskService.updateTask(id, newTask);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(updatedTask, TaskCreateUpdateDTO.class);
         taskDTO.setStatus(updatedTask.getStatus().getName());
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        return new ResponseEntity(taskDTO, HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> removeTask(@PathVariable Integer id) {
         Task deletedTask = taskService.removeTask(id);
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        return new ResponseEntity(taskDTO, HttpStatus.OK);
     }
 
     @GetMapping("/status/{id}")
     public ResponseEntity<Object> findTaskStatus(@PathVariable Integer id) {
         boolean findStatus = taskService.findTaskStatus(id);
         if (findStatus) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity(HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
     }
 }

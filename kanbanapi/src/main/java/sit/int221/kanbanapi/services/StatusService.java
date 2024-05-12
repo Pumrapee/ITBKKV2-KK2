@@ -49,6 +49,7 @@ public class StatusService {
         } else {
             existingStatus.setName(status.getName());
             existingStatus.setDescription(status.getDescription());
+            existingStatus.setColor(status.getColor());
             return repository.save(existingStatus);
         }
     }
