@@ -144,18 +144,15 @@ const openDeleteModal = (id, title, index) => {
                 </button>
               </router-link>
             </td>
-            <td
-              class="itbkk-assignees pl-20"
-              :style="{ 'font-style': task.assignees ? 'medium' : 'italic' }"
-            >
+            <td class="itbkk-assignees pl-20">
               <p v-if="task.assignees">
                 {{ task.assignees }}
               </p>
-              <p v-else class="text-gray-500 font-medium">Unassigned</p>
+              <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
             </td>
             <td class="itbkk-status pl-20">
               <div
-                class="rounded-md p-2 text-black w-24 text-center"
+                class="rounded-md p-2 text-black w-36 text-center"
                 :style="{
                   'background-color': myStatus.getStatusColor(task.status),
                 }"
@@ -198,5 +195,10 @@ const openDeleteModal = (id, title, index) => {
   /* กำหนดความกว้างสูงสุดของ column title */
   max-width: 600px; /* ปรับค่าตามต้องการ */
   word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
+}
+
+.itbkk-status {
+  max-width: 600px;
+  word-break: break-all;
 }
 </style>

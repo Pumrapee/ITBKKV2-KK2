@@ -52,6 +52,14 @@ const transferTasks = async() =>{
         myTask.addTasks(listTasks)
         emits("closeTransferStatus",newStatus)
     }
+    if(newStatus === 404){
+        myStatus.removeStatus(modal.deleteId)
+        showTransferModal.value =false
+        const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+        myTask.clearTask()
+        myTask.addTasks(listTasks)
+        emits("closeTransferStatus",newStatus)
+    }
 }
 
 

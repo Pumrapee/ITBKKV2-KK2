@@ -142,6 +142,18 @@ const closeTransfereModal = (statusCode) => {
       modalAlert.value.modal = false
     }, "2500")
   }
+
+  if (statusCode === 404) {
+    showDeleteModal.value = false
+    modalAlert.value = {
+      message: "An error has occurred, the status does not exist.",
+      type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "2500")
+  }
 }
 
 const openEditStatus = async (idStatus) => {
@@ -212,14 +224,13 @@ const openEditStatus = async (idStatus) => {
               </p>
             </td>
 
-            <td
-              class="itbkk-assignees pl-20"
-              :style="{ 'font-style': task.description ? 'medium' : 'italic' }"
-            >
+            <td class="itbkk-assignees pl-20">
               <p v-if="task.description">
                 {{ task.description }}
               </p>
-              <p v-else class="text-gray-500 font-medium">Unassigned</p>
+              <p v-else class="text-gray-500 font-medium italic">
+                No Description Provided
+              </p>
             </td>
 
             <!-- ใส่ v-if เพื่อตรวจสอบว่า index เท่ากับ 0 หรือไม่ -->
@@ -277,4 +288,10 @@ const openEditStatus = async (idStatus) => {
   />
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbkk-assignees {
+  /* กำหนดความกว้างสูงสุดของ column title */
+  max-width: 400px; /* ปรับค่าตามต้องการ */
+  word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
+}
+</style>

@@ -130,7 +130,6 @@ const changeTitle = computed(() => {
             type="text"
             id="title"
             v-model="listNewTask.title"
-            placeholder="Enter Title here..."
             class="itbkk-title w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
           />
           <p
@@ -152,8 +151,7 @@ const changeTitle = computed(() => {
             <textarea
               id="description"
               v-model="listNewTask.description"
-              placeholder="Enter description here"
-              class="itbkk-description w-full border border-blue-400 rounded-lg py-3 px-3 h-72 textarea textarea-ghost resize-none"
+              class="itbkk-description w-full border border-blue-400 rounded-lg py-3 px-3 h-72 textarea textarea-ghost"
             ></textarea>
             <p
               class="text-gray-300 text-sm text-end"
@@ -172,7 +170,6 @@ const changeTitle = computed(() => {
               <textarea
                 id="assignees"
                 v-model="listNewTask.assignees"
-                placeholder="Enter assignees here"
                 class="itbkk-assignees w-full border border-blue-400 rounded-lg py-3 px-3 h-42 textarea textarea-ghost"
               ></textarea>
               <p
