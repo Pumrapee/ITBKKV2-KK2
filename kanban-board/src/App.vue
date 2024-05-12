@@ -3,12 +3,21 @@ import { onMounted } from "vue"
 import { RouterView } from "vue-router"
 import { useTaskStore } from "../src/stores/taskStore"
 import { getItems } from "./libs/fetchUtils"
+import { useStatusStore } from "../src/stores/statusStore"
 
 const myTask = useTaskStore()
+const myStatus = useStatusStore()
 onMounted(async () => {
   if (myTask.getTasks().length === 0) {
-    const listTasks = await getItems(import.meta.env.VITE_BASE_URL)
+    const listTasks = await getItems(`${import.meta.env.VITE_BASE_URL}tasks`)
     myTask.addTasks(listTasks)
+  }
+
+  if (myStatus.getStatus().length === 0) {
+    const listStatus = await getItems(
+      `${import.meta.env.VITE_BASE_URL}statuses`
+    )
+    myStatus.addStatus(listStatus)
   }
 })
 </script>

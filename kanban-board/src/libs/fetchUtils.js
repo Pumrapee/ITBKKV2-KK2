@@ -16,11 +16,31 @@ async function getItemById(url, id) {
     if (data.status === 404) return 404
   }
 }
+async function findStatus(url, id) {
+  let data
+  try {
+    data = await fetch(`${url}/${id}`)
+    const item = await data.json()
+    return item
+  } catch (error) {
+    if (data.status === 404) return 404
+  }
+}
 
 async function deleteItemById(url, id) {
   //DELETE Method
   try {
     const res = await fetch(`${url}/${id}`, {
+      method: "DELETE",
+    })
+    return res.status
+  } catch (error) {}
+}
+
+async function deleteItemByIdToNewId(url, oldId, newId) {
+  //DELETE Method
+  try {
+    const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
     })
     return res.status
@@ -65,4 +85,12 @@ async function editItem(url, id, editItem) {
   } catch (error) {}
 }
 
-export { getItems, getItemById, deleteItemById, addItem, editItem }
+export {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteItemByIdToNewId,
+  findStatus,
+}

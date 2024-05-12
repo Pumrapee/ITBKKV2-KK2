@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from "vue-router"
 import HomeView from "@/views/HomeView.vue"
 import AddTask from "@/components/AddTask.vue"
 import EditTask from "@/components/EditTask.vue"
+import StatusView from "@/views/StatusView.vue"
+import AddStatus from "@/components/AddStatus.vue"
+import EditStatus from "@/components/EditStatus.vue"
 
 const router = createRouter({
   history: createWebHistory(),
@@ -22,6 +25,24 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: "/status/manage",
+      name: "tableStatus",
+      component: StatusView,
+      children: [
+        {
+          path: "/status/add",
+          name: "AddStatus",
+          component: AddStatus,
+        },
+        {
+          path: "/status/:id/edit",
+          name: "EditStatus",
+          component: EditStatus,
+        },
+      ],
+    },
+
     {
       path: "/",
       redirect: "/task",
