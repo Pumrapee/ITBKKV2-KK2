@@ -25,7 +25,7 @@ const openAddStatus = () => {
 }
 
 const openDeleteStatus = (id, name) => {
-  // const status = findStatus(`${import.meta.env.VITE_BASE_URL}tasks/status`, id)
+  // const status = findStatus(`${import.meta.env.VITE_API_URL}tasks/status`, id)
   showDeleteModal.value = true
   modal.deleteId = id
   modal.deleteName = name
@@ -147,7 +147,7 @@ const closeTransfereModal = (statusCode) => {
 const openEditStatus = async (idStatus) => {
   if (idStatus) {
     const statusItem = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}statuses`,
       idStatus
     )
     if (statusItem.status === 404) {

@@ -7,7 +7,7 @@ import AddStatus from "@/components/AddStatus.vue"
 import EditStatus from "@/components/EditStatus.vue"
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/task",
@@ -16,6 +16,7 @@ const router = createRouter({
       children: [
         {
           path: "add",
+          name: "add",
           component: AddTask,
         },
         {
@@ -45,12 +46,12 @@ const router = createRouter({
 
     {
       path: "/",
-      redirect: "/task",
+      redirect: {name: "task"},
     },
     {
       path: "/:catchAll(.*)",
       name: "404",
-      redirect: "/task",
+      redirect: {name: "task"},
     },
   ],
 })

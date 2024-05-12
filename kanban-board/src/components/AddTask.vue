@@ -47,7 +47,7 @@ const saveNewTask = async () => {
   }
 
   const { newTask, statusCode } = await addItem(
-    `${import.meta.env.VITE_BASE_URL}tasks`,
+    `${import.meta.env.VITE_API_URL}tasks`,
     listNewTask.value
   )
 

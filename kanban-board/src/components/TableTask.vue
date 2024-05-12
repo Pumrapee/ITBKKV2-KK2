@@ -55,7 +55,7 @@ const closeEditModal = (statusCode) => {
 const openModal = async (taskId) => {
   if (taskId) {
     const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}tasks`,
+      `${import.meta.env.VITE_API_URL}tasks`,
       taskId
     )
     if (data.status === 404) {

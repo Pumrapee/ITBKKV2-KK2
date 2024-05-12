@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --base=/kk2/",
     "preview": "vite preview",
     "backend": "json-server --watch ./data/task.json --port 5000",
     "cypress:open": "cypress open",
