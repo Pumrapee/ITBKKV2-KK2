@@ -10,36 +10,49 @@
       "updatedOn": "2024-04-22T09:00:00Z"
     },
     {
-      "id": "2",
-      "title": "Review Codebase",
-      "description": "Conduct a thorough review of the latest codebase changes.",
-      "assignees": "Alice Johnson",
+      "id": "25e5",
+      "title": "dddd",
+      "description": null,
+      "assignees": null,
+      "status": "NO_STATUS"
+    },
+    {
+      "id": "dc50",
+      "title": "sssss",
+      "description": null,
+      "assignees": null,
+      "status": "NO_STATUS"
+    },
+    {
+      "id": "63b4",
+      "title": "sadsadsa",
+      "description": null,
+      "assignees": null,
+      "status": "NO_STATUS"
+    },
+    {
+      "id": "913c",
+      "title": "dfsfds",
+      "description": null,
+      "assignees": "dfsfdsdfsfdsdfsfdsdfsfdsdfsfdsdfsfds",
+      "status": "NO_STATUS"
+    }
+  ],
+  "status": [
+    {
+      "id": "1",
       "status": "NO_STATUS",
-      "createdOn": "2024-04-22T09:00:00Z",
-      "updatedOn": "2024-04-22T09:00:00Z"
+      "description": "The default status"
+    },
+    {
+      "id": "2",
+      "status": "DOING",
+      "description": "what do you mean"
     },
     {
       "id": "3",
-      "title": "Deploy Application Update",
-      "description": "Deploy the latest application update to production servers.",
-      "assignees": "Charlie Brown",
       "status": "DONE",
-      "createdOn": "2024-04-22T09:00:00Z",
-      "updatedOn": "2024-04-22T09:00:00Z"
-    },
-    {
-      "id": "3a22",
-      "title": "ddd",
-      "description": "ddd",
-      "assignees": "ddd",
-      "status": "TO_DO"
-    },
-    {
-      "id": "5f70",
-      "title": "ssss",
-      "description": "sss",
-      "assignees": "ssss",
-      "status": "NO_STATUS"
+      "description": "what do you mean"
     }
   ]
 }

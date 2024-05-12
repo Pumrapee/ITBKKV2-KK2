@@ -1,17 +1,19 @@
 <script setup>
-import { defineProps, defineEmits, ref, computed, watch } from "vue"
-import { addItem } from "../libs/fetchUtils"
+import { defineProps, defineEmits, ref, computed, onMounted } from "vue"
+import { addItem, getItems } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
+import { useStatusStore } from "@/stores/statusStore"
 
 const { showAdd } = defineProps({
   showAdd: Boolean,
 })
 
-const emits = defineEmits(["closeAddModal"])
+const myStatus = useStatusStore()
 
-const selected = ref("NO_STATUS")
+const emits = defineEmits(["closeAddModal", "closeCancle"])
 
-const addPass = ref(false)
+const selected = ref()
+selected.value = "No Status"
 
 const listNewTask = ref({
   title: "",
@@ -29,7 +31,7 @@ const errorTask = ref({
 const myTask = useTaskStore()
 const saveNewTask = async () => {
   // Trim
-  listNewTask.value.title = listNewTask.value.title.trim()
+  listNewTask.value.title = listNewTask.value.title?.trim()
   listNewTask.value.description = listNewTask.value.description.trim()
   listNewTask.value.assignees = listNewTask.value.assignees.trim()
 
@@ -45,7 +47,7 @@ const saveNewTask = async () => {
   }
 
   const { newTask, statusCode } = await addItem(
-    import.meta.env.VITE_BASE_URL,
+    `${import.meta.env.VITE_BASE_URL}tasks`,
     listNewTask.value
   )
 
@@ -64,21 +66,15 @@ const saveNewTask = async () => {
     listNewTask.value.description = ""
     listNewTask.value.assignees = ""
     listNewTask.value.status = selected.value
-    emits("closeAddModal")
-
-    addPass.value = true
+    emits("closeAddModal", statusCode)
   }
 
   if (statusCode === 400) {
-    alert("There are some fields that exceed the limit.")
-    listNewTask.value.title = ""
-    listNewTask.value.description = ""
-    listNewTask.value.assignees = ""
-    listNewTask.value.status = selected.value
+    emits("closeAddModal", statusCode)
   }
 }
 
-const closeAddModal = () => {
+const cancleModal = () => {
   // ทำการเคลียร์ค่าในฟอร์ม
   listNewTask.value.title = ""
   listNewTask.value.description = ""
@@ -86,7 +82,7 @@ const closeAddModal = () => {
   listNewTask.value.status = selected.value
 
   // ปิด Modal
-  emits("closeAddModal")
+  emits("closeCancle")
 }
 
 const changeTitle = computed(() => {
@@ -119,42 +115,26 @@ const changeTitle = computed(() => {
 </script>
 
 <template>
-  <!-- Alert Pass Add-->
-  <div v-show="addPass" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-success shadow-lg w-2/5">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6 text-white"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span class="text-white">The task has been successfully added!!</span>
-      <button class="text-white" @click="addPass = false">X</button>
-    </div>
-  </div>
-
   <!-- Modal window -->
   <div v-if="showAdd" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div
-        class="grid grid-rows-6 grid-cols-4 gap-2 bg-white p-10 rounded-lg w-2/3"
-      >
-        <div class="flex col-span-4 items-center">
+      <div class="bg-white p-6 rounded-lg w-11/12 max-w-3xl">
+        <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b-2">
+          Add Task
+        </h2>
+        <div class="mb-4">
+          <label for="title" class="block text-blue-400 font-bold mb-2"
+            >Title</label
+          >
           <input
             type="text"
-            className="itbkk-title input pl-2 font-semibold text-3xl text-blue-400 rounded-lg w-11/12"
+            id="title"
             v-model="listNewTask.title"
             placeholder="Enter Title here..."
+            class="itbkk-title w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
           />
           <p
-            class="text-gray-300 p-2 ml-2 whitespace-nowrap text-sm"
+            class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
             :class="{
               'text-red-400':
                 listNewTask.title?.length > 100 ||
@@ -164,77 +144,86 @@ const changeTitle = computed(() => {
             {{ listNewTask.title?.trim()?.length }} / 100
           </p>
         </div>
-
-        <div
-          class="border-2 border-blue-400 row-span-4 col-span-3 rounded-lg flex flex-col justify-between"
-        >
-          <p class="p-5 font-bold text-blue-400">Description</p>
-          <textarea
-            v-model="listNewTask.description"
-            class="itbkk-description textarea textarea-ghost p-4 h-3/5 w-11/12 ml-9"
-          ></textarea>
-          <p
-            class="text-gray-300 p-4 self-end text-sm"
-            :class="{
-              'text-red-400': listNewTask.description?.trim()?.length > 500,
-            }"
-          >
-            {{ listNewTask.description?.trim()?.length }} / 500
-          </p>
+        <div class="flex">
+          <div class="w-2/3 mr-2">
+            <label for="description" class="block text-blue-400 font-bold mb-2"
+              >Description</label
+            >
+            <textarea
+              id="description"
+              v-model="listNewTask.description"
+              placeholder="Enter description here"
+              class="itbkk-description w-full border border-blue-400 rounded-lg py-3 px-3 h-72 textarea textarea-ghost resize-none"
+            ></textarea>
+            <p
+              class="text-gray-300 text-sm text-end"
+              :class="{
+                'text-red-400': listNewTask.description?.trim()?.length > 500,
+              }"
+            >
+              {{ listNewTask.description?.trim()?.length }} / 500
+            </p>
+          </div>
+          <div class="w-1/3">
+            <div>
+              <label for="assignees" class="block text-blue-400 font-bold mb-2"
+                >Assignees</label
+              >
+              <textarea
+                id="assignees"
+                v-model="listNewTask.assignees"
+                placeholder="Enter assignees here"
+                class="itbkk-assignees w-full border border-blue-400 rounded-lg py-3 px-3 h-42 textarea textarea-ghost"
+              ></textarea>
+              <p
+                class="text-gray-300 text-sm text-end"
+                :class="{
+                  'text-red-400': listNewTask.assignees?.trim()?.length > 30,
+                }"
+              >
+                {{ listNewTask.assignees?.trim()?.length }} / 30
+              </p>
+            </div>
+            <div>
+              <label for="status" class="block text-blue-400 font-bold mb-2"
+                >Status</label
+              >
+              <select
+                v-model="listNewTask.status"
+                class="itbkk-status pl-5 border-2 rounded-md h-10 pr-5 w-full"
+              >
+                <option
+                  v-for="(status, index) in myStatus.getStatus()"
+                  :key="index"
+                  :value="status.name"
+                >
+                  {{ status.name }}
+                </option>
+              </select>
+            </div>
+            <div></div>
+          </div>
         </div>
-
-        <div
-          class="border-2 border-blue-400 col-start-4 row-start-2 row-end-4 rounded-lg flex flex-col justify-between"
-        >
-          <p class="p-3 font-bold text-blue-400">Assignees</p>
-          <textarea
-            v-model="listNewTask.assignees"
-            class="itbkk-assignees pl-5 textarea textarea-ghost h-5/5 w-11/12 ml-2"
-          ></textarea>
-          <p
-            class="text-gray-300 p-4 self-end text-sm"
-            :class="{
-              'text-red-400': listNewTask.assignees?.trim()?.length > 30,
-            }"
-          >
-            {{ listNewTask.assignees?.trim()?.length }} / 30
-          </p>
-        </div>
-
-        <div
-          class="border-2 border-blue-400 col-start-4 p-2 row-start-4 row-end-5 rounded-lg"
-        >
-          <label for="status" class="p-2 font-bold text-blue-400">Status</label>
-          <select
-            v-model="listNewTask.status"
-            class="itbkk-status pl-5 border-2 rounded-md h-10 pr-5"
-          >
-            <option value="NO_STATUS">No Status</option>
-            <option value="TO_DO">To Do</option>
-            <option value="DOING">Doing</option>
-            <option value="DONE">Done</option>
-          </select>
-        </div>
-
-        <div class="col-start-1 row-start-6 col-span-2">
-          <p class="text-red-500">
-            {{
-              errorTask.title || errorTask.description || errorTask.assignees
-            }}
-          </p>
-        </div>
-
-        <div class="row-start-6 col-span-4 place-self-end rounded-lg">
-          <button
-            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
-            @click="saveNewTask"
-            :disabled="changeTitle"
-          >
-            Save
-          </button>
-          <button class="itbkk-button-cancel btn" @click="closeAddModal">
-            Close
-          </button>
+        <div class="flex justify-between mt-4">
+          <div>
+            <p class="text-red-500">
+              {{
+                errorTask.title || errorTask.description || errorTask.assignees
+              }}
+            </p>
+          </div>
+          <div>
+            <button
+              class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
+              @click="saveNewTask"
+              :disabled="changeTitle"
+            >
+              Save
+            </button>
+            <button class="itbkk-button-cancle btn" @click="cancleModal">
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>

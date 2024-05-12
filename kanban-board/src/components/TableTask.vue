@@ -3,50 +3,77 @@ import { ref } from "vue"
 import EditTask from "../components/EditTask.vue"
 import { getItemById } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
+import { useStatusStore } from "../stores/statusStore"
 import router from "@/router"
 import { useModalStore } from "../stores/modal"
 import Delete from "../components/Delete.vue"
+import { RouterLink } from "vue-router"
+import AlertComponent from "./Alert.vue"
 
-const showModal = ref(false)
+const showEditModal = ref(false)
 const task = ref()
 const mytasks = useTaskStore()
-
-const editFail = ref(false)
+const myStatus = useStatusStore()
 
 const myTask = useTaskStore()
 
 const modal = useModalStore()
 
-const closeModal = () => {
-  showModal.value = false
+const modalAlert = ref({ message: "", type: "", modal: false })
+myTask.showNavbar = true
+
+const closeCancle = () => {
+  showEditModal.value = false
   router.go(-1)
+}
+const closeEditModal = (statusCode) => {
+  if (statusCode === 200) {
+    showEditModal.value = false
+    router.go(-1)
+    modalAlert.value = {
+      message: "The task has been updated",
+      type: "success",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "2500")
+  }
+
+  if (statusCode === 400) {
+    modalAlert.value = {
+      message: "There are some fields that exceed the limit.",
+      type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "2500")
+  }
 }
 
 const openModal = async (taskId) => {
   if (taskId) {
-    const data = await getItemById(import.meta.env.VITE_BASE_URL, taskId)
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}tasks`,
+      taskId
+    )
     if (data.status === 404) {
-      //require PBI2
-      alert("The requested task does not exist")
-      //require PBI5
-      editFail.value = true
+      modalAlert.value = {
+        message: "An error has occurred, the task does not exist.",
+        type: "error",
+        modal: true,
+      }
+      setTimeout(() => {
+        modalAlert.value.modal = false
+      }, "2500")
       mytasks.removeTasks(modal.deleteId)
       router.go(-1)
     } else {
       task.value = data
-      showModal.value = true
+      showEditModal.value = true
     }
   }
-}
-
-const reformat = (status) => {
-  const statusMap = {
-    NO_STATUS: "No Status",
-    TO_DO: "To Do",
-    DOING: "Doing",
-    DONE: "Done",
-  }
-  return statusMap[status] || status // ถ้าไม่มีค่าใน statusMap ให้ใช้ค่าเดิม
 }
 
 const openDeleteModal = (id, title, index) => {
@@ -58,34 +85,21 @@ const openDeleteModal = (id, title, index) => {
 </script>
 
 <template>
-  <EditTask @closeModal="closeModal" :showModal="showModal" :task="task" />
+  <EditTask
+    @closeModal="closeCancle"
+    @closeEditTask="closeEditModal"
+    :showModal="showEditModal"
+    :task="task"
+  />
   <Delete />
-
-  <!-- Alert fail Edit-->
-  <div v-if="editFail" class="flex justify-center mt-3">
-    <div role="alert" class="alert alert-error w-2/3">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6 text-white"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span class="itbkk-message text-white">The update was unsuccessful</span>
-      <button class="text-white" @click="editFail = false">X</button>
-    </div>
-  </div>
 
   <!-- Task Table -->
   <div class="flex flex-col items-center mt-16 mb-20">
     <div class="flex justify-between w-4/5">
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
+      <RouterLink :to="{ name: 'tableStatus' }">
+        <button class="btn text-l">Manage Status</button>
+      </RouterLink>
     </div>
 
     <div class="overflow-x-auto border border-blue-400 rounded-md w-4/5 mt-4">
@@ -128,19 +142,12 @@ const openDeleteModal = (id, title, index) => {
             </td>
             <td class="itbkk-status pl-20">
               <div
-                class="border rounded-md p-2 text-white w-24"
-                :class="{
-                  'bg-gray-400 font-semibold':
-                    reformat(task.status) === 'No Status',
-                  'bg-yellow-400 font-semibold':
-                    reformat(task.status) === 'To Do',
-                  'bg-purple-400 font-semibold':
-                    reformat(task.status) === 'Doing',
-                  'bg-green-400 font-semibold':
-                    reformat(task.status) === 'Done',
+                class="rounded-md p-2 text-black w-24"
+                :style="{
+                  'background-color': myStatus.getStatusColor(task.status),
                 }"
               >
-                {{ reformat(task.status) }}
+                {{ task.status }}
               </div>
             </td>
             <td>
@@ -164,6 +171,13 @@ const openDeleteModal = (id, title, index) => {
       </table>
     </div>
   </div>
+
+  <!-- Alert -->
+  <AlertComponent
+    :message="modalAlert.message"
+    :type="modalAlert.type"
+    :showAlert="modalAlert.modal"
+  />
 </template>
 
 <style scoped>

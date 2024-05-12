@@ -1,18 +1,61 @@
 <script setup>
-import { ref } from "vue"
+import { onMounted, ref } from "vue"
 import AddTask from "../components/AddTask.vue"
 import router from "@/router"
 import { useModalStore } from "@/stores/modal"
+import { useTaskStore } from "../stores/taskStore"
+import AlertComponent from "./Alert.vue"
 
+const myTask = useTaskStore()
 const showAdd = ref()
+const modalAlert = ref({ message: "", type: "", modal: false })
 
 const showModalAdd = () => {
   showAdd.value = true
 }
 
-const closeAdd = () => {
+const CancelAdd = () => {
   showAdd.value = false
   router.go(-1)
+}
+
+const closeAddModal = (statusCode) => {
+  if (statusCode === 201) {
+    showAdd.value = false
+    router.go(-1)
+    modalAlert.value = {
+      message: "The task has been successfully added",
+      type: "success",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "2500")
+  }
+
+  if (statusCode === 400) {
+    modalAlert.value = {
+      message: "There are some fields that exceed the limit.",
+      type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "2500")
+  }
+
+  if (statusCode === 404) {
+    showAdd.value = false
+    router.go(-1)
+    modalAlert.value = {
+      message: "An error has occurred, the task does not exist.",
+      type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "2500")
+  }
 }
 
 const modal = useModalStore()
@@ -22,6 +65,13 @@ const showbtnDelete = () => {
 </script>
 
 <template>
+  <!-- Alert -->
+  <AlertComponent
+    :message="modalAlert.message"
+    :type="modalAlert.type"
+    :showAlert="modalAlert.modal"
+  />
+  <!-- Navbar -->
   <div class="navbar bg-white border-b border-gray">
     <div class="navbar-start font-custom">
       <a class="pl-5 text-2xl text-blue-400 font-semibold"
@@ -32,6 +82,7 @@ const showbtnDelete = () => {
 
     <div class="navbar-end">
       <button
+        v-if="myTask.showNavbar"
         @click="showbtnDelete"
         class="itbkk-button-action btn border-red-500 bg-red-500 text-white mr-2"
       >
@@ -40,6 +91,7 @@ const showbtnDelete = () => {
 
       <router-link to="/task/add">
         <button
+          v-if="myTask.showNavbar"
           @click="showModalAdd"
           class="itbkk-button-add btn border-blue-400 bg-blue-400 text-white hover:bg-pink-400"
         >
@@ -49,7 +101,12 @@ const showbtnDelete = () => {
     </div>
   </div>
 
-  <AddTask @closeAddModal="closeAdd" :showAdd="showAdd" />
+  <!-- Alert -->
+  <AddTask
+    @closeAddModal="closeAddModal"
+    @closeCancle="CancelAdd"
+    :showAdd="showAdd"
+  />
 </template>
 
 <style scoped>
