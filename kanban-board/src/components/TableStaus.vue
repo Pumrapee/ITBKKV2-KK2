@@ -164,7 +164,6 @@ const openEditStatus = async (idStatus) => {
     } else {
       statusItems.value = statusItem
       showEditModal.value = true
-      console.log(statusItem)
     }
   }
 }
