@@ -74,14 +74,15 @@ const showbtnDelete = () => {
   <!-- Navbar -->
   <div class="navbar bg-white border-b border-gray">
     <div class="navbar-start font-custom">
-    <button class="btn btn-ghost bg-white pl-5 flex items-center text-2xl text-blue-400 font-semibold">
-    <RouterLink :to="{ name: 'task' }"> 
-    <span>IT-BANGMOD KRADAN KANBAN</span>
-    </RouterLink>
-    <img src="/icons/completed-task.png" class="w-6 ml-2" />
-    </button>
+      <button
+        class="btn btn-ghost bg-white pl-5 flex items-center text-2xl text-blue-400 font-semibold"
+      >
+        <RouterLink :to="{ name: 'task' }">
+          <span>IT-BANGMOD KRADAN KANBAN</span>
+        </RouterLink>
+        <img src="/icons/completed-task.png" class="w-6 ml-2" />
+      </button>
     </div>
-
 
     <div class="navbar-end">
       <button
@@ -92,7 +93,7 @@ const showbtnDelete = () => {
         <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
       </button>
 
-      <router-link :to="{ name: 'add' }>
+      <router-link :to="{ name: 'add' }">
         <button
           v-if="myTask.showNavbar"
           @click="showModalAdd"
