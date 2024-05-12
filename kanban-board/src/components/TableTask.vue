@@ -142,7 +142,7 @@ const openDeleteModal = (id, title, index) => {
             </td>
             <td class="itbkk-status pl-20">
               <div
-                class="rounded-md p-2 text-black w-24"
+                class="rounded-md p-2 text-black w-24 text-center"
                 :style="{
                   'background-color': myStatus.getStatusColor(task.status),
                 }"

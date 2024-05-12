@@ -1,8 +1,9 @@
 <script setup>
 import { defineProps, defineEmits, computed } from "vue"
 import { watch, ref } from "vue"
-import { editItem } from "@/libs/fetchUtils"
+import { editItem, getItems } from "@/libs/fetchUtils"
 import { useStatusStore } from "@/stores/statusStore"
+import { useTaskStore } from "@/stores/taskStore"
 
 const props = defineProps({
   showEditStatus: Boolean,
@@ -12,6 +13,7 @@ const emits = defineEmits(["closeEditStatus", "closeCancleStatus"])
 
 const newStatus = ref({})
 const myStatus = useStatusStore()
+const myTask = useTaskStore()
 const errorStatus = ref({
   name: "",
   description: "",
@@ -81,6 +83,10 @@ const editStatusSave = async (status) => {
       editedItem.description,
       editedItem.color
     )
+    const listTasks = await getItems(`${import.meta.env.VITE_BASE_URL}tasks`)
+    myTask.clearTask()
+    myTask.addTasks(listTasks)
+
     emits("closeEditStatus", statusCode)
   }
 
