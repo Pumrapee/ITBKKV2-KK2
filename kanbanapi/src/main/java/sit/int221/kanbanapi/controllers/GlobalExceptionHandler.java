@@ -14,7 +14,7 @@ import sit.int221.kanbanapi.exceptions.ErrorResponse;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 
 @RestControllerAdvice
-@CrossOrigin(origins = "http://ip23kk2.sit.kmutt.ac.th")
+@CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ItemNotFoundException.class)
