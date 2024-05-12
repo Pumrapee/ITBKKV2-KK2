@@ -82,7 +82,9 @@ const showbtnDelete = () => {
         </RouterLink>
         <img src="/icons/completed-task.png" class="w-6 ml-2" />
       </button>
+
     </div>
+
 
     <div class="navbar-end">
       <button
@@ -92,8 +94,8 @@ const showbtnDelete = () => {
       >
         <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
       </button>
-
       <router-link :to="{ name: 'add' }">
+
         <button
           v-if="myTask.showNavbar"
           @click="showModalAdd"
