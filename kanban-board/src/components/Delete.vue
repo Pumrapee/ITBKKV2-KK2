@@ -15,7 +15,7 @@ const { showDelete } = defineProps({
 
 const confirmDelete = async () => {
   const deleteItem = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}tasks`,
+    `${import.meta.env.VITE_API_URL}tasks`,
     modal.deleteId
   )
 

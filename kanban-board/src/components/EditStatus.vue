@@ -67,7 +67,7 @@ const editStatusSave = async (status) => {
   }
 
   const { editedItem, statusCode } = await editItem(
-    `${import.meta.env.VITE_BASE_URL}statuses`,
+    `${import.meta.env.VITE_API_URL}statuses`,
     editStatus.id,
     {
       name: editStatus.name,
@@ -83,7 +83,7 @@ const editStatusSave = async (status) => {
       editedItem.description,
       editedItem.color
     )
-    const listTasks = await getItems(`${import.meta.env.VITE_BASE_URL}tasks`)
+    const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
     myTask.clearTask()
     myTask.addTasks(listTasks)
 

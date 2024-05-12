@@ -9,13 +9,13 @@ const myTask = useTaskStore()
 const myStatus = useStatusStore()
 onMounted(async () => {
   if (myTask.getTasks().length === 0) {
-    const listTasks = await getItems(`${import.meta.env.VITE_BASE_URL}tasks`)
+    const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
     myTask.addTasks(listTasks)
   }
 
   if (myStatus.getStatus().length === 0) {
     const listStatus = await getItems(
-      `${import.meta.env.VITE_BASE_URL}statuses`
+      `${import.meta.env.VITE_API_URL}statuses`
     )
     myStatus.addStatus(listStatus)
   }

@@ -78,7 +78,7 @@ const editSave = async (task) => {
   }
 
   const { editedItem, statusCode } = await editItem(
-    `${import.meta.env.VITE_BASE_URL}tasks`,
+    `${import.meta.env.VITE_API_URL}tasks`,
     editedTask.id,
     {
       title: editedTask.title,

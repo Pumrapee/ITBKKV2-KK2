@@ -24,7 +24,7 @@ const emits = defineEmits(["closeDeleteStatus", "closeCancle" , "closeTransferSt
 
 const confirmDelete = async () => {
     const deleteItem = await deleteItemById(
-      `${import.meta.env.VITE_BASE_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}statuses`,
       modal.deleteId
     )
 
@@ -43,11 +43,11 @@ const confirmDelete = async () => {
 }
 
 const transferTasks = async() =>{
-    const newStatus = await deleteItemByIdToNewId(`${import.meta.env.VITE_BASE_URL}statuses`,modal.deleteId,selectedStatus.value)
+    const newStatus = await deleteItemByIdToNewId(`${import.meta.env.VITE_API_URL}statuses`,modal.deleteId,selectedStatus.value)
     if(newStatus === 200){
         myStatus.removeStatus(modal.deleteId)
         showTransferModal.value =false
-        const listTasks = await getItems(`${import.meta.env.VITE_BASE_URL}tasks`)
+        const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
         myTask.clearTask()
         myTask.addTasks(listTasks)
         emits("closeTransferStatus",newStatus)
