@@ -74,10 +74,12 @@ const showbtnDelete = () => {
   <!-- Navbar -->
   <div class="navbar bg-white border-b border-gray">
     <div class="navbar-start font-custom">
-      <a class="pl-5 text-2xl text-blue-400 font-semibold"
-        >IT-BANGMOD KRADAN KANBAN
-      </a>
-      <img src="/icons/completed-task.png" class="w-6 m-2" />
+    <button class="btn btn-ghost bg-white pl-5 flex items-center text-2xl text-blue-400 font-semibold">
+    <RouterLink :to="{ name: 'task' }"> 
+    <span>IT-BANGMOD KRADAN KANBAN</span>
+    </RouterLink>
+    <img src="/icons/completed-task.png" class="w-6 ml-2" />
+    </button>
     </div>
 
     <div class="navbar-end">
