@@ -6,7 +6,7 @@ import { useModalStore } from "@/stores/modal"
 import AddStatus from "./AddStatus.vue"
 import EditStatus from "./EditStatus.vue"
 import router from "@/router"
-import { getItemById, findStatus } from "../libs/fetchUtils"
+import { getItemById } from "../libs/fetchUtils"
 import AlertComponent from "./Alert.vue"
 import DeleteStatus from "./DeleteStatus.vue"
 
