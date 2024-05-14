@@ -9,11 +9,11 @@ import { deleteItemByIdToNewId } from "@/libs/fetchUtils"
 
 const { showDeleteStatus } = defineProps({
   showDeleteStatus: Boolean,
+  showTransferModal: Boolean,
 })
 const modal = useModalStore()
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
-const showTransferModal = ref(false)
 const selectedStatus = ref()
 
 const filteredStatus = computed(() => {
@@ -32,10 +32,9 @@ const confirmDelete = async () => {
       myStatus.removeStatus(modal.deleteId)
       emits("closeDeleteStatus",deleteItem)
     }
-    if (deleteItem === 400) {       
-        emits("closeCancle")
-         showTransferModal.value =true
-    }
+    // if (deleteItem === 400) {       
+    //     emits("closeCancle")
+    // }
     if (deleteItem === 404) {       
         emits("closeDeleteStatus",deleteItem)
         myStatus.removeStatus(modal.deleteId)
@@ -46,7 +45,6 @@ const transferTasks = async() =>{
     const newStatus = await deleteItemByIdToNewId(`${import.meta.env.VITE_API_URL}statuses`,modal.deleteId,selectedStatus.value)
     if(newStatus === 200){
         myStatus.removeStatus(modal.deleteId)
-        showTransferModal.value =false
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
         myTask.clearTask()
         myTask.addTasks(listTasks)
@@ -54,7 +52,6 @@ const transferTasks = async() =>{
     }
     if(newStatus === 404){
         myStatus.removeStatus(modal.deleteId)
-        showTransferModal.value =false
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
         myTask.clearTask()
         myTask.addTasks(listTasks)
@@ -113,7 +110,7 @@ const transferTasks = async() =>{
 
         <div class="mt-4 flex justify-end">
           <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()">Transfer</button>
-          <button class="itbkk-button-cancel btn" @click="showTransferModal = false">Cancel</button>
+          <button class="itbkk-button-cancel btn" @click="$emit('closeCancle')">Cancel</button>
         </div>
       </div>
     </div>

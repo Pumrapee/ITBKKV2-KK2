@@ -6,7 +6,7 @@ import { useModalStore } from "@/stores/modal"
 import AddStatus from "./AddStatus.vue"
 import EditStatus from "./EditStatus.vue"
 import router from "@/router"
-import { getItemById } from "../libs/fetchUtils"
+import { getItemById, findStatus } from "../libs/fetchUtils"
 import AlertComponent from "./Alert.vue"
 import DeleteStatus from "./DeleteStatus.vue"
 
@@ -16,6 +16,7 @@ const modal = useModalStore()
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
+const showTransferModal = ref(false)
 const statusItems = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 
@@ -24,9 +25,19 @@ const openAddStatus = () => {
   showAddModal.value = true
 }
 
-const openDeleteStatus = (id, name) => {
-  // const status = findStatus(`${import.meta.env.VITE_API_URL}tasks/status`, id)
-  showDeleteModal.value = true
+const openDeleteStatus = async (id, name) => {
+  // 200 tranfer , 404 confrim
+  const Showstatus = await findStatus(
+    `${import.meta.env.VITE_API_URL}tasks/status`,
+    id
+  )
+  console.log(Showstatus)
+  if (Showstatus === 200) {
+    showTransferModal.value = true
+  }
+  if (Showstatus === 404) {
+    showDeleteModal.value = true
+  }
   modal.deleteId = id
   modal.deleteName = name
 }
@@ -34,11 +45,24 @@ const openDeleteStatus = (id, name) => {
 const closeCancle = () => {
   if (showDeleteModal.value === true) {
     showDeleteModal.value = false
-  } else {
+  }
+  if (showTransferModal.value === true) {
+    showTransferModal.value = false
+  }
+
+  if (showAddModal.value === true || showEditModal.value === true) {
     showAddModal.value = false
     showEditModal.value = false
     router.go(-1)
   }
+
+  // if (showTransferModal.value === true) {
+  //   showTransferModal.value = false
+  // } else {
+  //   showAddModal.value = false
+  //   showEditModal.value = false
+  //   router.go(-1)
+  // }
 }
 
 const closeAddModal = (statusCode) => {
@@ -131,7 +155,7 @@ const closeDeleteModal = (statusCode) => {
 
 const closeTransfereModal = (statusCode) => {
   if (statusCode === 200) {
-    showDeleteModal.value = false
+    showTransferModal.value = false
     modalAlert.value = {
       message:
         "The task(s) have been transferred and the status has been deleted",
@@ -144,7 +168,7 @@ const closeTransfereModal = (statusCode) => {
   }
 
   if (statusCode === 404) {
-    showDeleteModal.value = false
+    showTransferModal.value = false
     modalAlert.value = {
       message: "An error has occurred, the status does not exist.",
       type: "error",
@@ -277,6 +301,7 @@ const openEditStatus = async (idStatus) => {
   />
   <DeleteStatus
     :showDeleteStatus="showDeleteModal"
+    :showTransferModal="showTransferModal"
     @closeCancle="closeCancle"
     @closeDeleteStatus="closeDeleteModal"
     @closeTransferStatus="closeTransfereModal"

@@ -41,6 +41,7 @@ const closeEditModal = (statusCode) => {
   }
 
   if (statusCode === 400) {
+    //เป็นกด status ที่ไม่มีจะขึ้นแทน
     modalAlert.value = {
       message: "There are some fields that exceed the limit.",
       type: "error",
