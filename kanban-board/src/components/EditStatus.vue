@@ -35,22 +35,44 @@ const changeStatus = computed(() => {
   const newName = trimAndCheckNull(newStatus.value.name)
   const newDescription = trimAndCheckNull(newStatus.value.description)
 
-  newStatus.value.name?.length > 50
-    ? (errorStatus.value.name = "Name exceeds the limit of 50 characters.")
-    : newStatus.value.name?.length === 0
-    ? (errorStatus.value.name = "Name is require.")
-    : (errorStatus.value.name = "")
+  const isNameLength = newName?.length > 50
+  const isNameEmpthy = newName?.length === 0
+  const isDescriptionLength = newDescription?.length > 200
 
-  newStatus.value.description?.length > 200
-    ? (errorStatus.value.description =
-        "Description exceeds the limit of 200 characters.")
-    : (errorStatus.value.description = "")
+  if (isNameLength) {
+    errorStatus.value.name = "Name exceeds the limit of 50 characters."
+  } else if (isNameEmpthy) {
+    errorStatus.value.name = "Name is require."
+  } else {
+    errorStatus.value.name = ""
+  }
+
+  if (isDescriptionLength) {
+    errorStatus.value.description =
+      "Description exceeds the limit of 200 characters."
+  } else {
+    errorStatus.value.description = ""
+  }
+
+  // newStatus.value.name?.length > 50
+  //   ? (errorStatus.value.name = "Name exceeds the limit of 50 characters.")
+  //   : newStatus.value.name?.length === 0
+  //   ? (errorStatus.value.name = "Name is require.")
+  //   : (errorStatus.value.name = "")
+
+  // newStatus.value.description?.length > 200
+  //   ? (errorStatus.value.description =
+  //       "Description exceeds the limit of 200 characters.")
+  //   : (errorStatus.value.description = "")
 
   return (
+    isNameEmpthy ||
+    isNameLength ||
+    isDescriptionLength ||
+    newName === null ||
     (oldStatus.name === newName &&
       oldStatus.description === newDescription &&
-      oldStatus.color === newStatus.value.color) ||
-    newName === null
+      oldStatus.color === newStatus.value.color)
   )
 })
 
@@ -129,9 +151,19 @@ watch(props, () => {
           class="w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
           placeholder="Enter Name here..."
         />
-        <p class="text-red-400">
-          {{ errorStatus.name }}
-        </p>
+        <div class="flex justify-between items-center">
+          <p class="text-red-400">
+            {{ errorStatus.name }}
+          </p>
+          <p
+            class="text-gray-300 pb-4 text-sm"
+            :class="{
+              'text-red-400': newStatus.name?.trim()?.length > 50,
+            }"
+          >
+            {{ newStatus.name?.trim()?.length || 0 }}/50
+          </p>
+        </div>
       </div>
 
       <div class="mb-6">
@@ -149,9 +181,17 @@ watch(props, () => {
           "
           placeholder="No Description Provided"
         ></textarea>
-        <p class="text-red-400">
-          {{ errorStatus.description }}
-        </p>
+        <div class="flex justify-between items-center mt-2">
+          <p class="text-red-400">{{ errorStatus.description }}</p>
+          <p
+            class="text-gray-300 self-end text-sm pb-3"
+            :class="{
+              'text-red-400': newStatus.description?.trim()?.length > 200,
+            }"
+          >
+            {{ newStatus.description?.trim()?.length || 0 }}/200
+          </p>
+        </div>
       </div>
 
       <div class="mb-6 flex">

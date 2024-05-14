@@ -65,18 +65,37 @@ const cancleStatus = () => {
 }
 
 const changeStatus = computed(() => {
-  newStatus.value.name?.length > 50
-    ? (errorStatus.value.name = "Name exceeds the limit of 50 characters.")
-    : newStatus.value.name?.length === 0
-    ? (errorStatus.value.name = "Name is require.")
-    : (errorStatus.value.name = "")
+  const trimmedNameLength = newStatus.value.name?.length > 50
+  const trimmedNameEmpthy = newStatus.value.name?.length === 0
+  const trimmedDescriptionLength = newStatus.value.description?.length > 200
 
-  newStatus.value.description?.length > 200
-    ? (errorStatus.value.description =
-        "Description exceeds the limit of 200 characters.")
-    : (errorStatus.value.description = "")
+  const nameUnique = myStatus.getStatus().some((listStatus) => {
+    return listStatus.name.toLowerCase() === newStatus.value.name.toLowerCase()
+  })
 
-  return !newStatus.value.name
+  if (trimmedNameLength) {
+    errorStatus.value.name = "Name exceeds the limit of 50 characters."
+  } else if (trimmedNameEmpthy) {
+    errorStatus.value.name = "Name is require."
+  } else if (nameUnique) {
+    errorStatus.value.name = "Name already exists."
+  } else {
+    errorStatus.value.name = ""
+  }
+
+  if (trimmedDescriptionLength) {
+    errorStatus.value.description =
+      "Description exceeds the limit of 200 characters."
+  } else {
+    errorStatus.value.description = ""
+  }
+
+  return (
+    trimmedNameLength ||
+    trimmedDescriptionLength ||
+    trimmedNameEmpthy ||
+    nameUnique
+  )
 })
 </script>
 
@@ -112,7 +131,7 @@ const changeStatus = computed(() => {
               'text-red-400': newStatus.name?.trim()?.length > 50,
             }"
           >
-            {{ newStatus.name?.trim()?.length }}/50
+            {{ newStatus.name?.trim()?.length || 0 }}/50
           </p>
         </div>
       </div>
@@ -134,7 +153,7 @@ const changeStatus = computed(() => {
               'text-red-400': newStatus.description?.trim()?.length > 200,
             }"
           >
-            {{ newStatus.description?.trim()?.length }}/200
+            {{ newStatus.description?.trim()?.length || 0 }}/200
           </p>
         </div>
       </div>

@@ -37,29 +37,45 @@ const changeTask = computed(() => {
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
   const newStatus = newTask.value.status
 
-  newTask.value.title?.length > 100
-    ? (errorTask.value.title = "Title exceeds the limit of 100 characters.")
-    : (errorTask.value.title = "")
+  // ตรวจสอบความยาวของ title, description, และ assignees
+  const isTitleTooLong = newTitle?.length > 100
+  const isTitleTooEmpthy = newTitle?.length === 0
+  const isDescriptionTooLong = newDescription?.length > 500
+  const isAssigneesTooLong = newAssignees?.length > 30
 
-  newTask.value.description?.length > 500
-    ? (errorTask.value.description =
-        "Description exceeds the limit of 500 characters.")
-    : (errorTask.value.description = "")
+  if (isTitleTooLong) {
+    errorTask.value.title = "Title exceeds the limit of 100 characters."
+  } else if (isTitleTooEmpthy) {
+    errorTask.value.title = "Title is required."
+  } else {
+    errorTask.value.title = ""
+  }
 
-  newTask.value.assignees?.length > 30
-    ? (errorTask.value.assignees =
-        "Assignees exceeds the limit of 30 characters.")
-    : (errorTask.value.assignees = "")
+  if (isDescriptionTooLong) {
+    errorTask.value.description =
+      "Description exceeds the limit of 500 characters."
+  } else {
+    errorTask.value.description = ""
+  }
 
+  if (isAssigneesTooLong) {
+    errorTask.value.assignees = "Assignees exceeds the limit of 30 characters."
+  } else {
+    errorTask.value.assignees = ""
+  }
+
+  // ตรวจสอบเงื่อนไขทั้งหมดรวมถึงการเปลี่ยนแปลงของข้อมูล
   return (
+    isTitleTooLong ||
+    isDescriptionTooLong ||
+    isAssigneesTooLong ||
+    newTitle === null ||
     (oldTask.title === newTitle &&
       oldTask.description === newDescription &&
       oldTask.assignees === newAssignees &&
-      oldTask.status === newStatus) ||
-    newTitle === null
+      oldTask.status === newStatus)
   )
 })
-
 const myTask = useTaskStore()
 const editSave = async (task) => {
   const editedTask = { ...task }
@@ -136,6 +152,20 @@ watch(props, () => {
             placeholder="Enter Title here..."
             class="itbkk-title w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
           />
+          <div class="flex justify-between">
+            <p class="text-red-400">
+              {{ errorTask.title }}
+            </p>
+            <p
+              class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
+              :class="{
+                'text-red-400':
+                  newTask.title?.length > 100 || newTask.title?.length === 0,
+              }"
+            >
+              {{ newTask.title?.trim()?.length || 0 }} / 100
+            </p>
+          </div>
         </div>
         <div class="flex">
           <div class="w-2/3 mr-2">
@@ -153,6 +183,19 @@ watch(props, () => {
               "
               placeholder="No Description Provided"
             ></textarea>
+            <div class="flex justify-between">
+              <p class="text-red-400">
+                {{ errorTask.description }}
+              </p>
+              <p
+                class="text-gray-300 text-sm text-end"
+                :class="{
+                  'text-red-400': newTask.description?.trim()?.length > 500,
+                }"
+              >
+                {{ newTask.description?.trim()?.length || 0 }} / 500
+              </p>
+            </div>
           </div>
           <div class="w-1/3">
             <div>
@@ -170,6 +213,19 @@ watch(props, () => {
                 "
                 placeholder="Unassigned"
               ></textarea>
+              <div class="flex justify-between">
+                <p class="text-red-400 text-sm w-40">
+                  {{ errorTask.assignees }}
+                </p>
+                <p
+                  class="text-gray-300 text-sm text-end"
+                  :class="{
+                    'text-red-400': newTask.assignees?.trim()?.length > 30,
+                  }"
+                >
+                  {{ newTask.assignees?.trim()?.length || 0 }} / 30
+                </p>
+              </div>
             </div>
             <div>
               <label for="status" class="block text-blue-400 font-bold mb-2"
@@ -210,14 +266,7 @@ watch(props, () => {
             </div>
           </div>
         </div>
-        <div class="flex justify-between mt-4">
-          <div>
-            <p class="text-red-500">
-              {{
-                errorTask.title || errorTask.description || errorTask.assignees
-              }}
-            </p>
-          </div>
+        <div class="flex justify-end mt-4">
           <div>
             <button
               class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
