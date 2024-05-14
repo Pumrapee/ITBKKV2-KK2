@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.context.request.WebRequest;
+import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ErrorResponse;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 
@@ -23,7 +24,7 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler({DataAccessException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({DataAccessException.class, HttpMessageNotReadableException.class, BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleJpaException
             (Exception exception, WebRequest request) {
