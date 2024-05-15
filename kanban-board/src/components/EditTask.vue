@@ -77,6 +77,7 @@ const changeTask = computed(() => {
   )
 })
 const myTask = useTaskStore()
+console.log(myTask.getTasks())
 const editSave = async (task) => {
   const editedTask = { ...task }
   editedTask.title = editedTask.title?.trim()

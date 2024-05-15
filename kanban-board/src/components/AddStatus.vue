@@ -110,7 +110,7 @@ const changeStatus = computed(() => {
         Add Status
       </h2>
 
-      <div class="mb-4">
+      <div class="itbkk-modal-status mb-4">
         <label for="name" class="block text-blue-400 font-bold mb-2"
           >Name</label
         >
@@ -119,7 +119,7 @@ const changeStatus = computed(() => {
           v-model="newStatus.name"
           max="50"
           id="name"
-          class="w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
+          class="itbkk-status-name w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
         />
         <div class="flex justify-between items-center">
           <p class="text-red-400">
@@ -143,7 +143,7 @@ const changeStatus = computed(() => {
         <textarea
           id="description"
           v-model="newStatus.description"
-          class="w-full border border-blue-400 rounded-lg py-3 px-3 h-44 textarea textarea-ghost"
+          class="itbkk-status-description w-full border border-blue-400 rounded-lg py-3 px-3 h-44 textarea textarea-ghost"
         ></textarea>
         <div class="flex justify-between items-center">
           <p class="text-red-400">{{ errorStatus.description }}</p>
@@ -168,14 +168,14 @@ const changeStatus = computed(() => {
       <div class="flex justify-end">
         <button
           @click="saveStatus"
-          class="btn bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
+          class="itbkk-button-confirm btn bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
           :disabled="changeStatus"
         >
           Save
         </button>
         <button
           @click="cancleStatus"
-          class="btn bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
+          class="itbkk-button-cancle btn bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
         >
           Cancel
         </button>

@@ -2,7 +2,6 @@
 import { ref } from "vue"
 import { useTaskStore } from "../stores/taskStore"
 import { useStatusStore } from "../stores/statusStore"
-import { useModalStore } from "@/stores/modal"
 import AddStatus from "./AddStatus.vue"
 import EditStatus from "./EditStatus.vue"
 import router from "@/router"
@@ -12,15 +11,17 @@ import DeleteStatus from "./DeleteStatus.vue"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
-const modal = useModalStore()
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const showTransferModal = ref(false)
 const statusItems = ref()
+const statusDetail = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 
+//ไม่โชว์ add delete บน navbar
 myTask.showNavbar = false
+
 const openAddStatus = () => {
   showAddModal.value = true
 }
@@ -38,8 +39,10 @@ const openDeleteStatus = async (id, name) => {
   if (Showstatus === 404) {
     showDeleteModal.value = true
   }
-  modal.deleteId = id
-  modal.deleteName = name
+  statusDetail.value = {
+    id: id,
+    name: name,
+  }
 }
 
 const closeCancle = () => {
@@ -55,14 +58,6 @@ const closeCancle = () => {
     showEditModal.value = false
     router.go(-1)
   }
-
-  // if (showTransferModal.value === true) {
-  //   showTransferModal.value = false
-  // } else {
-  //   showAddModal.value = false
-  //   showEditModal.value = false
-  //   router.go(-1)
-  // }
 }
 
 const closeAddModal = (statusCode) => {
@@ -105,8 +100,8 @@ const closeEditModal = (statusCode) => {
 
   if (statusCode === 400) {
     modalAlert.value = {
-      message: "There are some fields that exceed the limit.",
-      type: "warning",
+      message: "An error has occurred, the status does not exist.",
+      type: "error",
       modal: true,
     }
     setTimeout(() => {
@@ -211,12 +206,16 @@ const openEditStatus = async (idStatus) => {
     <div class="flex justify-between w-4/5">
       <div class="flex text-sm breadcrumbs text-blue-400">
         <ul>
-          <li><RouterLink :to="{ name: 'task' }"> Home</RouterLink></li>
+          <li class="itbkk-button-home">
+            <RouterLink :to="{ name: 'task' }"> Home</RouterLink>
+          </li>
           <li>Task Status</li>
         </ul>
       </div>
       <RouterLink :to="{ name: 'AddStatus' }">
-        <button @click="openAddStatus" class="btn">Add status</button>
+        <button @click="openAddStatus" class="itbkk-button-home btn">
+          Add status
+        </button>
       </RouterLink>
     </div>
 
@@ -239,7 +238,7 @@ const openEditStatus = async (idStatus) => {
           >
             <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
 
-            <td class="pl-20 w-1/3">
+            <td class="itbkk-status-name pl-20 w-1/3">
               <p
                 class="h-auto max-w-40 font-medium rounded-md text-center p-3 break-all"
                 :style="{ 'background-color': task.color }"
@@ -248,7 +247,7 @@ const openEditStatus = async (idStatus) => {
               </p>
             </td>
 
-            <td class="itbkk-assignees pl-20">
+            <td class="itbkk-status-description pl-20">
               <p v-if="task.description">
                 {{ task.description }}
               </p>
@@ -265,7 +264,7 @@ const openEditStatus = async (idStatus) => {
                 >
                   <button
                     @click="openEditStatus(task.id)"
-                    class="btn btn-ghost h-auto bg-yellow-100"
+                    class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
                   >
                     <img src="/icons/pen.png" class="w-4" />
                   </button>
@@ -302,6 +301,7 @@ const openEditStatus = async (idStatus) => {
   <DeleteStatus
     :showDeleteStatus="showDeleteModal"
     :showTransferModal="showTransferModal"
+    :deatailStatus="statusDetail"
     @closeCancle="closeCancle"
     @closeDeleteStatus="closeDeleteModal"
     @closeTransferStatus="closeTransfereModal"

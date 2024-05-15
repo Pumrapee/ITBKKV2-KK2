@@ -54,17 +54,6 @@ const changeStatus = computed(() => {
     errorStatus.value.description = ""
   }
 
-  // newStatus.value.name?.length > 50
-  //   ? (errorStatus.value.name = "Name exceeds the limit of 50 characters.")
-  //   : newStatus.value.name?.length === 0
-  //   ? (errorStatus.value.name = "Name is require.")
-  //   : (errorStatus.value.name = "")
-
-  // newStatus.value.description?.length > 200
-  //   ? (errorStatus.value.description =
-  //       "Description exceeds the limit of 200 characters.")
-  //   : (errorStatus.value.description = "")
-
   return (
     isNameEmpthy ||
     isNameLength ||
@@ -140,7 +129,7 @@ watch(props, () => {
         Edit Status
       </h2>
 
-      <div class="mb-4">
+      <div class="itbkk-modal-status mb-4">
         <label for="name" class="block text-blue-400 font-bold mb-2"
           >Name</label
         >
@@ -148,7 +137,7 @@ watch(props, () => {
           type="text"
           id="name"
           v-model="newStatus.name"
-          class="w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
+          class="itbkk-status-name w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
           placeholder="Enter Name here..."
         />
         <div class="flex justify-between items-center">
@@ -173,7 +162,7 @@ watch(props, () => {
         <textarea
           id="description"
           v-model="newStatus.description"
-          class="w-full border border-blue-400 rounded-lg py-3 px-3 h-44 textarea textarea-ghost"
+          class="itbkk-status-description w-full border border-blue-400 rounded-lg py-3 px-3 h-44 textarea textarea-ghost"
           :class="
             newStatus.description
               ? 'bg-white text-black'
@@ -204,14 +193,14 @@ watch(props, () => {
       <div class="flex justify-end">
         <button
           @click="editStatusSave(newStatus)"
-          class="bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
+          class="itbkk-button-confirm bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
           :disabled="changeStatus"
         >
           Save
         </button>
         <button
           @click="$emit('closeCancleStatus')"
-          class="bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
+          class="itbkk-button-cancle bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
         >
           Cancel
         </button>
