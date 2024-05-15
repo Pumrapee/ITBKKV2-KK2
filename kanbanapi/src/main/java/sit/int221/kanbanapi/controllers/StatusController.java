@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,21 +26,21 @@ public class StatusController {
         List<Status> statuses = statusService.getStatus();
         return new ResponseEntity(statuses, HttpStatus.OK);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<Object> getStatusById(@PathVariable Integer id) {
         Status status = statusService.getStatusById(id);
         return new ResponseEntity(status, HttpStatus.OK);
     }
 
-
     @PostMapping("")
-    public ResponseEntity<Object> addNewStatus(@RequestBody Status status) {
+    public ResponseEntity<Object> addNewStatus(@Valid @RequestBody Status status) {
         Status createdStatus = statusService.createStatus(status);
         return new ResponseEntity(createdStatus, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateStatus(@RequestBody Status status, @PathVariable Integer id) {
+    public ResponseEntity<Object> updateStatus(@Valid @RequestBody Status status, @PathVariable Integer id) {
         Status updatedStatus = statusService.updateStatus(id, status);
         return new ResponseEntity(updatedStatus, HttpStatus.OK);
     }

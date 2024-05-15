@@ -1,9 +1,11 @@
 package sit.int221.kanbanapi.controllers;
 
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
@@ -27,8 +29,8 @@ public class TaskController {
     private ModelMapper modelMapper;
 
     @GetMapping("")
-    public ResponseEntity<Object> getAllTask() {
-        List<Task> tasks = taskService.getTask();
+    public ResponseEntity<Object> getAllTaskFilteredSorted(@RequestParam(required = false) List<String> filterStatuses, @RequestParam(required = false, defaultValue = "id") String sortBy) {
+        List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy);
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
                 .map(task -> {
                     SimpleTaskDTO taskDTO = modelMapper.map(task, SimpleTaskDTO.class);
@@ -47,14 +49,9 @@ public class TaskController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> addNewTask(@RequestBody TaskCreateUpdateDTO task) {
+    public ResponseEntity<Object> addNewTask(@Valid @RequestBody TaskCreateUpdateDTO task) {
         Task newTask = modelMapper.map(task, Task.class);
-        try {
-            Integer statusId = Integer.parseInt(task.getStatus());
-            newTask.setStatus(statusService.getStatusById(statusId));
-        } catch (NumberFormatException e) {
-            newTask.setStatus(statusService.getStatusByName(task.getStatus()));
-        }
+        newTask.setStatus(statusService.getStatusByName(task.getStatus()));
         Task createdTask = taskService.createTask(newTask);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(createdTask, TaskCreateUpdateDTO.class);
         taskDTO.setStatus(createdTask.getStatus().getName());
@@ -62,7 +59,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateTask(@RequestBody TaskCreateUpdateDTO task, @PathVariable Integer id) {
+    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskCreateUpdateDTO task, @PathVariable Integer id) {
         Task newTask = modelMapper.map(task, Task.class);
         try {
             Integer statusId = Integer.parseInt(task.getStatus());

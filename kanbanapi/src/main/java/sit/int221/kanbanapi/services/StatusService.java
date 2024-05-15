@@ -56,9 +56,14 @@ public class StatusService {
     }
 
     public Status getStatusByName(String statusName) {
-        if (statusName == null || statusName.isBlank()) {
-            return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+        try {
+            Integer statusId = Integer.parseInt(statusName);
+            return repository.findById(statusId).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+        } catch (NumberFormatException e) {
+            if (statusName == null || statusName.isBlank()) {
+                return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+            }
+            return repository.findByName(statusName).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
         }
-        return repository.findByName(statusName).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
     }
 }
