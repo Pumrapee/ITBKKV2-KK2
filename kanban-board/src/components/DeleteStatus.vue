@@ -1,23 +1,22 @@
 <script setup>
 import { defineProps, defineEmits, ref , computed } from "vue"
-import { useModalStore } from "@/stores/modal"
 import { deleteItemById , getItems } from "@/libs/fetchUtils"
 import { useStatusStore } from "../stores/statusStore"
 import { useTaskStore } from "../stores/taskStore"
 import { deleteItemByIdToNewId } from "@/libs/fetchUtils"
 
 
-const { showDeleteStatus } = defineProps({
+const props = defineProps({
   showDeleteStatus: Boolean,
+  showTransferModal: Boolean,
+  deatailStatus: Object
 })
-const modal = useModalStore()
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
-const showTransferModal = ref(false)
 const selectedStatus = ref()
 
 const filteredStatus = computed(() => {
-  return myStatus.getStatus().filter(status => status.id !== modal.deleteId)
+  return myStatus.getStatus().filter(status => status.id !== props.deatailStatus.id)
 })
 
 const emits = defineEmits(["closeDeleteStatus", "closeCancle" , "closeTransferStatus"])
@@ -25,36 +24,33 @@ const emits = defineEmits(["closeDeleteStatus", "closeCancle" , "closeTransferSt
 const confirmDelete = async () => {
     const deleteItem = await deleteItemById(
       `${import.meta.env.VITE_API_URL}statuses`,
-      modal.deleteId
+      props.deatailStatus.id
     )
 
     if (deleteItem === 200) {
-      myStatus.removeStatus(modal.deleteId)
+      myStatus.removeStatus(props.deatailStatus.id)
       emits("closeDeleteStatus",deleteItem)
     }
-    if (deleteItem === 400) {       
-        emits("closeCancle")
-         showTransferModal.value =true
-    }
-    if (deleteItem === 404) {       
+
+    if (deleteItem === 404) {     
+      myStatus.removeStatus(props.deatailStatus.id)  
         emits("closeDeleteStatus",deleteItem)
-        myStatus.removeStatus(modal.deleteId)
+
     }
 }
 
 const transferTasks = async() =>{
-    const newStatus = await deleteItemByIdToNewId(`${import.meta.env.VITE_API_URL}statuses`,modal.deleteId,selectedStatus.value)
+    const newStatus = await deleteItemByIdToNewId(`${import.meta.env.VITE_API_URL}statuses`,props.deatailStatus.id,selectedStatus.value)
+    
     if(newStatus === 200){
-        myStatus.removeStatus(modal.deleteId)
-        showTransferModal.value =false
+        myStatus.removeStatus(props.deatailStatus.id)
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
         myTask.clearTask()
         myTask.addTasks(listTasks)
         emits("closeTransferStatus",newStatus)
     }
     if(newStatus === 404){
-        myStatus.removeStatus(modal.deleteId)
-        showTransferModal.value =false
+        myStatus.removeStatus(filteredStatus.id)
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
         myTask.clearTask()
         myTask.addTasks(listTasks)
@@ -74,7 +70,7 @@ const transferTasks = async() =>{
         <div class="itbkk-message text-lg font-semibold text-center">
           <p style="word-wrap: break-word">
             Do you want to delete the <br />
-            <span class="text-blue-400">{{ modal.deleteName }}</span>
+            <span class="text-blue-400">{{ deatailStatus.name }}</span>
             <span> status?</span>
           </p>
         </div>
@@ -100,20 +96,20 @@ const transferTasks = async() =>{
       <div class="bg-white p-10 rounded-lg w-2/5">
         <div class="itbkk-message text-lg font-semibold text-center">
           <p style="word-wrap: break-word">
-            There are tasks associated with the "{{ modal.deleteName }}" status.</br> Do you want to transfer them?
+            There are tasks associated with the "{{ deatailStatus.name }}" status.</br> Do you want to transfer them?
           </p>
         </div>
 
         <div class="mt-4">
           <label for="transferTo" class="block text-sm font-medium text-gray-700">Transfer to:</label>
-          <select v-model="selectedStatus" id="transferTo" name="transferTo" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <select v-model="selectedStatus" id="transferTo" name="transferTo" class="itbkk-status mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <option v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }}</option>
           </select>
         </div>
 
         <div class="mt-4 flex justify-end">
           <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()">Transfer</button>
-          <button class="itbkk-button-cancel btn" @click="showTransferModal = false">Cancel</button>
+          <button class="itbkk-button-cancel btn" @click="$emit('closeCancle')">Cancel</button>
         </div>
       </div>
     </div>

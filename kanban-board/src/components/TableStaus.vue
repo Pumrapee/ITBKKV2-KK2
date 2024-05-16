@@ -2,39 +2,57 @@
 import { ref } from "vue"
 import { useTaskStore } from "../stores/taskStore"
 import { useStatusStore } from "../stores/statusStore"
-import { useModalStore } from "@/stores/modal"
 import AddStatus from "./AddStatus.vue"
 import EditStatus from "./EditStatus.vue"
 import router from "@/router"
-import { getItemById } from "../libs/fetchUtils"
+import { getItemById, findStatus } from "../libs/fetchUtils"
 import AlertComponent from "./Alert.vue"
 import DeleteStatus from "./DeleteStatus.vue"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
-const modal = useModalStore()
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
+const showTransferModal = ref(false)
 const statusItems = ref()
+const statusDetail = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 
+//ไม่โชว์ add delete บน navbar
 myTask.showNavbar = false
+
 const openAddStatus = () => {
   showAddModal.value = true
 }
 
-const openDeleteStatus = (id, name) => {
-  // const status = findStatus(`${import.meta.env.VITE_API_URL}tasks/status`, id)
-  showDeleteModal.value = true
-  modal.deleteId = id
-  modal.deleteName = name
+const openDeleteStatus = async (id, name) => {
+  // 200 tranfer , 404 confrim
+  const Showstatus = await findStatus(
+    `${import.meta.env.VITE_API_URL}tasks/status`,
+    id
+  )
+  if (Showstatus === 200) {
+    showTransferModal.value = true
+  }
+  if (Showstatus === 404) {
+    showDeleteModal.value = true
+  }
+  statusDetail.value = {
+    id: id,
+    name: name,
+  }
 }
 
 const closeCancle = () => {
   if (showDeleteModal.value === true) {
     showDeleteModal.value = false
-  } else {
+  }
+  if (showTransferModal.value === true) {
+    showTransferModal.value = false
+  }
+
+  if (showAddModal.value === true || showEditModal.value === true) {
     showAddModal.value = false
     showEditModal.value = false
     router.go(-1)
@@ -52,7 +70,7 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   } else {
     modalAlert.value = {
       message: "An error has occurred, the status could not be added.",
@@ -61,7 +79,7 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -76,18 +94,7 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
-  }
-
-  if (statusCode === 400) {
-    modalAlert.value = {
-      message: "There are some fields that exceed the limit.",
-      type: "warning",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -100,7 +107,7 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -114,7 +121,7 @@ const closeDeleteModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
   if (statusCode === 404) {
     showDeleteModal.value = false
@@ -125,13 +132,13 @@ const closeDeleteModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
 const closeTransfereModal = (statusCode) => {
   if (statusCode === 200) {
-    showDeleteModal.value = false
+    showTransferModal.value = false
     modalAlert.value = {
       message:
         "The task(s) have been transferred and the status has been deleted",
@@ -140,11 +147,11 @@ const closeTransfereModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
-    showDeleteModal.value = false
+    showTransferModal.value = false
     modalAlert.value = {
       message: "An error has occurred, the status does not exist.",
       type: "error",
@@ -152,7 +159,7 @@ const closeTransfereModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -170,7 +177,7 @@ const openEditStatus = async (idStatus) => {
       }
       setTimeout(() => {
         modalAlert.value.modal = false
-      }, "2500")
+      }, "4000")
       myStatus.removeStatus(idStatus)
       router.go(-1)
     } else {
@@ -187,12 +194,16 @@ const openEditStatus = async (idStatus) => {
     <div class="flex justify-between w-4/5">
       <div class="flex text-sm breadcrumbs text-blue-400">
         <ul>
-          <li><RouterLink :to="{ name: 'task' }"> Home</RouterLink></li>
+          <li class="itbkk-button-home">
+            <RouterLink :to="{ name: 'task' }"> Home</RouterLink>
+          </li>
           <li>Task Status</li>
         </ul>
       </div>
       <RouterLink :to="{ name: 'AddStatus' }">
-        <button @click="openAddStatus" class="btn">Add status</button>
+        <button @click="openAddStatus" class="itbkk-button-home btn">
+          Add status
+        </button>
       </RouterLink>
     </div>
 
@@ -215,7 +226,7 @@ const openEditStatus = async (idStatus) => {
           >
             <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
 
-            <td class="pl-20 w-1/3">
+            <td class="itbkk-status-name pl-20 w-1/3">
               <p
                 class="h-auto max-w-40 font-medium rounded-md text-center p-3 break-all"
                 :style="{ 'background-color': task.color }"
@@ -224,7 +235,7 @@ const openEditStatus = async (idStatus) => {
               </p>
             </td>
 
-            <td class="itbkk-assignees pl-20">
+            <td class="itbkk-status-description pl-20">
               <p v-if="task.description">
                 {{ task.description }}
               </p>
@@ -241,7 +252,7 @@ const openEditStatus = async (idStatus) => {
                 >
                   <button
                     @click="openEditStatus(task.id)"
-                    class="btn btn-ghost h-auto bg-yellow-100"
+                    class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
                   >
                     <img src="/icons/pen.png" class="w-4" />
                   </button>
@@ -277,6 +288,8 @@ const openEditStatus = async (idStatus) => {
   />
   <DeleteStatus
     :showDeleteStatus="showDeleteModal"
+    :showTransferModal="showTransferModal"
+    :deatailStatus="statusDetail"
     @closeCancle="closeCancle"
     @closeDeleteStatus="closeDeleteModal"
     @closeTransferStatus="closeTransfereModal"

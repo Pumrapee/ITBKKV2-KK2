@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, ref } from "vue"
+import { ref } from "vue"
 import AddTask from "../components/AddTask.vue"
 import router from "@/router"
-import { useModalStore } from "@/stores/modal"
 import { useTaskStore } from "../stores/taskStore"
 import AlertComponent from "./Alert.vue"
+import { defineEmits } from "vue"
 
+const emits = defineEmits(["showbtn"])
 const myTask = useTaskStore()
 const showAdd = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
@@ -30,18 +31,20 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 400) {
+    showAdd.value = false
+    router.go(-1)
     modalAlert.value = {
-      message: "There are some fields that exceed the limit.",
+      message: "An error has occurred, the task does not exist.",
       type: "error",
       modal: true,
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -54,13 +57,12 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
-const modal = useModalStore()
 const showbtnDelete = () => {
-  modal.showModal = !modal.showModal
+  emits("showbtn")
 }
 </script>
 
@@ -82,9 +84,7 @@ const showbtnDelete = () => {
         </RouterLink>
         <img src="/icons/completed-task.png" class="w-6 ml-2" />
       </button>
-
     </div>
-
 
     <div class="navbar-end">
       <button
@@ -95,7 +95,6 @@ const showbtnDelete = () => {
         <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
       </button>
       <router-link :to="{ name: 'add' }">
-
         <button
           v-if="myTask.showNavbar"
           @click="showModalAdd"
@@ -107,7 +106,6 @@ const showbtnDelete = () => {
     </div>
   </div>
 
-  <!-- Alert -->
   <AddTask
     @closeAddModal="closeAddModal"
     @closeCancle="CancelAdd"

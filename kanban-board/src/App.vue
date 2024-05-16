@@ -14,9 +14,7 @@ onMounted(async () => {
   }
 
   if (myStatus.getStatus().length === 0) {
-    const listStatus = await getItems(
-      `${import.meta.env.VITE_API_URL}statuses`
-    )
+    const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
     myStatus.addStatus(listStatus)
   }
 })

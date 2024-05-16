@@ -65,18 +65,37 @@ const cancleStatus = () => {
 }
 
 const changeStatus = computed(() => {
-  newStatus.value.name?.length > 50
-    ? (errorStatus.value.name = "Name exceeds the limit of 50 characters.")
-    : newStatus.value.name?.length === 0
-    ? (errorStatus.value.name = "Name is require.")
-    : (errorStatus.value.name = "")
+  const trimmedNameLength = newStatus.value.name?.length > 50
+  const trimmedNameEmpthy = newStatus.value.name?.length === 0
+  const trimmedDescriptionLength = newStatus.value.description?.length > 200
 
-  newStatus.value.description?.length > 200
-    ? (errorStatus.value.description =
-        "Description exceeds the limit of 200 characters.")
-    : (errorStatus.value.description = "")
+  const nameUnique = myStatus.getStatus().some((listStatus) => {
+    return listStatus.name.toLowerCase() === newStatus.value.name.toLowerCase()
+  })
 
-  return !newStatus.value.name
+  if (trimmedNameLength) {
+    errorStatus.value.name = "Name exceeds the limit of 50 characters."
+  } else if (trimmedNameEmpthy) {
+    errorStatus.value.name = "Name is require."
+  } else if (nameUnique) {
+    errorStatus.value.name = "Name already exists."
+  } else {
+    errorStatus.value.name = ""
+  }
+
+  if (trimmedDescriptionLength) {
+    errorStatus.value.description =
+      "Description exceeds the limit of 200 characters."
+  } else {
+    errorStatus.value.description = ""
+  }
+
+  return (
+    trimmedNameLength ||
+    trimmedDescriptionLength ||
+    trimmedNameEmpthy ||
+    nameUnique
+  )
 })
 </script>
 
@@ -91,7 +110,7 @@ const changeStatus = computed(() => {
         Add Status
       </h2>
 
-      <div class="mb-4">
+      <div class="itbkk-modal-status mb-4">
         <label for="name" class="block text-blue-400 font-bold mb-2"
           >Name</label
         >
@@ -100,7 +119,7 @@ const changeStatus = computed(() => {
           v-model="newStatus.name"
           max="50"
           id="name"
-          class="w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
+          class="itbkk-status-name w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
         />
         <div class="flex justify-between items-center">
           <p class="text-red-400">
@@ -112,7 +131,7 @@ const changeStatus = computed(() => {
               'text-red-400': newStatus.name?.trim()?.length > 50,
             }"
           >
-            {{ newStatus.name?.trim()?.length }}/50
+            {{ newStatus.name?.trim()?.length || 0 }}/50
           </p>
         </div>
       </div>
@@ -124,7 +143,7 @@ const changeStatus = computed(() => {
         <textarea
           id="description"
           v-model="newStatus.description"
-          class="w-full border border-blue-400 rounded-lg py-3 px-3 h-44 textarea textarea-ghost"
+          class="itbkk-status-description w-full border border-blue-400 rounded-lg py-3 px-3 h-44 textarea textarea-ghost"
         ></textarea>
         <div class="flex justify-between items-center">
           <p class="text-red-400">{{ errorStatus.description }}</p>
@@ -134,7 +153,7 @@ const changeStatus = computed(() => {
               'text-red-400': newStatus.description?.trim()?.length > 200,
             }"
           >
-            {{ newStatus.description?.trim()?.length }}/200
+            {{ newStatus.description?.trim()?.length || 0 }}/200
           </p>
         </div>
       </div>
@@ -149,14 +168,14 @@ const changeStatus = computed(() => {
       <div class="flex justify-end">
         <button
           @click="saveStatus"
-          class="btn bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
+          class="itbkk-button-confirm btn bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
           :disabled="changeStatus"
         >
           Save
         </button>
         <button
           @click="cancleStatus"
-          class="btn bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
+          class="itbkk-button-cancle btn bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
         >
           Cancel
         </button>

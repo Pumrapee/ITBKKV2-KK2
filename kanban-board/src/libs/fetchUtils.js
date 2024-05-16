@@ -19,9 +19,10 @@ async function getItemById(url, id) {
 async function findStatus(url, id) {
   let data
   try {
-    data = await fetch(`${url}/${id}`)
-    const item = await data.json()
-    return item
+    data = await fetch(`${url}/${id}`, {
+      method: "GET",
+    })
+    return data.status
   } catch (error) {
     if (data.status === 404) return 404
   }

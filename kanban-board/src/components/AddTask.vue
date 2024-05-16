@@ -70,6 +70,15 @@ const saveNewTask = async () => {
   }
 
   if (statusCode === 400) {
+    const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
+    myStatus.clearStatus()
+    myStatus.addStatus(listStatus)
+
+    listNewTask.value.title = ""
+    listNewTask.value.description = ""
+    listNewTask.value.assignees = ""
+    listNewTask.value.status = selected.value
+
     emits("closeAddModal", statusCode)
   }
 }
@@ -86,31 +95,42 @@ const cancleModal = () => {
 }
 
 const changeTitle = computed(() => {
-  const trimmedTitleLength = listNewTask.value.title.trim().length
+  const trimmedTitleLength = listNewTask.value.title?.trim()?.length > 100
+  const trimmedTitleEmpthy = listNewTask.value.title?.trim()?.length === 0
+  const trimmedDescriptionLength =
+    listNewTask.value.description?.trim()?.length > 500
+  const trimmedAssigneesLength =
+    listNewTask.value.assignees?.trim()?.length > 30
 
   // ตรวจสอบว่า title มีความยาวมากกว่า 100 หรือมีช่องว่างหรือไม่
-  if (trimmedTitleLength > 100 || trimmedTitleLength === 0) {
-    errorTask.value.title =
-      trimmedTitleLength === 0
-        ? "Title is required."
-        : "Title exceeds the limit of 100 characters."
-    return true // ให้มีค่าเป็น true เมื่อ title มีความยาวเกิน 100 หรือมีช่องว่าง
+  if (trimmedTitleLength) {
+    errorTask.value.title = "Title exceeds the limit of 100 characters."
+  } else if (trimmedTitleEmpthy) {
+    errorTask.value.title = "Title is required."
   } else {
-    // กรณีที่ไม่เข้าเงื่อนไขด้านบน ให้เคลียร์ข้อผิดพลาดของ title
     errorTask.value.title = ""
   }
 
-  listNewTask.value.description?.trim()?.length > 500
-    ? (errorTask.value.description =
-        "Description exceeds the limit of 500 characters.")
-    : (errorTask.value.description = "")
+  if (trimmedDescriptionLength) {
+    errorTask.value.description =
+      "Description exceeds the limit of 500 characters."
+  } else {
+    errorTask.value.description = ""
+  }
 
-  listNewTask.value.assignees?.trim()?.length > 30
-    ? (errorTask.value.assignees =
-        "Assignees exceeds the limit of 30 characters.")
-    : (errorTask.value.assignees = "")
+  if (trimmedAssigneesLength) {
+    errorTask.value.assignees = "Assignees exceeds the limit of 30 characters."
+  } else {
+    errorTask.value.assignees = ""
+  }
 
-  return !listNewTask.value.title
+  // หากมีเงื่อนไขใดเป็นจริง ให้คืนค่าเป็นจริงเพื่อระบุว่าควรปิดใช้งานปุ่มนั้น
+  return (
+    trimmedTitleLength ||
+    trimmedDescriptionLength ||
+    trimmedAssigneesLength ||
+    trimmedTitleEmpthy
+  )
 })
 </script>
 
@@ -132,16 +152,21 @@ const changeTitle = computed(() => {
             v-model="listNewTask.title"
             class="itbkk-title w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
           />
-          <p
-            class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
-            :class="{
-              'text-red-400':
-                listNewTask.title?.length > 100 ||
-                listNewTask.title?.length === 0,
-            }"
-          >
-            {{ listNewTask.title?.trim()?.length }} / 100
-          </p>
+          <div class="flex justify-between">
+            <p class="text-red-400">
+              {{ errorTask.title }}
+            </p>
+            <p
+              class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
+              :class="{
+                'text-red-400':
+                  listNewTask.title?.length > 100 ||
+                  listNewTask.title?.length === 0,
+              }"
+            >
+              {{ listNewTask.title?.trim()?.length || 0 }} / 100
+            </p>
+          </div>
         </div>
         <div class="flex">
           <div class="w-2/3 mr-2">
@@ -153,14 +178,19 @@ const changeTitle = computed(() => {
               v-model="listNewTask.description"
               class="itbkk-description w-full border border-blue-400 rounded-lg py-3 px-3 h-72 textarea textarea-ghost"
             ></textarea>
-            <p
-              class="text-gray-300 text-sm text-end"
-              :class="{
-                'text-red-400': listNewTask.description?.trim()?.length > 500,
-              }"
-            >
-              {{ listNewTask.description?.trim()?.length }} / 500
-            </p>
+            <div class="flex justify-between">
+              <p class="text-red-400">
+                {{ errorTask.description }}
+              </p>
+              <p
+                class="text-gray-300 text-sm text-end"
+                :class="{
+                  'text-red-400': listNewTask.description?.trim()?.length > 500,
+                }"
+              >
+                {{ listNewTask.description?.trim()?.length || 0 }} / 500
+              </p>
+            </div>
           </div>
           <div class="w-1/3">
             <div>
@@ -172,14 +202,19 @@ const changeTitle = computed(() => {
                 v-model="listNewTask.assignees"
                 class="itbkk-assignees w-full border border-blue-400 rounded-lg py-3 px-3 h-42 textarea textarea-ghost"
               ></textarea>
-              <p
-                class="text-gray-300 text-sm text-end"
-                :class="{
-                  'text-red-400': listNewTask.assignees?.trim()?.length > 30,
-                }"
-              >
-                {{ listNewTask.assignees?.trim()?.length }} / 30
-              </p>
+              <div class="flex justify-between">
+                <p class="text-red-400 text-sm w-40">
+                  {{ errorTask.assignees }}
+                </p>
+                <p
+                  class="text-gray-300 text-sm text-end"
+                  :class="{
+                    'text-red-400': listNewTask.assignees?.trim()?.length > 30,
+                  }"
+                >
+                  {{ listNewTask.assignees?.trim()?.length || 0 }} / 30
+                </p>
+              </div>
             </div>
             <div>
               <label for="status" class="block text-blue-400 font-bold mb-2"
@@ -201,14 +236,7 @@ const changeTitle = computed(() => {
             <div></div>
           </div>
         </div>
-        <div class="flex justify-between mt-4">
-          <div>
-            <p class="text-red-500">
-              {{
-                errorTask.title || errorTask.description || errorTask.assignees
-              }}
-            </p>
-          </div>
+        <div class="flex justify-end mt-4">
           <div>
             <button
               class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
