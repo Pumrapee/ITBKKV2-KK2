@@ -24,12 +24,10 @@ public class Status {
     @Column(name = "statusName", unique = true, nullable = false)
     private String name;
 
-    @NotBlank(message = "Status description cannot be blank")
     @Size(max = 200, message = "Status description must be at most 200 characters long")
     @Column(name = "statusDescription")
     private String description;
 
-    @NotBlank(message = "Status color cannot be blank")
     @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Status color must be a valid hex color code")
     @Column(name = "statusColor", nullable = false)
     private String color = "#ffffff";

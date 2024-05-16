@@ -34,7 +34,7 @@ public class StatusService {
     @Transactional
     public Status removeStatus(Integer id) {
         Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if (id == 1) {
+        if (id == 1 || id == 4) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Deletion of record with No Status is not allowed.");
         } else {
             repository.delete(status);
@@ -45,7 +45,7 @@ public class StatusService {
     @Transactional
     public Status updateStatus(Integer id, Status status) {
         Status existingStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if (id == 1) {
+        if (id == 1 || id == 4) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updation of record with No Status is not allowed.");
         } else {
             existingStatus.setName(status.getName());
@@ -58,7 +58,7 @@ public class StatusService {
     public Status getStatusByName(String statusName) {
         try {
             Integer statusId = Integer.parseInt(statusName);
-            return repository.findById(statusId).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+            return repository.findById(statusId).orElseThrow(() -> new ItemNotFoundException("BAD REQUEST"));
         } catch (NumberFormatException e) {
             if (statusName == null || statusName.isBlank()) {
                 return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("BAD REQUEST"));

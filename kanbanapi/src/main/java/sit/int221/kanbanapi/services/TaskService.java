@@ -19,20 +19,12 @@ public class TaskService {
     @Autowired
     private TaskRepository repository;
 
-//    public List<Task> getAllTask() {
-//        return repository.findAll();
-//    }
+    public List<Task> getAllTask() {
+        return repository.findAll();
+    }
 
-//    public List<Task> getAllTaskSorted(String sortBy) {
-//        try {
-//            Sort sort = Sort.by(Sort.Order.asc(sortBy));
-//            return repository.findAll(sort);
-//        } catch (PropertyReferenceException e) {
-//            throw new IllegalArgumentException("Invalid sortBy parameter: " + sortBy);
-//        }
-//    }
     public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy) {
-        Sort sort = Sort.by(Sort.Order.asc(sortBy != null ? sortBy : "id"));
+        Sort sort = Sort.by(Sort.Order.asc(sortBy != null ? sortBy : "createdOn"));
         try {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
                 return repository.findByStatusNamesSorted(filterStatuses, sort);

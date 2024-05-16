@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
@@ -29,7 +28,7 @@ public class TaskController {
     private ModelMapper modelMapper;
 
     @GetMapping("")
-    public ResponseEntity<Object> getAllTaskFilteredSorted(@RequestParam(required = false) List<String> filterStatuses, @RequestParam(required = false, defaultValue = "id") String sortBy) {
+    public ResponseEntity<Object> getAllTaskFilteredSorted(@RequestParam(required = false) List<String> filterStatuses, @RequestParam(required = false, defaultValue = "createdOn") String sortBy) {
         List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy);
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
                 .map(task -> {
