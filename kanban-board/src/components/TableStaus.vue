@@ -32,7 +32,6 @@ const openDeleteStatus = async (id, name) => {
     `${import.meta.env.VITE_API_URL}tasks/status`,
     id
   )
-  console.log(Showstatus)
   if (Showstatus === 200) {
     showTransferModal.value = true
   }
@@ -71,7 +70,7 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   } else {
     modalAlert.value = {
       message: "An error has occurred, the status could not be added.",
@@ -80,7 +79,7 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -95,18 +94,7 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
-  }
-
-  if (statusCode === 400) {
-    modalAlert.value = {
-      message: "An error has occurred, the status does not exist.",
-      type: "error",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -119,7 +107,7 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -133,7 +121,7 @@ const closeDeleteModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
   if (statusCode === 404) {
     showDeleteModal.value = false
@@ -144,7 +132,7 @@ const closeDeleteModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -159,7 +147,7 @@ const closeTransfereModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -171,7 +159,7 @@ const closeTransfereModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -189,7 +177,7 @@ const openEditStatus = async (idStatus) => {
       }
       setTimeout(() => {
         modalAlert.value.modal = false
-      }, "2500")
+      }, "4000")
       myStatus.removeStatus(idStatus)
       router.go(-1)
     } else {

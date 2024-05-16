@@ -31,9 +31,7 @@ const confirmDelete = async () => {
       myStatus.removeStatus(props.deatailStatus.id)
       emits("closeDeleteStatus",deleteItem)
     }
-    // if (deleteItem === 400) {       
-    //     emits("closeCancle")
-    // }
+
     if (deleteItem === 404) {     
       myStatus.removeStatus(props.deatailStatus.id)  
         emits("closeDeleteStatus",deleteItem)
@@ -43,6 +41,7 @@ const confirmDelete = async () => {
 
 const transferTasks = async() =>{
     const newStatus = await deleteItemByIdToNewId(`${import.meta.env.VITE_API_URL}statuses`,props.deatailStatus.id,selectedStatus.value)
+    
     if(newStatus === 200){
         myStatus.removeStatus(props.deatailStatus.id)
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
@@ -51,7 +50,7 @@ const transferTasks = async() =>{
         emits("closeTransferStatus",newStatus)
     }
     if(newStatus === 404){
-        myStatus.removeStatus(props.deatailStatus.id)
+        myStatus.removeStatus(filteredStatus.id)
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
         myTask.clearTask()
         myTask.addTasks(listTasks)

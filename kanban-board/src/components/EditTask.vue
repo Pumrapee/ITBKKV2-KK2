@@ -76,8 +76,9 @@ const changeTask = computed(() => {
       oldTask.status === newStatus)
   )
 })
+
+
 const myTask = useTaskStore()
-console.log(myTask.getTasks())
 const editSave = async (task) => {
   const editedTask = { ...task }
   editedTask.title = editedTask.title?.trim()
@@ -105,9 +106,6 @@ const editSave = async (task) => {
     }
   )
 
-  console.table(editedItem)
-  console.table(statusCode)
-
   if (statusCode === 200) {
     myTask.updateTask(
       editedItem.id,
@@ -118,14 +116,16 @@ const editSave = async (task) => {
       editedItem.createdTime,
       editedItem.updatedTime
     )
-    console.log(myTask.getTasks())
 
     emits("closeEditTask", statusCode)
   }
   if (statusCode === 400) {
-    myStatus.clearStatus()
+    // ตอน edit task แล้ว ค่า status ที่ลบไปยังอยู่
     const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
+    myStatus.clearStatus()
     myStatus.addStatus(listStatus)
+
+    // ตอน edit task แล้วแก้กด status ที่ลบไปจะขึ้น alert แต่ status ใน list task ยังเป็นอันเดิมอยู่
     const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
     myTask.clearTask()
     myTask.addTasks(listTasks)

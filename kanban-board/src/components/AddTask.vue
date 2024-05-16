@@ -70,6 +70,15 @@ const saveNewTask = async () => {
   }
 
   if (statusCode === 400) {
+    const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
+    myStatus.clearStatus()
+    myStatus.addStatus(listStatus)
+
+    listNewTask.value.title = ""
+    listNewTask.value.description = ""
+    listNewTask.value.assignees = ""
+    listNewTask.value.status = selected.value
+
     emits("closeAddModal", statusCode)
   }
 }

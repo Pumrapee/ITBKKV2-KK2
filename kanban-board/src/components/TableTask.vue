@@ -51,11 +51,10 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 400) {
-    //เป็นกด status ที่ไม่มีจะขึ้นแทน
     showEditModal.value = false
     router.go(-1)
     modalAlert.value = {
@@ -65,7 +64,7 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -78,7 +77,7 @@ const closeEditModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -96,7 +95,7 @@ const openModal = async (taskId) => {
       }
       setTimeout(() => {
         modalAlert.value.modal = false
-      }, "2500")
+      }, "4000")
       myTask.removeTasks(modal.deleteId)
       router.go(-1)
     } else {
@@ -125,7 +124,7 @@ const closeDeleteModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -137,7 +136,7 @@ const closeDeleteModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
@@ -152,7 +151,6 @@ const handleSortChange = async (status) => {
       .getTasks()
       .sort((a, b) => a.status.localeCompare(b.status))
     sortStatus.value = "asc"
-    console.log("default to asc")
   }
   // ถ้าเป็น asc -> desc
   if (status === "asc") {
@@ -160,7 +158,6 @@ const handleSortChange = async (status) => {
       .getTasks()
       .sort((a, b) => b.status.localeCompare(a.status))
     sortStatus.value = "desc"
-    console.log("asc to desc")
   }
   // ถ้าเป็น desc -> default
   if (status === "desc") {
@@ -168,7 +165,6 @@ const handleSortChange = async (status) => {
     listTaskStore.value = listTask
 
     sortStatus.value = "default"
-    console.log("desc to default")
   }
 }
 

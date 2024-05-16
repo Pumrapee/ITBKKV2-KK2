@@ -31,18 +31,20 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 400) {
+    showAdd.value = false
+    router.go(-1)
     modalAlert.value = {
-      message: "There are some fields that exceed the limit.",
+      message: "An error has occurred, the task does not exist.",
       type: "error",
       modal: true,
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 
   if (statusCode === 404) {
@@ -55,7 +57,7 @@ const closeAddModal = (statusCode) => {
     }
     setTimeout(() => {
       modalAlert.value.modal = false
-    }, "2500")
+    }, "4000")
   }
 }
 
