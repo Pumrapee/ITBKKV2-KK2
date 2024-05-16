@@ -46,6 +46,11 @@ export const useStatusStore = defineStore("status", () => {
       1
     )
   }
+
+  const clearStatus = () => {
+    listStatus.value = []
+  }
+
   return {
     getStatus,
     addStatus,
@@ -53,6 +58,7 @@ export const useStatusStore = defineStore("status", () => {
     removeStatus,
     updateStatus,
     getStatusColor,
+    clearStatus,
   }
 })
 

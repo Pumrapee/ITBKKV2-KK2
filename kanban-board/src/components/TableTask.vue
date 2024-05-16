@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import EditTask from "../components/EditTask.vue"
 import { getItemById, getItems } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
@@ -33,6 +33,15 @@ const closeCancle = () => {
 }
 const closeEditModal = (statusCode) => {
   if (statusCode === 200) {
+    myTask.updateTask(
+      task.id,
+      task.title,
+      task.description,
+      task.assignees,
+      task.status,
+      task.createdTime,
+      task.updatedTime
+    )
     showEditModal.value = false
     router.go(-1)
     modalAlert.value = {
@@ -47,8 +56,10 @@ const closeEditModal = (statusCode) => {
 
   if (statusCode === 400) {
     //เป็นกด status ที่ไม่มีจะขึ้นแทน
+    showEditModal.value = false
+    router.go(-1)
     modalAlert.value = {
-      message: "There are some fields that exceed the limit.",
+      message: "An error has occurred, the task does not exist.",
       type: "error",
       modal: true,
     }
@@ -153,7 +164,8 @@ const handleSortChange = async (status) => {
   }
   // ถ้าเป็น desc -> default
   if (status === "desc") {
-    listTaskStore.value = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+    const listTask = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+    listTaskStore.value = listTask
 
     sortStatus.value = "default"
     console.log("desc to default")
@@ -170,6 +182,14 @@ const filteredTasks = computed(() => {
     )
   }
 })
+
+watch(
+  () => myTask.getTasks(),
+  (newTasks) => {
+    listTaskStore.value = newTasks
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

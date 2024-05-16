@@ -1,6 +1,6 @@
 <script setup>
 import { ref, defineProps, defineEmits, computed, watch } from "vue"
-import { editItem } from "../libs/fetchUtils"
+import { editItem, getItems } from "../libs/fetchUtils"
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
 
@@ -105,6 +105,9 @@ const editSave = async (task) => {
     }
   )
 
+  console.table(editedItem)
+  console.table(statusCode)
+
   if (statusCode === 200) {
     myTask.updateTask(
       editedItem.id,
@@ -115,10 +118,17 @@ const editSave = async (task) => {
       editedItem.createdTime,
       editedItem.updatedTime
     )
+    console.log(myTask.getTasks())
 
     emits("closeEditTask", statusCode)
   }
   if (statusCode === 400) {
+    myStatus.clearStatus()
+    const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
+    myStatus.addStatus(listStatus)
+    const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+    myTask.clearTask()
+    myTask.addTasks(listTasks)
     emits("closeEditTask", statusCode)
   }
   if (statusCode === 404) {
