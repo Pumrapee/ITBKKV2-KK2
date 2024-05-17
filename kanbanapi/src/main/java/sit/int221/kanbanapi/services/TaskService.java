@@ -74,6 +74,7 @@ public class TaskService {
         }
     }
 
+    @Transactional
     public void transferTaskStatus(Integer id, Integer newId) {
         if (id != 1 && id != 4 && newId == 1 || newId == 4 || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
             try {

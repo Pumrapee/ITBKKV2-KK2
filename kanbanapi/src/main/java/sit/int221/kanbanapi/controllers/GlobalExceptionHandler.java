@@ -25,19 +25,19 @@ import java.util.List;
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(
-            HandlerMethodValidationException exception, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                "Validation error. Check 'errors' field for details.", request.getDescription(false));
-        List<ParameterValidationResult> paramNames = exception.getAllValidationResults();
-        for (ParameterValidationResult param : paramNames) {
-            errorResponse.addValidationError(param.getMethodParameter().getParameterName(),
-                    param.getResolvableErrors().get(0).getDefaultMessage()
-                            + " (" + param.getArgument().toString() + ")");
-        }
-        return ResponseEntity.unprocessableEntity().body(errorResponse);
-    }
+//    @ExceptionHandler(HandlerMethodValidationException.class)
+//    public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(
+//            HandlerMethodValidationException exception, WebRequest request) {
+//        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+//                "Validation error. Check 'errors' field for details.", request.getDescription(false));
+//        List<ParameterValidationResult> paramNames = exception.getAllValidationResults();
+//        for (ParameterValidationResult param : paramNames) {
+//            errorResponse.addValidationError(param.getMethodParameter().getParameterName(),
+//                    param.getResolvableErrors().get(0).getDefaultMessage()
+//                            + " (" + param.getArgument().toString() + ")");
+//        }
+//        return ResponseEntity.unprocessableEntity().body(errorResponse);
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

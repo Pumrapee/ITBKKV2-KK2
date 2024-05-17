@@ -30,16 +30,12 @@ public class ConfigurationController {
     }
 
     @PatchMapping("/statuses/limitTask")
-    public ResponseEntity<Object> updateConfig(@Valid @RequestBody StatusConfiguration newConfig) {
-        if (taskService.allStatusLimitCheck(newConfig)) {
-            try {
-                configService.updateTaskConfiguration(newConfig);
-                return new ResponseEntity(newConfig, HttpStatus.OK);
-            } catch (IOException ex) {
-                throw new BadRequestException("config wrong");
-            }
-        } else {
-            throw new TaskLimitExceededException("Task limit exceeded!!!");
+    public ResponseEntity<Object> updateConfig( @RequestParam boolean taskLimitEnabled, @RequestParam Integer maxTasksPerStatus) {
+        try {
+            configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (IOException ex) {
+            throw new BadRequestException("config wrong");
         }
     }
 }

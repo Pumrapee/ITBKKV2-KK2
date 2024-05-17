@@ -23,9 +23,9 @@ public class ConfigService {
         return configuration;
     }
 
-    public void updateTaskConfiguration(StatusConfiguration newConfig) throws IOException {
-        configuration.setMaxTasksPerStatus(newConfig.getMaxTasksPerStatus());
-        configuration.setTaskLimitEnabled(newConfig.getTaskLimitEnabled());
+    public void updateTaskConfiguration(boolean taskLimitEnabled, Integer maxTasksPerStatus) throws IOException {
+        configuration.setTaskLimitEnabled(taskLimitEnabled);
+        configuration.setMaxTasksPerStatus(maxTasksPerStatus);
         saveConfigurationToFile();
     }
 
