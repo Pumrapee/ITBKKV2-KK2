@@ -9,6 +9,7 @@ import Delete from "../components/DeleteTask.vue"
 import { RouterLink } from "vue-router"
 import AlertComponent from "./Alert.vue"
 import { defineProps } from "vue"
+import LimitTasks from "./LimitTasks.vue"
 
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
@@ -186,6 +187,16 @@ watch(
   },
   { immediate: true }
 )
+
+const showLimitModal = ref(false)
+
+const openLimitModal = () => {
+  showLimitModal.value = true
+}
+
+const closeLimitModal = () => {
+  showLimitModal.value = false
+}
 </script>
 
 <template>
@@ -202,15 +213,20 @@ watch(
     @closeDeleteTask="closeDeleteModal"
   />
 
+  <LimitTasks
+    @closeLimitModal="closeLimitModal"
+    :showLimitModal="showLimitModal"
+  />
+
   <!-- Task Table -->
   <div class="flex flex-col items-center mt-16 mb-20">
     <div class="flex justify-between w-4/5">
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
 
       <div class="flex items-center">
-        <details className="dropdown dropdown-end">
-          <summary className="m-1 btn">
-            <img src="/icons/filter.png" class="w-4" />
+        <details className="dropdown dropdown-end ">
+          <summary className="mr-1 btn bg-pink-400 text-white">
+            <img src="/icons/filter.png" class="w-6" />
             Filter
           </summary>
           <ul
@@ -235,8 +251,17 @@ watch(
         </details>
 
         <RouterLink :to="{ name: 'tableStatus' }">
-          <button class="itbkk-manage-status btn text-l">Manage Status</button>
+          <button class="itbkk-manage-status btn text-l bg-pink-400 text-white">
+            Manage Status
+          </button>
         </RouterLink>
+
+        <button
+          @click="openLimitModal"
+          class="itbkk-manage-status btn text-l ml-1 bg-pink-400 text-white"
+        >
+          Limit Tasks in Status
+        </button>
       </div>
     </div>
 
