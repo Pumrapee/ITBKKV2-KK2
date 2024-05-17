@@ -75,7 +75,7 @@ public class TaskService {
     }
 
     public void transferTaskStatus(Integer id, Integer newId) {
-        if (newId == 1 || newId == 4 || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
+        if (id != 1 && id != 4 && newId == 1 || newId == 4 || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
             try {
                 repository.transferTaskStatus(id, newId);
             } catch (Exception ex) {
