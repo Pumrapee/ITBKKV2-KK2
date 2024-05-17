@@ -46,7 +46,7 @@ public class TaskService {
 
     @Transactional
     public Task createTask(Task task) {
-        if (task.getStatus().getId() == 1 || task.getStatus().getId() == 4 || statusLimitCheck(countTasksByStatus(task.getStatus().getId()))) {
+        if (task.getStatus().getId() == 1 || task.getStatus().getId() == 4 || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
             return repository.save(task);
         } else {
             throw new TaskLimitExceededException("Task limit exceeded!!!");
@@ -62,7 +62,7 @@ public class TaskService {
 
     @Transactional
     public Task updateTask(Integer id, Task task) {
-        if (task.getStatus().getId() == 1 || task.getStatus().getId() == 4 || statusLimitCheck(countTasksByStatus(task.getStatus().getId()))) {
+        if (task.getStatus().getId() == 1 || task.getStatus().getId() == 4 || statusLimitCheck(countTasksByStatus(task.getStatus().getId() + 1))) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
@@ -93,7 +93,7 @@ public class TaskService {
     public Integer countTasksByStatus(Integer id) { return repository.countTasksByStatus(id); }
     public Boolean statusLimitCheck(Integer count) {
         if (configuration.getTaskLimitEnabled()) {
-            return count < configuration.getMaxTasksPerStatus();
+            return count <= configuration.getMaxTasksPerStatus();
         } else {
             return true;
         }
