@@ -179,6 +179,10 @@ const filteredTasks = computed(() => {
   }
 })
 
+const clearFilter = () => {
+  filterStatus.value = []
+}
+
 watch(
   () => myTask.getTasks(),
   (newTasks) => {
@@ -208,6 +212,11 @@ watch(
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
 
       <div class="flex items-center">
+        <div class="text-sm pr-2" v-if="filterStatus.length > 0">
+          <button class="text-red-500" @click="clearFilter">
+            Clear filter
+          </button>
+        </div>
         <details className="dropdown dropdown-end">
           <summary className="m-1 btn">
             <img src="/icons/filter.png" class="w-4" />
