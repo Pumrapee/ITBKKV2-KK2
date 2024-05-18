@@ -20,9 +20,6 @@ public class ConfigurationController {
     @Autowired
     private ConfigService configService;
 
-    @Autowired
-    private TaskService taskService;
-
     @GetMapping("/statuses/limitTask")
     public ResponseEntity<Object> getConfig() {
         StatusConfiguration config = configService.getConfiguration();
@@ -33,7 +30,7 @@ public class ConfigurationController {
     public ResponseEntity<Object> updateConfig( @RequestParam boolean taskLimitEnabled, @RequestParam Integer maxTasksPerStatus) {
         try {
             configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity(configService.getConfiguration(), HttpStatus.OK);
         } catch (IOException ex) {
             throw new BadRequestException("config wrong");
         }
