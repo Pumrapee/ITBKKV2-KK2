@@ -6,15 +6,6 @@ async function getItems(url) {
     return items
   } catch (error) {}
 }
-
-async function getStatusLimits(url) {
-  try {
-    const data = await fetch(`${url}/limitTask`) //GET Method
-    const items = await data.json()
-    return items
-  } catch (error) {}
-}
-
 async function getItemById(url, id) {
   let data
   try {
@@ -95,23 +86,6 @@ async function editItem(url, id, editItem) {
   } catch (error) {}
 }
 
-async function editLimitStatus(url, boolean, maxLimit) {
-  try {
-    const res = await fetch(
-      `${url}/limitTask?taskLimitEnabled=${boolean}&maxTasksPerStatus=${maxLimit}`,
-      {
-        method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    )
-    const editedLimit = await res.json()
-    console.log(editedLimit)
-    return editedLimit
-  } catch (error) {}
-}
-
 export {
   getItems,
   getItemById,
@@ -120,6 +94,4 @@ export {
   editItem,
   deleteItemByIdToNewId,
   findStatus,
-  getStatusLimits,
-  editLimitStatus,
 }

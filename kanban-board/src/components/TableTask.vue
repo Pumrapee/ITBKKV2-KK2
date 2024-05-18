@@ -9,7 +9,6 @@ import Delete from "../components/DeleteTask.vue"
 import { RouterLink } from "vue-router"
 import AlertComponent from "./Alert.vue"
 import { defineProps } from "vue"
-import LimitTasks from "./LimitTasks.vue"
 
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
@@ -31,7 +30,6 @@ const closeCancle = () => {
     router.go(-1)
   }
   if (showDeleteModal.value === true) showDeleteModal.value = false
-  if (showLimitModal.value === true) showLimitModal.value = false
 }
 const closeEditModal = (statusCode) => {
   if (statusCode === 200) {
@@ -192,41 +190,6 @@ watch(
   },
   { immediate: true }
 )
-
-const showLimitModal = ref(false)
-
-const openLimitModal = () => {
-  showLimitModal.value = true
-}
-
-const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
-  if (limintBoolean === false) {
-    showLimitModal.value = false
-  }
-  if (limintBoolean === true  && statusIsNotLimit === true) {
-    showLimitModal.value = false
-    modalAlert.value = {
-      message: `The Kanban board now limits ${maxlimit} tasks in each status.`,
-      type: "success",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "4000")
-  }
-
-  if (limintBoolean === true && statusIsNotLimit === false) {
-    modalAlert.value = {
-      message:
-        "These statuses that have reached the task limit. No additional tasks can be added to these statuses.",
-      type: "warning",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "4000")
-  }
-}
 </script>
 
 <template>
@@ -243,12 +206,6 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
     @closeDeleteTask="closeDeleteModal"
   />
 
-  <LimitTasks
-    @closeLimitModal="closeLimitModal"
-    @closeCancle="closeCancle"
-    :showLimitModal="showLimitModal"
-  />
-
   <!-- Task Table -->
   <div class="flex flex-col items-center mt-16 mb-20">
     <div class="flex justify-between w-4/5">
@@ -263,7 +220,6 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
         <details className="dropdown dropdown-end">
           <summary className="m-1 btn">
             <img src="/icons/filter.png" class="w-4" />
-
             Filter
           </summary>
           <ul
@@ -288,17 +244,8 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
         </details>
 
         <RouterLink :to="{ name: 'tableStatus' }">
-          <button class="itbkk-manage-status btn text-l bg-pink-400 text-white">
-            Manage Status
-          </button>
+          <button class="itbkk-manage-status btn text-l">Manage Status</button>
         </RouterLink>
-
-        <button
-          @click="openLimitModal"
-          class="itbkk-manage-status btn text-l ml-1 bg-pink-400 text-white"
-        >
-          Limit Tasks in Status
-        </button>
       </div>
     </div>
 

@@ -2,13 +2,11 @@
 import { onMounted } from "vue"
 import { RouterView } from "vue-router"
 import { useTaskStore } from "../src/stores/taskStore"
-import { getItems, getStatusLimits } from "./libs/fetchUtils"
+import { getItems } from "./libs/fetchUtils"
 import { useStatusStore } from "../src/stores/statusStore"
-import { useLimitStore } from "./stores/limitStore"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
-const myLimit = useLimitStore()
 onMounted(async () => {
   if (myTask.getTasks().length === 0) {
     const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
@@ -19,12 +17,6 @@ onMounted(async () => {
     const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
     myStatus.addStatus(listStatus)
   }
-
-  const limitStatus = await getStatusLimits(
-    `${import.meta.env.VITE_API_URL}statuses`
-  )
-  myLimit.addLimit(limitStatus)
-  console.log(myLimit.getLimit())
 })
 </script>
 
