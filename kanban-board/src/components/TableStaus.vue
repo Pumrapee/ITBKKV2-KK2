@@ -245,7 +245,7 @@ const openEditStatus = async (idStatus) => {
             </td>
 
             <!-- ใส่ v-if เพื่อตรวจสอบว่า index เท่ากับ 0 หรือไม่ -->
-            <td v-if="index !== 0" class="ml-10 flex">
+            <td v-if="index !== 0 && index !==1" class="ml-10 flex">
               <div class="mr-2">
                 <router-link
                   :to="{ name: 'EditStatus', params: { id: task.id } }"
