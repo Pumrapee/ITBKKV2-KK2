@@ -33,15 +33,6 @@ const closeCancle = () => {
 }
 const closeEditModal = (statusCode) => {
   if (statusCode === 200) {
-    myTask.updateTask(
-      task.id,
-      task.title,
-      task.description,
-      task.assignees,
-      task.status,
-      task.createdTime,
-      task.updatedTime
-    )
     showEditModal.value = false
     router.go(-1)
     modalAlert.value = {
