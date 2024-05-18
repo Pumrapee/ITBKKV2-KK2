@@ -101,7 +101,6 @@ const editStatusSave = async (status) => {
     emits("closeEditStatus", statusCode)
   }
 
-
   if (statusCode === 404) {
     myStatus.removeStatus(editedItem.id)
     emits("closeEditStatus", statusCode)
@@ -144,7 +143,9 @@ watch(props, () => {
           <p
             class="text-gray-300 pb-4 text-sm"
             :class="{
-              'text-red-400': newStatus.name?.trim()?.length > 50,
+              'text-red-400':
+                newStatus.name?.trim()?.length > 50 ||
+                newStatus.name?.trim()?.length === 0,
             }"
           >
             {{ newStatus.name?.trim()?.length || 0 }}/50

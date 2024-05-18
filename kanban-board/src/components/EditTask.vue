@@ -69,6 +69,7 @@ const changeTask = computed(() => {
     isTitleTooLong ||
     isDescriptionTooLong ||
     isAssigneesTooLong ||
+    isTitleTooEmpthy ||
     newTitle === null ||
     (oldTask.title === newTitle &&
       oldTask.description === newDescription &&
@@ -76,7 +77,6 @@ const changeTask = computed(() => {
       oldTask.status === newStatus)
   )
 })
-
 
 const myTask = useTaskStore()
 const editSave = async (task) => {
@@ -171,7 +171,8 @@ watch(props, () => {
               class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
               :class="{
                 'text-red-400':
-                  newTask.title?.length > 100 || newTask.title?.length === 0,
+                  newTask.title?.trim()?.length > 100 ||
+                  newTask.title?.trim()?.length === 0,
               }"
             >
               {{ newTask.title?.trim()?.length || 0 }} / 100

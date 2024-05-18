@@ -128,7 +128,9 @@ const changeStatus = computed(() => {
           <p
             class="text-gray-300 pb-4 text-sm"
             :class="{
-              'text-red-400': newStatus.name?.trim()?.length > 50,
+              'text-red-400':
+                newStatus.name?.trim()?.length > 50 ||
+                newStatus.name?.trim()?.length === 0,
             }"
           >
             {{ newStatus.name?.trim()?.length || 0 }}/50
