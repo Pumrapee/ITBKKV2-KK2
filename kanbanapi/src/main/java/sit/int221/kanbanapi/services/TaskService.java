@@ -6,10 +6,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
+import sit.int221.kanbanapi.entities.Status;
 import sit.int221.kanbanapi.entities.Task;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
+import sit.int221.kanbanapi.repositories.StatusRepository;
 import sit.int221.kanbanapi.repositories.TaskRepository;
 
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.List;
 public class TaskService {
     @Autowired
     private TaskRepository repository;
+    @Autowired
+    private StatusRepository statusRepository;
     @Autowired
     private StatusConfiguration configuration;
 
@@ -46,7 +50,8 @@ public class TaskService {
 
     @Transactional
     public Task createTask(Task task) {
-        if (task.getStatus().getId() == 1 || task.getStatus().getId() == 4 || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
+        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getStatus().getName())
+                || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
             return repository.save(task);
         } else {
             throw new TaskLimitExceededException("Task limit exceeded!!!");
@@ -62,7 +67,7 @@ public class TaskService {
 
     @Transactional
     public Task updateTask(Integer id, Task task) {
-        if (task.getStatus().getId() == 1 || task.getStatus().getId() == 4 || statusLimitCheck(countTasksByStatus(task.getStatus().getId() + 1))) {
+        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getStatus().getName()) || statusLimitCheck(countTasksByStatus(task.getStatus().getId() + 1))) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
@@ -76,7 +81,14 @@ public class TaskService {
 
     @Transactional
     public void transferTaskStatus(Integer id, Integer newId) {
-        if (id != 1 && id != 4 && newId == 1 || newId == 4 || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
+        Status oldStatus = statusRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        Status newStatus = statusRepository.findById(newId).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())){
+            throw new BadRequestException("Bad Request");
+        }
+        if (!configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())
+                && configuration.getNonLimitedUpdatableDeletableStatuses().contains(newStatus.getName())
+                || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
             try {
                 repository.transferTaskStatus(id, newId);
             } catch (Exception ex) {
@@ -90,6 +102,7 @@ public class TaskService {
     public boolean findTaskStatus(Integer id) {
         return (repository.countTasksByStatus(id) != 0);
     }
+
 
     public Integer countTasksByStatus(Integer id) { return repository.countTasksByStatus(id); }
     public Boolean statusLimitCheck(Integer count) {
