@@ -160,8 +160,8 @@ const changeTitle = computed(() => {
               class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
               :class="{
                 'text-red-400':
-                  listNewTask.title?.length > 100 ||
-                  listNewTask.title?.length === 0,
+                  listNewTask.title?.trim()?.length > 100 ||
+                  listNewTask.title?.trim()?.length === 0,
               }"
             >
               {{ listNewTask.title?.trim()?.length || 0 }} / 100

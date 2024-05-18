@@ -36,13 +36,23 @@ const changeStatus = computed(() => {
   const newDescription = trimAndCheckNull(newStatus.value.description)
 
   const isNameLength = newName?.length > 50
-  const isNameEmpthy = newName?.length === 0
+  const isNameEmpthy = newName === null
   const isDescriptionLength = newDescription?.length > 200
+
+  const nameNot = myStatus.getStatus().filter((list) => {
+    return list.name.toLowerCase() !== oldStatus.name.toLowerCase()
+  })
+
+  const nameUnique = nameNot.some((listStatus) => {
+    return listStatus.name.toLowerCase() === newStatus.value.name.toLowerCase()
+  })
 
   if (isNameLength) {
     errorStatus.value.name = "Name exceeds the limit of 50 characters."
   } else if (isNameEmpthy) {
     errorStatus.value.name = "Name is require."
+  } else if (nameUnique) {
+    errorStatus.value.name = "Name already exists."
   } else {
     errorStatus.value.name = ""
   }
@@ -58,6 +68,7 @@ const changeStatus = computed(() => {
     isNameEmpthy ||
     isNameLength ||
     isDescriptionLength ||
+    nameUnique ||
     newName === null ||
     (oldStatus.name === newName &&
       oldStatus.description === newDescription &&
@@ -101,7 +112,6 @@ const editStatusSave = async (status) => {
     emits("closeEditStatus", statusCode)
   }
 
-
   if (statusCode === 404) {
     myStatus.removeStatus(editedItem.id)
     emits("closeEditStatus", statusCode)
@@ -144,7 +154,9 @@ watch(props, () => {
           <p
             class="text-gray-300 pb-4 text-sm"
             :class="{
-              'text-red-400': newStatus.name?.trim()?.length > 50,
+              'text-red-400':
+                newStatus.name?.trim()?.length > 50 ||
+                newStatus.name?.trim()?.length === 0,
             }"
           >
             {{ newStatus.name?.trim()?.length || 0 }}/50
