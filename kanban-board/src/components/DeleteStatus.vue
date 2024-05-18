@@ -52,8 +52,6 @@ const transferTasks = async() =>{
     if(newStatus === 404){
         myStatus.removeStatus(filteredStatus.id)
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
-        myTask.clearTask()
-        myTask.addTasks(listTasks)
         emits("closeTransferStatus",newStatus)
     }
 }
