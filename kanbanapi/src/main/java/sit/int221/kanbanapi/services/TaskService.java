@@ -67,7 +67,8 @@ public class TaskService {
 
     @Transactional
     public Task updateTask(Integer id, Task task) {
-        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getStatus().getName()) || statusLimitCheck(countTasksByStatus(task.getStatus().getId() + 1))) {
+        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getStatus().getName())
+                || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
@@ -92,7 +93,7 @@ public class TaskService {
             try {
                 repository.transferTaskStatus(id, newId);
             } catch (Exception ex) {
-                throw new ItemNotFoundException("NOT FOUND");
+                throw new ItemNotFoundException("Bad Request");
             }
         } else {
             throw new TaskLimitExceededException("Task limit exceeded!!!");
