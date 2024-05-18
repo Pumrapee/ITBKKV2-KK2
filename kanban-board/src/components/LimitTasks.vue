@@ -2,6 +2,7 @@
 import { ref, defineProps, defineEmits } from "vue"
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../libs/fetchUtils"
+import { useLimitStore } from "../stores/limitStore"
 
 const props = defineProps({
   showLimitModal: Boolean,
@@ -12,6 +13,7 @@ const maxTasks = ref(10)
 const myTask = useTaskStore()
 const showLimitStatus = ref()
 const emits = defineEmits(["closeLimitModal", "closeCancle"])
+const limitStatus = useLimitStore()
 
 const closelimitModal = async (maxlimit) => {
   //นับจำนวน status ที่ใช้ของแต่ละอัน ได้ค่าเป็น {}
@@ -42,13 +44,15 @@ const closelimitModal = async (maxlimit) => {
     })
 
     showLimitStatus.value = StatusIslimit
-    await editLimitStatus(
+    const editedLimit = await editLimitStatus(
       `${import.meta.env.VITE_API_URL}statuses`,
       isLimitEnabled.value,
       maxlimit
     )
-    console.log(lengthStatusArray)
-    console.log(StatusIslimit)
+
+    //เอาค่า fetch เก็บใน store
+    limitStatus.addLimit(editedLimit)
+    console.log(limitStatus.getLimit())
 
     //check ว่าค่า excessCount มีค่าเป็น 0 ไหม
     const statusIsNotLimit = StatusIslimit.every((status) => {
@@ -64,13 +68,25 @@ const closelimitModal = async (maxlimit) => {
     }
   }
 
-  await editLimitStatus(
-    `${import.meta.env.VITE_API_URL}statuses`,
-    isLimitEnabled.value,
-    maxlimit
-  )
-  //แปลกๆ
-  emits("closeLimitModal", maxlimit, isLimitEnabled.value, isLimitEnabled.value)
+  if (isLimitEnabled.value === false) {
+    const editedLimit = await editLimitStatus(
+      `${import.meta.env.VITE_API_URL}statuses`,
+      isLimitEnabled.value,
+      maxlimit
+    )
+
+    //เอาค่า fetch เก็บใน store
+    limitStatus.addLimit(editedLimit)
+    console.log(limitStatus.getLimit())
+
+    //แปลกๆ
+    emits(
+      "closeLimitModal",
+      maxlimit,
+      isLimitEnabled.value,
+      isLimitEnabled.value
+    )
+  }
 }
 
 const closeCancle = () => {
