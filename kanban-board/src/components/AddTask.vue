@@ -3,14 +3,15 @@ import { defineProps, defineEmits, ref, computed, onMounted } from "vue"
 import { addItem, getItems } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
+import { useLimitStore } from "../stores/limitStore"
 
 const { showAdd } = defineProps({
   showAdd: Boolean,
 })
-
+const myLimit = useLimitStore()
 const myStatus = useStatusStore()
 
-const emits = defineEmits(["closeAddModal", "closeCancle"])
+const emits = defineEmits(["closeAddModal", "closeCancel"])
 
 const selected = ref()
 selected.value = "No Status"
@@ -81,9 +82,13 @@ const saveNewTask = async () => {
 
     emits("closeAddModal", statusCode)
   }
+
+  if (statusCode === 507) {
+    emits("closeAddModal", statusCode, listNewTask.value.status)
+  }
 }
 
-const cancleModal = () => {
+const cancelModal = () => {
   // ทำการเคลียร์ค่าในฟอร์ม
   listNewTask.value.title = ""
   listNewTask.value.description = ""
@@ -91,7 +96,7 @@ const cancleModal = () => {
   listNewTask.value.status = selected.value
 
   // ปิด Modal
-  emits("closeCancle")
+  emits("closeCancel")
 }
 
 const changeTitle = computed(() => {
@@ -139,9 +144,22 @@ const changeTitle = computed(() => {
   <div v-if="showAdd" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div class="bg-white p-6 rounded-lg w-11/12 max-w-3xl">
-        <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b-2">
-          Add Task
-        </h2>
+        <div class="flex justify-between items-center mb-4 border-b-2">
+          <h2 class="text-2xl font-bold text-blue-400 mb-2">Add Task</h2>
+          <div class="mb-2">
+            <span
+              v-if="myLimit.getLimit().taskLimitEnabled === true"
+              class="text-green-500 font-light text-sm border border-green-500 rounded px-2 py-1"
+              >The Limit Enable state</span
+            >
+            <span
+              v-else
+              class="text-red-500 font-light text-sm border border-red-500 rounded px-2 py-1"
+              >The Limit Disable state</span
+            >
+          </div>
+        </div>
+
         <div class="mb-4">
           <label for="title" class="block text-blue-400 font-bold mb-2"
             >Title</label
@@ -245,8 +263,8 @@ const changeTitle = computed(() => {
             >
               Save
             </button>
-            <button class="itbkk-button-cancle btn" @click="cancleModal">
-              Close
+            <button class="itbkk-button-cancel btn" @click="cancelModal">
+              Cancel
             </button>
           </div>
         </div>

@@ -44,7 +44,7 @@ const openDeleteStatus = async (id, name) => {
   }
 }
 
-const closeCancle = () => {
+const closeCancel = () => {
   if (showDeleteModal.value === true) {
     showDeleteModal.value = false
   }
@@ -136,7 +136,7 @@ const closeDeleteModal = (statusCode) => {
   }
 }
 
-const closeTransfereModal = (statusCode) => {
+const closeTransfereModal = (statusCode, statusName) => {
   if (statusCode === 200) {
     showTransferModal.value = false
     modalAlert.value = {
@@ -155,6 +155,17 @@ const closeTransfereModal = (statusCode) => {
     modalAlert.value = {
       message: "An error has occurred, the status does not exist.",
       type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "4000")
+  }
+
+  if (statusCode === 507) {
+    modalAlert.value = {
+      message: `Cannot transfer to ${statusName} status since it will exceed the limit.  Please choose another status to transfer to.`,
+      type: "warning",
       modal: true,
     }
     setTimeout(() => {
@@ -200,11 +211,26 @@ const openEditStatus = async (idStatus) => {
           <li>Task Status</li>
         </ul>
       </div>
-      <RouterLink :to="{ name: 'AddStatus' }">
-        <button @click="openAddStatus" class="itbkk-button-home btn">
-          Add status
-        </button>
-      </RouterLink>
+      <div class="flex items-center">
+        <RouterLink :to="{ name: 'task' }">
+          <button
+            @click="openAddStatus"
+            class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
+          >
+            <img src="/icons/home.png" class="w-4" />
+            Home
+          </button>
+        </RouterLink>
+        <RouterLink :to="{ name: 'AddStatus' }">
+          <button
+            @click="openAddStatus"
+            class="itbkk-button-home btn bg-blue-400 text-white"
+          >
+            <img src="/icons/plus.png" class="w-4" />
+            Add Status
+          </button>
+        </RouterLink>
+      </div>
     </div>
 
     <!-- Task Table -->
@@ -245,7 +271,7 @@ const openEditStatus = async (idStatus) => {
             </td>
 
             <!-- ใส่ v-if เพื่อตรวจสอบว่า index เท่ากับ 0 หรือไม่ -->
-            <td v-if="index !== 0" class="ml-10 flex">
+            <td v-if="index !== 0 && index !== 1" class="ml-10 flex">
               <div class="mr-2">
                 <router-link
                   :to="{ name: 'EditStatus', params: { id: task.id } }"
@@ -278,19 +304,19 @@ const openEditStatus = async (idStatus) => {
   <EditStatus
     :showEditStatus="showEditModal"
     @closeEditStatus="closeEditModal"
-    @closeCancleStatus="closeCancle"
+    @closeCancelStatus="closeCancel"
     :taskStatus="statusItems"
   />
   <AddStatus
     :showAddStatus="showAddModal"
     @closeAddStatus="closeAddModal"
-    @closeCancleStatus="closeCancle"
+    @closeCancelStatus="closeCancel"
   />
   <DeleteStatus
     :showDeleteStatus="showDeleteModal"
     :showTransferModal="showTransferModal"
     :deatailStatus="statusDetail"
-    @closeCancle="closeCancle"
+    @closeCancel="closeCancel"
     @closeDeleteStatus="closeDeleteModal"
     @closeTransferStatus="closeTransfereModal"
   />
