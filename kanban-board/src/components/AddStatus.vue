@@ -78,7 +78,7 @@ const changeStatus = computed(() => {
   } else if (trimmedNameEmpthy) {
     errorStatus.value.name = "Name is require."
   } else if (nameUnique) {
-    errorStatus.value.name = "Name already exists."
+    errorStatus.value.name = "Status name must be uniques, please choose another name."
   } else {
     errorStatus.value.name = ""
   }
