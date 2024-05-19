@@ -17,6 +17,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ErrorResponse;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
+import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
 
 import java.util.List;
 
@@ -24,19 +25,19 @@ import java.util.List;
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(
-            HandlerMethodValidationException exception, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                "Validation error. Check 'errors' field for details.", request.getDescription(false));
-        List<ParameterValidationResult> paramNames = exception.getAllValidationResults();
-        for (ParameterValidationResult param : paramNames) {
-            errorResponse.addValidationError(param.getMethodParameter().getParameterName(),
-                    param.getResolvableErrors().get(0).getDefaultMessage()
-                            + " (" + param.getArgument().toString() + ")");
-        }
-        return ResponseEntity.unprocessableEntity().body(errorResponse);
-    }
+//    @ExceptionHandler(HandlerMethodValidationException.class)
+//    public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(
+//            HandlerMethodValidationException exception, WebRequest request) {
+//        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+//                "Validation error. Check 'errors' field for details.", request.getDescription(false));
+//        List<ParameterValidationResult> paramNames = exception.getAllValidationResults();
+//        for (ParameterValidationResult param : paramNames) {
+//            errorResponse.addValidationError(param.getMethodParameter().getParameterName(),
+//                    param.getResolvableErrors().get(0).getDefaultMessage()
+//                            + " (" + param.getArgument().toString() + ")");
+//        }
+//        return ResponseEntity.unprocessableEntity().body(errorResponse);
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -63,12 +64,19 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.BAD_REQUEST, request);
     }
 
-//    @ExceptionHandler(Exception.class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public ResponseEntity<ErrorResponse> handleAllUncaughtException
-//            (Exception exception, WebRequest request) {
-//        return buildErrorResponse(exception, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
-//    }
+    @ExceptionHandler(TaskLimitExceededException.class)
+    @ResponseStatus(HttpStatus.INSUFFICIENT_STORAGE)
+    public ResponseEntity<ErrorResponse> handleTaskLimitExceededException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, HttpStatus.INSUFFICIENT_STORAGE, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponse> handleAllUncaughtException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(
             Exception exception, HttpStatus httpStatus, WebRequest request) {
