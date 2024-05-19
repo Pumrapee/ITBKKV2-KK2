@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed , watch } from "vue"
+import { ref, defineProps, defineEmits, computed, watch } from "vue"
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../libs/fetchUtils"
 import { useLimitStore } from "../stores/limitStore"
@@ -9,12 +9,15 @@ const props = defineProps({
 })
 
 //ถ้าเปิด modal มาให้เซ็ตค่าตรงกับใน storeLimit
-watch(() => props.showLimitModal, (newVal) => {
-  if (newVal) {
-    isLimitEnabled.value = myLimit.getLimit().taskLimitEnabled
-    maxTasks.value = myLimit.getLimit().maxTasksPerStatus || 10
+watch(
+  () => props.showLimitModal,
+  (newVal) => {
+    if (newVal) {
+      isLimitEnabled.value = myLimit.getLimit().taskLimitEnabled
+      maxTasks.value = myLimit.getLimit().maxTasksPerStatus || 10
+    }
   }
-})
+)
 
 const myLimit = useLimitStore()
 const isLimitEnabled = ref(myLimit.getLimit().taskLimitEnabled)
@@ -145,6 +148,8 @@ const closeCancel = async () => {
             v-model="maxTasks"
             class="itbkk-max-task input input-bordered"
             placeholder="Enter max tasks"
+            min="0"
+            max="30"
           />
         </div>
 
