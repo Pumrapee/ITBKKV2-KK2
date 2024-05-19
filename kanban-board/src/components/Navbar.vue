@@ -20,7 +20,7 @@ const CancelAdd = () => {
   router.go(-1)
 }
 
-const closeAddModal = (statusCode) => {
+const closeAddModal = (statusCode, status) => {
   if (statusCode === 201) {
     showAdd.value = false
     router.go(-1)
@@ -53,6 +53,17 @@ const closeAddModal = (statusCode) => {
     modalAlert.value = {
       message: "An error has occurred, the task does not exist.",
       type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "4000")
+  }
+
+  if (statusCode === 507) {
+    modalAlert.value = {
+      message: `The status ${status} will have too many tasks.  Please make progress and update status of existing tasks first.`,
+      type: "warning",
       modal: true,
     }
     setTimeout(() => {
@@ -108,7 +119,7 @@ const showbtnDelete = () => {
 
   <AddTask
     @closeAddModal="closeAddModal"
-    @closeCancle="CancelAdd"
+    @closeCancel="CancelAdd"
     :showAdd="showAdd"
   />
 </template>

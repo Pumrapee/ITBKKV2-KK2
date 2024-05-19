@@ -63,7 +63,7 @@ const props = defineProps({
 
 <style scoped>
 .alert-warning {
-  background-color: rgb(255, 204, 0);
+  background-color: rgb(245, 201, 25);
 }
 .alert-success {
   background-color: rgb(65, 202, 50);
