@@ -1,11 +1,19 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed } from "vue"
+import { ref, defineProps, defineEmits, computed , watch } from "vue"
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../libs/fetchUtils"
 import { useLimitStore } from "../stores/limitStore"
 
 const props = defineProps({
   showLimitModal: Boolean,
+})
+
+//ถ้าเปิด modal มาให้เซ็ตค่าตรงกับใน storeLimit
+watch(() => props.showLimitModal, (newVal) => {
+  if (newVal) {
+    isLimitEnabled.value = myLimit.getLimit().taskLimitEnabled
+    maxTasks.value = myLimit.getLimit().maxTasksPerStatus || 10
+  }
 })
 
 const myLimit = useLimitStore()
@@ -101,20 +109,6 @@ const changeLimit = computed(() => {
 })
 
 const closeCancel = async () => {
-  // if (isLimitEnabled.value === true) {
-  //   const editedLimit = await editLimitStatus(
-  //     `${import.meta.env.VITE_API_URL}statuses`,
-  //     isLimitEnabled.value,
-  //     maxlimit
-  //   )
-  //   myLimit.addLimit(editedLimit)
-  //   emits("closeCancel")
-  // }
-
-  // if (isLimitEnabled.value === false) {
-  //   emits("closeCancel")
-  // }
-
   emits("closeCancel")
 }
 </script>
