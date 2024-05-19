@@ -107,7 +107,6 @@ async function editLimitStatus(url, boolean, maxLimit) {
       }
     )
     const editedLimit = await res.json()
-    console.log(editedLimit)
     return editedLimit
   } catch (error) {}
 }
