@@ -286,7 +286,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
             className="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-30"
           >
             <li v-for="status in myStatus.getStatus()">
-              <div className="form-control">
+              <div className="form-control" style="word-wrap: break-word">
                 <label className="label cursor-pointer">
                   <input
                     type="checkbox"
@@ -457,7 +457,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
 
   <!-- footer -->
   <footer
-    className=" bottom-0 left-0 right-0 footer items-center p-4 bg-blue-400 text-white font-semibold"
+    className="fixed bottom-0 left-0 right-0 footer items-center p-4 bg-blue-400 text-white font-semibold"
   >
     <aside className="items-center grid-flow-col">
       <img src="/icons/wand.png" class="w-10" />

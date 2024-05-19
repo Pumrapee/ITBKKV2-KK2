@@ -1,12 +1,12 @@
 <script setup>
-import TableStaus from "../components/TableStaus.vue"
+import TableStatus from "../components/TableStatus.vue"
 import Navbar from "../components/Navbar.vue"
 </script>
 
 <template>
   <div>
     <Navbar />
-    <TableStaus />
+    <TableStatus />
   </div>
 </template>
 
