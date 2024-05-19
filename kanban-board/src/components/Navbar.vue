@@ -36,7 +36,7 @@ const closeAddModal = (statusCode, status) => {
 
   if (statusCode === 400) {
     showAdd.value = false
-    router.go(-1)
+    router.push({ name: "task" })
     modalAlert.value = {
       message: "An error has occurred, the task does not exist.",
       type: "error",
