@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
 import sit.int221.kanbanapi.entities.Status;
-import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.repositories.StatusRepository;
 
@@ -38,6 +37,7 @@ public class StatusService {
     @Transactional
     public Status removeStatus(Integer id) {
         Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
             throw new BadRequestException("Deletion of record with No Status is not allowed.");
         } else {
@@ -49,8 +49,10 @@ public class StatusService {
     @Transactional
     public Status updateStatus(Integer id, Status status) {
         Status existingStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
             throw new BadRequestException("Updation of record with No Status is not allowed.");
+
         } else {
             existingStatus.setName(status.getName());
             existingStatus.setDescription(status.getDescription());
@@ -61,13 +63,16 @@ public class StatusService {
 
     public Status getStatusByName(String statusName) {
         try {
+
             Integer statusId = Integer.parseInt(statusName);
             return repository.findById(statusId).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
         } catch (NumberFormatException e) {
             if (statusName == null || statusName.isBlank()) {
-                return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+                return repository.findByName("No Status").orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
             }
-            return repository.findByName(statusName).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+            return repository.findByName(statusName).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        } catch (Exception ex) {
+            throw new ItemNotFoundException("NOT FOUND");
         }
     }
 }

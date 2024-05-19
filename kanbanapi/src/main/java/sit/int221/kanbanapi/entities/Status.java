@@ -2,10 +2,6 @@ package sit.int221.kanbanapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,20 +16,12 @@ public class Status {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "statusId")
     private Integer id;
-
-    @NotNull(message = "Status name cannot be null")
-    @NotBlank(message = "Status name cannot be blank")
-    @Size(max = 50, message = "Status name must be at most 50 characters long")
-    @Column(name = "statusName", unique = true, nullable = false)
+    @Column(name = "statusName", nullable = false, unique = true)
     private String name;
-
-    @Size(max = 200, message = "Status description must be at most 200 characters long")
     @Column(name = "statusDescription")
     private String description;
-
-    @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Status color must be a valid hex color code")
-    @Column(name = "statusColor", nullable = false)
-    private String color = "#ffffff";
+    @Column(name = "statusColor")
+    private String color = "#FFFFFF";
 
     public void setName(String name) {
         if (name != null) {
@@ -57,7 +45,7 @@ public class Status {
 
     public void setColor(String color) {
         if (color == null || color.isBlank() || color.length() != 7) {
-            color = "#ffffff";
+            color = "#FFFFFF";
         }
         this.color = color;
     }

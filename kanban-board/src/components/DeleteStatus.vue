@@ -19,7 +19,7 @@ const filteredStatus = computed(() => {
   return myStatus.getStatus().filter(status => status.id !== props.deatailStatus.id)
 })
 
-const emits = defineEmits(["closeDeleteStatus", "closeCancle" , "closeTransferStatus"])
+const emits = defineEmits(["closeDeleteStatus", "closeCancel" , "closeTransferStatus"])
 
 const confirmDelete = async () => {
     const deleteItem = await deleteItemById(
@@ -52,8 +52,6 @@ const transferTasks = async() =>{
     if(newStatus === 404){
         myStatus.removeStatus(filteredStatus.id)
         const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
-        myTask.clearTask()
-        myTask.addTasks(listTasks)
         emits("closeTransferStatus",newStatus)
     }
 }
@@ -82,7 +80,7 @@ const transferTasks = async() =>{
           >
             Confirm
           </button>
-          <button class="itbkk-button-cancel btn" @click="$emit('closeCancle')">
+          <button class="itbkk-button-cancel btn" @click="$emit('closeCancel')">
             Cancel
           </button>
         </div>
@@ -109,7 +107,7 @@ const transferTasks = async() =>{
 
         <div class="mt-4 flex justify-end">
           <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()">Transfer</button>
-          <button class="itbkk-button-cancel btn" @click="$emit('closeCancle')">Cancel</button>
+          <button class="itbkk-button-cancel btn" @click="$emit('closeCancel')">Cancel</button>
         </div>
       </div>
     </div>
