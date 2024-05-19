@@ -7,7 +7,7 @@ const { showAddStatus } = defineProps({
   showAddStatus: Boolean,
 })
 
-const emits = defineEmits(["closeAddStatus", "closeCancelStatus"])
+const emits = defineEmits(["closeAddStatus", "closeCancleStatus"])
 
 const newStatus = ref({
   name: "",
@@ -57,11 +57,11 @@ const saveStatus = async () => {
   }
 }
 
-const cancelStatus = () => {
+const cancleStatus = () => {
   newStatus.value.name = ""
   newStatus.value.description = ""
   newStatus.value.color = "#FFFFFF"
-  emits("closeCancelStatus")
+  emits("closeCancleStatus")
 }
 
 const changeStatus = computed(() => {
@@ -176,8 +176,8 @@ const changeStatus = computed(() => {
           Save
         </button>
         <button
-          @click="cancelStatus"
-          class="itbkk-button-cancel btn bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
+          @click="cancleStatus"
+          class="itbkk-button-cancle btn bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
         >
           Cancel
         </button>

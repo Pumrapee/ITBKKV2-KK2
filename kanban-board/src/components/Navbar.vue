@@ -108,7 +108,7 @@ const showbtnDelete = () => {
 
   <AddTask
     @closeAddModal="closeAddModal"
-    @closeCancel="CancelAdd"
+    @closeCancle="CancelAdd"
     :showAdd="showAdd"
   />
 </template>

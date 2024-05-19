@@ -2,6 +2,9 @@ package sit.int221.kanbanapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,10 +19,17 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "taskId")
     private Integer id;
-    @Column(name = "taskTitle")
+
+    @NotBlank(message = "Task title cannot be blank")
+    @Size(max = 100, message = "Task title must be at most 100 characters long")
+    @Column(name = "taskTitle", nullable = false)
     private String title;
+
+    @Size(max = 500, message = "Task description must be at most 500 characters long")
     @Column(name = "taskDescription")
     private String description;
+
+    @Size(max = 30, message = "Task assignees must be at most 30 characters long")
     @Column(name = "taskAssignees")
     private String assignees;
     @ManyToOne

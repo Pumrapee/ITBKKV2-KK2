@@ -12,7 +12,7 @@ const props = defineProps({
   detailDelete: Object,
 })
 
-const emits = defineEmits(["closeDeleteTask", "cancelDelete"])
+const emits = defineEmits(["closeDeleteTask", "cancleDelete"])
 
 const confirmDelete = async () => {
   const deleteItem = await deleteItemById(
@@ -32,7 +32,7 @@ const confirmDelete = async () => {
 }
 
 const cancelDelete = () => {
-  emits("cancelDelete")
+  emits("cancleDelete")
 }
 </script>
 

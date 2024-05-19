@@ -24,7 +24,7 @@ const { showbtnDelete } = defineProps({
 //โชว์ add delete บน navbar
 myTask.showNavbar = true
 
-const closeCancel = () => {
+const closeCancle = () => {
   if (showEditModal.value === true) {
     showEditModal.value = false
     router.go(-1)
@@ -33,6 +33,15 @@ const closeCancel = () => {
 }
 const closeEditModal = (statusCode) => {
   if (statusCode === 200) {
+    myTask.updateTask(
+      task.id,
+      task.title,
+      task.description,
+      task.assignees,
+      task.status,
+      task.createdTime,
+      task.updatedTime
+    )
     showEditModal.value = false
     router.go(-1)
     modalAlert.value = {
@@ -185,7 +194,7 @@ watch(
 
 <template>
   <EditTask
-    @closeModal="closeCancel"
+    @closeModal="closeCancle"
     @closeEditTask="closeEditModal"
     :showModal="showEditModal"
     :task="task"
@@ -193,7 +202,7 @@ watch(
   <Delete
     :showDelete="showDeleteModal"
     :detailDelete="listdelete"
-    @cancelDelete="closeCancel"
+    @cancleDelete="closeCancle"
     @closeDeleteTask="closeDeleteModal"
   />
 
@@ -203,26 +212,19 @@ watch(
       <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
 
       <div class="flex items-center">
-        <div class="" v-if="filterStatus.length > 0">
-          <button
-            class="btn btn-outline text-blue-500 font-light hover:bg-blue-400 hover:border-blue-400"
-            @click="clearFilter"
-          >
-            <div class="flex items-center">
-              <img src="/icons/close.png" class="w-3" />
-            </div>
-
+        <div class="text-sm pr-2" v-if="filterStatus.length > 0">
+          <button class="text-red-500" @click="clearFilter">
+            Clear filter
           </button>
         </div>
         <details className="dropdown dropdown-end">
-          <summary className="m-1 btn bg-pink-400 text-white">
-            <img src="/icons/filter.png" class="w-6" />
-
+          <summary className="m-1 btn">
+            <img src="/icons/filter.png" class="w-4" />
             Filter
           </summary>
           <ul
             tabIndex="{0}"
-            className="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-30"
+            className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-30"
           >
             <li v-for="status in myStatus.getStatus()">
               <div className="form-control">
@@ -234,14 +236,7 @@ watch(
                     className="checkbox mr-2"
                     v-model="filterStatus"
                   />
-                  <div
-                    class="rounded-md p-2 text-black w-36 text-center mb-2"
-                    :style="{
-                      'background-color': myStatus.getStatusColor(status.name),
-                    }"
-                  >
-                    <span className="label-text">{{ status.name }}</span>
-                  </div>
+                  <span className="label-text">{{ status.name }}</span>
                 </label>
               </div>
             </li>
@@ -249,9 +244,7 @@ watch(
         </details>
 
         <RouterLink :to="{ name: 'tableStatus' }">
-          <button class="itbkk-manage-status btn text-l bg-pink-400 text-white">
-            Manage Status
-          </button>
+          <button class="itbkk-manage-status btn text-l">Manage Status</button>
         </RouterLink>
       </div>
     </div>
@@ -370,7 +363,7 @@ watch(
                 v-if="showbtnDelete"
                 class="itbkk-button-delete btn bg-red-500"
               >
-                <img src="/icons/delete.png" class="w-5" />
+                <img src="/icons/delete.png" class="w-4" />
               </button>
             </td>
           </tr>
@@ -385,21 +378,6 @@ watch(
       </table>
     </div>
   </div>
-
-  <!-- footer -->
-  <footer
-    className="bottom-0 left-0 right-0 footer items-center p-4 bg-blue-400 text-white font-semibold"
-  >
-    <aside className="items-center grid-flow-col">
-      <img src="/icons/wand.png" class="w-10" />
-      <p>Integrated Project By KK2 since 2024</p>
-    </aside>
-    <nav
-      className="grid-flow-col gap-4 md:place-self-center md:justify-self-end"
-    >
-      <img src="/icons/logosit.png" class="w-24" />
-    </nav>
-  </footer>
 
   <!-- Alert -->
   <AlertComponent

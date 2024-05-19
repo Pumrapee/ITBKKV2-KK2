@@ -44,7 +44,7 @@ const openDeleteStatus = async (id, name) => {
   }
 }
 
-const closeCancel = () => {
+const closeCancle = () => {
   if (showDeleteModal.value === true) {
     showDeleteModal.value = false
   }
@@ -200,26 +200,11 @@ const openEditStatus = async (idStatus) => {
           <li>Task Status</li>
         </ul>
       </div>
-      <div class="flex items-center">
-        <RouterLink :to="{ name: 'task' }">
-          <button
-            @click="openAddStatus"
-            class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
-          >
-            <img src="/icons/home.png" class="w-4" />
-            Home
-          </button>
-        </RouterLink>
-        <RouterLink :to="{ name: 'AddStatus' }">
-          <button
-            @click="openAddStatus"
-            class="itbkk-button-home btn bg-blue-400 text-white"
-          >
-            <img src="/icons/plus.png" class="w-4" />
-            Add Status
-          </button>
-        </RouterLink>
-      </div>
+      <RouterLink :to="{ name: 'AddStatus' }">
+        <button @click="openAddStatus" class="itbkk-button-home btn">
+          Add status
+        </button>
+      </RouterLink>
     </div>
 
     <!-- Task Table -->
@@ -293,19 +278,19 @@ const openEditStatus = async (idStatus) => {
   <EditStatus
     :showEditStatus="showEditModal"
     @closeEditStatus="closeEditModal"
-    @closeCancelStatus="closeCancel"
+    @closeCancleStatus="closeCancle"
     :taskStatus="statusItems"
   />
   <AddStatus
     :showAddStatus="showAddModal"
     @closeAddStatus="closeAddModal"
-    @closeCancelStatus="closeCancel"
+    @closeCancleStatus="closeCancle"
   />
   <DeleteStatus
     :showDeleteStatus="showDeleteModal"
     :showTransferModal="showTransferModal"
     :deatailStatus="statusDetail"
-    @closeCancel="closeCancel"
+    @closeCancle="closeCancle"
     @closeDeleteStatus="closeDeleteModal"
     @closeTransferStatus="closeTransfereModal"
   />

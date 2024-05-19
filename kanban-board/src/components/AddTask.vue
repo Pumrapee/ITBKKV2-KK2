@@ -10,7 +10,7 @@ const { showAdd } = defineProps({
 
 const myStatus = useStatusStore()
 
-const emits = defineEmits(["closeAddModal", "closeCancel"])
+const emits = defineEmits(["closeAddModal", "closeCancle"])
 
 const selected = ref()
 selected.value = "No Status"
@@ -83,7 +83,7 @@ const saveNewTask = async () => {
   }
 }
 
-const cancelModal = () => {
+const cancleModal = () => {
   // ทำการเคลียร์ค่าในฟอร์ม
   listNewTask.value.title = ""
   listNewTask.value.description = ""
@@ -91,7 +91,7 @@ const cancelModal = () => {
   listNewTask.value.status = selected.value
 
   // ปิด Modal
-  emits("closeCancel")
+  emits("closeCancle")
 }
 
 const changeTitle = computed(() => {
@@ -245,8 +245,8 @@ const changeTitle = computed(() => {
             >
               Save
             </button>
-            <button class="itbkk-button-cancel btn" @click="cancelModal">
-              Cancel
+            <button class="itbkk-button-cancle btn" @click="cancleModal">
+              Close
             </button>
           </div>
         </div>

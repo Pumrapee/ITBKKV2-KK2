@@ -288,10 +288,10 @@ watch(props, () => {
               Save
             </button>
             <button
-              class="itbkk-button-cancel btn"
+              class="itbkk-button-cancle btn"
               @click="$emit('closeModal')"
             >
-              Cancel
+              Close
             </button>
           </div>
         </div>
