@@ -216,7 +216,7 @@ watch(
         </div>
         <details className="dropdown dropdown-end">
           <summary className="m-1 btn bg-pink-400 text-white">
-            <img src="/icons/filter.png" class="w-4" />
+            <img src="/icons/filter.png" class="w-6" />
 
             Filter
           </summary>
