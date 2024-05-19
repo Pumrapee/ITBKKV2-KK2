@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone="UTC")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone="UTC")
     private OffsetDateTime timestamp = OffsetDateTime.now();
     private final int status;
     private final String message;
