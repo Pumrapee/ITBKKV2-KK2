@@ -457,7 +457,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
 
   <!-- footer -->
   <footer
-    className=" bottom-0 left-0 right-0 footer items-center p-4 bg-blue-400 text-white font-semibold"
+    className="fixed bottom-0 left-0 right-0 footer items-center p-4 bg-blue-400 text-white font-semibold"
   >
     <aside className="items-center grid-flow-col">
       <img src="/icons/wand.png" class="w-10" />

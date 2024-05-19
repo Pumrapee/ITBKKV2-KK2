@@ -24,7 +24,6 @@ onMounted(async () => {
     `${import.meta.env.VITE_API_URL}statuses`
   )
   myLimit.addLimit(limitStatus)
-  console.log(myLimit.getLimit())
 })
 </script>
 
