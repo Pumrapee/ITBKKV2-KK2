@@ -9,7 +9,7 @@ const props = defineProps({
   showEditStatus: Boolean,
   taskStatus: Object,
 })
-const emits = defineEmits(["closeEditStatus", "closeCancleStatus"])
+const emits = defineEmits(["closeEditStatus", "closeCancelStatus"])
 
 const newStatus = ref({})
 const myStatus = useStatusStore()
@@ -208,8 +208,8 @@ watch(props, () => {
           Save
         </button>
         <button
-          @click="$emit('closeCancleStatus')"
-          class="itbkk-button-cancle bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
+          @click="$emit('closeCancelStatus')"
+          class="itbkk-button-cancel bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
         >
           Cancel
         </button>
