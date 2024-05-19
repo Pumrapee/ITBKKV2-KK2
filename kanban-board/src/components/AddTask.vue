@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref, computed, onMounted } from "vue"
+import { defineProps, defineEmits, ref, computed } from "vue"
 import { addItem, getItems } from "../libs/fetchUtils"
 import { useTaskStore } from "../stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
@@ -74,6 +74,12 @@ const saveNewTask = async () => {
     const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
     myStatus.clearStatus()
     myStatus.addStatus(listStatus)
+
+    // ตอน add task แล้วแก้กด status ที่ลบไปจะขึ้น alert แต่ status ใน list task ยังเป็นอันเดิมอยู่
+    const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+    myTask.clearTask()
+    myTask.addTasks(listTasks)
+    emits("closeAddModal", statusCode)
 
     listNewTask.value.title = ""
     listNewTask.value.description = ""
