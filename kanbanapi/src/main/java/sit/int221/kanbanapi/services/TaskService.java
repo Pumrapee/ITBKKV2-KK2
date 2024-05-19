@@ -15,6 +15,9 @@ import sit.int221.kanbanapi.repositories.StatusRepository;
 import sit.int221.kanbanapi.repositories.TaskRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 @Service
 public class TaskService {
@@ -30,15 +33,23 @@ public class TaskService {
     }
 
     public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy) {
-        Sort sort = Sort.by(Sort.Order.asc(sortBy != null ? sortBy : "createdOn"));
+        String sortProperty = sortBy != null ? sortBy : "createdOn";
+        Sort sort = Sort.by(Sort.Order.asc(sortProperty));
         try {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
-                return repository.findByStatusNamesSorted(filterStatuses, sort);
+                try {
+                    List<Integer> statusIds = filterStatuses.stream()
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                    return repository.findByStatusIdSorted(statusIds, sort);
+                } catch (NumberFormatException e) {
+                    return repository.findByStatusNamesSorted(filterStatuses, sort);
+                }
             } else {
                 return repository.findAll(sort);
             }
         } catch (PropertyReferenceException e) {
-            throw new BadRequestException("Invalid sortBy parameter: " + sortBy);
+            throw new BadRequestException("Invalid sortBy parameter: " + sortProperty);
         }
     }
 
@@ -54,7 +65,7 @@ public class TaskService {
                 || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
             return repository.save(task);
         } else {
-            throw new TaskLimitExceededException("Task limit exceeded!!!");
+            throw new TaskLimitExceededException("The status " + task.getStatus().getName() + " has reached the task limit.");
         }
     }
 
@@ -76,7 +87,7 @@ public class TaskService {
             existingTask.setStatus(task.getStatus());
             return repository.save(existingTask);
         } else {
-            throw new TaskLimitExceededException("Task limit exceeded!!!");
+            throw new TaskLimitExceededException("The status " + task.getStatus().getName() + " has reached the task limit.");
         }
     }
 
@@ -96,7 +107,7 @@ public class TaskService {
                 throw new ItemNotFoundException("Bad Request");
             }
         } else {
-            throw new TaskLimitExceededException("Task limit exceeded!!!");
+            throw new TaskLimitExceededException("The destination status cannot be over the limit after transfer");
         }
     }
 

@@ -1,6 +1,5 @@
 package sit.int221.kanbanapi.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import sit.int221.kanbanapi.validates.UniqueStatusName;
 
 import java.util.List;
 
@@ -23,6 +23,7 @@ public class Status {
 
     @NotNull(message = "Status name cannot be null")
     @NotBlank(message = "Status name cannot be blank")
+    @UniqueStatusName
     @Size(max = 50, message = "Status name must be at most 50 characters long")
     @Column(name = "statusName", unique = true, nullable = false)
     private String name;
@@ -33,7 +34,7 @@ public class Status {
 
     @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Status color must be a valid hex color code")
     @Column(name = "statusColor", nullable = false)
-    private String color = "#ffffff";
+    private String color;
 
     public void setName(String name) {
         if (name != null) {

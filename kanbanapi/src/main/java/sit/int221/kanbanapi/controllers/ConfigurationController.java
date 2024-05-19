@@ -1,9 +1,13 @@
 package sit.int221.kanbanapi.controllers;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
@@ -27,7 +31,7 @@ public class ConfigurationController {
     }
 
     @PatchMapping("/statuses/limitTask")
-    public ResponseEntity<Object> updateConfig( @RequestParam boolean taskLimitEnabled, @RequestParam Integer maxTasksPerStatus) {
+    public ResponseEntity<Object> updateConfig(@RequestParam @NotNull boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
         try {
             configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);
             return new ResponseEntity(configService.getConfiguration(), HttpStatus.OK);

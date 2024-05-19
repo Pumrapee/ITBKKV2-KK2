@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.controllers;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ErrorResponse;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -25,30 +27,48 @@ import java.util.List;
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class GlobalExceptionHandler {
 
-//    @ExceptionHandler(HandlerMethodValidationException.class)
-//    public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(
-//            HandlerMethodValidationException exception, WebRequest request) {
-//        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-//                "Validation error. Check 'errors' field for details.", request.getDescription(false));
-//        List<ParameterValidationResult> paramNames = exception.getAllValidationResults();
-//        for (ParameterValidationResult param : paramNames) {
-//            errorResponse.addValidationError(param.getMethodParameter().getParameterName(),
-//                    param.getResolvableErrors().get(0).getDefaultMessage()
-//                            + " (" + param.getArgument().toString() + ")");
-//        }
-//        return ResponseEntity.unprocessableEntity().body(errorResponse);
-//    }
+    @ExceptionHandler({
+            MethodArgumentTypeMismatchException.class,
+            MethodArgumentNotValidException.class,
+            ConstraintViolationException.class,
+            HandlerMethodValidationException.class
+    })
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(Exception exception, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation error. Check 'errors' field for details.",
+                request.getDescription(false)
+        );
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException exception, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                "Validation error. Check 'errors' field for details.", request.getDescription(false));
-        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
-            errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+        if (exception instanceof MethodArgumentTypeMismatchException) {
+            MethodArgumentTypeMismatchException ex = (MethodArgumentTypeMismatchException) exception;
+            errorResponse.addValidationError(ex.getName(), ex.getValue() + " is not a valid " + ex.getParameter().getParameterName() +" value");
+        } else if (exception instanceof MethodArgumentNotValidException) {
+            MethodArgumentNotValidException ex = (MethodArgumentNotValidException) exception;
+            for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+                errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+            }
+        } else if (exception instanceof ConstraintViolationException) {
+            ConstraintViolationException ex = (ConstraintViolationException) exception;
+            ex.getConstraintViolations().forEach(violation -> {
+                errorResponse.addValidationError(
+                        violation.getPropertyPath().toString(),
+                        violation.getMessage() + " (" + violation.getInvalidValue() + ")"
+                );
+            });
+        } else if (exception instanceof HandlerMethodValidationException) {
+            HandlerMethodValidationException ex = (HandlerMethodValidationException) exception;
+            List<ParameterValidationResult> paramNames = ex.getAllValidationResults();
+            for (ParameterValidationResult param : paramNames) {
+                errorResponse.addValidationError(
+                        param.getMethodParameter().getParameterName(),
+                        param.getResolvableErrors().get(0).getDefaultMessage()
+                                + " (" + param.getArgument().toString() + ")"
+                );
+            }
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
     @ExceptionHandler(ItemNotFoundException.class)
