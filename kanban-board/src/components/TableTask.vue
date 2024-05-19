@@ -211,6 +211,7 @@ watch(
             <div class="flex items-center">
               <img src="/icons/close.png" class="w-3" />
             </div>
+
           </button>
         </div>
         <details className="dropdown dropdown-end">
