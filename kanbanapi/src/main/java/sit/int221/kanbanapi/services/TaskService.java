@@ -14,6 +14,7 @@ import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
 import sit.int221.kanbanapi.repositories.StatusRepository;
 import sit.int221.kanbanapi.repositories.TaskRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,21 @@ public class TaskService {
         Sort sort = Sort.by(Sort.Order.asc(sortProperty));
         try {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
-                try {
-                    List<Integer> statusIds = filterStatuses.stream()
-                            .map(Integer::parseInt)
-                            .collect(Collectors.toList());
-                    return repository.findByStatusIdSorted(statusIds, sort);
-                } catch (NumberFormatException e) {
-                    return repository.findByStatusNamesSorted(filterStatuses, sort);
+                List<Integer> statusIds = new ArrayList<>();
+                List<String> statusNames = new ArrayList<>();
+
+                for (String status : filterStatuses) {
+                    try {
+                        statusIds.add(Integer.parseInt(status));
+                    } catch (NumberFormatException e) {
+                        statusNames.add(status);
+                    }
+                }
+
+                if (!statusIds.isEmpty() || !statusNames.isEmpty()) {
+                    return repository.findByStatusIdsAndNamesSorted(statusIds, statusNames, sort);
+                } else {
+                    return repository.findAll(sort);
                 }
             } else {
                 return repository.findAll(sort);

@@ -23,8 +23,6 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     @Query("SELECT COUNT(t) FROM Task t WHERE t.status.name != 'No Status' and t.status.name != 'Done' GROUP BY t.status.id")
     List<Integer> countTasksByStatus();
 
-    @Query("SELECT t FROM Task t JOIN t.status s WHERE s.id IN :filterStatuses")
-    List<Task> findByStatusIdSorted(@Param("filterStatuses") List<Integer> filterStatuses, Sort sort);
-    @Query("SELECT t FROM Task t JOIN t.status s WHERE s.name IN :filterStatuses")
-    List<Task> findByStatusNamesSorted(@Param("filterStatuses") List<String> filterStatuses, Sort sort);
+    @Query("SELECT t FROM Task t JOIN t.status s WHERE s.id IN :filterStatusIds OR s.name IN :filterStatusNames")
+    List<Task> findByStatusIdsAndNamesSorted(List<Integer> filterStatusIds, List<String> filterStatusNames, Sort sort);
 }

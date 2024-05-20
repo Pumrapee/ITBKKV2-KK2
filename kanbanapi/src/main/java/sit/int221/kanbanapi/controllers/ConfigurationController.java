@@ -18,19 +18,19 @@ import sit.int221.kanbanapi.services.TaskService;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/statuses")
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class ConfigurationController {
     @Autowired
     private ConfigService configService;
 
-    @GetMapping("/statuses/limitTask")
+    @GetMapping("/maximum-task")
     public ResponseEntity<Object> getConfig() {
         StatusConfiguration config = configService.getConfiguration();
         return new ResponseEntity(config, HttpStatus.OK);
     }
 
-    @PatchMapping("/statuses/limitTask")
+    @PatchMapping("/maximum-task")
     public ResponseEntity<Object> updateConfig(@RequestParam @NotNull boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
         try {
             configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);

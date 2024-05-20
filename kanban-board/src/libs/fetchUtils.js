@@ -9,7 +9,7 @@ async function getItems(url) {
 
 async function getStatusLimits(url) {
   try {
-    const data = await fetch(`${url}/limitTask`) //GET Method
+    const data = await fetch(`${url}/maximum-task`) //GET Method
     const items = await data.json()
     return items
   } catch (error) {}
@@ -98,7 +98,7 @@ async function editItem(url, id, editItem) {
 async function editLimitStatus(url, boolean, maxLimit) {
   try {
     const res = await fetch(
-      `${url}/limitTask?taskLimitEnabled=${boolean}&maxTasksPerStatus=${maxLimit}`,
+      `${url}/maximum-task?taskLimitEnabled=${boolean}&maxTasksPerStatus=${maxLimit}`,
       {
         method: "PATCH",
         headers: {
