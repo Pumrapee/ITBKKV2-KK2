@@ -15,7 +15,7 @@ public class UniqueStatusNameValidator implements ConstraintValidator<UniqueStat
     @Override
     public boolean isValid(String statusName, ConstraintValidatorContext context) {
         if (statusName == null || statusName.isBlank()) {
-            return true; // Not the responsibility of this validator to check for null/blank
+            return true;
         }
         return !statusRepository.existsByName(statusName);
     }

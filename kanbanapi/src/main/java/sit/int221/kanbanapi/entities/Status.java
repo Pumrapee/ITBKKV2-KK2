@@ -23,7 +23,7 @@ public class Status {
 
     @NotNull(message = "Status name cannot be null")
     @NotBlank(message = "Status name cannot be blank")
-    @UniqueStatusName
+//    @UniqueStatusName
     @Size(max = 50, message = "Status name must be at most 50 characters long")
     @Column(name = "statusName", unique = true, nullable = false)
     private String name;
@@ -34,7 +34,7 @@ public class Status {
 
     @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Status color must be a valid hex color code")
     @Column(name = "statusColor", nullable = false)
-    private String color;
+    private String color = "#ffffff";
 
     public void setName(String name) {
         if (name != null) {
