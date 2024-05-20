@@ -36,7 +36,11 @@ public class ConfigurationController {
             configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);
             return new ResponseEntity(configService.getConfiguration(), HttpStatus.OK);
         } catch (IOException ex) {
-            throw new BadRequestException("config wrong");
+            if (configService.getConfiguration().getTaskLimitEnabled() == taskLimitEnabled && configService.getConfiguration().getMaxTasksPerStatus() == maxTasksPerStatus) {
+                return new ResponseEntity(configService.getConfiguration(), HttpStatus.OK);
+            } else {
+                throw new BadRequestException("config wrong");
+            }
         }
     }
 }
