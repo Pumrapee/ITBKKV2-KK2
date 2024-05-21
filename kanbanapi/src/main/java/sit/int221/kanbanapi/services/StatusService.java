@@ -43,7 +43,7 @@ public class StatusService {
     public Status removeStatus(Integer id) {
         Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
-            throw new BadRequestException("The status name '"+ status.getName() + "' cannot be changed.");
+            throw new BadRequestException("The status name '"+ status.getName() + "' cannot be deleted.");
         } else {
             repository.delete(status);
             return status;
@@ -54,7 +54,7 @@ public class StatusService {
     public Status updateStatus(Integer id, Status status) {
         Status existingStatus = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(existingStatus.getName())) {
-            throw new BadRequestException("The status name '" + existingStatus.getName() + "' cannot be deleted.");
+            throw new BadRequestException("The status name '" + existingStatus.getName() + "' cannot be changed.");
         }
         if (repository.existsByNameAndIdNot(status.getName(), id)) {
             throw new BadRequestException("Status name must be unique");
