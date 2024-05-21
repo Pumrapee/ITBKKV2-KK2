@@ -2,6 +2,7 @@ package sit.int221.kanbanapi.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,19 +28,22 @@ public class StatusService {
 
     public Status getStatusById(Integer id) {
         return repository.findById(id).orElseThrow(
-                () -> new ItemNotFoundException("Status id " + id + " does not exist !!!"));
+                () -> new ItemNotFoundException("Status " + id + " does not exist !!!"));
     }
 
     @Transactional
     public Status createStatus(Status status) {
+        if (repository.existsByName(status.getName())) {
+            throw new BadRequestException("Status name must be unique");
+        }
         return repository.save(status);
     }
 
     @Transactional
     public Status removeStatus(Integer id) {
-        Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
-            throw new BadRequestException("Deletion of record with No Status is not allowed.");
+            throw new BadRequestException("The status name '"+ status.getName() + "' cannot be changed.");
         } else {
             repository.delete(status);
             return status;
@@ -48,26 +52,29 @@ public class StatusService {
 
     @Transactional
     public Status updateStatus(Integer id, Status status) {
-        Status existingStatus = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
-            throw new BadRequestException("Updation of record with No Status is not allowed.");
-        } else {
-            existingStatus.setName(status.getName());
-            existingStatus.setDescription(status.getDescription());
-            existingStatus.setColor(status.getColor());
-            return repository.save(existingStatus);
+        Status existingStatus = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
+        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(existingStatus.getName())) {
+            throw new BadRequestException("The status name '" + existingStatus.getName() + "' cannot be deleted.");
         }
+        if (repository.existsByNameAndIdNot(status.getName(), id)) {
+            throw new BadRequestException("Status name must be unique");
+        }
+        existingStatus.setName(status.getName());
+        existingStatus.setDescription(status.getDescription());
+        existingStatus.setColor(status.getColor());
+        return repository.save(existingStatus);
+
     }
 
     public Status getStatusByName(String statusName) {
         try {
             Integer statusId = Integer.parseInt(statusName);
-            return repository.findById(statusId).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+            return repository.findById(statusId).orElseThrow(() -> new BadRequestException( "Status "+ statusId + " does not exist"));
         } catch (NumberFormatException e) {
             if (statusName == null || statusName.isBlank()) {
-                return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+                return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("Status "+ statusName + " does not exist"));
             }
-            return repository.findByName(statusName).orElseThrow(() -> new BadRequestException("BAD REQUEST"));
+            return repository.findByName(statusName).orElseThrow(() -> new BadRequestException("Status "+ statusName + " does not exist"));
         }
     }
 }

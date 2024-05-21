@@ -20,16 +20,16 @@ public class Task {
     @Column(name = "taskId")
     private Integer id;
 
-    @NotBlank(message = "Task title cannot be blank")
-    @Size(max = 100, message = "Task title must be at most 100 characters long")
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "taskTitle", nullable = false)
     private String title;
 
-    @Size(max = 500, message = "Task description must be at most 500 characters long")
+    @Size(max = 500)
     @Column(name = "taskDescription")
     private String description;
 
-    @Size(max = 30, message = "Task assignees must be at most 30 characters long")
+    @Size(max = 30)
     @Column(name = "taskAssignees")
     private String assignees;
     @ManyToOne

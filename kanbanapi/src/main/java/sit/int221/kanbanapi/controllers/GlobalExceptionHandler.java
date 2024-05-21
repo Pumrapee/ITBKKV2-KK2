@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,7 +32,8 @@ public class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException.class,
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class,
-            HandlerMethodValidationException.class
+            HandlerMethodValidationException.class,
+            MissingServletRequestParameterException.class
     })
     public ResponseEntity<ErrorResponse> handleValidationExceptions(Exception exception, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
@@ -42,7 +44,7 @@ public class GlobalExceptionHandler {
 
         if (exception instanceof MethodArgumentTypeMismatchException) {
             MethodArgumentTypeMismatchException ex = (MethodArgumentTypeMismatchException) exception;
-            errorResponse.addValidationError(ex.getName(), ex.getValue() + " is not a valid " + ex.getParameter().getParameterName() +" value");
+            errorResponse.addValidationError(ex.getName(), ex.getValue() + " is not a valid " + ex.getParameter().getParameterType() +" value");
         } else if (exception instanceof MethodArgumentNotValidException) {
             MethodArgumentNotValidException ex = (MethodArgumentNotValidException) exception;
             for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
@@ -66,6 +68,11 @@ public class GlobalExceptionHandler {
                                 + " (" + param.getArgument().toString() + ")"
                 );
             }
+        } else if (exception instanceof  MissingServletRequestParameterException) {
+            MissingServletRequestParameterException ex = (MissingServletRequestParameterException) exception;
+            String paramName = ex.getParameterName();
+            String paramType = ex.getParameterType();
+            errorResponse.addValidationError(paramName, "Missing required parameter of type " + paramType);
         }
 
         return ResponseEntity.badRequest().body(errorResponse);

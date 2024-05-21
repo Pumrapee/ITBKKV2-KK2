@@ -38,22 +38,23 @@ public class TaskService {
         Sort sort = Sort.by(Sort.Order.asc(sortProperty));
         try {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
-                List<Integer> statusIds = new ArrayList<>();
-                List<String> statusNames = new ArrayList<>();
-
-                for (String status : filterStatuses) {
-                    try {
-                        statusIds.add(Integer.parseInt(status));
-                    } catch (NumberFormatException e) {
-                        statusNames.add(status);
-                    }
-                }
-
-                if (!statusIds.isEmpty() || !statusNames.isEmpty()) {
-                    return repository.findByStatusIdsAndNamesSorted(statusIds, statusNames, sort);
-                } else {
-                    return repository.findAll(sort);
-                }
+//                List<Integer> statusIds = new ArrayList<>();
+//                List<String> statusNames = new ArrayList<>();
+//
+//                for (String status : filterStatuses) {
+//                    try {
+//                        statusIds.add(Integer.parseInt(status));
+//                    } catch (NumberFormatException e) {
+//                        statusNames.add(status);
+//                    }
+//                }
+//
+//                if (!statusIds.isEmpty() || !statusNames.isEmpty()) {
+//                    return repository.findByStatusIdsAndNamesSorted(statusIds, statusNames, sort);
+//                } else {
+//                    return repository.findAll(sort);
+//                }
+                return repository.findByStatusNamesSorted(filterStatuses, sort);
             } else {
                 return repository.findAll(sort);
             }
@@ -102,19 +103,18 @@ public class TaskService {
 
     @Transactional
     public void transferTaskStatus(Integer id, Integer newId) {
-        Status oldStatus = statusRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        Status newStatus = statusRepository.findById(newId).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        if (id == newId) {
+            throw new BadRequestException("destination status for task transfer must be different from current status");
+        }
+        Status oldStatus = statusRepository.findById(id).orElseThrow(() -> new BadRequestException("The specified status for task transfer does not exist"));
+        Status newStatus = statusRepository.findById(newId).orElseThrow(() -> new BadRequestException("The specified status for task transfer does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())){
-            throw new BadRequestException("Bad Request");
+            throw new BadRequestException("The status name '"+ oldStatus.getName() + "' cannot be transfered");
         }
         if (!configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())
                 && configuration.getNonLimitedUpdatableDeletableStatuses().contains(newStatus.getName())
                 || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
-            try {
-                repository.transferTaskStatus(id, newId);
-            } catch (Exception ex) {
-                throw new ItemNotFoundException("Bad Request");
-            }
+            repository.transferTaskStatus(id, newId);
         } else {
             throw new TaskLimitExceededException("The destination status cannot be over the limit after transfer");
         }

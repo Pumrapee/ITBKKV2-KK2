@@ -1,6 +1,7 @@
 package sit.int221.kanbanapi.dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -12,15 +13,16 @@ import lombok.Setter;
 public class TaskCreateUpdateDTO {
     private Integer id;
 
-    @NotNull(message = "Task title cannot be null")
-    @NotBlank(message = "Task title cannot be blank")
-    @Size(max = 100, message = "Task title must be at most 100 characters long")
+    @NotNull
+    @NotBlank
+    @NotEmpty
+    @Size(max = 100)
     private String title;
 
-    @Size(max = 500, message = "Task description must be at most 500 characters long")
+    @Size(max = 500)
     private String description;
 
-    @Size(max = 30, message = "Task assignees must be at most 30 characters long")
+    @Size(max = 30)
     private String assignees;
     private String status;
 }

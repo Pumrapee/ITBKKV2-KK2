@@ -60,12 +60,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskCreateUpdateDTO task, @PathVariable Integer id) {
         Task newTask = modelMapper.map(task, Task.class);
-        try {
-            Integer statusId = Integer.parseInt(task.getStatus());
-            newTask.setStatus(statusService.getStatusById(statusId));
-        } catch (NumberFormatException e) {
-            newTask.setStatus(statusService.getStatusByName(task.getStatus()));
-        }
+        newTask.setStatus(statusService.getStatusByName(task.getStatus()));
         Task updatedTask = taskService.updateTask(id, newTask);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(updatedTask, TaskCreateUpdateDTO.class);
         taskDTO.setStatus(updatedTask.getStatus().getName());

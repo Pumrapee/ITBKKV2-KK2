@@ -7,9 +7,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import sit.int221.kanbanapi.validates.UniqueStatusName;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -21,18 +18,17 @@ public class Status {
     @Column(name = "statusId")
     private Integer id;
 
-    @NotNull(message = "Status name cannot be null")
-    @NotBlank(message = "Status name cannot be blank")
-//    @UniqueStatusName
-    @Size(max = 50, message = "Status name must be at most 50 characters long")
+    @NotNull
+    @NotBlank
+    @Size(max = 50)
     @Column(name = "statusName", unique = true, nullable = false)
     private String name;
 
-    @Size(max = 200, message = "Status description must be at most 200 characters long")
+    @Size(max = 200)
     @Column(name = "statusDescription")
     private String description;
 
-    @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Status color must be a valid hex color code")
+    @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "must be a valid hex color code")
     @Column(name = "statusColor", nullable = false)
     private String color = "#ffffff";
 
