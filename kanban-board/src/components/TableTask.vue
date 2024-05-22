@@ -275,7 +275,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
             </div>
           </button>
         </div>
-        <details className="dropdown dropdown-end">
+        <details className="dropdown dropdown-end itbkk-status-filter">
           <summary className="m-1 btn bg-pink-400 text-white">
             <img src="/icons/filter.png" class="w-6" />
 
@@ -285,7 +285,10 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
             tabIndex="{0}"
             className="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-30"
           >
-            <li v-for="status in myStatus.getStatus()">
+            <li
+              v-for="status in myStatus.getStatus()"
+              class="itbkk-status-choice"
+            >
               <div className="form-control" style="word-wrap: break-word">
                 <label className="label cursor-pointer">
                   <input
@@ -335,7 +338,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
             <th class="pl-20">
               <button
                 @click="handleSortChange(sortStatus)"
-                class="btn btn-ghost"
+                class="btn btn-ghost itbkk-status-sort"
               >
                 <div class="">Status</div>
                 <div class="">
@@ -406,7 +409,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
             class="itbkk-item"
           >
             <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
-            <td class="itbkk-title itbkk-button-action itbkk-button-edit pl-20">
+            <td class="itbkk-title itbkk-button-edit pl-20">
               <router-link :to="{ name: 'edit', params: { id: task.id } }">
                 <button
                   @click="openModal(task.id)"
@@ -437,7 +440,7 @@ const closeLimitModal = (maxlimit, limintBoolean, statusIsNotLimit) => {
               <button
                 @click="openDeleteModal(task.id, task.title, index)"
                 v-if="showbtnDelete"
-                class="itbkk-button-delete btn bg-red-500"
+                class="itbkk-button-action itbkk-button-delete btn bg-red-500"
               >
                 <img src="/icons/delete.png" class="w-5" />
               </button>
