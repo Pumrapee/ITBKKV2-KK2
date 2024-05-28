@@ -33,8 +33,8 @@ const myTask = useTaskStore()
 const saveNewTask = async () => {
   // Trim
   listNewTask.value.title = listNewTask.value.title?.trim()
-  listNewTask.value.description = listNewTask.value.description.trim()
-  listNewTask.value.assignees = listNewTask.value.assignees.trim()
+  listNewTask.value.description = listNewTask.value.description?.trim()
+  listNewTask.value.assignees = listNewTask.value.assignees?.trim()
 
   // Replace empty strings with null
   if (listNewTask.value.title === "") {
