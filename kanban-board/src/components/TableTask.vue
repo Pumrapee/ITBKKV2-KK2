@@ -33,6 +33,8 @@ const closeCancel = () => {
   if (showDeleteModal.value === true) showDeleteModal.value = false
   if (showLimitModal.value === true) showLimitModal.value = false
 }
+
+//Edit Task
 const closeEditModal = (statusCode, status) => {
   if (statusCode === 200) {
     showEditModal.value = false
@@ -100,7 +102,7 @@ const openModal = async (taskId) => {
       setTimeout(() => {
         modalAlert.value.modal = false
       }, "4000")
-      myTask.removeTasks(modal.deleteId)
+      myTask.removeTasks(taskId)
       router.go(-1)
     } else {
       task.value = data
@@ -109,6 +111,8 @@ const openModal = async (taskId) => {
   }
 }
 
+
+//Delete Task
 const openDeleteModal = (id, title, index) => {
   showDeleteModal.value = true
   listdelete.value = {
@@ -144,6 +148,7 @@ const closeDeleteModal = (statusCode) => {
   }
 }
 
+// Sort status
 const sortStatus = ref("default")
 const listTaskStore = ref(myTask.getTasks())
 
@@ -172,6 +177,7 @@ const handleSortChange = async (status) => {
   }
 }
 
+// Filter status
 const filterStatus = ref([])
 const filteredTasks = computed(() => {
   if (filterStatus.value.length === 0) {
@@ -187,6 +193,7 @@ const clearFilter = () => {
   filterStatus.value = []
 }
 
+// ถ้าเกิด 400 ใน edit task จะทำการ update status ค่าตามที่เปลี่ยนใน back
 watch(
   () => myTask.getTasks(),
   (newTasks) => {
@@ -195,6 +202,7 @@ watch(
   { immediate: true }
 )
 
+// limit 
 const showLimitModal = ref(false)
 
 const openLimitModal = () => {
