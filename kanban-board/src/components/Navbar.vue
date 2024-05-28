@@ -11,6 +11,7 @@ const myTask = useTaskStore()
 const showAdd = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 
+// Add task
 const showModalAdd = () => {
   showAdd.value = true
 }
@@ -36,7 +37,7 @@ const closeAddModal = (statusCode, status) => {
 
   if (statusCode === 400) {
     showAdd.value = false
-    router.push({ name: "task" })
+    router.push({ name: "task"})
     modalAlert.value = {
       message: "An error has occurred, the task does not exist.",
       type: "error",

@@ -121,13 +121,14 @@ const editSave = async (task) => {
 
     emits("closeEditTask", statusCode)
   }
+
   if (statusCode === 400) {
-    // ตอน edit task แล้ว ค่า status ที่ลบไปยังอยู่
+    // ตอน edit task แล้ว ค่า status ที่แก้ไปยังอยู่
     const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
     myStatus.clearStatus()
     myStatus.addStatus(listStatus)
 
-    // ตอน edit task แล้วแก้กด status ที่ลบไปจะขึ้น alert แต่ status ใน list task ยังเป็นอันเดิมอยู่
+    // ตอน edit task แล้วแก้กด status ที่แก้ไปจะขึ้น alert แต่ status ใน list task ยังเป็นอันเดิมอยู่
     const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
     myTask.clearTask()
     myTask.addTasks(listTasks)

@@ -27,17 +27,23 @@ const router = createRouter({
       ],
     },
     {
-      path: "/status/manage",
+      path: "/status",
       name: "tableStatus",
+      redirect: { name: "homestatus" },
       component: StatusView,
       children: [
         {
-          path: "/status/add",
+          path: "manage",
+          name: "homestatus",
+          component: StatusView,
+        },
+        {
+          path: "add",
           name: "AddStatus",
           component: AddStatus,
         },
         {
-          path: "/status/:id/edit",
+          path: ":id/edit",
           name: "EditStatus",
           component: EditStatus,
         },
@@ -46,12 +52,12 @@ const router = createRouter({
 
     {
       path: "/",
-      redirect: {name: "task"},
+      redirect: { name: "task" },
     },
     {
       path: "/:catchAll(.*)",
       name: "404",
-      redirect: {name: "task"},
+      redirect: { name: "task" },
     },
   ],
 })

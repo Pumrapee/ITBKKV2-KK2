@@ -71,11 +71,12 @@ const saveNewTask = async () => {
   }
 
   if (statusCode === 400) {
+    // แก้ ตอน add task แล้วแก้ status กด status ที่แก้ไป แต่ status ใน list status ยังเป็นค่าเดิมอยู่
     const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
     myStatus.clearStatus()
     myStatus.addStatus(listStatus)
 
-    // ตอน add task แล้วแก้กด status ที่ลบไปจะขึ้น alert แต่ status ใน list task ยังเป็นอันเดิมอยู่
+    // แก้ ตอน add task แล้วแก้ status กด status ที่แก้ไปจะขึ้น alert แต่ status ใน list task ยังเป็นอันเดิมอยู่
     const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
     myTask.clearTask()
     myTask.addTasks(listTasks)
