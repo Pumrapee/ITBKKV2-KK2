@@ -22,4 +22,5 @@ CREATE TABLE `tasks` (
   CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`taskStatus`) REFERENCES `statuses` (`statusId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `kanbandb`.`statuses` (`statusId`, `statusName`, `statusDescription`, `statusColor`) VALUES ('1', 'No Status', 'Default Status', '#FFFFFF');
+INSERT INTO `kanbandb`.`statuses` (`statusId`, `statusName`, `statusDescription`, `statusColor`) VALUES ('1', 'No Status', 'A status has not been assigned', '#FFFFFF');
+INSERT INTO `kanbandb`.`statuses` (`statusId`, `statusName`, `statusDescription`, `statusColor`) VALUES ('2', 'Done', 'The task has been completed', '#A1DD70');
