@@ -177,7 +177,7 @@ const closeTransfereModal = (statusCode, statusName) => {
     }, "4000")
   }
 
-  if (statusCode === 404) {
+  if (statusCode === 400) {
     showTransferModal.value = false
     modalAlert.value = {
       message: "An error has occurred, the status does not exist.",
@@ -337,5 +337,4 @@ const closeTransfereModal = (statusCode, statusName) => {
   max-width: 400px; /* ปรับค่าตามต้องการ */
   word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
 }
-
 </style>

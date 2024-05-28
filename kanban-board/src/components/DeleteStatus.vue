@@ -48,13 +48,17 @@ const transferTasks = async() =>{
         // หลัง tranfer สำเร้จ ให้ค่าใน task status เปลี่ยน
         myTask.clearTask()
         myTask.addTasks(listTasks)
+
+        const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
+        myStatus.clearStatus()
+        myStatus.addStatus(listStatus)
         emits("closeTransferStatus",newStatus)
     }
-    if(newStatus === 404){
-        myStatus.removeStatus(filteredStatus.id)
-        const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+    if(newStatus === 400) {
+      myStatus.removeStatus(filteredStatus.id)
         emits("closeTransferStatus",newStatus)
     }
+
     if(newStatus === 507) {
       const selectedName = myStatus.getStatus().find(status => status.id === selectedStatus.value)
       emits("closeTransferStatus",newStatus , selectedName.name)
