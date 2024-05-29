@@ -23,7 +23,7 @@ public class StatusController {
 
     @GetMapping("")
     public ResponseEntity<List<Status>> getAllStatus() {
-        List<Status> statuses = statusService.getStatus();
+        List<Status> statuses = statusService.getAllStatus();
         return new ResponseEntity(statuses, HttpStatus.OK);
     }
 

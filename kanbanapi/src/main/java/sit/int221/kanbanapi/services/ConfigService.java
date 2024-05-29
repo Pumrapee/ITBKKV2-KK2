@@ -23,7 +23,7 @@ public class ConfigService {
         return configuration;
     }
 
-    public void updateTaskConfiguration(boolean taskLimitEnabled, Integer maxTasksPerStatus) throws IOException {
+    public void updateStatusConfiguration(Boolean taskLimitEnabled, Integer maxTasksPerStatus) throws IOException {
         configuration.setTaskLimitEnabled(taskLimitEnabled);
         configuration.setMaxTasksPerStatus(maxTasksPerStatus);
         saveConfigurationToFile();

@@ -22,7 +22,7 @@ public class StatusService {
     @Autowired
     private StatusConfiguration configuration;
 
-    public List<Status> getStatus() {
+    public List<Status> getAllStatus() {
         return repository.findAll();
     }
 
@@ -41,7 +41,7 @@ public class StatusService {
 
     @Transactional
     public Status removeStatus(Integer id) {
-        Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Status "+ id + " does not exist"));
+        Status status = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
             throw new BadRequestException("The status name '"+ status.getName() + "' cannot be deleted.");
         } else {

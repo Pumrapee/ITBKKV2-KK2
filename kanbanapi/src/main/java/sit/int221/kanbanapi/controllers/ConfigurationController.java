@@ -33,7 +33,7 @@ public class ConfigurationController {
     @PatchMapping("/maximum-task")
     public ResponseEntity<StatusConfiguration> updateConfig(@RequestParam @NotNull Boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
         try {
-            configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);
+            configService.updateStatusConfiguration(taskLimitEnabled, maxTasksPerStatus);
             return new ResponseEntity(configService.getConfiguration(), HttpStatus.OK);
         } catch (IOException ex) {
             if (configService.getConfiguration().getTaskLimitEnabled() == taskLimitEnabled && configService.getConfiguration().getMaxTasksPerStatus() == maxTasksPerStatus) {

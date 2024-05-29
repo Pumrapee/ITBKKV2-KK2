@@ -65,7 +65,7 @@ public class TaskService {
 
     @Transactional
     public Task removeTask(Integer id) {
-        Task task = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+        Task task = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
         repository.delete(task);
         return task;
     }
@@ -74,7 +74,7 @@ public class TaskService {
     public Task updateTask(Integer id, Task task) {
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
                 || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId()) + 1)) {
-            Task existingTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+            Task existingTask = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
             existingTask.setAssignees(task.getAssignees());
