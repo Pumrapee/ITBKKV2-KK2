@@ -25,7 +25,7 @@ const confirmDelete = async () => {
     emits("closeDeleteTask", deleteItem)
   }
 
-  if (deleteItem === 404) {
+  if (deleteItem === 400) {
     mytasks.removeTasks(props.detailDelete.id)
     emits("closeDeleteTask", deleteItem)
   }

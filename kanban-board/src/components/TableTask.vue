@@ -135,7 +135,7 @@ const closeDeleteModal = (statusCode) => {
     }, "4000")
   }
 
-  if (statusCode === 404) {
+  if (statusCode === 400) {
     showDeleteModal.value = false
     modalAlert.value = {
       message: "An error has occurred, the task does not exist.",
