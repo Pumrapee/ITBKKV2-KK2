@@ -123,6 +123,19 @@ const closeEditModal = (statusCode) => {
     }, "4000")
   }
 
+  if (statusCode === 400) {
+    showEditModal.value = false
+    router.go(-1)
+    modalAlert.value = {
+      message: "An error has occurred, the status does not exist.",
+      type: "error",
+      modal: true,
+    }
+    setTimeout(() => {
+      modalAlert.value.modal = false
+    }, "4000")
+  }
+
   if (statusCode === 404) {
     showEditModal.value = false
     router.go(-1)
