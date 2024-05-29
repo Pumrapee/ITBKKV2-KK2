@@ -12,10 +12,6 @@ export const useLimitStore = defineStore("limitStatus", () => {
     return (limitisStatus.value = limit)
   }
 
-  const updateLimit = (limit) => {
-    return (limitisStatus.value = limit)
-  }
-
   return { addLimit, getLimit }
 })
 
