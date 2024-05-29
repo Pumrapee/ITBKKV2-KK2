@@ -70,7 +70,7 @@ public class TaskController {
     }
 
     @GetMapping("/status/{id}")
-    public ResponseEntity<Object> findTaskStatus(@PathVariable Integer id) {
+    public ResponseEntity<Boolean> findTaskStatus(@PathVariable Integer id) {
         boolean findStatus = taskService.findTaskStatus(id);
         if (findStatus) {
             return new ResponseEntity(HttpStatus.OK);

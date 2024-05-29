@@ -45,7 +45,7 @@ public class StatusController {
         return new ResponseEntity(updatedStatus, HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
-    public void removeTask(@PathVariable Integer id) {
+    public void removeStatus(@PathVariable Integer id) {
         statusService.removeStatus(id);
     }
     @DeleteMapping("/{id}/{newId}")
