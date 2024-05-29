@@ -113,6 +113,12 @@ const editStatusSave = async (status) => {
     emits("closeEditStatus", statusCode)
   }
 
+
+  if (statusCode === 400) {
+    myStatus.removeStatus(editedItem.id)
+    emits("closeEditStatus", statusCode)
+  }
+
   if (statusCode === 404) {
     myStatus.removeStatus(editedItem.id)
     emits("closeEditStatus", statusCode)
