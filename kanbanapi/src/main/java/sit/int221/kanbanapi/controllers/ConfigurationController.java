@@ -25,13 +25,13 @@ public class ConfigurationController {
     private ConfigService configService;
 
     @GetMapping("/maximum-task")
-    public ResponseEntity<Object> getConfig() {
+    public ResponseEntity<StatusConfiguration> getConfig() {
         StatusConfiguration config = configService.getConfiguration();
         return new ResponseEntity(config, HttpStatus.OK);
     }
 
     @PatchMapping("/maximum-task")
-    public ResponseEntity<Object> updateConfig(@RequestParam @NotNull boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
+    public ResponseEntity<StatusConfiguration> updateConfig(@RequestParam @NotNull boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
         try {
             configService.updateTaskConfiguration(taskLimitEnabled, maxTasksPerStatus);
             return new ResponseEntity(configService.getConfiguration(), HttpStatus.OK);

@@ -31,7 +31,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             MethodArgumentTypeMismatchException.class,
             MethodArgumentNotValidException.class,
-            ConstraintViolationException.class,
             HandlerMethodValidationException.class,
             MissingServletRequestParameterException.class
     })
@@ -50,14 +49,6 @@ public class GlobalExceptionHandler {
             for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
                 errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
             }
-        } else if (exception instanceof ConstraintViolationException) {
-            ConstraintViolationException ex = (ConstraintViolationException) exception;
-            ex.getConstraintViolations().forEach(violation -> {
-                errorResponse.addValidationError(
-                        violation.getPropertyPath().toString(),
-                        violation.getMessage() + " (" + violation.getInvalidValue() + ")"
-                );
-            });
         } else if (exception instanceof HandlerMethodValidationException) {
             HandlerMethodValidationException ex = (HandlerMethodValidationException) exception;
             List<ParameterValidationResult> paramNames = ex.getAllValidationResults();
@@ -68,11 +59,9 @@ public class GlobalExceptionHandler {
                                 + " (" + param.getArgument().toString() + ")"
                 );
             }
-        } else if (exception instanceof  MissingServletRequestParameterException) {
+        } else if (exception instanceof MissingServletRequestParameterException) {
             MissingServletRequestParameterException ex = (MissingServletRequestParameterException) exception;
-            String paramName = ex.getParameterName();
-            String paramType = ex.getParameterType();
-            errorResponse.addValidationError(paramName, "Missing required parameter of type " + paramType);
+            errorResponse.addValidationError(ex.getParameterName(), "Missing required parameter of type " + ex.getParameterType());
         }
 
         return ResponseEntity.badRequest().body(errorResponse);

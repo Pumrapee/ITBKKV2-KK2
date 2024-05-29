@@ -3,10 +3,13 @@ package sit.int221.kanbanapi.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import sit.int221.kanbanapi.repositories.StatusRepository;
 
 import java.time.OffsetDateTime;
 
@@ -20,6 +23,8 @@ public class Task {
     @Column(name = "taskId")
     private Integer id;
 
+    @NotNull
+    @NotEmpty
     @NotBlank
     @Size(max = 100)
     @Column(name = "taskTitle", nullable = false)
@@ -32,12 +37,15 @@ public class Task {
     @Size(max = 30)
     @Column(name = "taskAssignees")
     private String assignees;
+
     @ManyToOne
-    @JoinColumn(name = "taskStatus", referencedColumnName = "statusId")
-    private Status status;
+    @JoinColumn(name = "taskStatus")
+    private Status taskStatus;
+
     @Column(name = "createdOn", insertable = false, updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private OffsetDateTime createdOn;
+
     @Column(name = "updatedOn", insertable = false, updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private OffsetDateTime updatedOn;
@@ -70,5 +78,9 @@ public class Task {
             }
         }
         this.assignees = assignees;
+    }
+
+    public String getStatus() {
+        return taskStatus.getName();
     }
 }

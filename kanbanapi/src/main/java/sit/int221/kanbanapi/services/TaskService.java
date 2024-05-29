@@ -38,22 +38,6 @@ public class TaskService {
         Sort sort = Sort.by(Sort.Order.asc(sortProperty));
         try {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
-//                List<Integer> statusIds = new ArrayList<>();
-//                List<String> statusNames = new ArrayList<>();
-//
-//                for (String status : filterStatuses) {
-//                    try {
-//                        statusIds.add(Integer.parseInt(status));
-//                    } catch (NumberFormatException e) {
-//                        statusNames.add(status);
-//                    }
-//                }
-//
-//                if (!statusIds.isEmpty() || !statusNames.isEmpty()) {
-//                    return repository.findByStatusIdsAndNamesSorted(statusIds, statusNames, sort);
-//                } else {
-//                    return repository.findAll(sort);
-//                }
                 return repository.findByStatusNamesSorted(filterStatuses, sort);
             } else {
                 return repository.findAll(sort);
@@ -71,11 +55,11 @@ public class TaskService {
 
     @Transactional
     public Task createTask(Task task) {
-        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getStatus().getName())
-                || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
+            if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
+                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId()) + 1)) {
             return repository.save(task);
         } else {
-            throw new TaskLimitExceededException("The status " + task.getStatus().getName() + " has reached the task limit.");
+            throw new TaskLimitExceededException("The status " + task.getTaskStatus().getName() + " has reached the task limit.");
         }
     }
 
@@ -88,16 +72,16 @@ public class TaskService {
 
     @Transactional
     public Task updateTask(Integer id, Task task) {
-        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getStatus().getName())
-                || statusLimitCheck(countTasksByStatus(task.getStatus().getId()) + 1)) {
+        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
+                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId()) + 1)) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
             existingTask.setAssignees(task.getAssignees());
-            existingTask.setStatus(task.getStatus());
+            existingTask.setTaskStatus(task.getTaskStatus());
             return repository.save(existingTask);
         } else {
-            throw new TaskLimitExceededException("The status " + task.getStatus().getName() + " has reached the task limit.");
+            throw new TaskLimitExceededException("The status " + task.getTaskStatus().getName() + " has reached the task limit.");
         }
     }
 

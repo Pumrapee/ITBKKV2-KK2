@@ -28,46 +28,42 @@ public class TaskController {
     private ModelMapper modelMapper;
 
     @GetMapping("")
-    public ResponseEntity<Object> getAllTaskFilteredSorted(@RequestParam(required = false) List<String> filterStatuses, @RequestParam(required = false, defaultValue = "createdOn") String sortBy) {
+    public ResponseEntity<List<SimpleTaskDTO>> getAllTaskFilteredSorted(@RequestParam(required = false) List<String> filterStatuses, @RequestParam(required = false, defaultValue = "createdOn") String sortBy) {
         List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy);
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
                 .map(task -> {
                     SimpleTaskDTO taskDTO = modelMapper.map(task, SimpleTaskDTO.class);
-                    taskDTO.setStatus(task.getStatus().getName());
                     return taskDTO;
                 }).collect(Collectors.toList());
         return new ResponseEntity(taskDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getTaskById(@PathVariable Integer id) {
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable Integer id) {
         Task task = taskService.getTaskById(id);
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
-        taskDTO.setStatus(task.getStatus().getName());
         return new ResponseEntity(taskDTO, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> addNewTask(@Valid @RequestBody TaskCreateUpdateDTO task) {
+    public ResponseEntity<TaskCreateUpdateDTO> addNewTask(@Valid @RequestBody TaskCreateUpdateDTO task) {
         Task newTask = modelMapper.map(task, Task.class);
-        newTask.setStatus(statusService.getStatusByName(task.getStatus()));
+        newTask.setTaskStatus(statusService.getStatusByName(task.getStatus()));
         Task createdTask = taskService.createTask(newTask);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(createdTask, TaskCreateUpdateDTO.class);
-        taskDTO.setStatus(createdTask.getStatus().getName());
         return new ResponseEntity(taskDTO, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskCreateUpdateDTO task, @PathVariable Integer id) {
+    public ResponseEntity<TaskCreateUpdateDTO> updateTask(@Valid @RequestBody TaskCreateUpdateDTO task, @PathVariable Integer id) {
         Task newTask = modelMapper.map(task, Task.class);
-        newTask.setStatus(statusService.getStatusByName(task.getStatus()));
+        newTask.setTaskStatus(statusService.getStatusByName(task.getStatus()));
         Task updatedTask = taskService.updateTask(id, newTask);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(updatedTask, TaskCreateUpdateDTO.class);
-        taskDTO.setStatus(updatedTask.getStatus().getName());
         return new ResponseEntity(taskDTO, HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> removeTask(@PathVariable Integer id) {
+    public ResponseEntity<SimpleTaskDTO> removeTask(@PathVariable Integer id) {
         Task deletedTask = taskService.removeTask(id);
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
         return new ResponseEntity(taskDTO, HttpStatus.OK);
