@@ -1,0 +1,74 @@
+services:
+  proxy:
+    image: nginx:alpine
+    volumes:
+      - ./kanbanproxy:/etc/nginx/conf.d
+    depends_on:
+      - fe
+      - api
+    networks:
+      kanban-front-network:
+        ipv4_address: 172.15.0.2
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+  fe:
+    image: kanbanfe-release
+    build: 
+      context: kanban-board
+    networks:
+      kanban-front-network:
+        ipv4_address: 172.15.0.3
+        aliases:
+          - kanban-fe
+    restart: unless-stopped
+
+  api:
+    image: kanbanapi-release
+    build: 
+      context: kanbanapi
+    environment:
+      - mysql_url=kanban-db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      kanban-front-network:
+        ipv4_address: 172.15.0.4
+        aliases:
+          - kanban-api
+      kanban-back-network:
+        ipv4_address: 172.15.1.4
+    restart: unless-stopped
+
+  db:
+    image: mysql/mysql-server
+    env_file: kanbandb/db-env.sh
+    volumes: 
+      - ./kanbanproj-db/scripts:/docker-entrypoint-initdb.d
+      - db-datadir:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 2s
+      timeout: 2s
+      retries: 20 
+    networks:
+      kanban-back-network:
+        ipv4_address: 172.15.1.5
+        aliases:
+          - kanban-db
+    restart: unless-stopped
+
+volumes:
+  db-datadir:
+
+networks:
+  kanban-front-network:
+    ipam:
+       config:
+         - subnet: "172.15.0.0/24"
+  kanban-back-network:
+    ipam:
+       config:
+         - subnet: "172.15.1.0/24"
