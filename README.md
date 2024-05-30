@@ -1,3 +1,3 @@
 # KK-2
 
-[Uploading สำเนาของ Diagram INT221.pdf…]()
+https://www.canva.com/design/DAGGbuyVIvg/mE5BDHUJ-9VFPGaNAThznQ/edit
