@@ -11,8 +11,8 @@ const props = defineProps({
 //ถ้าเปิด modal มาให้เซ็ตค่าตรงกับใน storeLimit
 watch(
   () => props.showLimitModal,
-  (newVal) => {
-    if (newVal) {
+  (newVal) => { // newVal เป็น เป็นค่าปัจจุบันของ props.showLimitModal
+    if (newVal) { 
       isLimitEnabled.value = myLimit.getLimit().taskLimitEnabled
       maxTasks.value = myLimit.getLimit().maxTasksPerStatus || 10
     }
@@ -30,7 +30,7 @@ const closelimitModal = async (maxlimit) => {
   //นับจำนวน status ที่ใช้ของแต่ละอัน ได้ค่าเป็น {}
   if (isLimitEnabled.value === true) {
     const lengthStatus = myTask.getTasks().reduce((taskacc, task) => {
-      taskacc[task.status] = (taskacc[task.status] || 0) + 1
+      taskacc[task.status] = (taskacc[task.status] || 0) + 1 //object key
       return taskacc
     }, {})
 

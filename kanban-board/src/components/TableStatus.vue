@@ -32,6 +32,14 @@ const openDeleteStatus = async (id, name) => {
     `${import.meta.env.VITE_API_URL}tasks/status`,
     id
   )
+
+  const countTask = myTask.getTasks().filter((listTask) => {
+    const statusName = myStatus.getStatus().find((listStatus) => {
+      return listStatus.id === id
+    })
+    return listTask.status === statusName.name
+  })
+
   if (Showstatus === 200) {
     showTransferModal.value = true
   }
@@ -41,6 +49,7 @@ const openDeleteStatus = async (id, name) => {
   statusDetail.value = {
     id: id,
     name: name,
+    countTask: countTask.length,
   }
 }
 
@@ -180,8 +189,7 @@ const closeTransfereModal = (statusCode, statusName) => {
   if (statusCode === 200) {
     showTransferModal.value = false
     modalAlert.value = {
-      message:
-        "The task(s) have been transferred and the status has been deleted",
+      message: `${statusDetail.value.countTask} task(s) have been transferred and the status has been deleted`,
       type: "success",
       modal: true,
     }

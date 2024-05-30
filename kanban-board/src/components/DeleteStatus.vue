@@ -14,7 +14,6 @@ const props = defineProps({
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const selectedStatus = ref()
-
 const filteredStatus = computed(() => {
   return myStatus.getStatus().filter(status => status.id !== props.deatailStatus.id)
 })
@@ -103,7 +102,7 @@ const transferTasks = async() =>{
       <div class="bg-white p-10 rounded-lg w-2/5">
         <div class="itbkk-message text-lg font-semibold text-center">
           <p style="word-wrap: break-word">
-            There are tasks associated with the "{{ deatailStatus.name }}" status.</br> Do you want to transfer them?
+            There are {{ deatailStatus.countTask }} tasks in "{{ deatailStatus.name }}" status.</br> Do you want to transfer them?
           </p>
         </div>
 

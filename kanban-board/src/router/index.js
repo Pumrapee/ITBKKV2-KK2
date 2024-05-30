@@ -5,6 +5,7 @@ import EditTask from "@/components/EditTask.vue"
 import StatusView from "@/views/StatusView.vue"
 import AddStatus from "@/components/AddStatus.vue"
 import EditStatus from "@/components/EditStatus.vue"
+import NotFoundView from "@/views/NotFoundView.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,7 +58,7 @@ const router = createRouter({
     {
       path: "/:catchAll(.*)",
       name: "404",
-      redirect: { name: "task" },
+      component: NotFoundView,
     },
   ],
 })
