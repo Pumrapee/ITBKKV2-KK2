@@ -5,10 +5,16 @@ import StatusView from "@/views/StatusView.vue"
 import NotFoundView from "../views/NotFoundView.vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import { getItemById } from "@/libs/fetchUtils"
+import LoginPage from "@/components/LoginPage.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: "/",
+      name: "Login",
+      component: LoginPage,
+    },
     {
       path: "/task",
       name: "task",

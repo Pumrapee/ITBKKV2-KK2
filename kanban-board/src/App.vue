@@ -31,16 +31,16 @@ onMounted(async () => {
   <RouterView />
   <!-- footer -->
   <footer
-    className="fixed bottom-0 left-0 right-0 footer items-center p-4 bg-blue-400 text-white font-semibold"
+    className="fixed bottom-0 left-0 right-0 footer items-center p-4 bg-black text-white font-semibold"
   >
     <aside className="items-center grid-flow-col">
-      <img src="/icons/wand.png" class="w-10" />
-      <p>Integrated Project By KK2 since 2024</p>
+      
+      <p class="font-thin">Kradan Kanban By KK2 since 2024</p>
     </aside>
     <nav
       className="grid-flow-col gap-4 md:place-self-center md:justify-self-end"
     >
-      <img src="/icons/logosit.png" class="w-24" />
+      <img src="/icons/logo2.png" class="w-12" />
     </nav>
   </footer>
 </template>
