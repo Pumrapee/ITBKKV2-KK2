@@ -1,7 +1,10 @@
 //function ที่ติดต่อ back-end
 async function getItems(url) {
   try {
-    const data = await fetch(url) //GET Method
+    const data = await fetch(url, {
+      //GET Method
+      method: "GET",
+    })
     const items = await data.json()
     return items
   } catch (error) {}
@@ -9,7 +12,10 @@ async function getItems(url) {
 
 async function getStatusLimits(url) {
   try {
-    const data = await fetch(`${url}/maximum-task`) //GET Method
+    const data = await fetch(`${url}/maximum-task`, {
+      //GET Method
+      method: "GET",
+    })
     const items = await data.json()
     return items
   } catch (error) {}
@@ -18,10 +24,14 @@ async function getStatusLimits(url) {
 async function getItemById(url, id) {
   let data
   try {
-    data = await fetch(`${url}/${id}`)
+    data = await fetch(`${url}/${id}`, {
+      //GET Method
+      method: "GET",
+    })
     const item = await data.json()
     return item
   } catch (error) {
+    // if (data.status === 404) return { exists: false, status: 404 }
     if (data.status === 404) return 404
   }
 }
@@ -29,6 +39,7 @@ async function findStatus(url, id) {
   let data
   try {
     data = await fetch(`${url}/${id}`, {
+      //GET Method
       method: "GET",
     })
     return data.status
