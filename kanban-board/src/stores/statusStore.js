@@ -9,17 +9,10 @@ export const useStatusStore = defineStore("status", () => {
   }
   //actions
   const addStatus = (newTasks) => {
-    newTasks.forEach((newTask) =>
-      addOneStatus(newTask.id, newTask.name, newTask.description, newTask.color)
-    )
+    newTasks.forEach(addOneStatus)
   }
-  const addOneStatus = (id, name, desc, color) => {
-    listStatus.value.push({
-      id: id,
-      name: name,
-      description: desc,
-      color: color,
-    })
+  const addOneStatus = (obj) => {
+    listStatus.value.push({ ...obj })
   }
 
   const getStatusColor = (nameStatus) => {
@@ -27,14 +20,12 @@ export const useStatusStore = defineStore("status", () => {
     return status ? status.color : null
   }
 
-  const updateStatus = (id, name, desc, color) => {
+  const updateStatus = (upStatus) => {
     listStatus.value = listStatus.value.map((todo) => {
-      return todo.id === id
+      return todo.id === upStatus.id
         ? {
             ...todo,
-            name: name,
-            description: desc,
-            color: color,
+            ...upStatus,
           }
         : todo
     })

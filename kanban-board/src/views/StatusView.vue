@@ -1,5 +1,5 @@
 <script setup>
-import TableStatus from "../components/TableStatus.vue"
+import TableStatus from "../components/status/TableStatus.vue"
 import Navbar from "../components/Navbar.vue"
 </script>
 
@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar.vue"
   <div>
     <Navbar />
     <TableStatus />
+    
   </div>
 </template>
 

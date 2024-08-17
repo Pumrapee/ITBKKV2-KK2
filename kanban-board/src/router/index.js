@@ -1,11 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router"
 import HomeView from "@/views/HomeView.vue"
-import AddTask from "@/components/AddTask.vue"
-import EditTask from "@/components/EditTask.vue"
+import AddEditTask from "@/components/task/AddEditTask.vue"
 import StatusView from "@/views/StatusView.vue"
-import AddStatus from "@/components/AddStatus.vue"
-import EditStatus from "@/components/EditStatus.vue"
-import NotFoundView from "@/views/NotFoundView.vue"
+import NotFoundView from "../views/NotFoundView.vue"
+import AddEditStatus from "@/components/status/AddEditStatus.vue"
+import { getItemById } from "@/libs/fetchUtils"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,48 +15,52 @@ const router = createRouter({
       component: HomeView,
       children: [
         {
-          path: "add",
-          name: "add",
-          component: AddTask,
+          path: ":id",
+          name: "detailTask",
+          component: AddEditTask,
         },
         {
           path: ":id/edit",
-          name: "edit",
-          component: EditTask,
+          name: "editTask",
+          component: AddEditTask,
+        },
+        {
+          path: "add",
+          name: "addTask",
+          component: AddEditTask,
         },
       ],
     },
     {
       path: "/status",
       name: "tableStatus",
-      redirect: { name: "homestatus" },
+      redirect: { name: "homeStatus" },
       component: StatusView,
       children: [
         {
           path: "manage",
-          name: "homestatus",
+          name: "homeStatus",
           component: StatusView,
         },
         {
           path: "add",
           name: "AddStatus",
-          component: AddStatus,
+          component: AddEditStatus,
         },
         {
           path: ":id/edit",
           name: "EditStatus",
-          component: EditStatus,
+          component: AddEditStatus,
         },
       ],
     },
-
     {
       path: "/",
       redirect: { name: "task" },
     },
     {
       path: "/:catchAll(.*)",
-      name: "404",
+      name: "notFound",
       component: NotFoundView,
     },
   ],
