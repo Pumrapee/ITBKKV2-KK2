@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import sit.int221.kanbanapi.exceptions.BadRequestException;
-import sit.int221.kanbanapi.exceptions.ErrorResponse;
-import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
-import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
+import sit.int221.kanbanapi.exceptions.*;
 
 import java.util.List;
 
@@ -85,6 +82,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTaskLimitExceededException
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, HttpStatus.INSUFFICIENT_STORAGE, request);
+    }
+
+    @ExceptionHandler(AuthenticationFailed.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorResponse> handleAuthenticaionException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, request);
     }
 
     @ExceptionHandler(Exception.class)

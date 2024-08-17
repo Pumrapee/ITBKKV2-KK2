@@ -1,4 +1,4 @@
-package sit.int221.kanbanapi.entities;
+package sit.int221.kanbanapi.databases.kanbandb.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

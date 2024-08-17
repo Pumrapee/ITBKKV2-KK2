@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
 import sit.int221.kanbanapi.dtos.TaskDTO;
-import sit.int221.kanbanapi.entities.Task;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
 

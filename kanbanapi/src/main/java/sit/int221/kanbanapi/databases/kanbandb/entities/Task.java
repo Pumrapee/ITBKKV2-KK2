@@ -1,4 +1,4 @@
-package sit.int221.kanbanapi.entities;
+package sit.int221.kanbanapi.databases.kanbandb.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -8,8 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import sit.int221.kanbanapi.repositories.StatusRepository;
 
 import java.time.OffsetDateTime;
 

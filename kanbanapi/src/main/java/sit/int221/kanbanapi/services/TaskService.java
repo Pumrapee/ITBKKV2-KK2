@@ -6,17 +6,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
-import sit.int221.kanbanapi.entities.Status;
-import sit.int221.kanbanapi.entities.Task;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
-import sit.int221.kanbanapi.repositories.StatusRepository;
-import sit.int221.kanbanapi.repositories.TaskRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.TaskRepository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 

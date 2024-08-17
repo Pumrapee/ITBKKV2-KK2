@@ -1,13 +1,11 @@
-package sit.int221.kanbanapi.repositories;
+package sit.int221.kanbanapi.databases.kanbandb.repositories;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-import sit.int221.kanbanapi.entities.Task;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
 
 import java.util.List;
 

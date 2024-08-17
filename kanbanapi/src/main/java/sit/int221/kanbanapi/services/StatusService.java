@@ -2,15 +2,12 @@ package sit.int221.kanbanapi.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
-import sit.int221.kanbanapi.entities.Status;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
-import sit.int221.kanbanapi.repositories.StatusRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
 
 import java.util.List;
 

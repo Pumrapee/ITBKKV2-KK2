@@ -3,7 +3,6 @@ package sit.int221.kanbanapi.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
-import sit.int221.kanbanapi.repositories.TaskRepository;
 
 
 import java.io.FileOutputStream;
