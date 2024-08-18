@@ -38,7 +38,7 @@ const addEditSave = (editTask) => {
     editedTask.assignees = null
   }
 
-  // editMode.value = false
+  editMode.value = false
   emits("saveAddEdit", editedTask)
 }
 
