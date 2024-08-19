@@ -156,13 +156,11 @@ const closeAddEdit = async (task) => {
     }
   }
 
-  editMode.value = false
   if (shouldCloseModal) {
     openModal.value = false
     router.push({ name: "task" })
   }
-
-  console.log(myTask.getTasks())
+  editMode.value = false
 }
 
 // Delete Modal
@@ -185,28 +183,28 @@ const closeDeleteModal = async (id) => {
 }
 
 // Limit model
-const closeLimitModal = (maxLimit, limitBoolean, statusIsNotLimit) => {
+const closeLimitModal = (maxLimit, limitBoolean) => {
   if (limitBoolean === false) {
-    showLimitModal.value = false
     showAlert(
       `The Kanban board has disabled the task limit in each status.`,
       "success"
     )
   }
-  if (limitBoolean === true && statusIsNotLimit === true) {
-    showLimitModal.value = false
+  if (limitBoolean === true) {
     showAlert(
       `The Kanban board now limits ${maxLimit} tasks in each status.`,
       "success"
     )
   }
 
-  if (limitBoolean === true && statusIsNotLimit === false) {
-    showAlert(
-      "These statuses that have reached the task limit. No additional tasks can be added to these statuses.",
-      "warning"
-    )
-  }
+  showLimitModal.value = false
+
+  // if (limitBoolean === true && statusIsNotLimit === false) {
+  //   showAlert(
+  //     "These statuses that have reached the task limit. No additional tasks can be added to these statuses.",
+  //     "warning"
+  //   )
+  // }
 }
 
 const closeModal = () => {
