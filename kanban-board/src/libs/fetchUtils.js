@@ -122,6 +122,37 @@ async function editLimitStatus(url, boolean, maxLimit) {
   } catch (error) {}
 }
 
+// Function to handle login
+async function login(url, username, password) {
+  try {
+    const res = await fetch(`${url}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        // username : "itbkk.olarn",
+        // password : "ip23/OLA",
+        // itbkk.siam
+        // ip23/SIA
+      }),
+    })
+    console.log(url)
+
+    // Return status code for further processing
+    return res.status;
+  } catch (error) {
+    console.error("Error during login:", error);
+    return 500; // Internal server error
+  }
+}
+
+
+
+
+
 export {
   getItems,
   getItemById,
@@ -132,4 +163,5 @@ export {
   findStatus,
   getStatusLimits,
   editLimitStatus,
+  login,
 }

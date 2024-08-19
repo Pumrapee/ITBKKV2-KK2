@@ -1,19 +1,15 @@
 package sit.int221.kanbanapi.controllers;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.configs.StatusConfiguration;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
-import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
 import sit.int221.kanbanapi.services.ConfigService;
-import sit.int221.kanbanapi.services.TaskService;
 
 import java.io.IOException;
 
