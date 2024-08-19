@@ -12,7 +12,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
+      path: "/login",
       name: "login",
       component: LoginPage,
     },
@@ -20,25 +20,25 @@ const router = createRouter({
       path: "/task",
       name: "task",
       component: HomeView,
-      meta: { requiresAuth: true },
+      //meta: { requiresAuth: true },
       children: [
         {
           path: ":id",
           name: "detailTask",
           component: AddEditTask,
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
         },
         {
           path: ":id/edit",
           name: "editTask",
           component: AddEditTask,
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
         },
         {
           path: "add",
           name: "addTask",
           component: AddEditTask,
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
         },
       ],
     },
@@ -47,31 +47,31 @@ const router = createRouter({
       name: "tableStatus",
       redirect: { name: "homeStatus" },
       component: StatusView,
-      meta: { requiresAuth: true },
+      //meta: { requiresAuth: true },
       children: [
         {
           path: "manage",
           name: "homeStatus",
           component: StatusView,
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
         },
         {
           path: "add",
           name: "AddStatus",
           component: AddEditStatus,
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
         },
         {
           path: ":id/edit",
           name: "EditStatus",
           component: AddEditStatus,
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
         },
       ],
     },
     {
       path: "/",
-      redirect: { name: "task" },
+      redirect: { name: "login" },
     },
     {
       path: "/:catchAll(.*)",
@@ -84,8 +84,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: "login" }); 
+  if ( !authStore.isAuthenticated && to.name !== "login") {
+    next({ name: "login" })
   } else {
     next()
   }
