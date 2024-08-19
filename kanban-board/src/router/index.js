@@ -6,13 +6,14 @@ import NotFoundView from "../views/NotFoundView.vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import { getItemById } from "@/libs/fetchUtils"
 import LoginPage from "@/components/LoginPage.vue"
-
+import { useAuthStore } from "@/stores/loginStore"
+        
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
-      name: "Login",
+      name: "login",
       component: LoginPage,
     },
     {
@@ -70,6 +71,16 @@ const router = createRouter({
       component: NotFoundView,
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: "login" }); 
+  } else {
+    next()
+  }
 })
 
 export default router
