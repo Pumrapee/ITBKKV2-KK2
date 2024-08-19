@@ -5,29 +5,40 @@ import StatusView from "@/views/StatusView.vue"
 import NotFoundView from "../views/NotFoundView.vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import { getItemById } from "@/libs/fetchUtils"
-
+import LoginPage from "@/components/LoginPage.vue"
+import { useAuthStore } from "@/stores/loginStore"
+        
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: "/login",
+      name: "login",
+      component: LoginPage,
+    },
+    {
       path: "/task",
       name: "task",
       component: HomeView,
+      //meta: { requiresAuth: true },
       children: [
         {
           path: ":id",
           name: "detailTask",
           component: AddEditTask,
+          //meta: { requiresAuth: true },
         },
         {
           path: ":id/edit",
           name: "editTask",
           component: AddEditTask,
+          //meta: { requiresAuth: true },
         },
         {
           path: "add",
           name: "addTask",
           component: AddEditTask,
+          //meta: { requiresAuth: true },
         },
       ],
     },
@@ -36,27 +47,31 @@ const router = createRouter({
       name: "tableStatus",
       redirect: { name: "homeStatus" },
       component: StatusView,
+      //meta: { requiresAuth: true },
       children: [
         {
           path: "manage",
           name: "homeStatus",
           component: StatusView,
+          //meta: { requiresAuth: true },
         },
         {
           path: "add",
           name: "AddStatus",
           component: AddEditStatus,
+          //meta: { requiresAuth: true },
         },
         {
           path: ":id/edit",
           name: "EditStatus",
           component: AddEditStatus,
+          //meta: { requiresAuth: true },
         },
       ],
     },
     {
       path: "/",
-      redirect: { name: "task" },
+      redirect: { name: "login" },
     },
     {
       path: "/:catchAll(.*)",
@@ -64,6 +79,16 @@ const router = createRouter({
       component: NotFoundView,
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+
+  if ( !authStore.isAuthenticated && to.name !== "login") {
+    next({ name: "login" })
+  } else {
+    next()
+  }
 })
 
 export default router
