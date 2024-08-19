@@ -31,10 +31,10 @@ async function getItemById(url, id) {
     const item = await data.json()
     return item
   } catch (error) {
-    // if (data.status === 404) return { exists: false, status: 404 }
     if (data.status === 404) return 404
   }
 }
+
 async function findStatus(url, id) {
   let data
   try {

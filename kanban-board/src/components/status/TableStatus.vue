@@ -217,7 +217,7 @@ const closeModal = () => {
   openModal.value = false
   showTransferModal.value = false
   showDeleteModal.value = false
-  router.push({ name: "homeStatus" })
+  router.push({ name: "tableStatus" })
 }
 </script>
 
@@ -348,4 +348,10 @@ const closeModal = () => {
   />
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbkk-status-description {
+  /* กำหนดความกว้างสูงสุดของ column title */
+  max-width: 350px; /* ปรับค่าตามต้องการ */
+  word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
+}
+</style>

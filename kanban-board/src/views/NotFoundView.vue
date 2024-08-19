@@ -16,7 +16,7 @@ onMounted(() => {
     <div class="card w-96 bg-blue-400 text-white">
       <div class="card-body items-center text-center">
         <h2 class="card-title">Not Found!</h2>
-        <p>The page you are looking for does not exist.</p>
+        <p>The requested task does not exist</p>
       </div>
     </div>
   </div>

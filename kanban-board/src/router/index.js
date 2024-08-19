@@ -45,16 +45,9 @@ const router = createRouter({
     {
       path: "/status",
       name: "tableStatus",
-      redirect: { name: "homeStatus" },
       component: StatusView,
       //meta: { requiresAuth: true },
       children: [
-        {
-          path: "manage",
-          name: "homeStatus",
-          component: StatusView,
-          //meta: { requiresAuth: true },
-        },
         {
           path: "add",
           name: "AddStatus",
@@ -74,7 +67,12 @@ const router = createRouter({
       redirect: { name: "login" },
     },
     {
-      path: "/:catchAll(.*)",
+      path: "/notfound",
+      name: "TaskNotFound",
+      component: NotFoundView,
+    },
+    {
+      path: "/:pathMatch(.*)*",
       name: "notFound",
       component: NotFoundView,
     },

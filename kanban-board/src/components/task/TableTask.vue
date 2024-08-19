@@ -13,6 +13,7 @@ import DeleteTask from "./DeleteTask.vue"
 import LimitTask from "./LimitTask.vue"
 import router from "@/router"
 import AlertComponent from "../toast/Alert.vue"
+import { useRoute } from "vue-router"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
@@ -20,6 +21,7 @@ const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
 const showDeleteModal = ref(false)
+const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
 const modalAlert = ref({ message: "", type: "", modal: false })
@@ -54,7 +56,7 @@ const openModalEdit = async (id, boolean) => {
   tasks.value = taskDetail
 
   if (taskDetail.status === 404) {
-    showAlert("An error has occurred, the task does not exist.", "error")
+    router.push({ name: "TaskNotFound" })
     myTask.removeTasks(id)
     router.go(-1)
   } else {
@@ -71,6 +73,7 @@ const openModalAdd = () => {
   selected.value = "No Status"
 
   tasks.value = {
+    id: undefined,
     title: "",
     description: "",
     assignees: "",
@@ -153,13 +156,11 @@ const closeAddEdit = async (task) => {
     }
   }
 
-  editMode.value = false
   if (shouldCloseModal) {
     openModal.value = false
-    router.go(-1)
+    router.push({ name: "task" })
   }
-
-  console.log(myTask.getTasks())
+  editMode.value = false
 }
 
 // Delete Modal
@@ -182,28 +183,28 @@ const closeDeleteModal = async (id) => {
 }
 
 // Limit model
-const closeLimitModal = (maxLimit, limitBoolean, statusIsNotLimit) => {
+const closeLimitModal = (maxLimit, limitBoolean) => {
   if (limitBoolean === false) {
-    showLimitModal.value = false
     showAlert(
       `The Kanban board has disabled the task limit in each status.`,
       "success"
     )
   }
-  if (limitBoolean === true && statusIsNotLimit === true) {
-    showLimitModal.value = false
+  if (limitBoolean === true) {
     showAlert(
       `The Kanban board now limits ${maxLimit} tasks in each status.`,
       "success"
     )
   }
 
-  if (limitBoolean === true && statusIsNotLimit === false) {
-    showAlert(
-      "These statuses that have reached the task limit. No additional tasks can be added to these statuses.",
-      "warning"
-    )
-  }
+  showLimitModal.value = false
+
+  // if (limitBoolean === true && statusIsNotLimit === false) {
+  //   showAlert(
+  //     "These statuses that have reached the task limit. No additional tasks can be added to these statuses.",
+  //     "warning"
+  //   )
+  // }
 }
 
 const closeModal = () => {
@@ -269,6 +270,23 @@ watch(
   () => myTask.getTasks(),
   (newTasks) => {
     listTaskStore.value = newTasks
+  },
+  { immediate: true }
+)
+
+// route path ถ้าไม่มี id นั้น
+watch(
+  () => route.params.id,
+  async (newId, oldId) => {
+    if (newId !== undefined) {
+      const res = await getItemById(
+        `${import.meta.env.VITE_API_URL}tasks`,
+        newId
+      )
+      if (res.status === 404) {
+        router.push({ name: "TaskNotFound" })
+      }
+    }
   },
   { immediate: true }
 )

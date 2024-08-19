@@ -1,5 +1,12 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed, watch } from "vue"
+import {
+  ref,
+  defineProps,
+  defineEmits,
+  computed,
+  watch,
+  watchEffect,
+} from "vue"
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
@@ -25,35 +32,45 @@ const isLimitEnabled = ref(myLimit.getLimit().taskLimitEnabled)
 const maxTasks = ref(myLimit.getLimit().maxTasksPerStatus || 10)
 const myTask = useTaskStore()
 const showLimitStatus = ref()
+const showWarning = ref()
+const statusShow = ref()
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
 
 const closelimitModal = async (maxlimit) => {
   //นับจำนวน status ที่ใช้ของแต่ละอัน ได้ค่าเป็น {}
   if (isLimitEnabled.value === true) {
-    const lengthStatus = myTask.getTasks().reduce((taskacc, task) => {
-      taskacc[task.status] = (taskacc[task.status] || 0) + 1 //object key
-      return taskacc
-    }, {})
+    // const lengthStatus = myTask.getTasks().reduce((taskacc, task) => {
+    //   taskacc[task.status] = (taskacc[task.status] || 0) + 1 //object key
+    //   return taskacc
+    // }, {})
 
-    //แปลงค่า {} เป็น [{}] เพื่อใช้ array method
-    const lengthStatusArray = Object.entries(lengthStatus).map(
-      ([name, count]) => {
-        return { name, count }
-      }
-    )
+    // //แปลงค่า {} เป็น [{}] เพื่อใช้ array method
+    // const lengthStatusArray = Object.entries(lengthStatus).map(
+    //   ([name, count]) => {
+    //     return { name, count }
+    //   }
+    // )
 
-    //ไม่เอาค่าที่มี status name Done กับ No Status
-    const statusNotStatus = lengthStatusArray.filter((status) => {
-      return !(status.name === "No Status" || status.name === "Done")
-    })
+    // //ไม่เอาค่าที่มี status name Done กับ No Status
+    // const statusNotStatus = lengthStatusArray.filter((status) => {
+    //   return !(status.name === "No Status" || status.name === "Done")
+    // })
+
+    const statusNotStatus = Object.entries(
+      myTask.getTasks().reduce((taskacc, task) => {
+        if (task.status !== "No Status" && task.status !== "Done") {
+          taskacc[task.status] = (taskacc[task.status] || 0) + 1
+        }
+        return taskacc
+      }, {})
+    ).map(([name, count]) => ({ name, count }))
 
     //map ค่า count แล้วลบกับค่า maxlimit เพื่อได้ค่า status ที่เกิน limit
-    const StatusIslimit = statusNotStatus.map(({ name, count }) => {
-      const excessCount = count - maxlimit
-      return { name, excessCount: excessCount }
-    })
+    // const StatusIslimit = statusNotStatus.map(({ name, count }) => {
+    //   const excessCount = count - maxlimit
+    //   return { name, excessCount: excessCount }
+    // })
 
-    showLimitStatus.value = StatusIslimit
     const editedLimit = await editLimitStatus(
       `${import.meta.env.VITE_API_URL}statuses`,
       isLimitEnabled.value,
@@ -62,11 +79,21 @@ const closelimitModal = async (maxlimit) => {
     //เอาค่า fetch update ใน store
     myLimit.addLimit(editedLimit)
 
-    //check ว่าค่า excessCount มีค่าเป็น 0 ไหม
-    const statusIsNotLimit = StatusIslimit.every((status) => {
-      return status.excessCount <= 0
-    })
-    emits("closeLimitModal", maxlimit, isLimitEnabled.value, statusIsNotLimit)
+    // //check ว่าค่า excessCount มีค่าเป็น 0 ไหม
+    // const statusIsNotLimit = StatusIslimit.every((status) => {
+    //   return status.excessCount <= 0
+    // })
+
+    // โชว์จำนวน Task ที่เกินค่า limit
+    statusShow.value = statusNotStatus.filter(
+      (taskStatus) => taskStatus.count > maxTasks.value
+    )
+
+    if (statusShow.value.length > 0) {
+      emits("closeLimitModal")
+      showWarning.value = true
+    }
+    emits("closeLimitModal", maxlimit, isLimitEnabled.value)
   }
 
   if (isLimitEnabled.value === false) {
@@ -78,13 +105,7 @@ const closelimitModal = async (maxlimit) => {
 
     //เอาค่า fetch เก็บใน store
     myLimit.addLimit(editedLimit)
-    //แปลกๆ
-    emits(
-      "closeLimitModal",
-      maxlimit,
-      isLimitEnabled.value,
-      isLimitEnabled.value
-    )
+    emits("closeLimitModal", maxlimit, isLimitEnabled.value)
   }
 }
 
@@ -104,11 +125,13 @@ const changeLimit = computed(() => {
 })
 
 const closeCancel = async () => {
+  showWarning.value = false
   emits("closeCancel")
 }
 </script>
 
 <template>
+  <!-- Modal limit -->
   <div v-if="showLimitModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div class="itbkk-modal-setting modal-box">
@@ -145,9 +168,53 @@ const closeCancel = async () => {
           />
         </div>
 
-        <div class="pt-2 text-red-500">
-          {{ errorLimit }}
+        <div class="modal-action">
+          <button
+            @click="closelimitModal(maxTasks)"
+            class="itbkk-button-confirm btn bg-green-400 text-white disabled:bg-green-200 disabled:text-white"
+            :disabled="changeLimit"
+          >
+            Save
+          </button>
+          <button @click="closeCancel()" class="itbkk-button-cancel btn">
+            Cancel
+          </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal warning -->
+  <div v-if="showWarning" class="fixed z-10 inset-0 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
+      <div class="itbkk-modal-setting modal-box">
+        <div class="flex justify-center">
+          <img src="/icons/caution.png" alt="caution" class="h-28" />
+        </div>
+
+        <div class="pt-5 text-red-500">
+          These statuses that have reached the task limit. No additional tasks
+          can be added to these statuses.
+        </div>
+
+        <table class="table mt-5">
+          <thead class="bg-blue-400">
+            <tr class="text-white text-sm">
+              <th>Status Name</th>
+              <th>number of tasks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(taskStatus, index) in statusShow" :key="index">
+              <td>
+                {{ taskStatus.name }}
+              </td>
+              <td>
+                {{ taskStatus.count }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
         <div class="pt-5" v-if="isLimitEnabled">
           <p v-for="(status, index) in showLimitStatus" :key="index">
@@ -158,13 +225,6 @@ const closeCancel = async () => {
         </div>
 
         <div class="modal-action">
-          <button
-            @click="closelimitModal(maxTasks)"
-            class="itbkk-button-confirm btn bg-green-400 text-white disabled:bg-green-200 disabled:text-white"
-            :disabled="changeLimit"
-          >
-            Save
-          </button>
           <button @click="closeCancel()" class="itbkk-button-cancel btn">
             Cancel
           </button>

@@ -24,6 +24,7 @@ const confirmDelete = async () => {
 
 const transferTasks = async() =>{
     emits("closeDeleteStatus",selectedStatus.value , filteredStatus.id)
+    selectedStatus.value = ""
 }
 
 </script>

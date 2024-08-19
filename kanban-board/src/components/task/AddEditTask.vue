@@ -2,7 +2,7 @@
 import { defineProps, ref, watch, computed, defineEmits } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
-
+import { useTaskStore } from "../../stores/taskStore"
 import router from "@/router"
 
 const props = defineProps({
@@ -14,12 +14,14 @@ const props = defineProps({
 const emits = defineEmits(["saveAddEdit", "closeModal"])
 const myStatus = useStatusStore()
 const myLimit = useLimitStore()
+const myTask = useTaskStore()
 const editMode = ref(props.editModeModal)
 const newTask = ref({}) // Create a local copy of the task object
 const errorTask = ref({
   title: "",
   description: "",
   assignees: "",
+  status: "",
 })
 
 const addEditSave = (editTask) => {
@@ -101,6 +103,36 @@ const changeTask = computed(() => {
     oldTask.description === newDescription &&
     oldTask.assignees === newAssignees &&
     oldTask.status === newStatus
+
+  if (myLimit.getLimit().taskLimitEnabled === true) {
+    //limit
+    const statusNotStatus = Object.entries(
+      myTask.getTasks().reduce((taskacc, task) => {
+        if (task.status !== "No Status" && task.status !== "Done") {
+          taskacc[task.status] = (taskacc[task.status] || 0) + 1
+        }
+        return taskacc
+      }, {})
+    ).map(([name, count]) => ({ name, count }))
+
+    const exceededStatuses = statusNotStatus.filter(
+      (taskStatus) => taskStatus.count > myLimit.getLimit().maxTasksPerStatus
+    )
+
+    const isExceeded = exceededStatuses.some(
+      (taskStatus) => taskStatus.name === newStatus
+    )
+
+    if (exceededStatuses.length > 0 && isExceeded) {
+      errorTask.value.status = `The status ${newStatus} will have too many tasks.  Please make progress and update status of existing tasks first.`
+    } else {
+      errorTask.value.status = ""
+    }
+  }
+
+  if (myLimit.getLimit().taskLimitEnabled === false) {
+    errorTask.value.status = ""
+  }
 
   // ตรวจสอบเงื่อนไขทั้งหมดรวมถึงการเปลี่ยนแปลงของข้อมูล
   return (
@@ -263,6 +295,9 @@ watch(props, () => {
                 </option>
               </select>
             </div>
+            <p class="text-red-400">
+              {{ errorTask.status }}
+            </p>
 
             <div v-if="task?.id" class="mt-5">
               <p
