@@ -119,14 +119,14 @@ const closeAddEdit = async (task) => {
     }
 
     //Alert limit
-    if (statusCode === 507) {
-      editMode.value = true
-      showAlert(
-        `The status ${task.status} will have too many tasks. Please make progress and update the status of existing tasks first.`,
-        "warning"
-      )
-      shouldCloseModal = false
-    }
+    // if (statusCode === 507) {
+    //   editMode.value = true
+    //   showAlert(
+    //     `The status ${task.status} will have too many tasks. Please make progress and update the status of existing tasks first.`,
+    //     "warning"
+    //   )
+    //   shouldCloseModal = false
+    // }
   }
 
   if (task.id === undefined) {
@@ -146,14 +146,14 @@ const closeAddEdit = async (task) => {
     }
 
     //Alert limit
-    if (statusCode === 507) {
-      editMode.value = true
-      showAlert(
-        `The status ${task.status} will have too many tasks. Please make progress and update the status of existing tasks first.`,
-        "warning"
-      )
-      shouldCloseModal = false
-    }
+    // if (statusCode === 507) {
+    //   editMode.value = true
+    //   showAlert(
+    //     `The status ${task.status} will have too many tasks. Please make progress and update the status of existing tasks first.`,
+    //     "warning"
+    //   )
+    //   shouldCloseModal = false
+    // }
   }
 
   if (shouldCloseModal) {
@@ -211,6 +211,7 @@ const closeModal = () => {
   openModal.value = false
   showDeleteModal.value = false
   showLimitModal.value = false
+  editMode.value = false
 
   router.push({ name: "task" })
 }

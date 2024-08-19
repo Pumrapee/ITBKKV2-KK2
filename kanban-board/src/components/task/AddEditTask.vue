@@ -40,7 +40,7 @@ const addEditSave = (editTask) => {
     editedTask.assignees = null
   }
 
-  // editMode.value = false
+  editMode.value = false
   emits("saveAddEdit", editedTask)
 }
 
@@ -78,7 +78,7 @@ const changeTask = computed(() => {
   const newTitle = trimAndCheckNull(newTask.value.title)
   const newDescription = trimAndCheckNull(newTask.value.description)
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
-  const newStatus = newTask.value.status
+  const newStatus = newTask.value.status // รับค่า newStatus จากการเลือกของผู้ใช้
 
   // ตรวจสอบความยาวของ title, description, และ assignees
   const isTitleTooLong = newTitle?.length > 100
@@ -105,34 +105,32 @@ const changeTask = computed(() => {
     oldTask.status === newStatus
 
   if (myLimit.getLimit().taskLimitEnabled === true) {
-    //limit
-    const statusNotStatus = Object.entries(
-      myTask.getTasks().reduce((taskacc, task) => {
-        if (task.status !== "No Status" && task.status !== "Done") {
-          taskacc[task.status] = (taskacc[task.status] || 0) + 1
+    const statusCount = myTask.matchStatus(newStatus).length
+    const statusLimit = myLimit.getLimit().maxTasksPerStatus
+
+    // เงื่อนไขพิเศษสำหรับสถานะ "No Status" และ "Done"
+    if (newStatus !== "No Status" && newStatus !== "Done") {
+      if (statusCount === statusLimit) {
+        // กรณีที่จำนวนเท่ากับ limit, ตรวจสอบว่าเป็นการเปลี่ยนสถานะหรือไม่
+        if (props.task.status !== newStatus) {
+          errorTask.value.status = `The status "${newStatus}" will have too many tasks. Please make progress and update status of existing tasks first.`
+        } else {
+          errorTask.value.status = "" // ถ้าเป็นสถานะเดิมไม่แสดงข้อความเตือน
         }
-        return taskacc
-      }, {})
-    ).map(([name, count]) => ({ name, count }))
-
-    const exceededStatuses = statusNotStatus.filter(
-      (taskStatus) => taskStatus.count > myLimit.getLimit().maxTasksPerStatus
-    )
-
-    const isExceeded = exceededStatuses.some(
-      (taskStatus) => taskStatus.name === newStatus
-    )
-
-    if (exceededStatuses.length > 0 && isExceeded) {
-      errorTask.value.status = `The status ${newStatus} will have too many tasks.  Please make progress and update status of existing tasks first.`
+      } else if (statusCount > statusLimit) {
+        // ถ้าจำนวนงานเกิน limit
+        errorTask.value.status = `The status "${newStatus}" will have too many tasks. Please make progress and update status of existing tasks first.`
+      } else {
+        errorTask.value.status = "" // กรณีอื่น ๆ ไม่มีการเตือน
+      }
     } else {
-      errorTask.value.status = ""
+      errorTask.value.status = "" // ไม่แสดงข้อความเตือนสำหรับ "No Status" และ "Done"
     }
-  }
-
-  if (myLimit.getLimit().taskLimitEnabled === false) {
+  } else {
     errorTask.value.status = ""
   }
+
+  const isStatusExceeded = errorTask.value.status !== ""
 
   // ตรวจสอบเงื่อนไขทั้งหมดรวมถึงการเปลี่ยนแปลงของข้อมูล
   return (
@@ -141,7 +139,8 @@ const changeTask = computed(() => {
     isAssigneesTooLong ||
     isTitleEmpty ||
     newTitle === null ||
-    isUnchanged
+    isUnchanged ||
+    isStatusExceeded
   )
 })
 
