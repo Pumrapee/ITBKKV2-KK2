@@ -115,16 +115,6 @@ const closeAddEdit = async (status) => {
       myStatus.removeStatus(editedItem.id)
       showAlert("An error has occurred, the status does not exist.", "error")
     }
-
-    // if (statusCode === 400) {
-    //   myStatus.removeStatus(editedItem.id)
-    //   showAlert("An error has occurred, the status does not exist.", "error")
-    // }
-
-    // if (statusCode === 404) {
-    //   myStatus.removeStatus(editedItem.id)
-    //   showAlert("An error has occurred, the status does not exist.", "error")
-    // }
   }
 
   if (!editMode.value) {
@@ -193,24 +183,10 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
       myStatus.removeStatus(filteredStatus)
       showAlert("An error has occurred, the status does not exist.", "error")
     }
-
-    if (newStatus === 507) {
-      const selectedName = myStatus
-        .getStatus()
-        .find((status) => status.id === selectedStatus)
-
-      showAlert(
-        `Cannot transfer to ${selectedName.name} status since it will exceed the limit.  Please choose another status to transfer to.`,
-        "warning"
-      )
-      shouldCloseModal = false
-    }
   }
 
-  if (shouldCloseModal) {
-    showTransferModal.value = false
-    showDeleteModal.value = false
-  }
+  showTransferModal.value = false
+  showDeleteModal.value = false
 }
 
 const closeModal = () => {

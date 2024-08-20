@@ -117,16 +117,6 @@ const closeAddEdit = async (task) => {
       myTask.removeTasks(task.id)
       showAlert("An error has occurred, the task does not exist.", "error")
     }
-
-    //Alert limit
-    // if (statusCode === 507) {
-    //   editMode.value = true
-    //   showAlert(
-    //     `The status ${task.status} will have too many tasks. Please make progress and update the status of existing tasks first.`,
-    //     "warning"
-    //   )
-    //   shouldCloseModal = false
-    // }
   }
 
   if (task.id === undefined) {
@@ -144,22 +134,10 @@ const closeAddEdit = async (task) => {
     if (statusCode === 400) {
       showAlert("An error has occurred, the task does not exist.", "error")
     }
-
-    //Alert limit
-    // if (statusCode === 507) {
-    //   editMode.value = true
-    //   showAlert(
-    //     `The status ${task.status} will have too many tasks. Please make progress and update the status of existing tasks first.`,
-    //     "warning"
-    //   )
-    //   shouldCloseModal = false
-    // }
   }
 
-  if (shouldCloseModal) {
-    openModal.value = false
-    router.push({ name: "task" })
-  }
+  openModal.value = false
+  router.push({ name: "task" })
   editMode.value = false
 }
 
@@ -198,13 +176,6 @@ const closeLimitModal = (maxLimit, limitBoolean) => {
   }
 
   showLimitModal.value = false
-
-  // if (limitBoolean === true && statusIsNotLimit === false) {
-  //   showAlert(
-  //     "These statuses that have reached the task limit. No additional tasks can be added to these statuses.",
-  //     "warning"
-  //   )
-  // }
 }
 
 const closeModal = () => {

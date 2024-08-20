@@ -133,10 +133,6 @@ async function login(url, username, password) {
       body: JSON.stringify({
         username: username,
         password: password,
-        // username : "itbkk.olarn",
-        // password : "ip23/OLA",
-        // itbkk.siam
-        // ip23/SIA
       }),
     })
     console.log(url)
