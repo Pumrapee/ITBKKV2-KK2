@@ -27,15 +27,7 @@ export const useTaskStore = defineStore("task", () => {
     })
   }
 
-  const updateTaskStatus1 = (updateStatus) => {
-    task.value = task.value.map((todo) => {
-      return todo.id === updateStatus.id ? { ...todo, ...updateStatus } : todo
-    })
-  }
-
   const updateTaskStatus = (updateStatus) => {
-    
-
     task.value = task.value.map((todo) => {
       return todo.status !== updateStatus.name
         ? { ...todo, ...updateStatus }
@@ -50,6 +42,10 @@ export const useTaskStore = defineStore("task", () => {
     )
   }
 
+  const matchStatus = (statusName) => {
+    return task.value.filter((todo) => todo.status === statusName)
+  }
+
   const clearTask = () => {
     return (task.value = [])
   }
@@ -61,6 +57,7 @@ export const useTaskStore = defineStore("task", () => {
     removeTasks,
     updateTaskStatus,
     clearTask,
+    matchStatus,
   }
 })
 
