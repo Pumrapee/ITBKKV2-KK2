@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 )
 public class KanbanDatabaseConfig {
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Primary
     @Bean(name = "primaryDataSource")

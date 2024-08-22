@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 )
 public class SharedDatabaseConfig {
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Bean(name = "secondaryDataSource")
     public DataSource secondaryDataSource() {
