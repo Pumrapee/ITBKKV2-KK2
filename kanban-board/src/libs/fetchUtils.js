@@ -123,7 +123,7 @@ async function editLimitStatus(url, boolean, maxLimit) {
 }
 
 // Function to handle login
-async function login(url, username, password) {
+async function login(url, userName, password) {
   try {
     const res = await fetch(`${url}`, {
       method: "POST",
@@ -131,7 +131,7 @@ async function login(url, username, password) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: username,
+        userName: userName,
         password: password,
       }),
     })
