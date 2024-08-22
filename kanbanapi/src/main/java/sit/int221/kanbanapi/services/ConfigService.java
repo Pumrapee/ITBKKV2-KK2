@@ -2,7 +2,7 @@ package sit.int221.kanbanapi.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sit.int221.kanbanapi.configs.StatusConfiguration;
+import sit.int221.kanbanapi.configs.StatusConfig;
 
 
 import java.io.FileOutputStream;
@@ -14,11 +14,11 @@ import java.util.Properties;
 public class ConfigService {
 
     @Autowired
-    private StatusConfiguration configuration;
+    private StatusConfig configuration;
 
     private static final String CONFIG_FILE_PATH = "src/main/resources/application.properties";
 
-    public StatusConfiguration getConfiguration() {
+    public StatusConfig getConfiguration() {
         return configuration;
     }
 
