@@ -37,25 +37,7 @@ const statusShow = ref()
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
 
 const closelimitModal = async (maxlimit) => {
-  //นับจำนวน status ที่ใช้ของแต่ละอัน ได้ค่าเป็น {}
   if (isLimitEnabled.value === true) {
-    // const lengthStatus = myTask.getTasks().reduce((taskacc, task) => {
-    //   taskacc[task.status] = (taskacc[task.status] || 0) + 1 //object key
-    //   return taskacc
-    // }, {})
-
-    // //แปลงค่า {} เป็น [{}] เพื่อใช้ array method
-    // const lengthStatusArray = Object.entries(lengthStatus).map(
-    //   ([name, count]) => {
-    //     return { name, count }
-    //   }
-    // )
-
-    // //ไม่เอาค่าที่มี status name Done กับ No Status
-    // const statusNotStatus = lengthStatusArray.filter((status) => {
-    //   return !(status.name === "No Status" || status.name === "Done")
-    // })
-
     const statusNotStatus = Object.entries(
       myTask.getTasks().reduce((taskacc, task) => {
         if (task.status !== "No Status" && task.status !== "Done") {
@@ -65,12 +47,6 @@ const closelimitModal = async (maxlimit) => {
       }, {})
     ).map(([name, count]) => ({ name, count }))
 
-    //map ค่า count แล้วลบกับค่า maxlimit เพื่อได้ค่า status ที่เกิน limit
-    // const StatusIslimit = statusNotStatus.map(({ name, count }) => {
-    //   const excessCount = count - maxlimit
-    //   return { name, excessCount: excessCount }
-    // })
-
     const editedLimit = await editLimitStatus(
       `${import.meta.env.VITE_API_URL}statuses`,
       isLimitEnabled.value,
@@ -78,11 +54,6 @@ const closelimitModal = async (maxlimit) => {
     )
     //เอาค่า fetch update ใน store
     myLimit.addLimit(editedLimit)
-
-    // //check ว่าค่า excessCount มีค่าเป็น 0 ไหม
-    // const statusIsNotLimit = StatusIslimit.every((status) => {
-    //   return status.excessCount <= 0
-    // })
 
     // โชว์จำนวน Task ที่เกินค่า limit
     statusShow.value = statusNotStatus.filter(

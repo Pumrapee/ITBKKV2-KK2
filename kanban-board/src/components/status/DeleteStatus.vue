@@ -1,6 +1,8 @@
 <script setup>
-import { defineProps , defineEmits , computed } from "vue"
+import { defineProps , defineEmits , computed , watch } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
+import { useLimitStore } from "../../stores/limitStore"
+import { useTaskStore } from "@/stores/taskStore"
 import { ref } from "vue"
 
 const props = defineProps({
@@ -11,7 +13,10 @@ const props = defineProps({
 const emits = defineEmits(["closeModal" , "closeDeleteStatus"])
 
 const myStatus = useStatusStore()
+const myLimit = useLimitStore()
+const myTask = useTaskStore()
 const selectedStatus = ref()
+const errorAlert = ref({ status : ""})
 const filteredStatus = computed(() => {
   return myStatus
     .getStatus()
@@ -26,6 +31,31 @@ const transferTasks = async() =>{
     emits("closeDeleteStatus",selectedStatus.value , filteredStatus.id)
     selectedStatus.value = ""
 }
+
+const closeModals = () => {
+  selectedStatus.value = ""
+  emits("closeModal")
+}
+
+//Disable ปุ่ม
+const deleteButton = computed(() => {
+  if (myLimit.getLimit().taskLimitEnabled) {
+    const selected = filteredStatus.value.find(status => status.id === selectedStatus.value)
+    const statusCount = myTask.matchStatus(selected?.name)?.length
+    const statusLimit = myLimit.getLimit().maxTasksPerStatus
+
+    if (selected?.name !== "No Status" && selected?.name !== "Done" && statusCount >= statusLimit) {
+      errorAlert.value.status = `Cannot transfer to ${selected?.name} status since it will exceed the limit. Please choose another status to transfer to.`
+      return true
+    } else {
+      errorAlert.value.status = ""
+      return false
+    }
+  }
+  
+  errorAlert.value.status = ""
+  return false
+})
 
 </script>
 
@@ -49,7 +79,7 @@ const transferTasks = async() =>{
           >
             Confirm
           </button>
-          <button class="itbkk-button-cancel btn" @click="$emit('closeModal')">
+          <button class="itbkk-button-cancel btn" @click="closeModals">
             Cancel
           </button>
         </div>
@@ -63,7 +93,8 @@ const transferTasks = async() =>{
       <div class="bg-white p-10 rounded-lg w-2/5">
         <div class="itbkk-message text-lg font-semibold text-center">
           <p style="word-wrap: break-word">
-            There are {{ detailStatus.countTask }} tasks in <span class="text-blue-400">"{{ detailStatus.name }}"</span> status.</br> Do you want to transfer them?
+            There are <span class="text-blue-400">{{ detailStatus.countTask }}</span> tasks in <span class="text-blue-400">"{{ detailStatus.name }}"</span> status.</br>  In order to delete this status, the system must transfer tasks in this status to existing status. Transfer tasks to 
+            [<span class="text-blue-400" v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }} ,  </span> ]
           </p>
         </div>
 
@@ -74,9 +105,15 @@ const transferTasks = async() =>{
           </select>
         </div>
 
+        <div>
+          <p class="text-red-400" v-if="errorAlert.status">
+         {{ errorAlert.status }}
+          </p>
+        </div>
+
         <div class="mt-4 flex justify-end">
-          <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()">Transfer</button>
-          <button class="itbkk-button-cancel btn" @click="$emit('closeModal')">Cancel</button>
+          <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()" :disabled="deleteButton">Transfer</button>
+          <button class="itbkk-button-cancel btn" @click="closeModals">Cancel</button>
         </div>
       </div>
     </div>

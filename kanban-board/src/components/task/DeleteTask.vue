@@ -1,35 +1,14 @@
 <script setup>
-import { ref, defineProps, defineEmits } from "vue"
-import { useTaskStore } from "@/stores/taskStore"
-import { deleteItemById } from "../../libs/fetchUtils"
-// import AlertComponent from "./Alert.vue"
-
-const myTasks = useTaskStore()
-// const modalAlert = ref({ message: "", type: "", modal: false })
+import { defineProps, defineEmits } from "vue"
 
 const props = defineProps({
   showDelete: Boolean,
   detailDelete: Object,
 })
-
 const emits = defineEmits(["closeDeleteTask", "cancelDelete"])
 
 const confirmDelete = async (id) => {
-  emits("closeDeleteTask",id)
-  // const deleteItem = await deleteItemById(
-  //   `${import.meta.env.VITE_API_URL}tasks`,
-  //   props.detailDelete.id
-  // )
-
-  // if (deleteItem === 200) {
-  //   myTasks.removeTasks(props.detailDelete.id)
-  //   emits("closeDeleteTask", deleteItem)
-  // }
-
-  // if (deleteItem === 400) {
-  //   myTasks.removeTasks(props.detailDelete.id)
-  //   emits("closeDeleteTask", deleteItem)
-  // }
+  emits("closeDeleteTask", id)
 }
 
 const cancelDelete = () => {
@@ -38,12 +17,6 @@ const cancelDelete = () => {
 </script>
 
 <template>
-  <!-- Alert -->
-  <!-- <AlertComponent
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
-  /> -->
   <!-- Modal Delete -->
   <div v-if="showDelete" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
