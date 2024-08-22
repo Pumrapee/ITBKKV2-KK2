@@ -11,61 +11,26 @@ export const useTaskStore = defineStore("task", () => {
   }
   //actions
   const addTasks = (newTasks) => {
-    newTasks.forEach((newTask) =>
-      addTask(
-        newTask.id,
-        newTask.title,
-        newTask.description,
-        newTask.assignees,
-        newTask.status,
-        newTask.createdOn,
-        newTask.updatedOn
-      )
-    )
+    // loop array
+    newTasks.forEach(addTask)
   }
-  const addTask = (id, title, desc, assign, sta, createdTime, updatedTime) => {
-    task.value.push({
-      id: id,
-      title: title,
-      description: desc,
-      assignees: assign,
-      status: sta,
-      createdOn: createdTime,
-      updatedOn: updatedTime,
+
+  const addTask = (obj) => {
+    // push object เข้า task
+    task.value.push({ ...obj })
+  }
+
+  const updateTask = (updatedTask) => {
+    task.value = task.value.map((todo) => {
+      //จะสร้าง object ใหม่ที่รวม properties ของ todo และ updatedTask เข้าด้วยกัน
+      return todo.id === updatedTask.id ? { ...todo, ...updatedTask } : todo
     })
   }
 
-  const updateTask = (
-    id,
-    title,
-    desc,
-    assign,
-    sta,
-    createdTime,
-    updatedTime
-  ) => {
+  const updateTaskStatus = (updateStatus) => {
     task.value = task.value.map((todo) => {
-      return todo.id === id
-        ? {
-            ...todo,
-            title: title,
-            description: desc,
-            assignees: assign,
-            status: sta,
-            createdOn: createdTime,
-            updatedOn: updatedTime,
-          }
-        : todo
-    })
-  }
-
-  const updateTaskStatus = (id, newStatus) => {
-    task.value = task.value.map((todo) => {
-      return todo.id === id
-        ? {
-            ...todo,
-            status: newStatus,
-          }
+      return todo.status !== updateStatus.name
+        ? { ...todo, ...updateStatus }
         : todo
     })
   }
@@ -76,6 +41,11 @@ export const useTaskStore = defineStore("task", () => {
       1
     )
   }
+
+  const matchStatus = (statusName) => {
+    return task.value.filter((todo) => todo.status === statusName)
+  }
+
   const clearTask = () => {
     return (task.value = [])
   }
@@ -87,6 +57,7 @@ export const useTaskStore = defineStore("task", () => {
     removeTasks,
     updateTaskStatus,
     clearTask,
+    matchStatus,
   }
 })
 

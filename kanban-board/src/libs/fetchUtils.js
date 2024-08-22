@@ -1,7 +1,10 @@
 //function ที่ติดต่อ back-end
 async function getItems(url) {
   try {
-    const data = await fetch(url) //GET Method
+    const data = await fetch(url, {
+      //GET Method
+      method: "GET",
+    })
     const items = await data.json()
     return items
   } catch (error) {}
@@ -9,7 +12,10 @@ async function getItems(url) {
 
 async function getStatusLimits(url) {
   try {
-    const data = await fetch(`${url}/maximum-task`) //GET Method
+    const data = await fetch(`${url}/maximum-task`, {
+      //GET Method
+      method: "GET",
+    })
     const items = await data.json()
     return items
   } catch (error) {}
@@ -18,17 +24,22 @@ async function getStatusLimits(url) {
 async function getItemById(url, id) {
   let data
   try {
-    data = await fetch(`${url}/${id}`)
+    data = await fetch(`${url}/${id}`, {
+      //GET Method
+      method: "GET",
+    })
     const item = await data.json()
     return item
   } catch (error) {
     if (data.status === 404) return 404
   }
 }
+
 async function findStatus(url, id) {
   let data
   try {
     data = await fetch(`${url}/${id}`, {
+      //GET Method
       method: "GET",
     })
     return data.status
@@ -111,6 +122,37 @@ async function editLimitStatus(url, boolean, maxLimit) {
   } catch (error) {}
 }
 
+// Function to handle login
+async function login(url, username, password) {
+  try {
+    const res = await fetch(`${url}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        // username : "itbkk.olarn",
+        // password : "ip23/OLA",
+        // itbkk.siam
+        // ip23/SIA
+      }),
+    })
+    console.log(url)
+
+    // Return status code for further processing
+    return res.status;
+  } catch (error) {
+    console.error("Error during login:", error);
+    return 500; // Internal server error
+  }
+}
+
+
+
+
+
 export {
   getItems,
   getItemById,
@@ -121,4 +163,5 @@ export {
   findStatus,
   getStatusLimits,
   editLimitStatus,
+  login,
 }

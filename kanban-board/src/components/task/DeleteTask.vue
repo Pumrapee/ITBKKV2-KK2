@@ -1,11 +1,11 @@
 <script setup>
 import { ref, defineProps, defineEmits } from "vue"
 import { useTaskStore } from "@/stores/taskStore"
-import { deleteItemById } from "../libs/fetchUtils"
-import AlertComponent from "./Alert.vue"
+import { deleteItemById } from "../../libs/fetchUtils"
+// import AlertComponent from "./Alert.vue"
 
-const mytasks = useTaskStore()
-const modalAlert = ref({ message: "", type: "", modal: false })
+const myTasks = useTaskStore()
+// const modalAlert = ref({ message: "", type: "", modal: false })
 
 const props = defineProps({
   showDelete: Boolean,
@@ -14,21 +14,22 @@ const props = defineProps({
 
 const emits = defineEmits(["closeDeleteTask", "cancelDelete"])
 
-const confirmDelete = async () => {
-  const deleteItem = await deleteItemById(
-    `${import.meta.env.VITE_API_URL}tasks`,
-    props.detailDelete.id
-  )
+const confirmDelete = async (id) => {
+  emits("closeDeleteTask",id)
+  // const deleteItem = await deleteItemById(
+  //   `${import.meta.env.VITE_API_URL}tasks`,
+  //   props.detailDelete.id
+  // )
 
-  if (deleteItem === 200) {
-    mytasks.removeTasks(props.detailDelete.id)
-    emits("closeDeleteTask", deleteItem)
-  }
+  // if (deleteItem === 200) {
+  //   myTasks.removeTasks(props.detailDelete.id)
+  //   emits("closeDeleteTask", deleteItem)
+  // }
 
-  if (deleteItem === 400) {
-    mytasks.removeTasks(props.detailDelete.id)
-    emits("closeDeleteTask", deleteItem)
-  }
+  // if (deleteItem === 400) {
+  //   myTasks.removeTasks(props.detailDelete.id)
+  //   emits("closeDeleteTask", deleteItem)
+  // }
 }
 
 const cancelDelete = () => {
@@ -38,11 +39,11 @@ const cancelDelete = () => {
 
 <template>
   <!-- Alert -->
-  <AlertComponent
+  <!-- <AlertComponent
     :message="modalAlert.message"
     :type="modalAlert.type"
     :showAlert="modalAlert.modal"
-  />
+  /> -->
   <!-- Modal Delete -->
   <div v-if="showDelete" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
@@ -61,7 +62,7 @@ const cancelDelete = () => {
         <div class="mt-4 flex justify-end">
           <button
             class="itbkk-button-confirm btn mr-4 bg-red-500 text-white"
-            @click="confirmDelete()"
+            @click="confirmDelete(detailDelete.id)"
           >
             Confirm
           </button>

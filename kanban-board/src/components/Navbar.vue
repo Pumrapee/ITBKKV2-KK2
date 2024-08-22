@@ -1,90 +1,6 @@
-<script setup>
-import { ref } from "vue"
-import AddTask from "../components/AddTask.vue"
-import router from "@/router"
-import { useTaskStore } from "../stores/taskStore"
-import AlertComponent from "./Alert.vue"
-import { defineEmits } from "vue"
-
-const emits = defineEmits(["showbtn"])
-const myTask = useTaskStore()
-const showAdd = ref()
-const modalAlert = ref({ message: "", type: "", modal: false })
-
-// Add task
-const showModalAdd = () => {
-  showAdd.value = true
-}
-
-const CancelAdd = () => {
-  showAdd.value = false
-  router.go(-1)
-}
-
-const closeAddModal = (statusCode, status) => {
-  if (statusCode === 201) {
-    showAdd.value = false
-    router.go(-1)
-    modalAlert.value = {
-      message: "The task has been successfully added",
-      type: "success",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "4000")
-  }
-
-  if (statusCode === 400) {
-    showAdd.value = false
-    router.push({ name: "task"})
-    modalAlert.value = {
-      message: "An error has occurred, the task does not exist.",
-      type: "error",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "4000")
-  }
-
-  if (statusCode === 404) {
-    showAdd.value = false
-    router.go(-1)
-    modalAlert.value = {
-      message: "An error has occurred, the task does not exist.",
-      type: "error",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "4000")
-  }
-
-  if (statusCode === 507) {
-    modalAlert.value = {
-      message: `The status ${status} will have too many tasks.  Please make progress and update status of existing tasks first.`,
-      type: "warning",
-      modal: true,
-    }
-    setTimeout(() => {
-      modalAlert.value.modal = false
-    }, "4000")
-  }
-}
-
-const showbtnDelete = () => {
-  emits("showbtn")
-}
-</script>
+<script setup></script>
 
 <template>
-  <!-- Alert -->
-  <AlertComponent
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
-  />
   <!-- Navbar -->
   <div class="navbar bg-white border-b border-gray">
     <div class="navbar-start font-custom">
@@ -98,31 +14,8 @@ const showbtnDelete = () => {
       </button>
     </div>
 
-    <div class="navbar-end">
-      <button
-        v-if="myTask.showNavbar"
-        @click="showbtnDelete"
-        class="itbkk-button-action btn border-red-500 bg-red-500 text-white mr-2"
-      >
-        <img src="/icons/delete.png" class="w-5 text-orange-400" />Delete
-      </button>
-      <router-link :to="{ name: 'add' }">
-        <button
-          v-if="myTask.showNavbar"
-          @click="showModalAdd"
-          class="itbkk-button-add btn border-blue-400 bg-blue-400 text-white hover:bg-pink-400"
-        >
-          <img src="/icons/plus.png" class="w-4" />Add Task
-        </button>
-      </router-link>
-    </div>
+    <div class="navbar-end"></div>
   </div>
-
-  <AddTask
-    @closeAddModal="closeAddModal"
-    @closeCancel="CancelAdd"
-    :showAdd="showAdd"
-  />
 </template>
 
 <style scoped>

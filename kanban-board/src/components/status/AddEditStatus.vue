@@ -1,23 +1,24 @@
 <script setup>
-import { defineProps, defineEmits, computed } from "vue"
-import { watch, ref } from "vue"
-import { editItem, getItems } from "@/libs/fetchUtils"
+import { defineProps, defineEmits, watch, ref, computed } from "vue"
 import { useStatusStore } from "@/stores/statusStore"
-import { useTaskStore } from "@/stores/taskStore"
 
 const props = defineProps({
-  showEditStatus: Boolean,
+  showModal: Boolean,
   taskStatus: Object,
+  editModeModal: Boolean,
 })
-const emits = defineEmits(["closeEditStatus", "closeCancelStatus"])
+const emits = defineEmits(["closeModal", "saveAddEdit"])
 
 const newStatus = ref({})
 const myStatus = useStatusStore()
-const myTask = useTaskStore()
 const errorStatus = ref({
   name: "",
   description: "",
 })
+
+const closeModal = () => {
+  emits("closeModal")
+}
 
 const changeStatus = computed(() => {
   const trimAndCheckNull = (value) => {
@@ -35,50 +36,49 @@ const changeStatus = computed(() => {
   const newName = trimAndCheckNull(newStatus.value.name)
   const newDescription = trimAndCheckNull(newStatus.value.description)
 
-  const isNameLength = newName?.length > 50
-  const isNameEmpthy = newName === null
-  const isDescriptionLength = newDescription?.length > 200
+  const isNameTooLong = newName?.length > 50
+  const isNameEmpty = newName === null
+  const isDescriptionTooLong = newDescription?.length > 200
 
   const nameNot = myStatus.getStatus().filter((list) => {
-    return list.name.toLowerCase() !== oldStatus.name.toLowerCase()
+    return list.name?.toLowerCase() !== oldStatus.name?.toLowerCase()
   })
 
-  const nameUnique = nameNot.some((listStatus) => {
-    return listStatus.name.toLowerCase() === newStatus.value.name.toLowerCase()
-  })
+  const isNameUnique = nameNot.some(
+    (listStatus) => listStatus.name?.toLowerCase() === newName?.toLowerCase()
+  )
 
-  if (isNameLength) {
-    errorStatus.value.name = "Name exceeds the limit of 50 characters."
-  } else if (isNameEmpthy) {
-    errorStatus.value.name = "Name is require."
-  } else if (nameUnique) {
-    errorStatus.value.name =
-      "Status name must be uniques, please choose another name."
-  } else {
-    errorStatus.value.name = ""
-  }
+  // จัดการข้อความข้อผิดพลาด
+  errorStatus.value.name = isNameTooLong
+    ? "Name exceeds the limit of 50 characters."
+    : isNameEmpty
+    ? "Name is required."
+    : isNameUnique
+    ? "Status name must be unique, please choose another name."
+    : ""
 
-  if (isDescriptionLength) {
-    errorStatus.value.description =
-      "Description exceeds the limit of 200 characters."
-  } else {
-    errorStatus.value.description = ""
-  }
+  errorStatus.value.description = isDescriptionTooLong
+    ? "Description exceeds the limit of 200 characters."
+    : ""
+
+  // ตรวจสอบเงื่อนไขทั้งหมดรวมถึงการเปลี่ยนแปลงของข้อมูล
+  const isUnchanged =
+    oldStatus.name === newName &&
+    oldStatus.description === newDescription &&
+    oldStatus.color === newStatus.value.color
 
   return (
-    isNameEmpthy ||
-    isNameLength ||
-    isDescriptionLength ||
-    nameUnique ||
+    isNameEmpty ||
+    isNameTooLong ||
+    isDescriptionTooLong ||
+    isNameUnique ||
     newName === null ||
-    (oldStatus.name === newName &&
-      oldStatus.description === newDescription &&
-      oldStatus.color === newStatus.value.color)
+    isUnchanged
   )
 })
 
-const editStatusSave = async (status) => {
-  const editStatus = { ...status }
+const addEditSave = (newStatus) => {
+  const editStatus = { ...newStatus }
   editStatus.name = editStatus.name?.trim()
   editStatus.description = editStatus.description?.trim()
 
@@ -89,44 +89,11 @@ const editStatusSave = async (status) => {
     editStatus.description = null
   }
 
-  const { editedItem, statusCode } = await editItem(
-    `${import.meta.env.VITE_API_URL}statuses`,
-    editStatus.id,
-    {
-      name: editStatus.name,
-      description: editStatus.description,
-      color: editStatus.color,
-    }
-  )
-
-  if (statusCode === 200) {
-    myStatus.updateStatus(
-      editedItem.id,
-      editedItem.name,
-      editedItem.description,
-      editedItem.color
-    )
-    const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
-    myTask.clearTask()
-    myTask.addTasks(listTasks)
-
-    emits("closeEditStatus", statusCode)
-  }
-
-
-  if (statusCode === 400) {
-    myStatus.removeStatus(editedItem.id)
-    emits("closeEditStatus", statusCode)
-  }
-
-  if (statusCode === 404) {
-    myStatus.removeStatus(editedItem.id)
-    emits("closeEditStatus", statusCode)
-  }
+  emits("saveAddEdit", newStatus)
 }
 
 watch(props, () => {
-  if (props.showEditStatus) {
+  if (props.showModal) {
     Object.assign(newStatus.value, props.taskStatus)
   }
 })
@@ -135,12 +102,12 @@ watch(props, () => {
 <template>
   <!-- Modal window -->
   <div
-    v-if="showEditStatus"
+    v-if="showModal"
     class="fixed z-10 inset-0 overflow-y-auto flex items-center justify-center bg-black/[.15]"
   >
     <div class="bg-white p-6 rounded-lg w-11/12 max-w-xl">
       <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b-2">
-        Edit Status
+        {{ editModeModal === true ? "Edit Status" : "Add Status" }}
       </h2>
 
       <div class="itbkk-modal-status mb-4">
@@ -208,14 +175,14 @@ watch(props, () => {
 
       <div class="flex justify-end">
         <button
-          @click="editStatusSave(newStatus)"
+          @click="addEditSave(newStatus)"
           class="itbkk-button-confirm bg-green-400 text-white rounded-lg py-2 px-4 mr-2 disabled:bg-green-200"
           :disabled="changeStatus"
         >
           Save
         </button>
         <button
-          @click="$emit('closeCancelStatus')"
+          @click="closeModal"
           class="itbkk-button-cancel bg-gray-300 text-gray-700 rounded-lg py-2 px-4"
         >
           Cancel
