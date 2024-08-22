@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.stereotype.Service;
-import sit.int221.kanbanapi.configs.StatusConfiguration;
+import sit.int221.kanbanapi.configs.StatusConfig;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
@@ -25,7 +25,7 @@ public class TaskService {
     @Autowired
     private StatusRepository statusRepository;
     @Autowired
-    private StatusConfiguration configuration;
+    private StatusConfig configuration;
 
     public List<Task> getAllTask() {
         return repository.findAll();
@@ -116,7 +116,7 @@ public class TaskService {
         }
     }
 
-    public boolean allStatusLimitCheck(StatusConfiguration newConfig) {
+    public boolean allStatusLimitCheck(StatusConfig newConfig) {
         if (newConfig.getTaskLimitEnabled()) {
             return repository.countTasksByStatus().stream().allMatch(tasks -> tasks <= newConfig.getMaxTasksPerStatus());
         } else {

@@ -3,7 +3,7 @@ package sit.int221.kanbanapi.services;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sit.int221.kanbanapi.configs.StatusConfiguration;
+import sit.int221.kanbanapi.configs.StatusConfig;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -17,7 +17,7 @@ public class StatusService {
     private StatusRepository repository;
 
     @Autowired
-    private StatusConfiguration configuration;
+    private StatusConfig configuration;
 
     public List<Status> getAllStatus() {
         return repository.findAll();

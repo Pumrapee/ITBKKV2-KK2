@@ -6,6 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -84,11 +87,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.INSUFFICIENT_STORAGE, request);
     }
 
-    @ExceptionHandler(AuthenticationFailed.class)
+    @ExceptionHandler({AuthenticationFailed.class, BadCredentialsException.class, UsernameNotFoundException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorResponse> handleAuthenticaionException
             (Exception exception, WebRequest request) {
-        return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, request);
+        return buildErrorResponse(exception, "Username or Password is incorrect.", HttpStatus.UNAUTHORIZED, request);
     }
 
     @ExceptionHandler(Exception.class)

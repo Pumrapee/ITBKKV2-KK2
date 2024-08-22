@@ -12,7 +12,7 @@ public class LoginDTO {
     @NotNull
     @NotBlank
     @Size(max = 50)
-    private String username;
+    private String userName;
 
     @NotNull
     @NotBlank

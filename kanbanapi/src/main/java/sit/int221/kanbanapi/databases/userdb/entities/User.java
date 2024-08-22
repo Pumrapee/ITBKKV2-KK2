@@ -3,6 +3,9 @@ package sit.int221.kanbanapi.databases.userdb.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 @Getter
 @Setter
@@ -29,5 +32,4 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role = Role.STUDENT;
-
 }
