@@ -268,18 +268,18 @@ watch(
   <!-- Head -->
   <div class="flex flex-col items-center mt-16 mb-20">
     <div class="flex justify-between w-3/5">
-      <div class="font-bold text-4xl text-blue-400 m-2">My Task</div>
+      <div class="font-bold text-4xl text-black m-2">My Task</div>
       <div class="flex items-center">
         <div v-if="filterStatus.length">
           <button
-            class="btn btn-outline text-blue-500 font-light hover:bg-blue-400 hover:border-blue-400"
+            class="btn btn-outline text-black font-light hover:bg-blue-400 hover:border-blue-400"
             @click="clearFilter"
           >
             <img src="/icons/close.png" class="w-3" />
           </button>
         </div>
         <details class="dropdown dropdown-end itbkk-status-filter">
-          <summary class="m-1 btn bg-pink-400 text-white">
+          <summary class="m-1 btn bg-black text-white">
             <img src="/icons/filter.png" class="w-6" />
             Filter
           </summary>
@@ -317,7 +317,7 @@ watch(
         <router-link :to="{ name: 'addTask' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-add btn border-blue-400 bg-blue-400 text-white hover:bg-pink-400"
+            class="itbkk-button-add btn border-black0 bg-black text-white hover:bg-pink-400"
           >
             <img src="/icons/plus.png" class="w-4" />Add Task
           </button>
@@ -325,7 +325,7 @@ watch(
 
         <router-link :to="{ name: 'tableStatus' }">
           <button
-            class="itbkk-manage-status btn text-l bg-pink-400 text-white ml-1"
+            class="itbkk-manage-status btn text-l bg-black text-white ml-1"
           >
             Status
           </button>
@@ -333,19 +333,19 @@ watch(
 
         <button
           @click="openLimitModal"
-          class="itbkk-manage-status btn text-l ml-1 bg-pink-400 text-white"
+          class="itbkk-manage-status btn text-l ml-1 bg-black text-white"
         >
-          <img src="/icons/management.png" class="w-6" />
+          <img src="/icons/limit.png" class="w-6" />
           Limit Status
         </button>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="border border-blue-400 rounded-md w-3/5 mt-4">
+    <div class="border border-black rounded-md w-3/5 mt-4">
       <table class="table">
         <!-- head -->
-        <thead class="bg-blue-400">
+        <thead class="bg-black">
           <tr class="text-white text-sm">
             <th class="pl-20">No.</th>
             <th class="pl-15">Title</th>
@@ -360,7 +360,7 @@ watch(
                   v-if="sortStatus"
                   xmlns="http://www.w3.org/2000/svg"
                   :class="{
-                    'text-blue-200': sortStatus === 'default',
+                    'text-blue-500': sortStatus === 'default',
                     '': sortStatus !== 'default',
                   }"
                   width="20"
@@ -392,7 +392,7 @@ watch(
         <tbody class="bg-white" v-if="myTask.getTasks().length > 0">
           <!-- row -->
           <tr v-for="(task, index) in filteredTasks" :key="task.id">
-            <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
+            <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
               <router-link
                 :to="{ name: 'detailTask', params: { id: task.id } }"
