@@ -87,7 +87,7 @@ const loginHandler = async () => {
         </svg>
 
         <!-- Alert Message -->
-        <span class="flex-grow">{{ alertMessage }}</span>
+        <span class="itbkk-message flex-grow">{{ alertMessage }}</span>
 
         <!-- Close Button -->
         <button
@@ -124,7 +124,7 @@ const loginHandler = async () => {
             v-model="username"
             required
             maxlength="50"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+            class="itbkk-username mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
           />
         </div>
         <div class="mb-6">
@@ -137,13 +137,14 @@ const loginHandler = async () => {
             v-model="password"
             required
             maxlength="14"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+            class="itbkk-password mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
           />
         </div>
         <button
           type="submit"
           :disabled="isButtonDisabled"
-          class="w-full bg-gray-800 text-white font-semibold py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 disabled:bg-gray-300"
+          :class="{ disabled: isButtonDisabled }"
+          class="itbkk-button-signin w-full bg-gray-800 text-white font-semibold py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 disabled:bg-gray-300"
         >
           Login
         </button>
