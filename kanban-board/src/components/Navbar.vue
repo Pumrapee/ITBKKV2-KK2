@@ -1,4 +1,9 @@
-<script setup></script>
+<script setup>
+import { useAuthStore } from '@/stores/loginStore'
+
+const userName = useAuthStore()
+
+</script>
 
 <template>
   <!-- Navbar -->
@@ -7,7 +12,7 @@
       <button
         class="btn btn-ghost bg-white pl-5 flex items-center text-2xl text-black "
       >
-
+      
       <!-- Logo -->
       <img src="/icons/logonavbar2.png" class="w-10 m-2" />
         <RouterLink :to="{ name: 'task' }">
@@ -18,7 +23,11 @@
       </button>
     </div>
 
-    <div class="navbar-end"></div>
+    <!-- user name -->
+    <div class="navbar-end pr-5">
+      Hi, {{ userName.user.name }}
+      
+    </div>
   </div>
 </template>
 

@@ -22,7 +22,7 @@ const alertMessage = ref('')
 const showAlert = ref(false)
 
 const loginHandler = async () => {
-  const status = await login(`${import.meta.env.VITE_API_URL}login`, username.value, password.value);
+  const {res, token} = await login(`${import.meta.env.VITE_API_URL}login`, username.value, password.value);
 
   // if (status === 200) {
   //   alertMessage.value = ''
@@ -34,16 +34,18 @@ const loginHandler = async () => {
   //   alertMessage.value = "There is a problem. Please try again later."
   //   showAlert.value = true
   // }
-  if (status === 200) {
-    authStore.login()
+  if (res.status === 200) {
+    authStore.login(token)
+    console.log(token)
     router.push({ name: "task" })
-  } else if (status === 400 || status === 401) {
+  } else if (res.status === 400 || res.status === 401) {
     alertMessage.value = "Username or Password is incorrect."
     showAlert.value = true
-  } else {
-    alertMessage.value = "There is a problem. Please try again later."
-    showAlert.value = true
-  }
+  } 
+  // else {
+  //   alertMessage.value = "There is a problem. Please try again later."
+  //   showAlert.value = true
+  // }
 
 }
 </script>

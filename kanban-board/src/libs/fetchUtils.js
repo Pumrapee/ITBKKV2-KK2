@@ -136,9 +136,13 @@ async function login(url, userName, password) {
       }),
     })
     console.log(url)
+  
 
     // Return status code for further processing
-    return res.status;
+    const data = await res.json()
+    const token = data.access_token
+
+    return {res, token}
   } catch (error) {
     console.error("Error during login:", error);
     return 500; // Internal server error

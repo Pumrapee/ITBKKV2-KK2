@@ -335,7 +335,7 @@ watch(
           @click="openLimitModal"
           class="itbkk-manage-status btn text-l ml-1 bg-black text-white"
         >
-          <img src="" class="w-6" />
+          <img src="/icons/limit.png" class="w-6" />
           Limit Status
         </button>
       </div>
