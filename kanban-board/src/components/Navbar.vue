@@ -1,8 +1,7 @@
 <script setup>
-import { useAuthStore } from '@/stores/loginStore'
+import { useAuthStore } from "@/stores/loginStore"
 
 const userName = useAuthStore()
-
 </script>
 
 <template>
@@ -10,24 +9,18 @@ const userName = useAuthStore()
   <div class="navbar bg-white border-b border-gray">
     <div class="navbar-start font-custom">
       <button
-        class="btn btn-ghost bg-white pl-5 flex items-center text-2xl text-black "
+        class="btn btn-ghost bg-white pl-5 flex items-center text-2xl text-black"
       >
-      
-      <!-- Logo -->
-      <img src="/icons/logonavbar2.png" class="w-10 m-2" />
+        <!-- Logo -->
+        <img src="/icons/logonavbar2.png" class="w-10 m-2" />
         <RouterLink :to="{ name: 'task' }">
-          <Span>KRADAN KANBAN</Span>
-         
+          <span>KRADAN KANBAN</span>
         </RouterLink>
-        
       </button>
     </div>
 
     <!-- user name -->
-    <div class="navbar-end pr-5">
-      Hi, {{ userName.user.name }}
-      
-    </div>
+    <div class="navbar-end pr-5">Hi, {{ userName.user.name }}</div>
   </div>
 </template>
 
