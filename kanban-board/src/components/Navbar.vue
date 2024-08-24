@@ -20,7 +20,9 @@ const userName = useAuthStore()
     </div>
 
     <!-- user name -->
-    <div class="navbar-end pr-5">Hi, {{ userName.user.name }}</div>
+    <div class="itbkk-fullname navbar-end pr-5">
+      Hi, {{ userName.user.name }}
+    </div>
   </div>
 </template>
 
