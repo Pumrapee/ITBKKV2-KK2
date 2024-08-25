@@ -46,8 +46,8 @@ services:
     image: mysql/mysql-server
     env_file: kanbandb/db-env.sh
     volumes: 
-      - ./kanbanproj-db/scripts:/docker-entrypoint-initdb.d
-      - db-datadir:/var/lib/mysql
+      - ./kanbandb/scripts:/docker-entrypoint-initdb.d
+      # - db-datadir:/var/lib/mysql
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       interval: 2s
@@ -60,8 +60,8 @@ services:
           - kanban-db
     restart: unless-stopped
 
-volumes:
-  db-datadir:
+# volumes:
+#   db-datadir:
 
 networks:
   kanban-front-network:
