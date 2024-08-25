@@ -1,4 +1,4 @@
-//function ที่ติดต่อ back-end
+//function ที่ติดต่อ back-end.
 async function getItems(url) {
   try {
     const data = await fetch(url, {
