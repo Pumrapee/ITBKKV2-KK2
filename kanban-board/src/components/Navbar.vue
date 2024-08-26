@@ -1,7 +1,12 @@
 <script setup>
 import { useAuthStore } from "@/stores/loginStore"
+import router from "@/router"
 
-const userName = useAuthStore()
+const authStore = useAuthStore()
+const logout = () => {
+  authStore.logout()
+  router.push({ name: "login" })
+}
 </script>
 
 <template>
@@ -21,7 +26,19 @@ const userName = useAuthStore()
 
     <!-- user name -->
     <div class="itbkk-fullname navbar-end pr-5">
-      Hi, {{ userName.user.name }}
+      Hi, {{ authStore.user.name }}
+    </div>
+    <div class="dropdown dropdown-end">
+      <div tabindex="0">
+        <img src="/icons/profile-user.png" alt="profile" class="h-8" />
+      </div>
+      <ul
+        tabindex="0"
+        class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-4 w-40 p-2 shadow"
+      >
+        <li><a>Profile</a></li>
+        <li @click="logout"><a>Logout</a></li>
+      </ul>
     </div>
   </div>
 </template>
