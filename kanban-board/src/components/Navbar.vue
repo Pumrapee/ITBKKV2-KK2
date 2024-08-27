@@ -28,7 +28,7 @@ const logout = () => {
     <div class="itbkk-fullname navbar-end pr-5">
       Hi, {{ authStore.user.name }}
     </div>
-    <div class="dropdown dropdown-end">
+    <div class="cursor-pointer dropdown dropdown-end">
       <div tabindex="0">
         <img src="/icons/profile-user.png" alt="profile" class="h-8" />
       </div>

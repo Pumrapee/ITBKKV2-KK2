@@ -267,15 +267,17 @@ watch(
 <template>
   <!-- Head -->
   <div class="flex flex-col items-center mt-16 mb-20">
+    <div class="font-bold text-4xl text-black m-2 self-start pl-72">
+      My Task
+    </div>
     <div class="flex justify-between w-3/5">
-      <div class="font-bold text-4xl text-black m-2">My Task</div>
-      <div class="flex items-center">
+      <div class="flex justify-start items-center">
         <div v-if="filterStatus.length">
           <button
-            class="btn btn-outline text-black font-light hover:bg-blue-400 hover:border-blue-400"
+            class="btn btn-outline text-black font-light hover:bg-black"
             @click="clearFilter"
           >
-            <img src="/icons/close.png" class="w-3" />
+            <p class="font-bold">X</p>
           </button>
         </div>
         <details class="dropdown dropdown-end itbkk-status-filter">
@@ -301,7 +303,7 @@ watch(
                     v-model="filterStatus"
                   />
                   <div
-                    class="rounded-md p-2 text-black w-36 text-center mb-2"
+                    class="shadow-md rounded-full font-medium p-2 text-black w-36 text-center mb-2 break-all"
                     :style="{
                       backgroundColor: myStatus.getStatusColor(status.name),
                     }"
@@ -314,15 +316,6 @@ watch(
           </ul>
         </details>
 
-        <router-link :to="{ name: 'addTask' }">
-          <button
-            @click="openModalAdd"
-            class="itbkk-button-add btn border-black0 bg-black text-white hover:bg-pink-400"
-          >
-            <img src="/icons/plus.png" class="w-4" />Add Task
-          </button>
-        </router-link>
-
         <router-link :to="{ name: 'tableStatus' }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
@@ -330,14 +323,25 @@ watch(
             Status
           </button>
         </router-link>
+      </div>
 
+      <div class="flex justify-end items-center">
         <button
           @click="openLimitModal"
-          class="itbkk-manage-status btn text-l ml-1 bg-black text-white"
+          class="flex itbkk-manage-status btn text-l ml-1 bg-black text-white"
         >
           <img src="/icons/limit.png" class="w-6" />
-          Limit Status
+          Limit
         </button>
+
+        <router-link :to="{ name: 'addTask' }">
+          <button
+            @click="openModalAdd"
+            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+          >
+            <img src="/icons/plus.png" class="w-4" />
+          </button>
+        </router-link>
       </div>
     </div>
 
@@ -389,6 +393,7 @@ watch(
             <th></th>
           </tr>
         </thead>
+
         <tbody class="bg-white" v-if="myTask.getTasks().length > 0">
           <!-- row -->
           <tr v-for="(task, index) in filteredTasks" :key="task.id">
@@ -413,7 +418,7 @@ watch(
             </td>
             <td class="itbkk-status pl-20">
               <div
-                class="rounded-md p-2 text-black w-36 text-center"
+                class="shadow-md rounded-full p-2 text-black w-36 text-center font-medium"
                 :style="{
                   'background-color': myStatus.getStatusColor(task.status),
                 }"
@@ -515,5 +520,10 @@ watch(
 .itbkk-status {
   max-width: 600px;
   word-break: break-all;
+}
+
+.button-container {
+  position: relative;
+  display: inline-block;
 }
 </style>

@@ -222,10 +222,9 @@ const closeModal = () => {
         <RouterLink :to="{ name: 'AddStatus' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-home btn bg-blue-400 text-white"
+            class="itbkk-button-home btn btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
-            Add Status
           </button>
         </RouterLink>
       </div>
@@ -236,7 +235,7 @@ const closeModal = () => {
       <table class="table">
         <thead class="bg-blue-400">
           <tr class="text-white text-sm">
-            <th>No.</th>
+            <th class="pl-20">No.</th>
             <th class="pl-20">Name</th>
             <th class="pl-20">Description</th>
             <th class="pl-20">Action</th>
@@ -252,7 +251,7 @@ const closeModal = () => {
 
             <td class="itbkk-status-name pl-20 w-1/3">
               <p
-                class="h-auto max-w-40 font-medium rounded-md text-center p-3 break-all"
+                class="shadow-md rounded-full h-auto max-w-40 font-medium text-center p-3 break-all"
                 :style="{ 'background-color': task.color }"
               >
                 {{ task.name }}
@@ -294,6 +293,10 @@ const closeModal = () => {
                 </button>
               </div>
             </td>
+            <td
+              v-else="task.name !== 'No Status' && task.name !== 'Done'"
+              class="bg-white"
+            ></td>
           </tr>
         </tbody>
       </table>

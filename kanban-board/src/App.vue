@@ -28,18 +28,26 @@ onMounted(async () => {
 </script>
 
 <template>
+  <video
+    autoplay
+    loop
+    muted
+    playsinline
+    class="top-0 left-0 w-full h-full object-cover z-[-1] absolute"
+    id="myVideo"
+  >
+    <source src="/video/bg.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
   <RouterView />
   <!-- footer -->
   <footer
-    className="fixed bottom-0 left-0 right-0 footer items-center p-4 bg-black text-white font-semibold"
+    class=" bottom-0 left-0 right-0 footer items-center p-2 bg-black text-white font-semibold"
   >
-    <aside className="items-center grid-flow-col">
-      
+    <aside class="items-center grid-flow-col">
       <p class="font-thin">Kradan Kanban By KK2 since 2024</p>
     </aside>
-    <nav
-      className="grid-flow-col gap-4 md:place-self-center md:justify-self-end"
-    >
+    <nav class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
       <img src="/icons/logo2.png" class="w-12" />
     </nav>
   </footer>
@@ -50,5 +58,13 @@ onMounted(async () => {
 
 body {
   font-family: "Open Sans", sans-serif;
+}
+
+#myVideo {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
 }
 </style>
