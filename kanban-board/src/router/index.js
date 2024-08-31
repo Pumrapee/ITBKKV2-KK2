@@ -5,6 +5,8 @@ import StatusView from "@/views/StatusView.vue"
 import NotFoundView from "../views/NotFoundView.vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import LoginPage from "@/components/LoginPage.vue"
+import BoardView from "@/views/BoardView.vue"
+import AddBoard from "@/components/board/AddBoard.vue"
 import { useAuthStore } from "@/stores/loginStore"
 
 const router = createRouter({
@@ -14,6 +16,18 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: LoginPage,
+    },
+    {
+      path: "/board",
+      name: "board",
+      component: BoardView,
+      children: [
+        {
+          path: "add",
+          name: "addBoard",
+          component: AddBoard,
+        },
+      ],
     },
     {
       path: "/task",

@@ -42,7 +42,7 @@ onMounted(async () => {
   <RouterView />
   <!-- footer -->
   <footer
-    class=" bottom-0 left-0 right-0 footer items-center p-2 bg-black text-white font-semibold"
+    class="fixed bottom-0 left-0 right-0 footer items-center p-2 bg-black text-white font-semibold"
   >
     <aside class="items-center grid-flow-col">
       <p class="font-thin">Kradan Kanban By KK2 since 2024</p>
