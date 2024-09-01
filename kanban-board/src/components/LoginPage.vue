@@ -28,7 +28,8 @@ const loginHandler = async () => {
     password.value
   )
   if (res.status === 200) {
-    authStore.login(token)
+    authStore.setToken(token)
+    authStore.login()
     router.push({ name: "task" })
   } else if (res.status === 400 || res.status === 401) {
     alertMessage.value = "Username or Password is incorrect."

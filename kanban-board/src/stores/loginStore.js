@@ -5,10 +5,15 @@ import { jwtDecode } from "jwt-decode"
 export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false)
   const user = ref(null)
+  const token = ref("")
 
-  const login = (jwtToken) => {
+  const setToken = (tokens) => {
+    token.value = tokens
+  }
+
+  const login = () => {
     isAuthenticated.value = true
-    user.value = jwtDecode(jwtToken)
+    user.value = jwtDecode(token.value)
   }
 
   const logout = () => {
@@ -21,5 +26,7 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     login,
     logout,
+    setToken,
+    token,
   }
 })

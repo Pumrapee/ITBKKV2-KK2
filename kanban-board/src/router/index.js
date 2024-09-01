@@ -70,7 +70,7 @@ const router = createRouter({
     },
     {
       path: "/",
-      redirect: { name: "login" },
+      redirect: { name: "board" },
     },
     {
       path: "/notfound",
