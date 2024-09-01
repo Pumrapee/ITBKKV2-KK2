@@ -22,15 +22,10 @@ import java.util.Map;
 public class AuthenticationController {
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
-
-    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private AuthenticationManager authenticationManager;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping
     public ResponseEntity login(@RequestBody @Valid LoginDTO login) {
@@ -42,12 +37,5 @@ public class AuthenticationController {
         Map<String, String> response = new HashMap<>();
         response.put("access_token", token);
         return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/test-login")
-    public ResponseEntity<?> testLogin(@RequestParam String username, @RequestParam String password) {
-        UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(username);
-        boolean passwordMatches = passwordEncoder.matches(password, userDetails.getPassword());
-        return ResponseEntity.ok("Password matches: " + passwordMatches);
     }
 }
