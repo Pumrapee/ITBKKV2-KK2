@@ -32,4 +32,12 @@ public class Board {
     @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<Task> tasks;
+
+    public String getId() {
+        return boardId;
+    }
+
+    public String getName() {
+        return boardName;
+    }
 }

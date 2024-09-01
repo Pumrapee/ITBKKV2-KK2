@@ -12,7 +12,7 @@ import sit.int221.kanbanapi.services.TaskService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/statuses")
+@RequestMapping("/board/{id}/statuses")
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class StatusController {
     @Autowired
@@ -26,9 +26,9 @@ public class StatusController {
         return new ResponseEntity(statuses, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Status> getStatusById(@PathVariable Integer id) {
-        Status status = statusService.getStatusById(id);
+    @GetMapping("/{statusId}")
+    public ResponseEntity<Status> getStatusById(@PathVariable Integer statusId) {
+        Status status = statusService.getStatusById(statusId);
         return new ResponseEntity(status, HttpStatus.OK);
     }
 
@@ -38,18 +38,18 @@ public class StatusController {
         return new ResponseEntity(createdStatus, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status, @PathVariable Integer id) {
-        Status updatedStatus = statusService.updateStatus(id, status);
+    @PutMapping("/{statusId}")
+    public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status, @PathVariable Integer statusId) {
+        Status updatedStatus = statusService.updateStatus(statusId, status);
         return new ResponseEntity(updatedStatus, HttpStatus.OK);
     }
-    @DeleteMapping("/{id}")
-    public void removeStatus(@PathVariable Integer id) {
-        statusService.removeStatus(id);
+    @DeleteMapping("/{statusId}")
+    public void removeStatus(@PathVariable Integer statusId) {
+        statusService.removeStatus(statusId);
     }
-    @DeleteMapping("/{id}/{newId}")
-    public void transferStatus(@PathVariable Integer id, @PathVariable Integer newId) {
-        taskService.transferTaskStatus(id, newId);
-        statusService.removeStatus(id);
+    @DeleteMapping("/{statusId}/{newStatusId}")
+    public void transferStatus(@PathVariable Integer statusId, @PathVariable Integer newStatusId) {
+        taskService.transferTaskStatus(statusId, newStatusId);
+        statusService.removeStatus(statusId);
     }
 }
