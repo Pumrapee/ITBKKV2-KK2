@@ -54,7 +54,7 @@ public class BoardController {
     public ResponseEntity<List<Board>> createNewBoard(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardCreateRequestDTO newBoard) {
         Board board = boardService.createBoard(user, newBoard.getName());
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), new Owner(board.getOwnerId(), user.getUsername()));
-        return new ResponseEntity(newBoardDTO, HttpStatus.OK);
+        return new ResponseEntity(newBoardDTO, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
