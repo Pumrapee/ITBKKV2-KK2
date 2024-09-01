@@ -5,6 +5,8 @@ import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 
 import java.util.List;
 
-public interface BoardRepository extends JpaRepository<Board, Integer> {
-    public List<Board> findByOwnerId(String oid);
+public interface BoardRepository extends JpaRepository<Board, String> {
+    List<Board> findByOwnerId(String oid);
+    Boolean existsBoardByBoardName(String boardName);
+
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import sit.int221.kanbanapi.databases.userdb.entities.User;
 
 import java.util.List;
 
@@ -20,7 +21,8 @@ public class Board {
     @Column(name = "boardName", nullable = false, length = 100)
     private String boardName;
 
-    @Column(name = "owneroid", nullable = false, length = 36)
+    @JsonIgnore
+    @Column(name = "owneroid", nullable = false, length = 100)
     private String ownerId;
 
     @JsonIgnore
@@ -30,5 +32,4 @@ public class Board {
     @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<Task> tasks;
-
 }
