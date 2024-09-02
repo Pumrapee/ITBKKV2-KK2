@@ -1,8 +1,14 @@
 //function ที่ติดต่อ back-end.
-let token = localStorage.getItem("token")
+let token = undefined
 
-console.log(token)
+// console.log(token)
+
+function getToken() {
+  token = localStorage.getItem("token")
+}
+
 async function getItems(url) {
+  console.log(token)
   try {
     const data = await fetch(url, {
       //GET Method
@@ -183,4 +189,5 @@ export {
   getStatusLimits,
   editLimitStatus,
   login,
+  getToken,
 }

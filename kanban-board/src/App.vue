@@ -12,24 +12,22 @@ const myStatus = useStatusStore()
 const myLimit = useLimitStore()
 const myBoard = useBoardStore()
 onMounted(async () => {
-  if (myTask.getTasks().length === 0) {
-    const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
-    myTask.addTasks(listTasks)
-  }
+  // if (myTask.getTasks().length === 0) {
+  //   const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+  //   myTask.addTasks(listTasks)
+  // }
+  // if (myStatus.getStatus().length === 0) {
+  //   const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
+  //   myStatus.addStatus(listStatus)
+  // }
+  // const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
+  // console.log(listBoard)
+  // myBoard.addBoards(listBoard)
 
-  if (myStatus.getStatus().length === 0) {
-    const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
-    myStatus.addStatus(listStatus)
-  }
-
-  const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  console.log(listBoard)
-  myBoard.addBoards(listBoard)
-
-  const limitStatus = await getStatusLimits(
-    `${import.meta.env.VITE_API_URL}statuses`
-  )
-  myLimit.addLimit(limitStatus)
+  // const limitStatus = await getStatusLimits(
+  //   `${import.meta.env.VITE_API_URL}statuses`
+  // )
+  // myLimit.addLimit(limitStatus)
 })
 </script>
 

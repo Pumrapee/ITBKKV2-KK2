@@ -8,6 +8,7 @@ import LoginPage from "@/components/LoginPage.vue"
 import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import { useAuthStore } from "@/stores/loginStore"
+import { getToken } from "@/libs/fetchUtils"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -99,6 +100,7 @@ router.beforeEach((to, from, next) => {
   } else {
     if (token) {
       authStore.isAuthenticated = true
+      getToken()
       authStore.token = token
     }
     next()

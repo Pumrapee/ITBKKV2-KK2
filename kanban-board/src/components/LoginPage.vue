@@ -2,12 +2,15 @@
 import { ref, computed } from "vue"
 import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore.js"
+import { getToken } from "@/libs/fetchUtils"
 import { useRouter } from "vue-router"
 
 const username = ref("")
 const password = ref("")
 const authStore = useAuthStore()
 const router = useRouter()
+const useBoard = useBoardStore()
 
 const isButtonDisabled = computed(() => {
   return (
@@ -29,8 +32,9 @@ const loginHandler = async () => {
   )
   if (res.status === 200) {
     // const Token = setToken(token)
-    // authStore.setToken(token)
+    authStore.setToken(token)
     authStore.login(token)
+    getToken()
     router.push({ name: "board" })
   } else if (res.status === 400 || res.status === 401) {
     alertMessage.value = "Username or Password is incorrect."

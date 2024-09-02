@@ -1,8 +1,8 @@
 <script setup>
 import router from "@/router"
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
-import { addItem } from "@/libs/fetchUtils"
+import { addItem, getItems } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
 
 const openModal = ref()
@@ -10,6 +10,12 @@ const useBoard = useBoardStore()
 const openModalAdd = () => {
   openModal.value = true
 }
+
+onMounted(async () => {
+  const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
+  console.log(listBoard)
+  useBoard.addBoards(listBoard)
+})
 
 const closeAdd = async (nameBoard) => {
   console.log(nameBoard)
@@ -20,8 +26,7 @@ const closeAdd = async (nameBoard) => {
 
   console.log(newTask)
 
-  if (statusCode === 200) {
-    //เดวแก้เป็น 201
+  if (statusCode === 201) {
     useBoard.addBoard(newTask)
 
     console.log(useBoard.getBoards())
@@ -71,7 +76,7 @@ const closeModal = () => {
 
             <th>
               <router-link :to="{}">
-                <button class="btn btn-ghost h-2">{{ board.boardName }}</button>
+                <button class="btn btn-ghost h-2">{{ board.name }}</button>
               </router-link>
             </th>
           </tr>
