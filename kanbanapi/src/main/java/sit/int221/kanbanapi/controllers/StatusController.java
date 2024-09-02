@@ -6,50 +6,55 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
+import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/board/{id}/statuses")
+@RequestMapping("/board/{boardId}/statuses")
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class StatusController {
     @Autowired
     private StatusService statusService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private BoardService boardService;
 
     @GetMapping("")
-    public ResponseEntity<List<Status>> getAllStatus() {
-        List<Status> statuses = statusService.getAllStatus();
-        return new ResponseEntity(statuses, HttpStatus.OK);
+    public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId) {
+        List<Status> statuses = statusService.getAllBoardStatus(boardService.getBoardById(boardId));
+        return new ResponseEntity<>(statuses, HttpStatus.OK);
     }
 
     @GetMapping("/{statusId}")
     public ResponseEntity<Status> getStatusById(@PathVariable Integer statusId) {
         Status status = statusService.getStatusById(statusId);
-        return new ResponseEntity(status, HttpStatus.OK);
+        return new ResponseEntity<>(status, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<Status> addNewStatus(@Valid @RequestBody Status status) {
-        Status createdStatus = statusService.createStatus(status);
-        return new ResponseEntity(createdStatus, HttpStatus.CREATED);
+    public ResponseEntity<Status> addNewStatus(@Valid @RequestBody Status status, @PathVariable String boardId) {
+        Status createdStatus = statusService.createStatus(status, boardId);
+        return new ResponseEntity<>(createdStatus, HttpStatus.CREATED);
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status, @PathVariable Integer statusId) {
-        Status updatedStatus = statusService.updateStatus(statusId, status);
-        return new ResponseEntity(updatedStatus, HttpStatus.OK);
+    public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status, @PathVariable Integer statusId, @PathVariable String boardId) {
+        Status updatedStatus = statusService.updateStatus(statusId, status, boardId);
+        return new ResponseEntity<>(updatedStatus, HttpStatus.OK);
     }
+
     @DeleteMapping("/{statusId}")
     public void removeStatus(@PathVariable Integer statusId) {
         statusService.removeStatus(statusId);
     }
+
     @DeleteMapping("/{statusId}/{newStatusId}")
-    public void transferStatus(@PathVariable Integer statusId, @PathVariable Integer newStatusId) {
-        taskService.transferTaskStatus(statusId, newStatusId);
+    public void transferStatus(@PathVariable Integer statusId, @PathVariable Integer newStatusId, @PathVariable String boardId) {
+        taskService.transferTaskStatus(statusId, newStatusId, boardId);
         statusService.removeStatus(statusId);
     }
 }
