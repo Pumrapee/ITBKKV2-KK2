@@ -94,7 +94,6 @@ const openDeleteModal = (id, title, index) => {
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task) => {
-
   if (task.id !== undefined) {
     const { editedItem, statusCode } = await editItem(
       `${import.meta.env.VITE_API_URL}tasks`,
@@ -136,7 +135,7 @@ const closeAddEdit = async (task) => {
   }
 
   openModal.value = false
-  router.push({ name: "task" })
+  // router.push({ name: "task" })
   editMode.value = false
 }
 
@@ -183,7 +182,7 @@ const closeModal = () => {
   showLimitModal.value = false
   editMode.value = false
 
-  router.push({ name: "task" })
+  // router.push({ name: "task" })
 }
 
 //Sort status
@@ -315,13 +314,13 @@ watch(
           </ul>
         </details>
 
-        <router-link :to="{ name: 'tableStatus' }">
+        <!-- <router-link :to="{ name: 'tableStatus' }"> -->
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
           >
             Status
           </button>
-        </router-link>
+        <!-- </router-link> -->
       </div>
 
       <div class="flex justify-end items-center">
@@ -333,14 +332,14 @@ watch(
           Limit
         </button>
 
-        <router-link :to="{ name: 'addTask' }">
+        <!-- <router-link :to="{ name: 'addTask' }"> -->
           <button
             @click="openModalAdd"
             class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
-        </router-link>
+        <!-- </router-link> -->
       </div>
     </div>
 
@@ -398,16 +397,13 @@ watch(
           <tr v-for="(task, index) in filteredTasks" :key="task.id">
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link
-                :to="{ name: 'detailTask', params: { id: task.id } }"
-              >
-                <button
-                  @click="openModalEdit(task.id)"
-                  class="btn btn-ghost h-2"
-                >
-                  {{ task.title }}
-                </button>
-              </router-link>
+              <!-- <router-link
+                :to="{ name: 'task', params: { id: task.id } }"
+              > -->
+              <button @click="openModalEdit(task.id)" class="btn btn-ghost h-2">
+                {{ task.title }}
+              </button>
+              <!-- </router-link> -->
             </td>
             <td class="itbkk-assignees pl-20">
               <p v-if="task.assignees">
@@ -451,13 +447,13 @@ watch(
                   tabindex="0"
                   class="dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
                 >
-                  <router-link
-                    :to="{ name: 'editTask', params: { id: task.id } }"
-                  >
+                  <!-- <router-link -->
+                    <!-- :to="{ name: 'editTask', params: { id: task.id } }" -->
+                  <!-- > -->
                     <li @click="openModalEdit(task.id, true)">
                       <a>Edit<img src="/icons/pen.png" class="w-4" /></a>
                     </li>
-                  </router-link>
+                  <!-- </router-link> -->
 
                   <li @click="openDeleteModal(task.id, task.title, index)">
                     <a>Delete<img src="/icons/trash.png" class="w-6" /></a>

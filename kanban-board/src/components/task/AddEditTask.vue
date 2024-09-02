@@ -53,7 +53,7 @@ const closeModal = () => {
 const enableEditMode = () => {
   editMode.value = true
   if (editMode.value === true) {
-    router.push({ name: "editTask" })
+    // router.push({ name: "editTask" })
   } else {
     router.go(-1)
   }

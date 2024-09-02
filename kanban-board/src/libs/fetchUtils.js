@@ -1,8 +1,6 @@
 //function ที่ติดต่อ back-end.
 let token = undefined
 
-// console.log(token)
-
 function getToken() {
   token = localStorage.getItem("token")
 }

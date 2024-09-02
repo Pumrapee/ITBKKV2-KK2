@@ -193,7 +193,7 @@ const closeModal = () => {
   openModal.value = false
   showTransferModal.value = false
   showDeleteModal.value = false
-  router.push({ name: "tableStatus" })
+  // router.push({ name: "tableStatus" })
 }
 </script>
 
@@ -204,13 +204,13 @@ const closeModal = () => {
       <div class="flex text-sm breadcrumbs text-blue-400">
         <ul>
           <li class="itbkk-button-home">
-            <RouterLink :to="{ name: 'task' }"> Home</RouterLink>
+            <!-- <RouterLink :to="{ name: 'task' }"> Home</RouterLink> -->
           </li>
           <li>Task Status</li>
         </ul>
       </div>
       <div class="flex items-center">
-        <RouterLink :to="{ name: 'task' }">
+        <!-- <RouterLink :to="{ name: 'task' }"> -->
           <button
             @click="openAddStatus"
             class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
@@ -218,15 +218,15 @@ const closeModal = () => {
             <img src="/icons/home.png" class="w-4" />
             Home
           </button>
-        </RouterLink>
-        <RouterLink :to="{ name: 'AddStatus' }">
+        <!-- </RouterLink> -->
+        <!-- <RouterLink :to="{ name: 'AddStatus' }"> -->
           <button
             @click="openModalAdd"
             class="itbkk-button-home btn btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
-        </RouterLink>
+        <!-- </RouterLink> -->
       </div>
     </div>
 
@@ -273,16 +273,16 @@ const closeModal = () => {
               class="ml-10 flex"
             >
               <div class="mr-2">
-                <router-link
+                <!-- <router-link
                   :to="{ name: 'EditStatus', params: { id: task.id } }"
-                >
+                > -->
                   <button
                     @click="openEditStatus(task.id)"
                     class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
                   >
                     <img src="/icons/pen.png" class="w-4" />
                   </button>
-                </router-link>
+                <!-- </router-link> -->
               </div>
               <div>
                 <button

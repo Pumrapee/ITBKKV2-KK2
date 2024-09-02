@@ -28,52 +28,48 @@ const router = createRouter({
           name: "addBoard",
           component: AddBoard,
         },
-        {
-          path: ":id/tasks",
-          name: "task",
-          component: HomeView,
-        },
       ],
     },
+
     {
-      path: "/task",
+      path: "/board/:id/tasks",
       name: "task",
       component: HomeView,
-      children: [
-        {
-          path: ":id",
-          name: "detailTask",
-          component: AddEditTask,
-        },
-        {
-          path: ":id/edit",
-          name: "editTask",
-          component: AddEditTask,
-        },
-        {
-          path: "add",
-          name: "addTask",
-          component: AddEditTask,
-        },
-      ],
+      // children: [
+      //   {
+      //     path: ":id",
+      //     name: "detailTask",
+      //     component: AddEditTask,
+      //   },
+      //   {
+      //     path: ":id/edit",
+      //     name: "editTask",
+      //     component: AddEditTask,
+      //   },
+      //   {
+      //     path: "add",
+      //     name: "addTask",
+      //     component: AddEditTask,
+      //   },
+      // ],
     },
-    {
-      path: "/status",
-      name: "tableStatus",
-      component: StatusView,
-      children: [
-        {
-          path: "add",
-          name: "AddStatus",
-          component: AddEditStatus,
-        },
-        {
-          path: ":id/edit",
-          name: "EditStatus",
-          component: AddEditStatus,
-        },
-      ],
-    },
+    // {
+    //   path: "/status",
+    //   name: "tableStatus",
+    //   component: StatusView,
+    //   children: [
+    //     {
+    //       path: "add",
+    //       name: "AddStatus",
+    //       component: AddEditStatus,
+    //     },
+    //     {
+    //       path: ":id/edit",
+    //       name: "EditStatus",
+    //       component: AddEditStatus,
+    //     },
+    //   ],
+    // },
     {
       path: "/",
       redirect: { name: "login" },
@@ -101,7 +97,7 @@ router.beforeEach((to, from, next) => {
     if (token) {
       authStore.isAuthenticated = true
       getToken()
-      authStore.token = token
+      // authStore.token = token
     }
     next()
   }

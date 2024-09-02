@@ -13,7 +13,6 @@ const openModalAdd = () => {
 
 onMounted(async () => {
   const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  console.log(listBoard)
   useBoard.addBoards(listBoard)
 })
 
@@ -75,7 +74,7 @@ const closeModal = () => {
             <th class="text-black pl-20">{{ index + 1 }}</th>
 
             <th>
-              <router-link :to="{}">
+              <router-link :to="{ name: 'task', params: { id: board.id } }">
                 <button class="btn btn-ghost h-2">{{ board.name }}</button>
               </router-link>
             </th>

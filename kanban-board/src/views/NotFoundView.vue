@@ -6,7 +6,7 @@ const router = useRouter()
 
 onMounted(() => {
   setTimeout(() => {
-    router.push({ name: "task" })
+    // router.push({ name: "task" })
   }, 3000)
 })
 </script>
