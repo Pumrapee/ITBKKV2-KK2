@@ -27,6 +27,11 @@ const router = createRouter({
           name: "addBoard",
           component: AddBoard,
         },
+        {
+          path: ":id/tasks",
+          name: "task",
+          component: HomeView,
+        },
       ],
     },
     {
@@ -70,7 +75,7 @@ const router = createRouter({
     },
     {
       path: "/",
-      redirect: { name: "board" },
+      redirect: { name: "login" },
     },
     {
       path: "/notfound",
@@ -87,9 +92,15 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  if (!authStore.isAuthenticated && to.name !== "login") {
+  const token = localStorage.getItem("token")
+
+  if (!authStore.isAuthenticated && !token && to.name !== "login") {
     next({ name: "login" })
   } else {
+    if (token) {
+      authStore.isAuthenticated = true
+      authStore.token = token
+    }
     next()
   }
 })

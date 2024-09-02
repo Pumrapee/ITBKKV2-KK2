@@ -2,14 +2,39 @@
 import router from "@/router"
 import { ref } from "vue"
 import AddBoard from "./AddBoard.vue"
+import { addItem } from "@/libs/fetchUtils"
+import { useBoardStore } from "@/stores/boardStore.js"
 
 const openModal = ref()
+const useBoard = useBoardStore()
 const openModalAdd = () => {
   openModal.value = true
 }
 
+const closeAdd = async (nameBoard) => {
+  console.log(nameBoard)
+  const { newTask, statusCode } = await addItem(
+    `${import.meta.env.VITE_API_URL}boards`,
+    nameBoard
+  )
+
+  console.log(newTask)
+
+  if (statusCode === 200) {
+    //เดวแก้เป็น 201
+    useBoard.addBoard(newTask)
+
+    console.log(useBoard.getBoards())
+    // showAlert("The task has been successfully added", "success")
+  }
+
+  openModal.value = false
+  router.go(-1)
+}
+
 const closeModal = () => {
   openModal.value = false
+  router.go(-1)
 }
 </script>
 
@@ -40,12 +65,22 @@ const closeModal = () => {
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody v-if="true"></tbody>
+        <tbody v-if="useBoard.getBoards().length > 0">
+          <tr v-for="(board, index) in useBoard.getBoards()">
+            <th class="text-black pl-20">{{ index + 1 }}</th>
+
+            <th>
+              <router-link :to="{}">
+                <button class="btn btn-ghost h-2">{{ board.boardName }}</button>
+              </router-link>
+            </th>
+          </tr>
+        </tbody>
 
         <tbody v-else>
           <tr>
             <td colspan="5" class="text-center py-4 text-gray-500 font-medium">
-              No task
+              No board
             </td>
           </tr>
         </tbody>
@@ -53,7 +88,11 @@ const closeModal = () => {
     </div>
   </div>
 
-  <AddBoard :showModal="openModal" @closeModal="closeModal" />
+  <AddBoard
+    :showModal="openModal"
+    @closeModal="closeModal"
+    @saveAdd="closeAdd"
+  />
 </template>
 
 <style scoped></style>

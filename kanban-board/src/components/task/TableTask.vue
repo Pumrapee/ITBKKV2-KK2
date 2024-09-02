@@ -94,7 +94,6 @@ const openDeleteModal = (id, title, index) => {
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task) => {
-  let shouldCloseModal = true
 
   if (task.id !== undefined) {
     const { editedItem, statusCode } = await editItem(

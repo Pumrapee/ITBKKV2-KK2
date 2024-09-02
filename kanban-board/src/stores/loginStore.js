@@ -9,16 +9,20 @@ export const useAuthStore = defineStore("auth", () => {
 
   const setToken = (tokens) => {
     token.value = tokens
+    localStorage.setItem("token", tokens)
   }
 
-  const login = () => {
+  const login = (newToken) => {
     isAuthenticated.value = true
-    user.value = jwtDecode(token.value)
+    localStorage.setItem("token", newToken)
+    user.value = jwtDecode(newToken)
   }
 
   const logout = () => {
     isAuthenticated.value = false
     user.value = null
+    token.value = ""
+    localStorage.clear()
   }
 
   return {
@@ -26,7 +30,6 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     login,
     logout,
-    setToken,
     token,
   }
 })
