@@ -10,11 +10,12 @@ import {
   deleteItemById,
   deleteItemByIdToNewId,
 } from "@/libs/fetchUtils"
-import { ref } from "vue"
+import { ref, onMounted, watch } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import DeleteStatus from "@/components/status/DeleteStatus.vue"
 import AlertComponent from "@/components/toast/Alert.vue"
 import router from "@/router"
+import { useRoute } from "vue-router"
 
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
@@ -24,7 +25,19 @@ const editMode = ref(false)
 const statusDetail = ref()
 const showTransferModal = ref(false)
 const showDeleteModal = ref(false)
+const boardId = ref()
+const route = useRoute()
+
 const modalAlert = ref({ message: "", type: "", modal: false })
+
+onMounted(async () => {
+  if (myStatus.getStatus().length === 0) {
+    const listStatus = await getItems(
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+    )
+    myStatus.addStatus(listStatus)
+  }
+})
 
 //Alert
 const showAlert = (message, type) => {
@@ -136,8 +149,6 @@ const closeAddEdit = async (status) => {
 }
 
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
-  let shouldCloseModal = true
-
   if (showDeleteModal.value) {
     const deleteItem = await deleteItemById(
       `${import.meta.env.VITE_API_URL}statuses`,
@@ -193,8 +204,16 @@ const closeModal = () => {
   openModal.value = false
   showTransferModal.value = false
   showDeleteModal.value = false
-  // router.push({ name: "tableStatus" })
+  router.push({ name: "tableStatus" })
 }
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    boardId.value = newId
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -204,13 +223,13 @@ const closeModal = () => {
       <div class="flex text-sm breadcrumbs text-blue-400">
         <ul>
           <li class="itbkk-button-home">
-            <!-- <RouterLink :to="{ name: 'task' }"> Home</RouterLink> -->
+            <RouterLink :to="{ name: 'task' }"> Home</RouterLink>
           </li>
           <li>Task Status</li>
         </ul>
       </div>
       <div class="flex items-center">
-        <!-- <RouterLink :to="{ name: 'task' }"> -->
+        <RouterLink :to="{ name: 'task' }">
           <button
             @click="openAddStatus"
             class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
@@ -218,15 +237,15 @@ const closeModal = () => {
             <img src="/icons/home.png" class="w-4" />
             Home
           </button>
-        <!-- </RouterLink> -->
-        <!-- <RouterLink :to="{ name: 'AddStatus' }"> -->
+        </RouterLink>
+        <RouterLink :to="{ name: 'AddStatus' }">
           <button
             @click="openModalAdd"
             class="itbkk-button-home btn btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
-        <!-- </RouterLink> -->
+        </RouterLink>
       </div>
     </div>
 
@@ -273,16 +292,16 @@ const closeModal = () => {
               class="ml-10 flex"
             >
               <div class="mr-2">
-                <!-- <router-link
-                  :to="{ name: 'EditStatus', params: { id: task.id } }"
-                > -->
+                <router-link
+                  :to="{ name: 'EditStatus', params: { statusId: task.id } }"
+                >
                   <button
                     @click="openEditStatus(task.id)"
                     class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
                   >
                     <img src="/icons/pen.png" class="w-4" />
                   </button>
-                <!-- </router-link> -->
+                </router-link>
               </div>
               <div>
                 <button

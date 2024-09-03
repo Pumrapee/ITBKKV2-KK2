@@ -1,34 +1,5 @@
 <script setup>
-import { onMounted } from "vue"
 import { RouterView } from "vue-router"
-import { useTaskStore } from "../src/stores/taskStore"
-import { getItems, getStatusLimits } from "./libs/fetchUtils"
-import { useStatusStore } from "../src/stores/statusStore"
-import { useLimitStore } from "./stores/limitStore"
-import { useBoardStore } from "./stores/boardStore"
-
-const myTask = useTaskStore()
-const myStatus = useStatusStore()
-const myLimit = useLimitStore()
-const myBoard = useBoardStore()
-onMounted(async () => {
-  // if (myTask.getTasks().length === 0) {
-  //   const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
-  //   myTask.addTasks(listTasks)
-  // }
-  // if (myStatus.getStatus().length === 0) {
-  //   const listStatus = await getItems(`${import.meta.env.VITE_API_URL}statuses`)
-  //   myStatus.addStatus(listStatus)
-  // }
-  // const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  // console.log(listBoard)
-  // myBoard.addBoards(listBoard)
-
-  // const limitStatus = await getStatusLimits(
-  //   `${import.meta.env.VITE_API_URL}statuses`
-  // )
-  // myLimit.addLimit(limitStatus)
-})
 </script>
 
 <template>

@@ -32,44 +32,44 @@ const router = createRouter({
     },
 
     {
-      path: "/board/:id/tasks",
+      path: "/board/:id",
       name: "task",
       component: HomeView,
-      // children: [
-      //   {
-      //     path: ":id",
-      //     name: "detailTask",
-      //     component: AddEditTask,
-      //   },
-      //   {
-      //     path: ":id/edit",
-      //     name: "editTask",
-      //     component: AddEditTask,
-      //   },
-      //   {
-      //     path: "add",
-      //     name: "addTask",
-      //     component: AddEditTask,
-      //   },
-      // ],
+      children: [
+        {
+          path: "task",
+          name: "detailTask",
+          component: AddEditTask,
+        },
+        {
+          path: "task/:taskId/edit",
+          name: "editTask",
+          component: AddEditTask,
+        },
+        {
+          path: "task/add",
+          name: "addTask",
+          component: AddEditTask,
+        },
+      ],
     },
-    // {
-    //   path: "/status",
-    //   name: "tableStatus",
-    //   component: StatusView,
-    //   children: [
-    //     {
-    //       path: "add",
-    //       name: "AddStatus",
-    //       component: AddEditStatus,
-    //     },
-    //     {
-    //       path: ":id/edit",
-    //       name: "EditStatus",
-    //       component: AddEditStatus,
-    //     },
-    //   ],
-    // },
+    {
+      path: "/board/:id/status",
+      name: "tableStatus",
+      component: StatusView,
+      children: [
+        {
+          path: "add",
+          name: "AddStatus",
+          component: AddEditStatus,
+        },
+        {
+          path: ":statusId/edit",
+          name: "EditStatus",
+          component: AddEditStatus,
+        },
+      ],
+    },
     {
       path: "/",
       redirect: { name: "login" },
