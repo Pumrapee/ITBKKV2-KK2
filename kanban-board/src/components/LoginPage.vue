@@ -47,7 +47,7 @@ const loginHandler = async () => {
   >
     <!-- login box -->
     <div
-      class="relative z-10 bg-opacity-90 w-full max-w-sm bg-white rounded-lg shadow-lg p-8"
+      class="relative z-10 bg-opacity-90 w-full max-w-sm backdrop-blur rounded-lg shadow-lg p-8"
     >
       <!-- Logo -->
       <div class="flex justify-center mb-6">

@@ -87,11 +87,19 @@ const router = createRouter({
   ],
 })
 
+// router.beforeEach((to, from, next) => {
+//   const authStore = useAuthStore()
+//   if (!authStore.isAuthenticated && to.name !== "login") {
+//     next({ name: "login" })
+//   } else {
+//     next()
+//   }
+// })
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const token = localStorage.getItem("token")
 
-  if (!authStore.isAuthenticated && !token && to.name !== "login") {
+if (!authStore.isAuthenticated && !token && to.name !== "login") {
     next({ name: "login" })
   } else {
     if (token) {
@@ -101,6 +109,17 @@ router.beforeEach((to, from, next) => {
     }
     next()
   }
+  // Check if the user has a board
+  const userHasBoard = authStore.hasBoard // Ensure this property is part of your auth store
+
+  if (to.name === "board" && userHasBoard) {
+    next({ name: "task" })
+  } else if (to.name === "task" && !userHasBoard) {
+    next({ name: "board" })
+  } else {
+    next()
+  }
 })
+
 
 export default router

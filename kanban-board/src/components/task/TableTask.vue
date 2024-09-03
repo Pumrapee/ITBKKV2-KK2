@@ -303,10 +303,11 @@ watch(
 <template>
   <!-- Head -->
   <div class="flex flex-col items-center mt-16 mb-20">
-    <div class="font-bold text-4xl text-black m-2 self-start pl-72">
+    
+    <div class="flex justify-between w-3/5 ml-52">
+      <div class="font-bold text-4xl m-2 ">
       My Task
     </div>
-    <div class="flex justify-between w-3/5">
       <div class="flex justify-start items-center">
         <div v-if="filterStatus.length">
           <button
@@ -316,7 +317,15 @@ watch(
             <p class="font-bold">X</p>
           </button>
         </div>
-        <details class="dropdown dropdown-end itbkk-status-filter">
+
+        
+
+        
+      </div>
+      
+
+      <div class="flex justify-end items-center">
+        <details class="dropdown dropdown-end itbkk-status-filter ">
           <summary class="m-1 btn bg-black text-white">
             <img src="/icons/filter.png" class="w-6" />
             Filter
@@ -352,6 +361,7 @@ watch(
           </ul>
         </details>
 
+
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
@@ -362,6 +372,7 @@ watch(
       </div>
 
       <div class="flex justify-end items-center">
+
         <button
           @click="openLimitModal"
           class="flex itbkk-manage-status btn text-l ml-1 bg-black text-white"
@@ -382,12 +393,12 @@ watch(
     </div>
 
     <!-- Table -->
-    <div class="border border-black rounded-md w-3/5 mt-4">
+    <div class="border border-black rounded-md w-3/5 mt-4 ml-52">
       <table class="table">
         <!-- head -->
-        <thead class="bg-black">
+        <thead class="bg-black ">
           <tr class="text-white text-sm">
-            <th class="pl-20">No.</th>
+            <th class="pl-20 rounded-tl-md">No.</th>
             <th class="pl-15">Title</th>
             <th class="pl-20">Assignees</th>
             <th class="pl-20">

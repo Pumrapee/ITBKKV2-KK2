@@ -43,9 +43,9 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-16 mb-20">
+  <div class="flex flex-col items-center mt-16 mb-20 ml-52">
     <div class="flex justify-between w-3/5">
-      <div class="font-bold text-4xl m-2">Board list</div>
+      <div class="font-bold text-4xl m-2 ">Board list</div>
       <div>
         <router-link :to="{ name: 'addBoard' }">
           <button

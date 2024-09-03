@@ -219,8 +219,8 @@ watch(
 <template>
   <div class="flex flex-col items-center mt-16 mb-20">
     <!-- Navigation -->
-    <div class="flex justify-between w-3/5">
-      <div class="flex text-sm breadcrumbs text-blue-400">
+    <div class="flex justify-between w-3/5 ml-52">
+      <div class="flex text-sm breadcrumbs text-black">
         <ul>
           <li class="itbkk-button-home">
             <RouterLink :to="{ name: 'task' }"> Home</RouterLink>
@@ -232,7 +232,7 @@ watch(
         <RouterLink :to="{ name: 'task' }">
           <button
             @click="openAddStatus"
-            class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
+            class="itbkk-button-home btn mr-1 bg-black text-white"
           >
             <img src="/icons/home.png" class="w-4" />
             Home
@@ -250,9 +250,9 @@ watch(
     </div>
 
     <!-- Status Table -->
-    <div class="overflow-x-auto border border-blue-400 rounded-md w-3/5 mt-4">
+    <div class="overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52">
       <table class="table">
-        <thead class="bg-blue-400">
+        <thead class="bg-black">
           <tr class="text-white text-sm">
             <th class="pl-20">No.</th>
             <th class="pl-20">Name</th>
