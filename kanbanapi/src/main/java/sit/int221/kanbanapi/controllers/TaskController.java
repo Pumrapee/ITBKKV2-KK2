@@ -10,6 +10,7 @@ import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
 import sit.int221.kanbanapi.dtos.TaskDTO;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
+import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
 
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/board/{boardId}/tasks")
+@RequestMapping("/boards/{boardId}/tasks")
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
 public class TaskController {
 
@@ -26,6 +27,9 @@ public class TaskController {
 
     @Autowired
     private StatusService statusService;
+
+    @Autowired
+    private BoardService boardService;
 
     @Autowired
     private ModelMapper modelMapper;

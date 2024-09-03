@@ -46,7 +46,7 @@ public class TaskService {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
                 return repository.findByStatusNamesSorted(filterStatuses, board, sort);
             } else {
-                return repository.findAll(sort);
+                return repository.findByBoardSorted(board, sort);
             }
         } catch (PropertyReferenceException e) {
             throw new BadRequestException("Invalid sortBy parameter: " + sortProperty);

@@ -27,4 +27,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     @Query("SELECT t FROM Task t JOIN t.taskStatus s WHERE (s.id IN :filterStatusIds OR s.name IN :filterStatusNames) AND t.board = :board")
     List<Task> findByStatusIdsAndNamesSorted(List<Integer> filterStatusIds,List<String> filterStatusNames,Board board, Sort sort);
+
+    @Query("SELECT t FROM Task t WHERE t.board = :board")
+    List<Task> findByBoardSorted(Board board, Sort sort);
 }
