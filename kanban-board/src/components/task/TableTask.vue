@@ -1,16 +1,13 @@
 <script setup>
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
-import { useLimitStore } from "@/stores/limitStore"
 import {
   getItemById,
   editItem,
   addItem,
   deleteItemById,
-  getItems,
-  getStatusLimits,
 } from "@/libs/fetchUtils"
-import { defineEmits, computed, ref, watch, onMounted } from "vue"
+import { defineEmits, computed, ref, watch } from "vue"
 import AddEditTask from "./AddEditTask.vue"
 import DeleteTask from "./DeleteTask.vue"
 import LimitTask from "./LimitTask.vue"
@@ -20,7 +17,6 @@ import { useRoute } from "vue-router"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
-const myLimit = useLimitStore()
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -28,32 +24,8 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
-const boardId = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 const emits = defineEmits(["closeAddModal"])
-console.log(boardId.value)
-
-onMounted(async () => {
-  //Task
-  if (myTask.getTasks().length === 0) {
-    const listTasks = await getItems(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
-    )
-    myTask.addTasks(listTasks)
-  }
-  //Status
-  if (myStatus.getStatus().length === 0) {
-    const listStatus = await getItems(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
-    )
-    myStatus.addStatus(listStatus)
-  }
-  //Limit
-  const limitStatus = await getStatusLimits(
-    `${import.meta.env.VITE_API_URL}statuses`
-  )
-  myLimit.addLimit(limitStatus)
-})
 
 //Alert
 const showAlert = (message, type) => {
@@ -78,7 +50,7 @@ const openModalEdit = async (id, boolean) => {
   }
 
   const taskDetail = await getItemById(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+    `${import.meta.env.VITE_API_URL}tasks`,
     id
   )
   tasks.value = taskDetail
@@ -122,9 +94,11 @@ const openDeleteModal = (id, title, index) => {
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task) => {
+  let shouldCloseModal = true
+
   if (task.id !== undefined) {
     const { editedItem, statusCode } = await editItem(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+      `${import.meta.env.VITE_API_URL}tasks`,
       task.id,
       {
         title: task.title,
@@ -146,10 +120,8 @@ const closeAddEdit = async (task) => {
   }
 
   if (task.id === undefined) {
-    console.log(boardId.value)
-
     const { newTask, statusCode } = await addItem(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+      `${import.meta.env.VITE_API_URL}tasks`,
       task
     )
 
@@ -172,7 +144,7 @@ const closeAddEdit = async (task) => {
 // Delete Modal
 const closeDeleteModal = async (id) => {
   const deleteItem = await deleteItemById(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+    `${import.meta.env.VITE_API_URL}tasks`,
     id
   )
 
@@ -276,25 +248,17 @@ watch(
 
 // route path ถ้าไม่มี id นั้น
 watch(
-  () => route.params.taskId,
+  () => route.params.id,
   async (newId, oldId) => {
     if (newId !== undefined) {
       const res = await getItemById(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+        `${import.meta.env.VITE_API_URL}tasks`,
         newId
       )
       if (res.status === 404) {
         router.push({ name: "TaskNotFound" })
       }
     }
-  },
-  { immediate: true }
-)
-
-watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
   },
   { immediate: true }
 )
@@ -360,19 +324,6 @@ watch(
             </li>
           </ul>
         </details>
-
-
-        <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
-          <button
-            class="itbkk-manage-status btn text-l bg-black text-white ml-1"
-          >
-            Status
-          </button>
-        </router-link>
-      </div>
-
-      <div class="flex justify-end items-center">
-
         <button
           @click="openLimitModal"
           class="flex itbkk-manage-status btn text-l ml-1 bg-black text-white"
@@ -446,7 +397,9 @@ watch(
           <tr v-for="(task, index) in filteredTasks" :key="task.id">
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link :to="{ name: 'detailTask' }">
+              <router-link
+                :to="{ name: 'detailTask', params: { id: task.id } }"
+              >
                 <button
                   @click="openModalEdit(task.id)"
                   class="btn btn-ghost h-2"
@@ -498,7 +451,7 @@ watch(
                   class="dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
                 >
                   <router-link
-                    :to="{ name: 'editTask', params: { taskId: task.id } }"
+                    :to="{ name: 'editTask', params: { id: task.id } }"
                   >
                     <li @click="openModalEdit(task.id, true)">
                       <a>Edit<img src="/icons/pen.png" class="w-4" /></a>

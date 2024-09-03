@@ -40,10 +40,7 @@ const addEditSave = (editTask) => {
     editedTask.assignees = null
   }
 
-  //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
-  setTimeout(() => {
-    editMode.value = false
-  }, 2000)
+  editMode.value = false
   emits("saveAddEdit", editedTask)
 }
 
@@ -55,6 +52,11 @@ const closeModal = () => {
 // สถานะของโหมดแก้ไข
 const enableEditMode = () => {
   editMode.value = true
+  if (editMode.value === true) {
+    router.push({ name: "editTask" })
+  } else {
+    router.go(-1)
+  }
 }
 
 //disable ปุ่ม save
@@ -322,22 +324,13 @@ watch(props, () => {
 
         <div class="flex justify-end mt-4">
           <div>
-            <router-link
-              v-if="task?.id"
-              :to="{
-                name: 'editTask',
-                params: { taskId: task.id },
-              }"
+            <button
+              v-show="!editMode"
+              @click="enableEditMode"
+              class="btn btn-info h-2 mr-3"
             >
-              <button
-                v-show="!editMode"
-                @click="enableEditMode"
-                class="btn btn-info h-2 mr-3"
-              >
-                Edit
-              </button>
-            </router-link>
-
+              Edit
+            </button>
             <button
               v-show="editMode"
               class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"

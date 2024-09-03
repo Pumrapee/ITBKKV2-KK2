@@ -2,7 +2,6 @@
 import { ref, computed } from "vue"
 import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken } from "@/libs/fetchUtils"
 import { useRouter } from "vue-router"
 
 const username = ref("")
@@ -29,11 +28,8 @@ const loginHandler = async () => {
     password.value
   )
   if (res.status === 200) {
-    // const Token = setToken(token)
-    // authStore.setToken(token)
     authStore.login(token)
-    getToken()
-    router.push({ name: "board" })
+    router.push({ name: "task" })
   } else if (res.status === 400 || res.status === 401) {
     alertMessage.value = "Username or Password is incorrect."
     showAlert.value = true

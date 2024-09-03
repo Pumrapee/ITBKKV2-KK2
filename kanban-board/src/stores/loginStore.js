@@ -6,31 +6,21 @@ import { jwtDecode } from "jwt-decode"
 export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false)
   const user = ref(null)
-  const token = ref("")
   const hasBoard = ref(false)
 
-  const login = (newToken) => {
+  const login = (jwtToken) => {
     isAuthenticated.value = true
-    //token
-    localStorage.setItem("token", newToken)
-    const tokenIsUser = localStorage.getItem("token")
-    user.value = jwtDecode(tokenIsUser)
-
-    //username
-    localStorage.setItem("user", user.value.name)
+    user.value = jwtDecode(jwtToken)
   }
 
   const logout = () => {
     isAuthenticated.value = false
     user.value = null
-    localStorage.clear()
-
     hasBoard.value = false
   }
 
   const updateBoardStatus = (status) => {
     hasBoard.value = status
-
   }
 
   return {
@@ -39,8 +29,6 @@ export const useAuthStore = defineStore("auth", () => {
     hasBoard,
     login,
     logout,
-    token,
     updateBoardStatus,
-
   }
 })

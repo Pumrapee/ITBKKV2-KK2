@@ -1,15 +1,11 @@
 package sit.int221.kanbanapi.databases.userdb.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Getter
 @Setter

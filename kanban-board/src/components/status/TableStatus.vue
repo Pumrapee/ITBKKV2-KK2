@@ -10,12 +10,11 @@ import {
   deleteItemById,
   deleteItemByIdToNewId,
 } from "@/libs/fetchUtils"
-import { ref, onMounted, watch } from "vue"
+import { ref } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import DeleteStatus from "@/components/status/DeleteStatus.vue"
 import AlertComponent from "@/components/toast/Alert.vue"
 import router from "@/router"
-import { useRoute } from "vue-router"
 
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
@@ -25,19 +24,7 @@ const editMode = ref(false)
 const statusDetail = ref()
 const showTransferModal = ref(false)
 const showDeleteModal = ref(false)
-const boardId = ref()
-const route = useRoute()
-
 const modalAlert = ref({ message: "", type: "", modal: false })
-
-onMounted(async () => {
-  if (myStatus.getStatus().length === 0) {
-    const listStatus = await getItems(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
-    )
-    myStatus.addStatus(listStatus)
-  }
-})
 
 //Alert
 const showAlert = (message, type) => {
@@ -149,6 +136,8 @@ const closeAddEdit = async (status) => {
 }
 
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
+  let shouldCloseModal = true
+
   if (showDeleteModal.value) {
     const deleteItem = await deleteItemById(
       `${import.meta.env.VITE_API_URL}statuses`,
@@ -206,14 +195,6 @@ const closeModal = () => {
   showDeleteModal.value = false
   router.push({ name: "tableStatus" })
 }
-
-watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
@@ -293,7 +274,7 @@ watch(
             >
               <div class="mr-2">
                 <router-link
-                  :to="{ name: 'EditStatus', params: { statusId: task.id } }"
+                  :to="{ name: 'EditStatus', params: { id: task.id } }"
                 >
                   <button
                     @click="openEditStatus(task.id)"

@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfig;
-import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -14,12 +13,8 @@ import java.util.List;
 
 @Service
 public class StatusService {
-
     @Autowired
     private StatusRepository repository;
-
-    @Autowired
-    private BoardService boardService;
 
     @Autowired
     private StatusConfig configuration;
@@ -28,22 +23,16 @@ public class StatusService {
         return repository.findAll();
     }
 
-    public List<Status> getAllBoardStatus(Board board) {
-        return repository.findAllByBoardOrNameIn(board, configuration.getNonLimitedUpdatableDeletableStatuses());
-    }
-
     public Status getStatusById(Integer id) {
         return repository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("Status " + id + " does not exist !!!"));
     }
 
     @Transactional
-    public Status createStatus(Status status, String boardId) {
-        Board board = boardService.getBoardById(boardId);
-        if (repository.existsByNameAndBoard(status.getName(), board)) {
-            throw new BadRequestException("Status name must be unique within the board");
+    public Status createStatus(Status status) {
+        if (repository.existsByName(status.getName())) {
+            throw new BadRequestException("Status name must be unique");
         }
-        status.setBoard(board); // Set the board for the status
         return repository.save(status);
     }
 
@@ -59,24 +48,30 @@ public class StatusService {
     }
 
     @Transactional
-    public Status updateStatus(Integer id, Status status, String boardId) {
-        Board board = boardService.getBoardById(boardId);
+    public Status updateStatus(Integer id, Status status) {
         Status existingStatus = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(existingStatus.getName())) {
             throw new BadRequestException("The status name '" + existingStatus.getName() + "' cannot be changed.");
         }
-        if (repository.existsByNameAndIdNotAndBoard(status.getName(), id, board)) {
-            throw new BadRequestException("Status name must be unique within the board");
+        if (repository.existsByNameAndIdNot(status.getName(), id)) {
+            throw new BadRequestException("Status name must be unique");
         }
         existingStatus.setName(status.getName());
         existingStatus.setDescription(status.getDescription());
         existingStatus.setColor(status.getColor());
         return repository.save(existingStatus);
+
     }
 
-    public Status getStatusByName(String statusName, String boardId) {
-        Board board = boardService.getBoardById(boardId);
-        return repository.findByNameAndBoard(statusName, board).orElseThrow(
-                () -> new BadRequestException("Status " + statusName + " does not exist"));
+    public Status getStatusByName(String statusName) {
+        try {
+            Integer statusId = Integer.parseInt(statusName);
+            return repository.findById(statusId).orElseThrow(() -> new BadRequestException( "Status "+ statusId + " does not exist"));
+        } catch (NumberFormatException e) {
+            if (statusName == null || statusName.isBlank()) {
+                return repository.findByName("No Status").orElseThrow(() -> new BadRequestException("Status "+ statusName + " does not exist"));
+            }
+            return repository.findByName(statusName).orElseThrow(() -> new BadRequestException("Status "+ statusName + " does not exist"));
+        }
     }
 }

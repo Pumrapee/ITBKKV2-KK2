@@ -87,18 +87,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.INSUFFICIENT_STORAGE, request);
     }
 
-    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
+    @ExceptionHandler({AuthenticationFailed.class, BadCredentialsException.class, UsernameNotFoundException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorResponse> handleAuthenticaionException
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, "Username or Password is incorrect.", HttpStatus.UNAUTHORIZED, request);
-    }
-
-    @ExceptionHandler({AuthenticationFailed.class})
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<ErrorResponse> handleTokenException
-            (Exception exception, WebRequest request) {
-        return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, request);
     }
 
     @ExceptionHandler(Exception.class)

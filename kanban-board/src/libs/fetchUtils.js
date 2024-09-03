@@ -1,21 +1,11 @@
 import { useAuthStore } from "@/stores/loginStore"
 
 //function ที่ติดต่อ back-end.
-let token = undefined
-
-function getToken() {
-  token = localStorage.getItem("token")
-}
-
 async function getItems(url) {
-  console.log(token)
   try {
     const data = await fetch(url, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
     const items = await data.json()
     return items
@@ -27,9 +17,6 @@ async function getStatusLimits(url) {
     const data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
     const items = await data.json()
     return items
@@ -42,9 +29,6 @@ async function getItemById(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
     const item = await data.json()
     return item
@@ -59,9 +43,6 @@ async function findStatus(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
     return data.status
   } catch (error) {
@@ -74,9 +55,6 @@ async function deleteItemById(url, id) {
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
     return res.status
   } catch (error) {}
@@ -87,22 +65,17 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
   try {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
     return res.status
   } catch (error) {}
 }
 
 async function addItem(url, newItem) {
-  console.log(newItem)
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         //destrucuring
@@ -113,7 +86,7 @@ async function addItem(url, newItem) {
     const statusCode = res.status
 
     const newTask = await res.json()
-    console.log(newTask)
+
     // Return both the added item and the status code
     return { newTask, statusCode }
   } catch (error) {}
@@ -125,7 +98,6 @@ async function editItem(url, id, editItem) {
       method: "PUT",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(editItem),
     })
@@ -144,7 +116,6 @@ async function editLimitStatus(url, boolean, maxLimit) {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       }
     )
@@ -213,6 +184,5 @@ export {
   getStatusLimits,
   editLimitStatus,
   login,
-  getToken,
   getUserBoardStatus,
 }

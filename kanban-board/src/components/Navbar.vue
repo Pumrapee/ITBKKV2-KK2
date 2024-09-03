@@ -1,20 +1,10 @@
 <script setup>
 import { useAuthStore } from "@/stores/loginStore"
-import { useBoardStore } from "@/stores/boardStore"
-import { useTaskStore } from "@/stores/taskStore"
-import { useStatusStore } from "@/stores/statusStore"
 import router from "@/router"
 
 const authStore = useAuthStore()
-const myBoard = useBoardStore()
-const myStatus = useStatusStore()
-const myTask = useTaskStore()
-const userName = localStorage.getItem("user")
 const logout = () => {
   authStore.logout()
-  myBoard.clearBoard()
-  myStatus.clearStatus()
-  myTask.clearTask()
   router.push({ name: "login" })
 }
 </script>
@@ -31,15 +21,16 @@ const logout = () => {
       >
         <!-- Logo -->
         <img src="/icons/logonavbar2.png" class="w-10 m-2" />
-        <!-- <RouterLink :to="{ name: 'task' }"> -->
-        <span>KRADAN KANBAN</span>
-        <!-- </RouterLink> -->
+        <RouterLink :to="{ name: 'task' }">
+          <span>KRADAN KANBAN</span>
+        </RouterLink>
       </button>
     </div>
 
-    <!-- user name -->
-    <div class="itbkk-fullname navbar-end pr-5">Hi, {{ userName }}</div>
-
+    <!-- User Name -->
+    <div class="itbkk-fullname navbar-end pr-5">
+      Hi, {{ authStore.user.name }}
+    </div>
     <div class="cursor-pointer dropdown dropdown-end">
       <div tabindex="0">
         <img src="/icons/profile-user.png" alt="profile" class="h-8" />

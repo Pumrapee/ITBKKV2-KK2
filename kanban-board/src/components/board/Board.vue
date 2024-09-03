@@ -1,44 +1,15 @@
 <script setup>
 import router from "@/router"
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import AddBoard from "./AddBoard.vue"
-import { addItem, getItems } from "@/libs/fetchUtils"
-import { useBoardStore } from "@/stores/boardStore.js"
 
 const openModal = ref()
-const useBoard = useBoardStore()
 const openModalAdd = () => {
   openModal.value = true
 }
 
-onMounted(async () => {
-  const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  useBoard.addBoards(listBoard)
-})
-
-const closeAdd = async (nameBoard) => {
-  console.log(nameBoard)
-  const { newTask, statusCode } = await addItem(
-    `${import.meta.env.VITE_API_URL}boards`,
-    nameBoard
-  )
-
-  console.log(newTask)
-
-  if (statusCode === 201) {
-    useBoard.addBoard(newTask)
-
-    console.log(useBoard.getBoards())
-    // showAlert("The task has been successfully added", "success")
-  }
-
-  openModal.value = false
-  router.go(-1)
-}
-
 const closeModal = () => {
   openModal.value = false
-  router.go(-1)
 }
 </script>
 
@@ -69,22 +40,12 @@ const closeModal = () => {
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody v-if="useBoard.getBoards().length > 0">
-          <tr v-for="(board, index) in useBoard.getBoards()">
-            <th class="text-black pl-20">{{ index + 1 }}</th>
-
-            <th>
-              <router-link :to="{ name: 'task', params: { id: board.id } }">
-                <button class="btn btn-ghost h-2">{{ board.name }}</button>
-              </router-link>
-            </th>
-          </tr>
-        </tbody>
+        <tbody v-if="true"></tbody>
 
         <tbody v-else>
           <tr>
             <td colspan="5" class="text-center py-4 text-gray-500 font-medium">
-              No board
+              No task
             </td>
           </tr>
         </tbody>
@@ -92,11 +53,7 @@ const closeModal = () => {
     </div>
   </div>
 
-  <AddBoard
-    :showModal="openModal"
-    @closeModal="closeModal"
-    @saveAdd="closeAdd"
-  />
+  <AddBoard :showModal="openModal" @closeModal="closeModal" />
 </template>
 
 <style scoped>

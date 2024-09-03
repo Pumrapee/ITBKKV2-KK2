@@ -8,7 +8,6 @@ import LoginPage from "@/components/LoginPage.vue"
 import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken } from "@/libs/fetchUtils"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,31 +29,30 @@ const router = createRouter({
         },
       ],
     },
-
     {
-      path: "/board/:id",
+      path: "/task",
       name: "task",
       component: HomeView,
       children: [
         {
-          path: "task",
+          path: ":id",
           name: "detailTask",
           component: AddEditTask,
         },
         {
-          path: "task/:taskId/edit",
+          path: ":id/edit",
           name: "editTask",
           component: AddEditTask,
         },
         {
-          path: "task/add",
+          path: "add",
           name: "addTask",
           component: AddEditTask,
         },
       ],
     },
     {
-      path: "/board/:id/status",
+      path: "/status",
       name: "tableStatus",
       component: StatusView,
       children: [
@@ -64,7 +62,7 @@ const router = createRouter({
           component: AddEditStatus,
         },
         {
-          path: ":statusId/edit",
+          path: ":id/edit",
           name: "EditStatus",
           component: AddEditStatus,
         },
@@ -97,27 +95,24 @@ const router = createRouter({
 // })
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  const token = localStorage.getItem("token")
 
-if (!authStore.isAuthenticated && !token && to.name !== "login") {
-    next({ name: "login" })
-  } else {
-    if (token) {
-      authStore.isAuthenticated = true
-      getToken()
-      // authStore.token = token
+  if (!authStore.isAuthenticated) {
+    if (to.name !== "login") {
+      next({ name: "login" })
+    } else {
+      next()
     }
-    next()
-  }
-  // Check if the user has a board
-  const userHasBoard = authStore.hasBoard // Ensure this property is part of your auth store
-
-  if (to.name === "board" && userHasBoard) {
-    next({ name: "task" })
-  } else if (to.name === "task" && !userHasBoard) {
-    next({ name: "board" })
   } else {
-    next()
+    // Check if the user has a board
+    const userHasBoard = authStore.hasBoard  // Ensure this property is part of your auth store
+
+    if (to.name === "board" && userHasBoard) {
+      next({ name: "task" })
+    } else if (to.name === "task" && !userHasBoard) {
+      next({ name: "board" })
+    } else {
+      next()
+    }
   }
 })
 

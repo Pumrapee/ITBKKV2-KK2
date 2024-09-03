@@ -1,16 +1,10 @@
 <script setup>
-import { defineProps, defineEmits, ref } from "vue"
+import { defineProps, defineEmits } from "vue"
 
 const props = defineProps({
   showModal: Boolean,
 })
-const boardName = ref({ name: "" })
-const emits = defineEmits(["closeModal", "saveAdd"])
-
-const saveAdd = () => {
-  console.log(boardName.value)
-  emits("saveAdd", boardName.value)
-}
+const emits = defineEmits(["closeModal"])
 
 const closeModals = () => {
   emits("closeModal")
@@ -32,7 +26,6 @@ const closeModals = () => {
             <input
               id="name"
               type="text"
-              v-model="boardName.name"
               placeholder="Enter your name board..."
               class="itbkk-title w-full border border-slate-950 rounded-lg py-2 px-3 input input-ghost"
             />
@@ -40,10 +33,7 @@ const closeModals = () => {
         </div>
 
         <div class="mt-4 flex justify-end">
-          <button
-            class="itbkk-button-confirm btn mr-2 bg-green-500 text-white"
-            @click="saveAdd"
-          >
+          <button class="itbkk-button-confirm btn mr-2 bg-green-500 text-white">
             Save
           </button>
           <button class="itbkk-button-cancel btn" @click="closeModals">

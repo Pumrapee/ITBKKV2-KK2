@@ -6,7 +6,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfig;
-import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
@@ -21,16 +20,10 @@ import static java.util.Arrays.stream;
 
 @Service
 public class TaskService {
-
     @Autowired
     private TaskRepository repository;
-
     @Autowired
     private StatusRepository statusRepository;
-
-    @Autowired
-    private BoardService boardService;
-
     @Autowired
     private StatusConfig configuration;
 
@@ -38,20 +31,20 @@ public class TaskService {
         return repository.findAll();
     }
 
-    public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy, String boardId) {
-        Board board = boardService.getBoardById(boardId);
+    public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy) {
         String sortProperty = sortBy != null ? sortBy : "createdOn";
         Sort sort = Sort.by(Sort.Order.asc(sortProperty));
         try {
             if (filterStatuses != null && !filterStatuses.isEmpty()) {
-                return repository.findByStatusNamesSorted(filterStatuses, board, sort);
+                return repository.findByStatusNamesSorted(filterStatuses, sort);
             } else {
-                return repository.findByBoardSorted(board, sort);
+                return repository.findAll(sort);
             }
         } catch (PropertyReferenceException e) {
             throw new BadRequestException("Invalid sortBy parameter: " + sortProperty);
         }
     }
+
 
     public Task getTaskById(Integer id) {
         return repository.findById(id).orElseThrow(
@@ -59,11 +52,9 @@ public class TaskService {
     }
 
     @Transactional
-    public Task createTask(Task task, String boardId) {
-        Board board = boardService.getBoardById(boardId);
-        task.setBoard(board);
-        if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
-                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
+    public Task createTask(Task task) {
+            if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
+                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId()) + 1)) {
             return repository.save(task);
         } else {
             throw new TaskLimitExceededException("The status " + task.getTaskStatus().getName() + " has reached the task limit.");
@@ -78,11 +69,9 @@ public class TaskService {
     }
 
     @Transactional
-    public Task updateTask(Integer id, Task task, String boardId) {
-        Board board = boardService.getBoardById(boardId);
-        task.setBoard(board);
+    public Task updateTask(Integer id, Task task) {
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
-                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
+                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId()) + 1)) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
@@ -95,34 +84,30 @@ public class TaskService {
     }
 
     @Transactional
-    public void transferTaskStatus(Integer id, Integer newId, String boardId) {
-        if (id.equals(newId)) {
-            throw new BadRequestException("Destination status for task transfer must be different from the current status");
+    public void transferTaskStatus(Integer id, Integer newId) {
+        if (id == newId) {
+            throw new BadRequestException("destination status for task transfer must be different from current status");
         }
-        Board board = boardService.getBoardById(boardId);
         Status oldStatus = statusRepository.findById(id).orElseThrow(() -> new BadRequestException("The specified status for task transfer does not exist"));
         Status newStatus = statusRepository.findById(newId).orElseThrow(() -> new BadRequestException("The specified status for task transfer does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())){
-            throw new BadRequestException("The status name '"+ oldStatus.getName() + "' cannot be transferred");
+            throw new BadRequestException("The status name '"+ oldStatus.getName() + "' cannot be transfered");
         }
         if (!configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())
                 && configuration.getNonLimitedUpdatableDeletableStatuses().contains(newStatus.getName())
-                || statusLimitCheck(countTasksByStatus(id, board) + countTasksByStatus(newId, board))){
-            repository.transferTaskStatus(id, newId, board);
+                || statusLimitCheck(countTasksByStatus(id) + countTasksByStatus(newId))){
+            repository.transferTaskStatus(id, newId);
         } else {
             throw new TaskLimitExceededException("The destination status cannot be over the limit after transfer");
         }
     }
 
-    public boolean findTaskStatus(Integer id, String boardId) {
-        Board board = boardService.getBoardById(boardId);
-        return (repository.countTasksByStatus(id, board) != 0);
+    public boolean findTaskStatus(Integer id) {
+        return (repository.countTasksByStatus(id) != 0);
     }
 
-    public Integer countTasksByStatus(Integer id, Board board) {
-        return repository.countTasksByStatus(id, board);
-    }
 
+    public Integer countTasksByStatus(Integer id) { return repository.countTasksByStatus(id); }
     public Boolean statusLimitCheck(Integer count) {
         if (configuration.getTaskLimitEnabled()) {
             return count <= configuration.getMaxTasksPerStatus();
@@ -131,13 +116,11 @@ public class TaskService {
         }
     }
 
-    public boolean allStatusLimitCheck(StatusConfig newConfig, String boardId) {
-        Board board = boardService.getBoardById(boardId);
+    public boolean allStatusLimitCheck(StatusConfig newConfig) {
         if (newConfig.getTaskLimitEnabled()) {
-            return repository.countTasksByStatus(board).stream().allMatch(tasks -> tasks <= newConfig.getMaxTasksPerStatus());
+            return repository.countTasksByStatus().stream().allMatch(tasks -> tasks <= newConfig.getMaxTasksPerStatus());
         } else {
             return true;
         }
     }
 }
-

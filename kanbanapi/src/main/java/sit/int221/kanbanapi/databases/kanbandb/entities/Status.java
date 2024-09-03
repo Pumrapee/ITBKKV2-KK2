@@ -35,10 +35,6 @@ public class Status {
     @Column(name = "statusColor", nullable = false)
     private String color = "#ffffff";
 
-    @ManyToOne
-    @JoinColumn(name = "boardId", nullable = false)
-    private Board board;
-
     @JsonIgnore
     @OneToMany(mappedBy = "taskStatus")
     private List<Task> tasks;
