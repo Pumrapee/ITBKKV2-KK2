@@ -8,6 +8,7 @@ import LoginPage from "@/components/LoginPage.vue"
 import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore.js"
 import { getToken } from "@/libs/fetchUtils"
 
 const router = createRouter({
@@ -100,6 +101,15 @@ router.beforeEach((to, from, next) => {
       // authStore.token = token
     }
     next()
+
+    // if (to.name === "board" && userHasBoard) {
+    //   next({ name: "task" })
+    // } else if (to.name === "task" && !userHasBoard) {
+    //   next({ name: "board" })
+    // } else {
+    //   next()
+    // }
+
   }
 })
 
