@@ -82,7 +82,7 @@ const boradAll = () => {
   <!-- Sidebar -->
   <aside
     id="sidebar-multi-level-sidebar"
-    class="slide-in-left fixed top-0 left-0 z-0 mt-16 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-lg"
+    class="slide-in-left backdrop-blur fixed top-0 left-0 z-0 mt-16 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-lg"
     aria-label="Sidebar"
   >
     <div
