@@ -1,6 +1,7 @@
 package sit.int221.kanbanapi.databases.kanbandb.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -39,6 +40,10 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "taskStatus")
     private Status taskStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "boardId", nullable = false)
+    private Board board;
 
     @Column(name = "createdOn", insertable = false, updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
