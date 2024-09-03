@@ -10,6 +10,7 @@ import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
 import sit.int221.kanbanapi.dtos.TaskDTO;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
+import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
 
@@ -26,6 +27,9 @@ public class TaskController {
 
     @Autowired
     private StatusService statusService;
+
+    @Autowired
+    private BoardService boardService;
 
     @Autowired
     private ModelMapper modelMapper;
