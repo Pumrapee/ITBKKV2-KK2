@@ -217,7 +217,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-16 mb-20">
+  <div class="flex flex-col items-center mt-16 mb-20 ml-60">
     <!-- Navigation -->
     <div class="bounce-in-top flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">
@@ -250,7 +250,9 @@ watch(
     </div>
 
     <!-- Status Table -->
-    <div class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52">
+    <div
+      class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
+    >
       <table class="table">
         <thead class="bg-black">
           <tr class="text-white text-sm">

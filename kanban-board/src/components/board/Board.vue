@@ -40,11 +40,10 @@ const closeModal = () => {
   openModal.value = false
   router.go(-1)
 }
-
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-16 mb-20">
+  <div class="flex flex-col items-center mt-16 mb-20 ml-60">
     <div class="flex justify-between w-3/5">
       <div class="font-bold text-4xl m-2">Board list</div>
       <div>
@@ -70,7 +69,7 @@ const closeModal = () => {
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody v-if="useBoard.getBoards().length > 0">
+        <tbody class="bg-white" v-if="useBoard.getBoards().length > 0">
           <tr v-for="(board, index) in useBoard.getBoards()">
             <th class="text-black pl-20">{{ index + 1 }}</th>
 
