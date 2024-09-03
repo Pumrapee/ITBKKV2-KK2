@@ -71,7 +71,7 @@ const logout = () => {
   <!-- Sidebar -->
   <aside
     id="sidebar-multi-level-sidebar"
-    class="tilt-in-left-2 fixed top-0 left-0 z-0 mt-16 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-lg"
+    class="fixed top-0 left-0 z-0 mt-16 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-lg"
     aria-label="Sidebar"
   >
     <div class="h-full px-3 py-4 overflow-y-auto backdrop-blur-lg dark:bg-gray-800">
@@ -129,33 +129,4 @@ const logout = () => {
   position: relative;
   z-index: 9;
 }
-.tilt-in-left-2 {
-	-webkit-animation: tilt-in-left-2 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-	        animation: tilt-in-left-2 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-}
-@-webkit-keyframes tilt-in-left-2 {
-  0% {
-    -webkit-transform: rotateX(30deg) translateX(-300px) skewX(30deg);
-            transform: rotateX(30deg) translateX(-300px) skewX(30deg);
-    opacity: 0;
-  }
-  100% {
-    -webkit-transform: rotateX(0deg) translateX(0) skewX(0deg);
-            transform: rotateX(0deg) translateX(0) skewX(0deg);
-    opacity: 1;
-  }
-}
-@keyframes tilt-in-left-2 {
-  0% {
-    -webkit-transform: rotateX(30deg) translateX(-300px) skewX(30deg);
-            transform: rotateX(30deg) translateX(-300px) skewX(30deg);
-    opacity: 0;
-  }
-  100% {
-    -webkit-transform: rotateX(0deg) translateX(0) skewX(0deg);
-            transform: rotateX(0deg) translateX(0) skewX(0deg);
-    opacity: 1;
-  }
-}
-
 </style>
