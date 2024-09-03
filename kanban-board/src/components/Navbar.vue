@@ -145,17 +145,14 @@ const boradAll = () => {
       </ul>
     </div>
   </aside>
+
 </template>
 
 <style scoped>
-.navbar {
-  position: relative;
-  z-index: 10;
-}
+@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Taviraj:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
-.sidebar {
-  position: relative;
-  z-index: 9;
+body {
+  font-family: "Open Sans", sans-serif;
 }
 .slide-in-left {
   -webkit-animation: slide-in-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)

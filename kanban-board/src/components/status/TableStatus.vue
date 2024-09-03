@@ -232,7 +232,7 @@ watch(
         <RouterLink :to="{ name: 'task' }">
           <button
             @click="openAddStatus"
-            class="itbkk-button-home btn mr-1 bg-black text-white"
+            class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
           >
             <img src="/icons/home.png" class="w-4" />
             Home
@@ -254,7 +254,7 @@ watch(
       class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
     >
       <table class="table">
-        <thead class="bg-black">
+        <thead class="bg-blue-400">
           <tr class="text-white text-sm">
             <th class="pl-20">No.</th>
             <th class="pl-20">Name</th>

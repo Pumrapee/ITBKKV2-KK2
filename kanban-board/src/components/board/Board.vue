@@ -40,6 +40,7 @@ const closeModal = () => {
   openModal.value = false
   router.go(-1)
 }
+
 </script>
 
 <template>
