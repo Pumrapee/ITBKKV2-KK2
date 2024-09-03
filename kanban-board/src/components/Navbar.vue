@@ -71,7 +71,7 @@ const logout = () => {
   <!-- Sidebar -->
   <aside
     id="sidebar-multi-level-sidebar"
-    class="fixed top-0 left-0 z-0 mt-16 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-lg"
+    class="slide-in-left fixed top-0 left-0 z-0 mt-16 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-lg"
     aria-label="Sidebar"
   >
     <div class="h-full px-3 py-4 overflow-y-auto backdrop-blur-lg dark:bg-gray-800">
@@ -129,4 +129,33 @@ const logout = () => {
   position: relative;
   z-index: 9;
 }
+.slide-in-left {
+	-webkit-animation: slide-in-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: slide-in-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+@-webkit-keyframes slide-in-left {
+  0% {
+    -webkit-transform: translateX(-1000px);
+            transform: translateX(-1000px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-in-left {
+  0% {
+    -webkit-transform: translateX(-1000px);
+            transform: translateX(-1000px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 </style>
