@@ -1,5 +1,3 @@
-import { useAuthStore } from "@/stores/loginStore"
-
 //function ที่ติดต่อ back-end.
 let token = undefined
 
@@ -167,14 +165,9 @@ async function login(url, userName, password) {
       }),
     })
 
+    // Return status code for further processing
     const data = await res.json()
     const token = data.access_token
-
-    // สร้าง instance ของ store และอัพเดตสถานะของบอร์ด
-    const authStore = useAuthStore()
-    authStore.login(token)
-    const boardStatus = await getUserBoardStatus(url)
-    authStore.updateBoardStatus(boardStatus)
 
     return { res, token }
   } catch (error) {
@@ -182,25 +175,6 @@ async function login(url, userName, password) {
     return 500 // Internal server error
   }
 }
-
-async function getUserBoardStatus(url) {
-  try {
-    const res = await fetch(`${url}/user-board-status`, {
-      method: "GET",
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      return data.hasBoard // ตรวจสอบข้อมูลที่กลับมาและปรับให้เหมาะสม
-    } else {
-      throw new Error('Failed to fetch board status')
-    }
-  } catch (error) {
-    console.error("Error fetching board status:", error)
-    return false
-  }
-}
-
 
 export {
   getItems,
@@ -214,5 +188,4 @@ export {
   editLimitStatus,
   login,
   getToken,
-  getUserBoardStatus,
 }
