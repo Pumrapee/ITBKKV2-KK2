@@ -1,10 +1,11 @@
 <script setup>
-import { defineProps, defineEmits, ref } from "vue"
+import { defineProps, defineEmits, ref, computed } from "vue"
 
 const props = defineProps({
   showModal: Boolean,
 })
-const boardName = ref({ name: "" })
+const userName = localStorage.getItem("user")
+const boardName = ref({ name: `${userName} personal board` })
 const emits = defineEmits(["closeModal", "saveAdd"])
 
 const saveAdd = () => {
@@ -15,6 +16,12 @@ const saveAdd = () => {
 const closeModals = () => {
   emits("closeModal")
 }
+
+const isButtonDisabled = computed(() => {
+  return (
+    boardName.value.name?.trim() === "" || boardName.value.name?.length > 120
+  )
+})
 </script>
 
 <template>
@@ -43,6 +50,7 @@ const closeModals = () => {
           <button
             class="itbkk-button-confirm btn mr-2 bg-green-500 text-white"
             @click="saveAdd"
+            :disabled="isButtonDisabled"
           >
             Save
           </button>
