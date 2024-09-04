@@ -19,6 +19,7 @@ const logout = () => {
 }
 
 const boradAll = () => {
+  myBoard.clearBoard()
   myStatus.clearStatus()
   myTask.clearTask()
 }
@@ -145,7 +146,6 @@ const boradAll = () => {
       </ul>
     </div>
   </aside>
-
 </template>
 
 <style scoped>

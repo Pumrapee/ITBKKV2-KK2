@@ -31,7 +31,6 @@ const editDrop = ref(false)
 const boardId = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 const emits = defineEmits(["closeAddModal"])
-console.log(boardId.value)
 
 onMounted(async () => {
   //Task

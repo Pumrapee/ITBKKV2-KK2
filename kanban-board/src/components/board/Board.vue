@@ -1,19 +1,24 @@
 <script setup>
 import router from "@/router"
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watch } from "vue"
 import AddBoard from "./AddBoard.vue"
 import { addItem, getItems } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
+import { useRoute } from "vue-router"
 
 const openModal = ref()
-const useBoard = useBoardStore()
+const myBoard = useBoardStore()
+const route = useRoute()
+
 const openModalAdd = () => {
   openModal.value = true
 }
 
 onMounted(async () => {
   const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  useBoard.addBoards(listBoard)
+  myBoard.addBoards(listBoard)
+  console.table(listBoard)
+  console.table(myBoard.getBoards()[0].id)
 })
 
 const closeAdd = async (nameBoard) => {
@@ -26,9 +31,9 @@ const closeAdd = async (nameBoard) => {
   console.log(newTask)
 
   if (statusCode === 201) {
-    useBoard.addBoard(newTask)
+    myBoard.addBoard(newTask)
 
-    console.log(useBoard.getBoards())
+    console.log(myBoard.getBoards())
     // showAlert("The task has been successfully added", "success")
   }
 
@@ -41,6 +46,27 @@ const closeModal = () => {
   router.go(-1)
 }
 
+// watch(
+//   () => myBoard.getBoards(),
+//   (newBoards) => {
+//     if (newBoards.length > 0) {
+//       const boardId = newBoards[0].id
+//       console.log(boardId)
+//       router.push({ name: "task", params: { id: boardId } })
+//     }
+//   },
+//   { immediate: true } // ตรวจสอบค่าทันทีเมื่อโหลด component
+// )
+
+// router.beforeEach((to, from, next) => {
+//   if (to.name === "board" && myBoard.getBoards().length > 0) {
+//     const boardId = myBoard.getBoards()[0].id
+//     console.log(boardId)
+//     next({ name: "task", params: { id: boardId } })
+//   } else {
+//     next()
+//   }
+// })
 </script>
 
 <template>
@@ -70,8 +96,8 @@ const closeModal = () => {
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody class="bg-white" v-if="useBoard.getBoards().length > 0">
-          <tr v-for="(board, index) in useBoard.getBoards()">
+        <tbody class="bg-white" v-if="myBoard.getBoards().length > 0">
+          <tr v-for="(board, index) in myBoard.getBoards()">
             <th class="text-black pl-20">{{ index + 1 }}</th>
 
             <th>

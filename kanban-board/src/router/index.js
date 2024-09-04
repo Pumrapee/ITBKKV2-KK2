@@ -91,6 +91,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const token = localStorage.getItem("token")
+  const myBoard = useBoardStore()
 
   if (!authStore.isAuthenticated && !token && to.name !== "login") {
     next({ name: "login" })
@@ -102,6 +103,14 @@ router.beforeEach((to, from, next) => {
     }
     next()
 
+    // if (to.name === "board" && myBoard.getBoards().length > 0) {
+    //   const boardId = myBoard.getBoards()[0].id
+    //   console.log(boardId)
+    //   next({ name: "task", params: { id: boardId } })
+    // } else {
+    //   next({ name: "board" })
+    // }
+
     // if (to.name === "board" && userHasBoard) {
     //   next({ name: "task" })
     // } else if (to.name === "task" && !userHasBoard) {
@@ -109,7 +118,6 @@ router.beforeEach((to, from, next) => {
     // } else {
     //   next()
     // }
-
   }
 })
 
