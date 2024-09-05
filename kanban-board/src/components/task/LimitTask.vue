@@ -105,7 +105,7 @@ const closeCancel = async () => {
   <div v-if="showLimitModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div class="itbkk-modal-setting modal-box">
-        <h3 class="font-bold text-lg text-blue-400">Status Settings</h3>
+        <h3 class="font-bold text-lg text-slate-700">Status Settings</h3>
         <p class="py-4">
           Users can limit the number of tasks in a status by setting the Maximum
           tasks in each status

@@ -54,7 +54,7 @@ const showAlert = (message, type) => {
 //เปิด Modal
 const openEditStatus = async (idStatus) => {
   const statusItem = await getItemById(
-    `${import.meta.env.VITE_API_URL}statuses`,
+    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
     idStatus
   )
   if (statusItem.status === 404) {
@@ -80,7 +80,7 @@ const openModalAdd = () => {
 
 const openDeleteModal = async (id, name) => {
   const showStatus = await findStatus(
-    `${import.meta.env.VITE_API_URL}tasks/status`,
+    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
     id
   )
 
@@ -108,7 +108,7 @@ const openDeleteModal = async (id, name) => {
 const closeAddEdit = async (status) => {
   if (editMode.value) {
     const { editedItem, statusCode } = await editItem(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       status.id,
       {
         name: status.name,
@@ -119,7 +119,7 @@ const closeAddEdit = async (status) => {
 
     if (statusCode === 200) {
       myStatus.updateStatus(editedItem)
-      const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+      const listTasks = await getItems(`${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`)
       myTask.clearTask()
       myTask.addTasks(listTasks)
       showAlert("The status has been updated", "success")
@@ -132,7 +132,7 @@ const closeAddEdit = async (status) => {
 
   if (!editMode.value) {
     const { newTask, statusCode } = await addItem(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       status
     )
     if (statusCode === 201) {
@@ -151,7 +151,7 @@ const closeAddEdit = async (status) => {
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
   if (showDeleteModal.value) {
     const deleteItem = await deleteItemById(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       statusDetail.value.id
     )
 
@@ -168,20 +168,20 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
 
   if (showTransferModal.value) {
     const newStatus = await deleteItemByIdToNewId(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       statusDetail.value.id,
       selectedStatus
     )
 
     if (newStatus === 200) {
       myStatus.removeStatus(statusDetail.id)
-      const listTasks = await getItems(`${import.meta.env.VITE_API_URL}tasks`)
+      const listTasks = await getItems(`${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`)
       // หลัง tranfer สำเร้จ ให้ค่าใน task status เปลี่ยน
       myTask.clearTask()
       myTask.addTasks(listTasks)
 
       const listStatus = await getItems(
-        `${import.meta.env.VITE_API_URL}statuses`
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
       )
       myStatus.clearStatus()
       myStatus.addStatus(listStatus)
@@ -217,7 +217,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-16 mb-20 ml-60">
+  <div class="flex flex-col items-center mt-16 mb-20 ml-30">
     <!-- Navigation -->
     <div class="bounce-in-top flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">
@@ -232,7 +232,7 @@ watch(
         <RouterLink :to="{ name: 'task' }">
           <button
             @click="openAddStatus"
-            class="itbkk-button-home btn mr-1 bg-pink-400 text-white"
+            class="itbkk-button-home btn mr-1 bg-black text-white"
           >
             <img src="/icons/home.png" class="w-4" />
             Home
@@ -254,7 +254,7 @@ watch(
       class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
     >
       <table class="table">
-        <thead class="bg-blue-400">
+        <thead class="bg-black">
           <tr class="text-white text-sm">
             <th class="pl-20">No.</th>
             <th class="pl-20">Name</th>
@@ -262,13 +262,13 @@ watch(
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody class="bg-white">
+        <tbody class="">
           <tr
             v-for="(task, index) in myStatus.getStatus()"
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-blue-400 pl-20">{{ index + 1 }}</th>
+            <th class="text-black pl-20">{{ index + 1 }}</th>
 
             <td class="itbkk-status-name pl-20 w-1/3">
               <p
