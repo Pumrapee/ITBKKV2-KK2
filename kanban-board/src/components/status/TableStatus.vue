@@ -316,7 +316,6 @@ watch(
             </td>
             <td
               v-else="task.name !== 'No Status' && task.name !== 'Done'"
-              class="bg-white"
             ></td>
           </tr>
         </tbody>

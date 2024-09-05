@@ -15,9 +15,11 @@ const openModalAdd = () => {
 onMounted(async () => {
   const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
   myBoard.addBoards(listBoard)
-
-  if (myBoard.getBoards().length > 0) {
+  if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
     router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
+  } else if (myBoard.navBoard) {
+    router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
+    myBoard.navBoard = false
   }
 })
 
@@ -45,28 +47,6 @@ const closeModal = () => {
   openModal.value = false
   router.go(-1)
 }
-
-// watch(
-//   () => myBoard.getBoards(),
-//   (newBoards) => {
-//     if (newBoards.length > 0) {
-//       const boardId = newBoards[0].id
-//       console.log(boardId)
-//       router.push({ name: "task", params: { id: boardId } })
-//     }
-//   },
-//   { immediate: true } // ตรวจสอบค่าทันทีเมื่อโหลด component
-// )
-
-// router.beforeEach((to, from, next) => {
-//   if (to.name === "board" && myBoard.getBoards().length > 0) {
-//     const boardId = myBoard.getBoards()[0].id
-//     console.log(boardId)
-//     next({ name: "task", params: { id: boardId } })
-//   } else {
-//     next()
-//   }
-// })
 </script>
 
 <template>

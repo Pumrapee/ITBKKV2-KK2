@@ -4,6 +4,7 @@ import { defineStore, acceptHMRUpdate } from "pinia"
 export const useBoardStore = defineStore("board", () => {
   //state
   const board = ref([])
+  const navBoard = ref(false)
   //view
   const getBoards = () => {
     return board.value
@@ -43,6 +44,7 @@ export const useBoardStore = defineStore("board", () => {
     updateBoard,
     removeBoards,
     clearBoard,
+    navBoard,
   }
 })
 
