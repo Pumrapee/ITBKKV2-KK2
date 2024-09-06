@@ -5,6 +5,8 @@ CREATE TABLE `boards` (
   `boardId` varchar(10) NOT NULL,
   `boardName` varchar(100) NOT NULL,
   `owneroid` varchar(36) NOT NULL,
+  `taskLimitEnabled` boolean NOT NULL,
+  `maxTasksPerStatus` int NOT NULL,
   PRIMARY KEY (`boardId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
