@@ -5,6 +5,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
@@ -38,8 +40,9 @@ public class TaskController {
     public ResponseEntity<List<SimpleTaskDTO>> getAllTaskFilteredSorted(
             @RequestParam(required = false) List<String> filterStatuses,
             @RequestParam(required = false, defaultValue = "createdOn") String sortBy,
-            @PathVariable String boardId) {
-        List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy, boardId);
+            @PathVariable String boardId,
+            @AuthenticationPrincipal UserDetails user) {
+        List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy, boardId, user.getUsername());
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
                 .map(task -> modelMapper.map(task, SimpleTaskDTO.class))
                 .collect(Collectors.toList());
@@ -47,17 +50,17 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskDTO> getTaskById(@PathVariable Integer id) {
-        Task task = taskService.getTaskById(id);
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable Integer id, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
+        Task task = taskService.getTaskById(id, boardId, user.getUsername());
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<TaskCreateUpdateDTO> addNewTask(@Valid @RequestBody TaskCreateUpdateDTO task, @PathVariable String boardId) {
+    public ResponseEntity<TaskCreateUpdateDTO> addNewTask(@Valid @RequestBody TaskCreateUpdateDTO task, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
         Task newTask = modelMapper.map(task, Task.class);
-        newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId));
-        Task createdTask = taskService.createTask(newTask, boardId);
+        newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId, user.getUsername()));
+        Task createdTask = taskService.createTask(newTask, boardId, user.getUsername());
         TaskCreateUpdateDTO taskDTO = modelMapper.map(createdTask, TaskCreateUpdateDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.CREATED);
     }
@@ -66,17 +69,18 @@ public class TaskController {
     public ResponseEntity<TaskCreateUpdateDTO> updateTask(
             @Valid @RequestBody TaskCreateUpdateDTO task,
             @PathVariable Integer id,
-            @PathVariable String boardId) {
+            @PathVariable String boardId,
+            @AuthenticationPrincipal UserDetails user) {
         Task newTask = modelMapper.map(task, Task.class);
-        newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId));
-        Task updatedTask = taskService.updateTask(id, newTask, boardId);
+        newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId, user.getUsername()));
+        Task updatedTask = taskService.updateTask(id, newTask, boardId, user.getUsername());
         TaskCreateUpdateDTO taskDTO = modelMapper.map(updatedTask, TaskCreateUpdateDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<SimpleTaskDTO> removeTask(@PathVariable Integer id) {
-        Task deletedTask = taskService.removeTask(id);
+    public ResponseEntity<SimpleTaskDTO> removeTask(@PathVariable Integer id, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
+        Task deletedTask = taskService.removeTask(id, boardId, user.getUsername());
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);
     }

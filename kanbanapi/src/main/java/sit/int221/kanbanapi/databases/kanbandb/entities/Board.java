@@ -25,6 +25,12 @@ public class Board {
     @Column(name = "owneroid", nullable = false, length = 100)
     private String ownerId;
 
+    @Column(name = "taskLimitEnabled", nullable = false)
+    private Boolean taskLimitEnabled;
+
+    @Column(name = "maxTasksPerStatus", nullable = false)
+    private Integer maxTasksPerStatus;
+
     @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<Status> statuses;

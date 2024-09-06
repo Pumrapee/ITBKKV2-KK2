@@ -38,7 +38,8 @@ public class TaskService {
         return repository.findAll();
     }
 
-    public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy, String boardId) {
+    public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Board board = boardService.getBoardById(boardId);
         String sortProperty = sortBy != null ? sortBy : "createdOn";
         Sort sort = Sort.by(Sort.Order.asc(sortProperty));
@@ -53,17 +54,19 @@ public class TaskService {
         }
     }
 
-    public Task getTaskById(Integer id) {
+    public Task getTaskById(Integer id, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         return repository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("Task id " + id + " does not exist !!!"));
     }
 
     @Transactional
-    public Task createTask(Task task, String boardId) {
+    public Task createTask(Task task, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Board board = boardService.getBoardById(boardId);
         task.setBoard(board);
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
-                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
+                || statusLimitCheck(boardId, countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
             return repository.save(task);
         } else {
             throw new TaskLimitExceededException("The status " + task.getTaskStatus().getName() + " has reached the task limit.");
@@ -71,18 +74,20 @@ public class TaskService {
     }
 
     @Transactional
-    public Task removeTask(Integer id) {
+    public Task removeTask(Integer id, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Task task = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
         repository.delete(task);
         return task;
     }
 
     @Transactional
-    public Task updateTask(Integer id, Task task, String boardId) {
+    public Task updateTask(Integer id, Task task, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Board board = boardService.getBoardById(boardId);
         task.setBoard(board);
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
-                || statusLimitCheck(countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
+                || statusLimitCheck(boardId, countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
             existingTask.setTitle(task.getTitle());
             existingTask.setDescription(task.getDescription());
@@ -95,7 +100,8 @@ public class TaskService {
     }
 
     @Transactional
-    public void transferTaskStatus(Integer id, Integer newId, String boardId) {
+    public void transferTaskStatus(Integer id, Integer newId, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         if (id.equals(newId)) {
             throw new BadRequestException("Destination status for task transfer must be different from the current status");
         }
@@ -107,7 +113,7 @@ public class TaskService {
         }
         if (!configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())
                 && configuration.getNonLimitedUpdatableDeletableStatuses().contains(newStatus.getName())
-                || statusLimitCheck(countTasksByStatus(id, board) + countTasksByStatus(newId, board))){
+                || statusLimitCheck(boardId, countTasksByStatus(id, board) + countTasksByStatus(newId, board))){
             repository.transferTaskStatus(id, newId, board);
         } else {
             throw new TaskLimitExceededException("The destination status cannot be over the limit after transfer");
@@ -123,9 +129,10 @@ public class TaskService {
         return repository.countTasksByStatus(id, board);
     }
 
-    public Boolean statusLimitCheck(Integer count) {
-        if (configuration.getTaskLimitEnabled()) {
-            return count <= configuration.getMaxTasksPerStatus();
+    public Boolean statusLimitCheck(String boardId, Integer count) {
+        Board board = boardService.getBoardById(boardId);
+        if (board.getTaskLimitEnabled()) {
+            return count <= board.getMaxTasksPerStatus();
         } else {
             return true;
         }
