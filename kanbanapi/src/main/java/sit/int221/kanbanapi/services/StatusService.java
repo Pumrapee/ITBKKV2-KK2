@@ -2,6 +2,8 @@ package sit.int221.kanbanapi.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfig;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
@@ -28,17 +30,20 @@ public class StatusService {
         return repository.findAll();
     }
 
-    public List<Status> getAllBoardStatus(Board board) {
+    public List<Status> getAllBoardStatus(Board board, String username) {
+        boardService.checkBoardOwnership(board.getBoardId(), username);
         return repository.findAllByBoardOrNameIn(board, configuration.getNonLimitedUpdatableDeletableStatuses());
     }
 
-    public Status getStatusById(Integer id) {
+    public Status getStatusById(Integer id, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         return repository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("Status " + id + " does not exist !!!"));
     }
 
     @Transactional
-    public Status createStatus(Status status, String boardId) {
+    public Status createStatus(Status status, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Board board = boardService.getBoardById(boardId);
         if (repository.existsByNameAndBoard(status.getName(), board)) {
             throw new BadRequestException("Status name must be unique within the board");
@@ -48,7 +53,8 @@ public class StatusService {
     }
 
     @Transactional
-    public Status removeStatus(Integer id) {
+    public Status removeStatus(Integer id, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Status status = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
             throw new BadRequestException("The status name '"+ status.getName() + "' cannot be deleted.");
@@ -59,7 +65,8 @@ public class StatusService {
     }
 
     @Transactional
-    public Status updateStatus(Integer id, Status status, String boardId) {
+    public Status updateStatus(Integer id, Status status, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Board board = boardService.getBoardById(boardId);
         Status existingStatus = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(existingStatus.getName())) {
@@ -74,7 +81,8 @@ public class StatusService {
         return repository.save(existingStatus);
     }
 
-    public Status getStatusByName(String statusName, String boardId) {
+    public Status getStatusByName(String statusName, String boardId, String username) {
+        boardService.checkBoardOwnership(boardId, username);
         Board board = boardService.getBoardById(boardId);
         return repository.findByNameAndBoard(statusName, board).orElseThrow(
                 () -> new BadRequestException("Status " + statusName + " does not exist"));
