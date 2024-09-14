@@ -308,12 +308,10 @@ watch(
 <template>
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-16 mb-20 ml-60">
-    <div class="font-bold text-4xl text-black m-2 self-start pl-60">
-      My Task
-    </div>
+    <div class="font-bold text-4xl text-black self-start pl-64">My Task</div>
     <!-- Filter Search-->
     <div class="flex justify-between w-3/5">
-      <div class="flex justify-start items-center">
+      <div class="flex justify-start items-center mt-4">
         <div class="relative">
           <div class="dropdown">
             <div
@@ -357,7 +355,7 @@ watch(
                       v-model="filterStatus"
                     />
                     <div
-                      class="shadow-md rounded-full font-medium p-2 text-black w-36 text-center mb-2 break-all"
+                      class="shadow-md rounded-full font-medium p-2 text-black w-36 h-10 text-center mb-2 break-all"
                       :style="{
                         backgroundColor: myStatus.getStatusColor(status.name),
                       }"
