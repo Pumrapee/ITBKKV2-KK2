@@ -9,6 +9,7 @@ import {
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
+import { useRoute } from "vue-router"
 
 const props = defineProps({
   showLimitModal: Boolean,
@@ -34,6 +35,7 @@ const showLimitStatus = ref()
 const showWarning = ref()
 const statusShow = ref()
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
+const route = useRoute()
 
 const closelimitModal = async (maxlimit) => {
   if (isLimitEnabled.value === true) {
@@ -47,7 +49,8 @@ const closelimitModal = async (maxlimit) => {
     ).map(([name, count]) => ({ name, count }))
 
     const editedLimit = await editLimitStatus(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      //`${import.meta.env.VITE_API_URL}statuses`
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       isLimitEnabled.value,
       maxlimit
     )
@@ -68,7 +71,7 @@ const closelimitModal = async (maxlimit) => {
 
   if (isLimitEnabled.value === false) {
     const editedLimit = await editLimitStatus(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       isLimitEnabled.value,
       maxlimit
     )
@@ -98,6 +101,14 @@ const closeCancel = async () => {
   showWarning.value = false
   emits("closeCancel")
 }
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    boardId.value = newId
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
