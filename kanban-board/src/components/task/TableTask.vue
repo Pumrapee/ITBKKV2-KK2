@@ -47,6 +47,7 @@ onMounted(async () => {
     )
     myStatus.addStatus(listStatus)
   }
+  console.log(myStatus.getStatus())
   //Limit
   const limitStatus = await getStatusLimits(
     `${import.meta.env.VITE_API_URL}statuses`
@@ -243,6 +244,7 @@ const handleSortChange = async (status) => {
 
 //Filter status
 const filterStatus = ref([])
+
 const filteredTasks = computed(() => {
   if (filterStatus.value.length === 0) {
     return listTaskStore.value
@@ -255,6 +257,10 @@ const filteredTasks = computed(() => {
 
 const clearFilter = () => {
   filterStatus.value = []
+}
+
+const removeFilter = (index) => {
+  filterStatus.value.splice(index, 1)
 }
 
 // Limit
@@ -305,61 +311,94 @@ watch(
     <div class="font-bold text-4xl text-black m-2 self-start pl-60">
       My Task
     </div>
+    <!-- Filter Search-->
     <div class="flex justify-between w-3/5">
       <div class="flex justify-start items-center">
-        <div v-if="filterStatus.length">
-          <button
-            class="btn btn-outline text-black font-light hover:bg-black"
-            @click="clearFilter"
-          >
-            <p class="font-bold">X</p>
-          </button>
-        </div>
-        <details class="dropdown dropdown-end itbkk-status-filter">
-          <summary class="m-1 btn bg-black text-white">
-            <img src="/icons/filter.png" class="w-6" />
-            Filter
-          </summary>
-          <ul
-            tabindex="0"
-            class="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-30"
-          >
-            <li
-              v-for="status in myStatus.getStatus()"
-              class="itbkk-status-choice"
+        <div class="relative">
+          <div class="dropdown">
+            <div
+              class="flex items-center border p-1 mb-4 bg-white rounded-xl max-h-40 flex-nowrap overflow-x-auto w-80 scrollbar-hidden"
             >
-              <div class="form-control" style="word-wrap: break-word">
-                <label class="label cursor-pointer">
-                  <input
-                    type="checkbox"
-                    :id="status.name"
-                    :value="status.name"
-                    class="checkbox mr-2"
-                    v-model="filterStatus"
-                  />
-                  <div
-                    class="shadow-md rounded-full font-medium p-2 text-black w-36 text-center mb-2 break-all"
-                    :style="{
-                      backgroundColor: myStatus.getStatusColor(status.name),
-                    }"
-                  >
-                    <span class="label-text">{{ status.name }}</span>
-                  </div>
-                </label>
-              </div>
-            </li>
-          </ul>
-        </details>
+              <!-- Filter Chips -->
+              <span
+                v-for="(filter, index) in filterStatus"
+                :key="index"
+                class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full mr-2 flex items-center whitespace-nowrap"
+              >
+                {{ filter }}
+                <button @click="removeFilter(index)" class="ml-2 text-red-500">
+                  x
+                </button>
+              </span>
 
-        
+              <div
+                tabindex="0"
+                role="button"
+                class="p-1 text-gray-400 flex-grow min-w-[120px] outline-none cursor-pointer"
+              >
+                {{ filterStatus.length > 0 ? "" : "Filter Enter..." }}
+              </div>
+            </div>
+            <ul
+              tabindex="0"
+              class="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-30"
+            >
+              <li
+                v-for="status in myStatus.getStatus()"
+                class="itbkk-status-choice"
+              >
+                <div class="form-control" style="word-wrap: break-word">
+                  <label class="label cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :id="status.name"
+                      :value="status.name"
+                      class="checkbox mr-2"
+                      v-model="filterStatus"
+                    />
+                    <div
+                      class="shadow-md rounded-full font-medium p-2 text-black w-36 text-center mb-2 break-all"
+                      :style="{
+                        backgroundColor: myStatus.getStatusColor(status.name),
+                      }"
+                    >
+                      <span class="label-text">{{ status.name }}</span>
+                    </div>
+                  </label>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          v-show="filterStatus.length > 0"
+          class="ml-3 mb-5"
+          @click="clearFilter"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="-ml-1 mr-3 h-5 w-5 text-gray-400 hover:text-gray-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
       </div>
 
-      <div class=" flex justify-end items-center">
+      <!-- Status -->
+      <div class="flex justify-end items-center">
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
           >
-          <svg
+            <svg
               class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
@@ -379,6 +418,8 @@ watch(
             Status
           </button>
         </router-link>
+
+        <!-- Limit Button -->
         <button
           @click="openLimitModal"
           class="flex itbkk-manage-status btn text-l ml-1 bg-black text-white"
@@ -387,6 +428,7 @@ watch(
           Limit
         </button>
 
+        <!-- Add Button -->
         <router-link :to="{ name: 'addTask' }">
           <button
             @click="openModalAdd"
@@ -562,6 +604,15 @@ watch(
 </template>
 
 <style scoped>
+.scrollbar-hidden {
+  overflow-x: auto;
+  scrollbar-width: none; /* For Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+
 .itbkk-title {
   /* กำหนดความกว้างสูงสุดของ column title */
   max-width: 600px; /* ปรับค่าตามต้องการ */
@@ -578,111 +629,111 @@ watch(
   display: inline-block;
 }
 .bounce-in-top {
-	-webkit-animation: bounce-in-top 1.1s both;
-	        animation: bounce-in-top 1.1s both;
+  -webkit-animation: bounce-in-top 1.1s both;
+  animation: bounce-in-top 1.1s both;
 }
 @-webkit-keyframes bounce-in-top {
   0% {
     -webkit-transform: translateY(-500px);
-            transform: translateY(-500px);
+    transform: translateY(-500px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
     opacity: 0;
   }
   38% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
     opacity: 1;
   }
   55% {
     -webkit-transform: translateY(-65px);
-            transform: translateY(-65px);
+    transform: translateY(-65px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
   }
   72% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
   81% {
     -webkit-transform: translateY(-28px);
-            transform: translateY(-28px);
+    transform: translateY(-28px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
   }
   90% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
   95% {
     -webkit-transform: translateY(-8px);
-            transform: translateY(-8px);
+    transform: translateY(-8px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
   }
   100% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
 }
 @keyframes bounce-in-top {
   0% {
     -webkit-transform: translateY(-500px);
-            transform: translateY(-500px);
+    transform: translateY(-500px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
     opacity: 0;
   }
   38% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
     opacity: 1;
   }
   55% {
     -webkit-transform: translateY(-65px);
-            transform: translateY(-65px);
+    transform: translateY(-65px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
   }
   72% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
   81% {
     -webkit-transform: translateY(-28px);
-            transform: translateY(-28px);
+    transform: translateY(-28px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
   }
   90% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
   95% {
     -webkit-transform: translateY(-8px);
-            transform: translateY(-8px);
+    transform: translateY(-8px);
     -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
   }
   100% {
     -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
 }
 </style>

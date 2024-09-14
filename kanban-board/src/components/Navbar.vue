@@ -10,18 +10,21 @@ const myBoard = useBoardStore()
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const userName = localStorage.getItem("user")
+
 const logout = () => {
   authStore.logout()
   myBoard.clearBoard()
   myStatus.clearStatus()
   myTask.clearTask()
+  myBoard.navBoard = false
   router.push({ name: "login" })
 }
 
-const boradAll = () => {
+const boardAll = () => {
   myBoard.clearBoard()
   myStatus.clearStatus()
   myTask.clearTask()
+  myBoard.navBoard = true
 }
 </script>
 
@@ -91,7 +94,7 @@ const boradAll = () => {
     >
       <ul class="space-y-2 font-medium">
         <li>
-          <div @click="boradAll">
+          <div @click="boardAll">
             <RouterLink :to="{ name: 'board' }">
               <a
                 href="#"
