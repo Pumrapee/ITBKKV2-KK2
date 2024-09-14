@@ -6,13 +6,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "statuses")
 public class Status {
@@ -35,6 +39,7 @@ public class Status {
     @Column(name = "statusColor", nullable = false)
     private String color = "#ffffff";
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "boardId", nullable = false)
     private Board board;
@@ -42,6 +47,13 @@ public class Status {
     @JsonIgnore
     @OneToMany(mappedBy = "taskStatus")
     private List<Task> tasks;
+
+    public Status(String name, String description, String color, Board board) {
+        this.name = name;
+        this.description = description;
+        this.color = (color == null || color.isBlank()) ? "#ffffff" : color;
+        this.board = board;
+    }
 
     public void setName(String name) {
         if (name != null) {

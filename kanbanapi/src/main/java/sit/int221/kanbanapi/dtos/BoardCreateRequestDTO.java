@@ -7,4 +7,8 @@ import lombok.Setter;
 @Setter
 public class BoardCreateRequestDTO {
     private String name;
+
+    public String getBoardName() {
+        return name;
+    }
 }

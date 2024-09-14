@@ -6,10 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
+import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
+import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -18,7 +23,10 @@ public class BoardService {
     private BoardRepository boardRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private StatusRepository statusRepository;
 
     public List<Board> getUserBoards(String user) {
         return boardRepository.findByOwnerId(userRepository.findByUsername(user).getOid());
@@ -38,20 +46,45 @@ public class BoardService {
         board.setBoardId(boardId);
         board.setBoardName(boardName);
         board.setOwnerId(userRepository.findByUsername(owner.getUsername()).getOid());
-        return boardRepository.save(board);
+        board.setTaskLimitEnabled(Boolean.FALSE);
+        board.setMaxTasksPerStatus(10);
+        Board savedBoard = boardRepository.save(board);
+        createDefaultStatuses(savedBoard);
+        return savedBoard;
     }
 
     @Transactional
-    public Board removeBoard(String id) {
-        Board board = boardRepository.findById(id).orElseThrow(() -> new BadRequestException("Board "+ id + " does not exist"));
+    public Board removeBoard(String boardId, String username) {
+        checkBoardOwnership(boardId, username);
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new BadRequestException("Board "+ boardId + " does not exist"));
         boardRepository.delete(board);
         return board;
     }
 
     @Transactional
-    public Board updateBoard(String id, String boardName) {
-        Board board = getBoardById(id);
-        board.setBoardName(boardName);
+    public Board updateBoard(String boardId, Board newBoard, String username) {
+        checkBoardOwnership(boardId, username);
+        Board board = getBoardById(boardId);
+        board.setBoardName(newBoard.getBoardName());
+        board.setTaskLimitEnabled(newBoard.getTaskLimitEnabled());
+        board.setMaxTasksPerStatus(newBoard.getMaxTasksPerStatus());
         return boardRepository.save(board);
+    }
+
+    public User checkBoardOwnership(String boardId, String username) {
+        Board board = getBoardById(boardId);
+        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new BadRequestException("User "+ board.getOwnerId() + " does not exist"));
+        if (!owner.getUsername().equals(username)) {
+            throw new AuthenticationFailed("You do not have permission to perform this action.");
+        }
+        return owner;
+    }
+
+    private void createDefaultStatuses(Board board) {
+        Status noStatus = new Status("No Status", "Default status", "#ffffff", board);
+        Status toDo = new Status("To Do", "Initial task status", "#ff0000", board);
+        Status doing = new Status("Doing", "Task is in progress", "#00ff00", board);
+        Status done = new Status("Done", "Task is completed", "#0000ff", board);
+        statusRepository.saveAll(Arrays.asList(noStatus, toDo, doing, done));
     }
 }
