@@ -50,7 +50,7 @@ onMounted(async () => {
   console.log(myStatus.getStatus())
   //Limit
   const limitStatus = await getStatusLimits(
-    `${import.meta.env.VITE_API_URL}statuses`
+    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
   )
   myLimit.addLimit(limitStatus)
 })

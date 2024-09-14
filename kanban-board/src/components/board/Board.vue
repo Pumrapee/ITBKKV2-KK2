@@ -34,7 +34,7 @@ const closeAdd = async (nameBoard) => {
 
   if (statusCode === 201) {
     myBoard.addBoard(newTask)
-
+    router.push({ name: "task", params: { id: newTask.id } })
     console.log(myBoard.getBoards())
     // showAlert("The task has been successfully added", "success")
   }
@@ -85,6 +85,8 @@ const closeModal = () => {
                 <button class="btn btn-ghost h-2">{{ board.name }}</button>
               </router-link>
             </th>
+
+            <th></th>
           </tr>
         </tbody>
 

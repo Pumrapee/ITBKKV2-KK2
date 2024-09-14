@@ -1,18 +1,15 @@
 <script setup>
-import {
-  ref,
-  defineProps,
-  defineEmits,
-  computed,
-  watch,
-} from "vue"
+import { ref, defineProps, defineEmits, computed, watch } from "vue"
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
+import { useRoute } from "vue-router"
 
 const props = defineProps({
   showLimitModal: Boolean,
 })
+const route = useRoute()
+const boardId = ref()
 
 //ถ้าเปิด modal มาให้เซ็ตค่าตรงกับใน storeLimit
 watch(
@@ -47,7 +44,7 @@ const closelimitModal = async (maxlimit) => {
     ).map(([name, count]) => ({ name, count }))
 
     const editedLimit = await editLimitStatus(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       isLimitEnabled.value,
       maxlimit
     )
@@ -68,7 +65,7 @@ const closelimitModal = async (maxlimit) => {
 
   if (isLimitEnabled.value === false) {
     const editedLimit = await editLimitStatus(
-      `${import.meta.env.VITE_API_URL}statuses`,
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       isLimitEnabled.value,
       maxlimit
     )
@@ -98,6 +95,14 @@ const closeCancel = async () => {
   showWarning.value = false
   emits("closeCancel")
 }
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    boardId.value = newId
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
