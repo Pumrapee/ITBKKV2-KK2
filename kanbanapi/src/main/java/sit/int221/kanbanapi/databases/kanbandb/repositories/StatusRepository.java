@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StatusRepository extends JpaRepository <Status, Integer> {
+    List<Status> findAllByBoard(Board board);
     Optional<Status> findByNameAndBoard(String name, Board board);
     Boolean existsByNameAndBoard(String name, Board board);
     Boolean existsByNameAndIdNotAndBoard(String name, Integer id, Board board);
