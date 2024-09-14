@@ -1,6 +1,7 @@
 <script setup>
 import { useStatusStore } from "@/stores/statusStore"
 import { useTaskStore } from "@/stores/taskStore"
+import { useAuthStore } from "@/stores/loginStore"
 import {
   getItemById,
   findStatus,
@@ -19,6 +20,7 @@ import { useRoute } from "vue-router"
 
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
+const myUser = useAuthStore()
 const statusItems = ref({})
 const openModal = ref()
 const editMode = ref(false)
@@ -66,6 +68,11 @@ const openEditStatus = async (idStatus) => {
     openModal.value = true
     editMode.value = true
   }
+
+  if (statusItem.status === 401) {
+    router.push({ name: "login" })
+    myUser.logout()
+  }
 }
 
 const openModalAdd = () => {
@@ -97,6 +104,11 @@ const openDeleteModal = async (id, name) => {
   if (showStatus === 404) {
     showDeleteModal.value = true
   }
+  if (showStatus === 401) {
+    router.push({ name: "login" })
+    myUser.logout()
+  }
+
   statusDetail.value = {
     id: id,
     name: name,
@@ -119,7 +131,9 @@ const closeAddEdit = async (status) => {
 
     if (statusCode === 200) {
       myStatus.updateStatus(editedItem)
-      const listTasks = await getItems(`${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`)
+      const listTasks = await getItems(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+      )
       myTask.clearTask()
       myTask.addTasks(listTasks)
       showAlert("The status has been updated", "success")
@@ -128,6 +142,11 @@ const closeAddEdit = async (status) => {
       myStatus.removeStatus(editedItem.id)
       showAlert("An error has occurred, the status does not exist.", "error")
     }
+
+    if (statusCode === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
   }
 
   if (!editMode.value) {
@@ -135,12 +154,18 @@ const closeAddEdit = async (status) => {
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       status
     )
+
     if (statusCode === 201) {
       myStatus.addOneStatus(newTask)
       showAlert("The status has been added", "success")
     } else {
       // 400 , 500
       showAlert("An error has occurred, the status does not exist.", "error")
+    }
+
+    if (statusCode === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
     }
   }
   openModal.value = false
@@ -164,6 +189,11 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
       myStatus.removeStatus(statusDetail.value.id)
       showAlert("An error has occurred, the status does not exist.", "error")
     }
+
+    if (deleteItem === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
   }
 
   if (showTransferModal.value) {
@@ -175,7 +205,9 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
 
     if (newStatus === 200) {
       myStatus.removeStatus(statusDetail.id)
-      const listTasks = await getItems(`${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`)
+      const listTasks = await getItems(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+      )
       // หลัง tranfer สำเร้จ ให้ค่าใน task status เปลี่ยน
       myTask.clearTask()
       myTask.addTasks(listTasks)
@@ -193,6 +225,11 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
     if (newStatus === 400) {
       myStatus.removeStatus(filteredStatus)
       showAlert("An error has occurred, the status does not exist.", "error")
+    }
+
+    if (newStatus === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
     }
   }
 
@@ -314,9 +351,7 @@ watch(
                 </button>
               </div>
             </td>
-            <td
-              v-else="task.name !== 'No Status' && task.name !== 'Done'"
-            ></td>
+            <td v-else="task.name !== 'No Status' && task.name !== 'Done'"></td>
           </tr>
         </tbody>
       </table>

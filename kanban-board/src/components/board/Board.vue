@@ -39,6 +39,11 @@ const closeAdd = async (nameBoard) => {
     // showAlert("The task has been successfully added", "success")
   }
 
+  if (statusCode === 401) {
+    router.push({ name: "login" })
+    myUser.logout()
+  }
+
   openModal.value = false
   router.go(-1)
 }

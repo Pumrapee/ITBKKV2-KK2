@@ -2,6 +2,7 @@
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
 import { useLimitStore } from "@/stores/limitStore"
+import { useAuthStore } from "@/stores/loginStore"
 import {
   getItemById,
   editItem,
@@ -21,6 +22,7 @@ import { useRoute } from "vue-router"
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
 const myLimit = useLimitStore()
+const myUser = useAuthStore()
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -91,6 +93,11 @@ const openModalEdit = async (id, boolean) => {
     openModal.value = true
     editMode.value = false
   }
+
+  if (taskDetail.status === 401) {
+    router.push({ name: "login" })
+    myUser.logout()
+  }
 }
 
 // Add Modal
@@ -143,6 +150,11 @@ const closeAddEdit = async (task) => {
       myTask.removeTasks(task.id)
       showAlert("An error has occurred, the task does not exist.", "error")
     }
+
+    if (statusCode === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
   }
 
   if (task.id === undefined) {
@@ -162,10 +174,16 @@ const closeAddEdit = async (task) => {
     if (statusCode === 400) {
       showAlert("An error has occurred, the task does not exist.", "error")
     }
+
+    if (statusCode === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
   }
 
   openModal.value = false
-  router.push({ name: "task" })
+  // router.push({ name: "task" })
+  router.go(-1)
   editMode.value = false
 }
 
@@ -184,6 +202,11 @@ const closeDeleteModal = async (id) => {
   if (deleteItem === 400) {
     myTask.removeTasks(id)
     showAlert("An error has occurred, the task does not exist.", "error")
+  }
+
+  if (deleteItem === 401) {
+    router.push({ name: "login" })
+    myUser.logout()
   }
   showDeleteModal.value = false
 }

@@ -17,7 +17,10 @@ async function getItems(url) {
     })
     const items = await data.json()
     return items
-  } catch (error) {}
+  } catch (error) {
+    if (data.status === 401) return 401
+
+  }
 }
 
 async function getStatusLimits(url) {
