@@ -37,6 +37,11 @@ onMounted(async () => {
     const listStatus = await getItems(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
     )
+    //401
+    if (listStatus.error === "Unauthorized") {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
     myStatus.addStatus(listStatus)
   }
 })

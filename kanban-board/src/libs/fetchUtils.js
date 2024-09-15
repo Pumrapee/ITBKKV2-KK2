@@ -15,11 +15,15 @@ async function getItems(url) {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    if (data.status === 401) {
+      throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
+    }
+
     const items = await data.json()
     return items
   } catch (error) {
-    if (data.status === 401) return 401
-
+    return { error: error.message }
   }
 }
 
@@ -131,7 +135,6 @@ async function editItem(url, id, editItem) {
       body: JSON.stringify(editItem),
     })
     const statusCode = res.status
-
     const editedItem = await res.json()
     return { editedItem, statusCode }
   } catch (error) {}
@@ -150,7 +153,8 @@ async function editLimitStatus(url, boolean, maxLimit) {
       }
     )
     const editedLimit = await res.json()
-    return editedLimit
+    const status = res.status
+    return { editedLimit, status }
   } catch (error) {}
 }
 

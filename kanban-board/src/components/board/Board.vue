@@ -4,9 +4,11 @@ import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import { addItem, getItems } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
+import { useAuthStore } from "@/stores/loginStore"
 
 const openModal = ref()
 const myBoard = useBoardStore()
+const myUser = useAuthStore()
 
 const openModalAdd = () => {
   openModal.value = true
@@ -14,7 +16,13 @@ const openModalAdd = () => {
 
 onMounted(async () => {
   const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
+  if (listBoard.error === "Unauthorized") {
+    router.push({ name: "login" })
+    myUser.logout()
+  }
+
   myBoard.addBoards(listBoard)
+
   if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
     router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
   } else if (myBoard.navBoard) {

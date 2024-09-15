@@ -3,7 +3,9 @@ import { ref, defineProps, defineEmits, computed, watch } from "vue"
 import { useTaskStore } from "@/stores/taskStore"
 import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
+import { useAuthStore } from "@/stores/loginStore"
 import { useRoute } from "vue-router"
+import router from "@/router"
 
 const props = defineProps({
   showLimitModal: Boolean,
@@ -24,6 +26,7 @@ watch(
 )
 
 const myLimit = useLimitStore()
+const myUser = useAuthStore()
 const isLimitEnabled = ref(myLimit.getLimit().taskLimitEnabled)
 const maxTasks = ref(myLimit.getLimit().maxTasksPerStatus || 10)
 const myTask = useTaskStore()
@@ -43,11 +46,17 @@ const closelimitModal = async (maxlimit) => {
       }, {})
     ).map(([name, count]) => ({ name, count }))
 
-    const editedLimit = await editLimitStatus(
+    const { editedLimit, status } = await editLimitStatus(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       isLimitEnabled.value,
       maxlimit
     )
+
+    if (status === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
+
     //เอาค่า fetch update ใน store
     myLimit.addLimit(editedLimit)
 
@@ -64,11 +73,15 @@ const closelimitModal = async (maxlimit) => {
   }
 
   if (isLimitEnabled.value === false) {
-    const editedLimit = await editLimitStatus(
+    const { editedLimit, status } = await editLimitStatus(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
       isLimitEnabled.value,
       maxlimit
     )
+    if (status === 401) {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
 
     //เอาค่า fetch เก็บใน store
     myLimit.addLimit(editedLimit)

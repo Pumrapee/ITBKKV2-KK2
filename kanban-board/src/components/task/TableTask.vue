@@ -40,6 +40,11 @@ onMounted(async () => {
     const listTasks = await getItems(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
     )
+    //401
+    if (listTasks.error === "Unauthorized") {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
     myTask.addTasks(listTasks)
   }
   //Status
@@ -47,6 +52,11 @@ onMounted(async () => {
     const listStatus = await getItems(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
     )
+    //401
+    if (listStatus.error === "Unauthorized") {
+      router.push({ name: "login" })
+      myUser.logout()
+    }
     myStatus.addStatus(listStatus)
   }
   console.log(myStatus.getStatus())
@@ -54,6 +64,11 @@ onMounted(async () => {
   const limitStatus = await getStatusLimits(
     `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
   )
+  //401
+  if (limitStatus.error === "Unauthorized") {
+    router.push({ name: "login" })
+    myUser.logout()
+  }
   myLimit.addLimit(limitStatus)
 })
 
