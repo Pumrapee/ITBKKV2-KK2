@@ -3,7 +3,7 @@ USE kanbandb;
 
 CREATE TABLE `boards` (
   `boardId` varchar(10) NOT NULL,
-  `boardName` varchar(100) NOT NULL,
+  `boardName` varchar(120) NOT NULL,
   `owneroid` varchar(36) NOT NULL,
   `taskLimitEnabled` boolean NOT NULL,
   `maxTasksPerStatus` int NOT NULL,

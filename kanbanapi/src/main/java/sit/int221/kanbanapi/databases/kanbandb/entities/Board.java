@@ -18,11 +18,11 @@ public class Board {
     @Column(name = "boardId", length = 10)
     private String boardId;
 
-    @Column(name = "boardName", nullable = false, length = 100)
+    @Column(name = "boardName", nullable = false, length = 120)
     private String boardName;
 
     @JsonIgnore
-    @Column(name = "owneroid", nullable = false, length = 100)
+    @Column(name = "owneroid", nullable = false, length = 36)
     private String ownerId;
 
     @Column(name = "taskLimitEnabled", nullable = false)
