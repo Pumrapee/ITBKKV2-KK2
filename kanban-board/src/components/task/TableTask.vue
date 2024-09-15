@@ -347,7 +347,7 @@ watch(
 <template>
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-16 mb-20 ml-60">
-    <div class="font-bold text-4xl text-black self-start pl-64">
+    <div class="font-bold text-4xl text-black self-start pl-64 w-4/6">
       {{ boardName }}
     </div>
     <!-- Filter Search-->

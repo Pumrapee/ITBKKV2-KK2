@@ -39,7 +39,8 @@ const closeModals = () => {
 
 //Disable ปุ่ม
 const deleteButton = computed(() => {
-  if (myLimit.getLimit().taskLimitEnabled) {
+  setTimeout(() => {
+    if (myLimit.getLimit().taskLimitEnabled) {
     const selected = filteredStatus.value.find(status => status.id === selectedStatus.value)
     const statusCount = myTask.matchStatus(selected?.name)?.length
     const statusLimit = myLimit.getLimit().maxTasksPerStatus
@@ -52,6 +53,8 @@ const deleteButton = computed(() => {
       return false
     }
   }
+}, 2000)
+
   
   errorAlert.value.status = ""
   return false

@@ -39,8 +39,6 @@ const closeAdd = async (nameBoard) => {
     nameBoard
   )
 
-  console.log(newTask)
-
   if (statusCode === 201) {
     myBoard.addBoard(newTask)
     router.push({ name: "task", params: { id: newTask.id } })
@@ -50,6 +48,7 @@ const closeAdd = async (nameBoard) => {
   }
 
   if (statusCode === 401) {
+    alert("There is a problem. Please try again later.")
     router.push({ name: "login" })
     myUser.logout()
   }

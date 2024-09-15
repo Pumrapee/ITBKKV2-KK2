@@ -14,6 +14,7 @@ const saveAdd = () => {
 }
 
 const closeModals = () => {
+  boardName.value.name = `${userName} personal board`
   emits("closeModal")
 }
 
