@@ -15,6 +15,7 @@ import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
 import DeleteTask from "./DeleteTask.vue"
 import LimitTask from "./LimitTask.vue"
+import ExpireToken from "../toast/ExpireToken.vue"
 import router from "@/router"
 import AlertComponent from "../toast/Alert.vue"
 import { useRoute } from "vue-router"
@@ -32,19 +33,22 @@ const listDelete = ref()
 const editDrop = ref(false)
 const boardId = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
+const expiredToken = ref(false)
 const boardName = ref(localStorage.getItem("BoardName"))
 const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
+  if (expiredToken.value) {
+    expiredToken.value = false
+  }
   //Task
   if (myTask.getTasks().length === 0) {
     const listTasks = await getItems(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
     )
     //401
-    if (listTasks.error === "Unauthorized") {
-      router.push({ name: "login" })
-      myUser.logout()
+    if (listTasks === 401) {
+      expiredToken.value = true
     }
     myTask.addTasks(listTasks)
   }
@@ -54,9 +58,8 @@ onMounted(async () => {
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
     )
     //401
-    if (listStatus.error === "Unauthorized") {
-      router.push({ name: "login" })
-      myUser.logout()
+    if (listStatus === 401) {
+      expiredToken.value = true
     }
     myStatus.addStatus(listStatus)
   }
@@ -66,9 +69,8 @@ onMounted(async () => {
     `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
   )
   //401
-  if (limitStatus.error === "Unauthorized") {
-    router.push({ name: "login" })
-    myUser.logout()
+  if (limitStatus === 401) {
+    expiredToken.value = true
   }
   myLimit.addLimit(limitStatus)
 })
@@ -101,6 +103,9 @@ const openModalEdit = async (id, boolean) => {
   )
   tasks.value = taskDetail
 
+  console.log(taskDetail)
+  console.log(taskDetail.status)
+
   if (taskDetail.status === 404) {
     router.push({ name: "TaskNotFound" })
     myTask.removeTasks(id)
@@ -110,9 +115,9 @@ const openModalEdit = async (id, boolean) => {
     editMode.value = false
   }
 
-  if (taskDetail.status === 401) {
-    router.push({ name: "login" })
-    myUser.logout()
+  if (taskDetail === 401) {
+    openModal.value = false
+    expiredToken.value = true
   }
 }
 
@@ -156,6 +161,7 @@ const closeAddEdit = async (task) => {
         status: task.status,
       }
     )
+    console.log(statusCode)
 
     if (statusCode === 200) {
       myTask.updateTask(editedItem)
@@ -168,8 +174,7 @@ const closeAddEdit = async (task) => {
     }
 
     if (statusCode === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
   }
 
@@ -192,8 +197,7 @@ const closeAddEdit = async (task) => {
     }
 
     if (statusCode === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
   }
 
@@ -221,8 +225,7 @@ const closeDeleteModal = async (id) => {
   }
 
   if (deleteItem === 401) {
-    router.push({ name: "login" })
-    myUser.logout()
+    expiredToken.value = true
   }
   showDeleteModal.value = false
 }
@@ -640,6 +643,8 @@ watch(
     :type="modalAlert.type"
     :showAlert="modalAlert.modal"
   />
+
+  <ExpireToken :showExpiredModal="expiredToken" />
 </template>
 
 <style scoped>

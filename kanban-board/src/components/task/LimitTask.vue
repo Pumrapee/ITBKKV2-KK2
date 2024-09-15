@@ -6,25 +6,14 @@ import { useLimitStore } from "../../stores/limitStore"
 import { useAuthStore } from "@/stores/loginStore"
 import { useRoute } from "vue-router"
 import router from "@/router"
+import ExpireToken from "../toast/ExpireToken.vue"
 
 const props = defineProps({
   showLimitModal: Boolean,
 })
 const route = useRoute()
 const boardId = ref()
-
-//ถ้าเปิด modal มาให้เซ็ตค่าตรงกับใน storeLimit
-watch(
-  () => props.showLimitModal,
-  (newVal) => {
-    // newVal เป็น เป็นค่าปัจจุบันของ props.showLimitModal
-    if (newVal) {
-      isLimitEnabled.value = myLimit.getLimit().taskLimitEnabled
-      maxTasks.value = myLimit.getLimit().maxTasksPerStatus || 10
-    }
-  }
-)
-
+const expiredToken = ref(false)
 const myLimit = useLimitStore()
 const myUser = useAuthStore()
 const isLimitEnabled = ref(myLimit.getLimit().taskLimitEnabled)
@@ -53,8 +42,7 @@ const closelimitModal = async (maxlimit) => {
     )
 
     if (status === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
 
     //เอาค่า fetch update ใน store
@@ -79,8 +67,7 @@ const closelimitModal = async (maxlimit) => {
       maxlimit
     )
     if (status === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
 
     //เอาค่า fetch เก็บใน store
@@ -115,6 +102,18 @@ watch(
     boardId.value = newId
   },
   { immediate: true }
+)
+
+//ถ้าเปิด modal มาให้เซ็ตค่าตรงกับใน storeLimit
+watch(
+  () => props.showLimitModal,
+  (newVal) => {
+    // newVal เป็น เป็นค่าปัจจุบันของ props.showLimitModal
+    if (newVal) {
+      isLimitEnabled.value = myLimit.getLimit().taskLimitEnabled
+      maxTasks.value = myLimit.getLimit().maxTasksPerStatus || 10
+    }
+  }
 )
 </script>
 
@@ -220,6 +219,8 @@ watch(
       </div>
     </div>
   </div>
+
+  <ExpireToken :showExpiredModal="expiredToken" />
 </template>
 
 <style scoped>

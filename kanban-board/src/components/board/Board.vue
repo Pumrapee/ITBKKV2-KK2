@@ -4,11 +4,11 @@ import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import { addItem, getItems } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
-import { useAuthStore } from "@/stores/loginStore"
+import ExpireToken from "../toast/ExpireToken.vue"
 
 const openModal = ref()
 const myBoard = useBoardStore()
-const myUser = useAuthStore()
+const expiredToken = ref(false)
 
 const openModalAdd = () => {
   openModal.value = true
@@ -16,9 +16,9 @@ const openModalAdd = () => {
 
 onMounted(async () => {
   const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  if (listBoard.error === "Unauthorized") {
-    router.push({ name: "login" })
-    myUser.logout()
+  //401
+  if (listBoard === 401) {
+    expiredToken.value = true
   }
 
   myBoard.addBoards(listBoard)
@@ -43,14 +43,11 @@ const closeAdd = async (nameBoard) => {
     myBoard.addBoard(newTask)
     router.push({ name: "task", params: { id: newTask.id } })
     localStorage.setItem("BoardName", newTask.name)
-    console.log(myBoard.getBoards())
-    // showAlert("The task has been successfully added", "success")
   }
 
   if (statusCode === 401) {
     alert("There is a problem. Please try again later.")
-    router.push({ name: "login" })
-    myUser.logout()
+    expiredToken.value = true
   }
 
   openModal.value = false
@@ -129,6 +126,8 @@ const saveBoardName = (name) => {
     @closeModal="closeModal"
     @saveAdd="closeAdd"
   />
+
+  <ExpireToken :showExpiredModal="expiredToken" />
 </template>
 
 <style scoped>

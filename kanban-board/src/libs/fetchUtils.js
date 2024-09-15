@@ -7,8 +7,9 @@ function getToken() {
 
 async function getItems(url) {
   console.log(token)
+  let data
   try {
-    const data = await fetch(url, {
+    data = await fetch(url, {
       //GET Method
       method: "GET",
       headers: {
@@ -23,13 +24,15 @@ async function getItems(url) {
     const items = await data.json()
     return items
   } catch (error) {
-    return { error: error.message }
+    if (data.status === 404) return 404
+    if (data.status === 401) return 401
   }
 }
 
 async function getStatusLimits(url) {
+  let data
   try {
-    const data = await fetch(`${url}/maximum-task`, {
+    data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
       headers: {
@@ -38,7 +41,10 @@ async function getStatusLimits(url) {
     })
     const items = await data.json()
     return items
-  } catch (error) {}
+  } catch (error) {
+    if (data.status === 404) return 404
+    if (data.status === 401) return 401
+  }
 }
 
 async function getItemById(url, id) {
@@ -51,10 +57,18 @@ async function getItemById(url, id) {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    if (data.status === 401) {
+      throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
+    }
+
     const item = await data.json()
     return item
   } catch (error) {
+    // return { error: error.message }
+
     if (data.status === 404) return 404
+    if (data.status === 401) return 401
   }
 }
 
@@ -83,6 +97,8 @@ async function deleteItemById(url, id) {
         Authorization: `Bearer ${token}`,
       },
     })
+    console.log(res)
+    console.log(status)
     return res.status
   } catch (error) {}
 }
@@ -96,6 +112,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
         Authorization: `Bearer ${token}`,
       },
     })
+    console.log(res.status)
     return res.status
   } catch (error) {}
 }
@@ -116,9 +133,11 @@ async function addItem(url, newItem) {
     })
     // Get the HTTP status code
     const statusCode = res.status
+    console.log(res.status)
+    console.log(res)
 
     const newTask = await res.json()
-    console.log(newTask)
+
     // Return both the added item and the status code
     return { newTask, statusCode }
   } catch (error) {}
@@ -135,6 +154,7 @@ async function editItem(url, id, editItem) {
       body: JSON.stringify(editItem),
     })
     const statusCode = res.status
+    console.log(statusCode)
     const editedItem = await res.json()
     return { editedItem, statusCode }
   } catch (error) {}
@@ -154,6 +174,8 @@ async function editLimitStatus(url, boolean, maxLimit) {
     )
     const editedLimit = await res.json()
     const status = res.status
+    console.log(res)
+    console.log(status)
     return { editedLimit, status }
   } catch (error) {}
 }

@@ -15,6 +15,7 @@ import { ref, onMounted, watch } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import DeleteStatus from "@/components/status/DeleteStatus.vue"
 import AlertComponent from "@/components/toast/Alert.vue"
+import ExpireToken from "../toast/ExpireToken.vue"
 import router from "@/router"
 import { useRoute } from "vue-router"
 
@@ -29,7 +30,7 @@ const showTransferModal = ref(false)
 const showDeleteModal = ref(false)
 const boardId = ref()
 const route = useRoute()
-
+const expiredToken = ref(false)
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 onMounted(async () => {
@@ -38,9 +39,8 @@ onMounted(async () => {
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
     )
     //401
-    if (listStatus.error === "Unauthorized") {
-      router.push({ name: "login" })
-      myUser.logout()
+    if (listStatus === 401) {
+      expiredToken.value = true
     }
     myStatus.addStatus(listStatus)
   }
@@ -74,9 +74,9 @@ const openEditStatus = async (idStatus) => {
     editMode.value = true
   }
 
-  if (statusItem.status === 401) {
-    router.push({ name: "login" })
-    myUser.logout()
+  if (statusItem === 401) {
+    expiredToken.value = true
+    openModal.value = false
   }
 }
 
@@ -110,8 +110,7 @@ const openDeleteModal = async (id, name) => {
     showDeleteModal.value = true
   }
   if (showStatus === 401) {
-    router.push({ name: "login" })
-    myUser.logout()
+    expiredToken.value = true
   }
 
   statusDetail.value = {
@@ -149,8 +148,7 @@ const closeAddEdit = async (status) => {
     }
 
     if (statusCode === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
   }
 
@@ -169,8 +167,7 @@ const closeAddEdit = async (status) => {
     }
 
     if (statusCode === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
   }
   openModal.value = false
@@ -196,8 +193,7 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
     }
 
     if (deleteItem === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
   }
 
@@ -233,8 +229,7 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
     }
 
     if (newStatus === 401) {
-      router.push({ name: "login" })
-      myUser.logout()
+      expiredToken.value = true
     }
   }
 
@@ -385,6 +380,8 @@ watch(
     :type="modalAlert.type"
     :showAlert="modalAlert.modal"
   />
+
+  <ExpireToken :showExpiredModal="expiredToken" />
 </template>
 
 <style scoped>
