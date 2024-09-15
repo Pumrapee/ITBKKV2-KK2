@@ -32,6 +32,7 @@ const listDelete = ref()
 const editDrop = ref(false)
 const boardId = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
+const boardName = ref(localStorage.getItem("BoardName"))
 const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
@@ -346,7 +347,9 @@ watch(
 <template>
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-16 mb-20 ml-60">
-    <div class="font-bold text-4xl text-black self-start pl-64">My Task</div>
+    <div class="font-bold text-4xl text-black self-start pl-64">
+      {{ boardName }}
+    </div>
     <!-- Filter Search-->
     <div class="flex justify-between w-3/5">
       <div class="flex justify-start items-center mt-4">

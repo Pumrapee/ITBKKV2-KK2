@@ -25,6 +25,7 @@ onMounted(async () => {
 
   if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
     router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
+    localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
   } else if (myBoard.navBoard) {
     router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
     myBoard.navBoard = false
@@ -43,6 +44,7 @@ const closeAdd = async (nameBoard) => {
   if (statusCode === 201) {
     myBoard.addBoard(newTask)
     router.push({ name: "task", params: { id: newTask.id } })
+    localStorage.setItem("BoardName", newTask.name)
     console.log(myBoard.getBoards())
     // showAlert("The task has been successfully added", "success")
   }
@@ -59,6 +61,10 @@ const closeAdd = async (nameBoard) => {
 const closeModal = () => {
   openModal.value = false
   router.go(-1)
+}
+
+const saveBoardName = (name) => {
+  localStorage.setItem("BoardName", name)
 }
 </script>
 
@@ -95,7 +101,12 @@ const closeModal = () => {
 
             <th>
               <router-link :to="{ name: 'task', params: { id: board.id } }">
-                <button class="btn btn-ghost h-2">{{ board.name }}</button>
+                <button
+                  class="btn btn-ghost h-2"
+                  @click="saveBoardName(board.name)"
+                >
+                  {{ board.name }}
+                </button>
               </router-link>
             </th>
 
