@@ -2,6 +2,7 @@ package sit.int221.kanbanapi.jwts;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +24,10 @@ import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ErrorResponse;
 import sit.int221.kanbanapi.services.JwtTokenUtil;
 import sit.int221.kanbanapi.services.JwtUserDetailsService;
+import io.jsonwebtoken.security.SignatureException;
 
 import java.io.IOException;
+
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -52,6 +55,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         throw new AuthenticationFailed("Unable to get JWT Token");
                     } catch (ExpiredJwtException e) {
                         throw new AuthenticationFailed("JWT Token has expired");
+                    } catch (SignatureException e) {
+                        throw new AuthenticationFailed("JWT signature does not match");
+                    } catch (MalformedJwtException e) {
+                        throw new AuthenticationFailed("Malformed JWT Token");
                     }
                 } else {
                     throw new AuthenticationFailed("JWT Token does not begin with Bearer String");

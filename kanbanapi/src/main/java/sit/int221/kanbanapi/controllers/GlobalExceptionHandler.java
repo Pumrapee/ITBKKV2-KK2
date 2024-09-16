@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.controllers;
 
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -95,7 +96,7 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, "Username or Password is incorrect.", HttpStatus.UNAUTHORIZED, request);
     }
 
-    @ExceptionHandler({AuthenticationFailed.class})
+    @ExceptionHandler({AuthenticationFailed.class, SignatureException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorResponse> handleTokenException
             (Exception exception, WebRequest request) {
