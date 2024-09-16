@@ -3,7 +3,6 @@ import { defineProps, ref, watch, computed, defineEmits } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
-import router from "@/router"
 
 const props = defineProps({
   showModal: Boolean,
@@ -43,7 +42,7 @@ const addEditSave = (editTask) => {
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
   setTimeout(() => {
     editMode.value = false
-  }, 2000)
+  }, 1000)
   emits("saveAddEdit", editedTask)
 }
 
@@ -292,7 +291,8 @@ watch(props, () => {
                 </option>
               </select>
             </div>
-            <p class="text-red-400">
+
+            <p v-if="editMode" class="text-red-400">
               {{ errorTask.status }}
             </p>
 

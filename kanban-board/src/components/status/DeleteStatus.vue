@@ -39,7 +39,7 @@ const closeModals = () => {
 
 //Disable ปุ่ม
 const deleteButton = computed(() => {
-  if (myLimit.getLimit().taskLimitEnabled) {
+    if (myLimit.getLimit().taskLimitEnabled) {
     const selected = filteredStatus.value.find(status => status.id === selectedStatus.value)
     const statusCount = myTask.matchStatus(selected?.name)?.length
     const statusLimit = myLimit.getLimit().maxTasksPerStatus
@@ -52,6 +52,7 @@ const deleteButton = computed(() => {
       return false
     }
   }
+
   
   errorAlert.value.status = ""
   return false
@@ -97,7 +98,6 @@ const deleteButton = computed(() => {
             [<span class="text-blue-400" v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }} ,  </span> ]
           </p>
         </div>
-
         <div class="mt-4">
           <label for="transferTo" class="block text-sm font-medium text-gray-700">Transfer to:</label>
           <select v-model="selectedStatus" id="transferTo" name="transferTo" class="itbkk-status mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">

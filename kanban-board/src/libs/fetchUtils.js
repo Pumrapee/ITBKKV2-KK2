@@ -5,24 +5,59 @@ function getToken() {
   token = localStorage.getItem("token")
 }
 
+//เช็คว่า Token หมดอายุ
+function isTokenExpired(token) {
+  if (!token) return true
+
+  const tokenParts = token.split(".")
+  if (tokenParts.length !== 3) return true
+
+  const base64Url = tokenParts[1]
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+      })
+      .join("")
+  )
+
+  const { exp } = JSON.parse(jsonPayload)
+
+  // ตรวจสอบว่าเวลาปัจจุบันเกินเวลาหมดอายุของ token หรือไม่
+  const currentTime = Math.floor(Date.now() / 1000)
+  return currentTime > exp
+}
+
 async function getItems(url) {
-  console.log(token)
+  getToken()
+  let data
   try {
-    const data = await fetch(url, {
+    data = await fetch(url, {
       //GET Method
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    if (data.status === 401) {
+      throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
+    }
+
     const items = await data.json()
     return items
-  } catch (error) {}
+  } catch (error) {
+    if (data.status === 404) return 404
+    if (data.status === 401) return 401
+  }
 }
 
 async function getStatusLimits(url) {
+  let data
   try {
-    const data = await fetch(`${url}/maximum-task`, {
+    data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
       headers: {
@@ -31,7 +66,10 @@ async function getStatusLimits(url) {
     })
     const items = await data.json()
     return items
-  } catch (error) {}
+  } catch (error) {
+    if (data.status === 404) return 404
+    if (data.status === 401) return 401
+  }
 }
 
 async function getItemById(url, id) {
@@ -44,10 +82,18 @@ async function getItemById(url, id) {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    if (data.status === 401) {
+      throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
+    }
+
     const item = await data.json()
     return item
   } catch (error) {
+    // return { error: error.message }
+
     if (data.status === 404) return 404
+    if (data.status === 401) return 401
   }
 }
 
@@ -69,6 +115,7 @@ async function findStatus(url, id) {
 
 async function deleteItemById(url, id) {
   //DELETE Method
+  getToken()
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
@@ -82,6 +129,7 @@ async function deleteItemById(url, id) {
 
 async function deleteItemByIdToNewId(url, oldId, newId) {
   //DELETE Method
+  getToken()
   try {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
@@ -94,7 +142,6 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
 }
 
 async function addItem(url, newItem) {
-  console.log(newItem)
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -109,15 +156,15 @@ async function addItem(url, newItem) {
     })
     // Get the HTTP status code
     const statusCode = res.status
-
     const newTask = await res.json()
-    console.log(newTask)
+
     // Return both the added item and the status code
     return { newTask, statusCode }
   } catch (error) {}
 }
 
 async function editItem(url, id, editItem) {
+  getToken()
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "PUT",
@@ -128,13 +175,13 @@ async function editItem(url, id, editItem) {
       body: JSON.stringify(editItem),
     })
     const statusCode = res.status
-
     const editedItem = await res.json()
     return { editedItem, statusCode }
   } catch (error) {}
 }
 
 async function editLimitStatus(url, boolean, maxLimit) {
+  getToken()
   try {
     const res = await fetch(
       `${url}/maximum-task?taskLimitEnabled=${boolean}&maxTasksPerStatus=${maxLimit}`,
@@ -147,7 +194,8 @@ async function editLimitStatus(url, boolean, maxLimit) {
       }
     )
     const editedLimit = await res.json()
-    return editedLimit
+    const status = res.status
+    return { editedLimit, status }
   } catch (error) {}
 }
 
@@ -188,4 +236,5 @@ export {
   editLimitStatus,
   login,
   getToken,
+  isTokenExpired,
 }

@@ -82,9 +82,9 @@ public class BoardService {
 
     private void createDefaultStatuses(Board board) {
         Status noStatus = new Status("No Status", "Default status", "#ffffff", board);
-        Status toDo = new Status("To Do", "Initial task status", "#ff0000", board);
-        Status doing = new Status("Doing", "Task is in progress", "#00ff00", board);
-        Status done = new Status("Done", "Task is completed", "#0000ff", board);
+        Status toDo = new Status("To Do", "Initial task status", "#478CCF", board);
+        Status doing = new Status("Doing", "Task is in progress", "#FEB941", board);
+        Status done = new Status("Done", "Task is completed", "#77E4C8", board);
         statusRepository.saveAll(Arrays.asList(noStatus, toDo, doing, done));
     }
 }

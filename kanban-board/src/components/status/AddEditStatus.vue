@@ -49,13 +49,13 @@ const changeStatus = computed(() => {
   )
 
   // จัดการข้อความข้อผิดพลาด
-  errorStatus.value.name = isNameTooLong
-    ? "Name exceeds the limit of 50 characters."
-    : isNameEmpty
-    ? "Name is required."
-    : isNameUnique
-    ? "Status name must be unique, please choose another name."
-    : ""
+    errorStatus.value.name = isNameTooLong
+      ? "Name exceeds the limit of 50 characters."
+      : isNameEmpty
+      ? "Name is required."
+      : isNameUnique
+      ? "Status name must be unique, please choose another name."
+      : ""
 
   errorStatus.value.description = isDescriptionTooLong
     ? "Description exceeds the limit of 200 characters."

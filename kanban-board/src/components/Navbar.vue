@@ -3,7 +3,6 @@ import { useAuthStore } from "@/stores/loginStore"
 import { useBoardStore } from "@/stores/boardStore"
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
-import router from "@/router"
 
 const authStore = useAuthStore()
 const myBoard = useBoardStore()
@@ -13,11 +12,12 @@ const userName = localStorage.getItem("user")
 
 const logout = () => {
   authStore.logout()
-  myBoard.clearBoard()
-  myStatus.clearStatus()
-  myTask.clearTask()
-  myBoard.navBoard = false
-  router.push({ name: "login" })
+  // myBoard.clearBoard()
+  // myStatus.clearStatus()
+  // myTask.clearTask()
+  // myBoard.navBoard = false
+  // router.push({ name: "login" })
+
 }
 
 const boardAll = () => {
