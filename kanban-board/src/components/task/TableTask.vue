@@ -231,14 +231,14 @@ const closeDeleteModal = async (id) => {
 }
 
 // Limit model
-const closeLimitModal = (maxLimit, limitBoolean) => {
-  if (limitBoolean === false) {
+const closeLimitModal = (maxLimit, limitBoolean, expiredToken) => {
+  if (limitBoolean === false && expiredToken === false) {
     showAlert(
       `The Kanban board has disabled the task limit in each status.`,
       "success"
     )
   }
-  if (limitBoolean === true) {
+  if (limitBoolean === true && expiredToken === false) {
     showAlert(
       `The Kanban board now limits ${maxLimit} tasks in each status.`,
       "success"
@@ -351,7 +351,7 @@ watch(
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-16 mb-20 ml-60">
     <div class="font-bold text-4xl text-black self-start pl-64 w-4/6">
-      {{ boardName }}
+      {{ boardName }} 
     </div>
     <!-- Filter Search-->
     <div class="flex justify-between w-3/5">

@@ -43,7 +43,7 @@ const addEditSave = (editTask) => {
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
   setTimeout(() => {
     editMode.value = false
-  }, 2000)
+  }, 1000)
   emits("saveAddEdit", editedTask)
 }
 

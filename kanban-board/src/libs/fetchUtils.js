@@ -6,6 +6,7 @@ function getToken() {
 }
 
 async function getItems(url) {
+  getToken()
   console.log(token)
   let data
   try {
@@ -90,6 +91,8 @@ async function findStatus(url, id) {
 
 async function deleteItemById(url, id) {
   //DELETE Method
+  console.log(token)
+  getToken()
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
@@ -98,13 +101,13 @@ async function deleteItemById(url, id) {
       },
     })
     console.log(res)
-    console.log(status)
     return res.status
   } catch (error) {}
 }
 
 async function deleteItemByIdToNewId(url, oldId, newId) {
   //DELETE Method
+  getToken()
   try {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
@@ -144,6 +147,7 @@ async function addItem(url, newItem) {
 }
 
 async function editItem(url, id, editItem) {
+  getToken()
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "PUT",
@@ -161,6 +165,7 @@ async function editItem(url, id, editItem) {
 }
 
 async function editLimitStatus(url, boolean, maxLimit) {
+  getToken()
   try {
     const res = await fetch(
       `${url}/maximum-task?taskLimitEnabled=${boolean}&maxTasksPerStatus=${maxLimit}`,

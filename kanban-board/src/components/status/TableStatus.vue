@@ -92,9 +92,11 @@ const openModalAdd = () => {
 
 const openDeleteModal = async (id, name) => {
   const showStatus = await findStatus(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks/status`,
     id
   )
+
+  console.log(showStatus)
 
   const countTask = myTask.getTasks().filter((listTask) => {
     const statusName = myStatus.getStatus().find((listStatus) => {

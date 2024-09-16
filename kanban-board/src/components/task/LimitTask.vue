@@ -57,7 +57,7 @@ const closelimitModal = async (maxlimit) => {
       emits("closeLimitModal")
       showWarning.value = true
     }
-    emits("closeLimitModal", maxlimit, isLimitEnabled.value)
+    emits("closeLimitModal", maxlimit, isLimitEnabled.value, expiredToken.value)
   }
 
   if (isLimitEnabled.value === false) {
@@ -72,7 +72,7 @@ const closelimitModal = async (maxlimit) => {
 
     //เอาค่า fetch เก็บใน store
     myLimit.addLimit(editedLimit)
-    emits("closeLimitModal", maxlimit, isLimitEnabled.value)
+    emits("closeLimitModal", maxlimit, isLimitEnabled.value, expiredToken.value)
   }
 }
 
