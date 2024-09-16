@@ -5,7 +5,7 @@ import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
 import { useAuthStore } from "@/stores/loginStore"
 import { useRoute } from "vue-router"
-import router from "@/router"
+import { isTokenExpired } from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
 
 const props = defineProps({
@@ -25,54 +25,71 @@ const statusShow = ref()
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
 
 const closelimitModal = async (maxlimit) => {
-  if (isLimitEnabled.value === true) {
-    const statusNotStatus = Object.entries(
-      myTask.getTasks().reduce((taskacc, task) => {
-        if (task.status !== "No Status" && task.status !== "Done") {
-          taskacc[task.status] = (taskacc[task.status] || 0) + 1
-        }
-        return taskacc
-      }, {})
-    ).map(([name, count]) => ({ name, count }))
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    console.log("check token")
+    expiredToken.value = true
+    emits("closeLimitModal")
+  } else {
+    if (isLimitEnabled.value === true) {
+      const statusNotStatus = Object.entries(
+        myTask.getTasks().reduce((taskacc, task) => {
+          if (task.status !== "No Status" && task.status !== "Done") {
+            taskacc[task.status] = (taskacc[task.status] || 0) + 1
+          }
+          return taskacc
+        }, {})
+      ).map(([name, count]) => ({ name, count }))
 
-    const { editedLimit, status } = await editLimitStatus(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-      isLimitEnabled.value,
-      maxlimit
-    )
+      const { editedLimit, status } = await editLimitStatus(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        isLimitEnabled.value,
+        maxlimit
+      )
 
-    if (status === 401) {
-      expiredToken.value = true
+      if (status === 401) {
+        expiredToken.value = true
+      }
+
+      //เอาค่า fetch update ใน store
+      myLimit.addLimit(editedLimit)
+
+      // โชว์จำนวน Task ที่เกินค่า limit
+      statusShow.value = statusNotStatus.filter(
+        (taskStatus) => taskStatus.count > maxTasks.value
+      )
+
+      if (statusShow.value.length > 0) {
+        emits("closeLimitModal")
+        showWarning.value = true
+      }
+      emits(
+        "closeLimitModal",
+        maxlimit,
+        isLimitEnabled.value,
+        expiredToken.value
+      )
     }
 
-    //เอาค่า fetch update ใน store
-    myLimit.addLimit(editedLimit)
+    if (isLimitEnabled.value === false) {
+      const { editedLimit, status } = await editLimitStatus(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        isLimitEnabled.value,
+        maxlimit
+      )
+      if (status === 401) {
+        expiredToken.value = true
+      }
 
-    // โชว์จำนวน Task ที่เกินค่า limit
-    statusShow.value = statusNotStatus.filter(
-      (taskStatus) => taskStatus.count > maxTasks.value
-    )
-
-    if (statusShow.value.length > 0) {
-      emits("closeLimitModal")
-      showWarning.value = true
+      //เอาค่า fetch เก็บใน store
+      myLimit.addLimit(editedLimit)
+      emits(
+        "closeLimitModal",
+        maxlimit,
+        isLimitEnabled.value,
+        expiredToken.value
+      )
     }
-    emits("closeLimitModal", maxlimit, isLimitEnabled.value, expiredToken.value)
-  }
-
-  if (isLimitEnabled.value === false) {
-    const { editedLimit, status } = await editLimitStatus(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-      isLimitEnabled.value,
-      maxlimit
-    )
-    if (status === 401) {
-      expiredToken.value = true
-    }
-
-    //เอาค่า fetch เก็บใน store
-    myLimit.addLimit(editedLimit)
-    emits("closeLimitModal", maxlimit, isLimitEnabled.value, expiredToken.value)
   }
 }
 

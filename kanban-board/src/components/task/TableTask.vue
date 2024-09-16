@@ -10,6 +10,7 @@ import {
   deleteItemById,
   getItems,
   getStatusLimits,
+  isTokenExpired,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -38,11 +39,16 @@ const boardName = ref(localStorage.getItem("BoardName"))
 const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
-  if (expiredToken.value) {
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    console.log("check token")
+    expiredToken.value = true
+  } else {
+    console.log("not check token")
     expiredToken.value = false
-  }
-  //Task
-  if (myTask.getTasks().length === 0) {
+
+    //Task
+    // if (myTask.getTasks().length === 0) {
     const listTasks = await getItems(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
     )
@@ -51,9 +57,9 @@ onMounted(async () => {
       expiredToken.value = true
     }
     myTask.addTasks(listTasks)
-  }
-  //Status
-  if (myStatus.getStatus().length === 0) {
+    // }
+    //Status
+    // if (myStatus.getStatus().length === 0) {
     const listStatus = await getItems(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
     )
@@ -62,17 +68,18 @@ onMounted(async () => {
       expiredToken.value = true
     }
     myStatus.addStatus(listStatus)
+    // }
+    console.log(myStatus.getStatus())
+    //Limit
+    const limitStatus = await getStatusLimits(
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+    )
+    //401
+    if (limitStatus === 401) {
+      expiredToken.value = true
+    }
+    myLimit.addLimit(limitStatus)
   }
-  console.log(myStatus.getStatus())
-  //Limit
-  const limitStatus = await getStatusLimits(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
-  )
-  //401
-  if (limitStatus === 401) {
-    expiredToken.value = true
-  }
-  myLimit.addLimit(limitStatus)
 })
 
 //Alert
@@ -90,34 +97,41 @@ const showAlert = (message, type) => {
 //Open Modal
 // Edit Modal
 const openModalEdit = async (id, boolean) => {
-  if (boolean) {
-    editMode.value = true
-    editDrop.value = true
-  } else {
-    editDrop.value = false
-  }
-
-  const taskDetail = await getItemById(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
-    id
-  )
-  tasks.value = taskDetail
-
-  console.log(taskDetail)
-  console.log(taskDetail.status)
-
-  if (taskDetail.status === 404) {
-    router.push({ name: "TaskNotFound" })
-    myTask.removeTasks(id)
-    router.go(-1)
-  } else {
-    openModal.value = true
-    editMode.value = false
-  }
-
-  if (taskDetail === 401) {
-    openModal.value = false
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
+    console.log("check token")
+  } else {
+    console.log("not check token")
+    if (boolean) {
+      editMode.value = true
+      editDrop.value = true
+    } else {
+      editDrop.value = false
+    }
+
+    const taskDetail = await getItemById(
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+      id
+    )
+    tasks.value = taskDetail
+
+    console.log(taskDetail)
+    console.log(taskDetail.status)
+
+    if (taskDetail.status === 404) {
+      router.push({ name: "TaskNotFound" })
+      myTask.removeTasks(id)
+      router.go(-1)
+    } else {
+      openModal.value = true
+      editMode.value = false
+    }
+
+    if (taskDetail === 401) {
+      openModal.value = false
+      expiredToken.value = true
+    }
   }
 }
 
@@ -150,54 +164,59 @@ const openDeleteModal = (id, title, index) => {
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task) => {
-  if (task.id !== undefined) {
-    const { editedItem, statusCode } = await editItem(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
-      task.id,
-      {
-        title: task.title,
-        description: task.description,
-        assignees: task.assignees,
-        status: task.status,
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    expiredToken.value = true
+  } else {
+    if (task.id !== undefined) {
+      const { editedItem, statusCode } = await editItem(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+        task.id,
+        {
+          title: task.title,
+          description: task.description,
+          assignees: task.assignees,
+          status: task.status,
+        }
+      )
+      console.log(statusCode)
+
+      if (statusCode === 200) {
+        myTask.updateTask(editedItem)
+        showAlert("The task has been updated", "success")
       }
-    )
-    console.log(statusCode)
 
-    if (statusCode === 200) {
-      myTask.updateTask(editedItem)
-      showAlert("The task has been updated", "success")
+      if (statusCode === 400 || statusCode === 404) {
+        myTask.removeTasks(task.id)
+        showAlert("An error has occurred, the task does not exist.", "error")
+      }
+
+      if (statusCode === 401) {
+        expiredToken.value = true
+      }
     }
 
-    if (statusCode === 400 || statusCode === 404) {
-      myTask.removeTasks(task.id)
-      showAlert("An error has occurred, the task does not exist.", "error")
-    }
+    if (task.id === undefined) {
+      console.log(boardId.value)
 
-    if (statusCode === 401) {
-      expiredToken.value = true
-    }
-  }
+      const { newTask, statusCode } = await addItem(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+        task
+      )
 
-  if (task.id === undefined) {
-    console.log(boardId.value)
+      if (statusCode === 201) {
+        myTask.addTask(newTask)
+        showAlert("The task has been successfully added", "success")
+      }
 
-    const { newTask, statusCode } = await addItem(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
-      task
-    )
+      //Alert status
+      if (statusCode === 400) {
+        showAlert("An error has occurred, the task does not exist.", "error")
+      }
 
-    if (statusCode === 201) {
-      myTask.addTask(newTask)
-      showAlert("The task has been successfully added", "success")
-    }
-
-    //Alert status
-    if (statusCode === 400) {
-      showAlert("An error has occurred, the task does not exist.", "error")
-    }
-
-    if (statusCode === 401) {
-      expiredToken.value = true
+      if (statusCode === 401) {
+        expiredToken.value = true
+      }
     }
   }
 
@@ -209,25 +228,30 @@ const closeAddEdit = async (task) => {
 
 // Delete Modal
 const closeDeleteModal = async (id) => {
-  const deleteItem = await deleteItemById(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
-    id
-  )
-
-  if (deleteItem === 200) {
-    myTask.removeTasks(id)
-    showAlert("The task has been deleted", "success")
-  }
-
-  if (deleteItem === 400) {
-    myTask.removeTasks(id)
-    showAlert("An error has occurred, the task does not exist.", "error")
-  }
-
-  if (deleteItem === 401) {
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
+  } else {
+    const deleteItem = await deleteItemById(
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+      id
+    )
+
+    if (deleteItem === 200) {
+      myTask.removeTasks(id)
+      showAlert("The task has been deleted", "success")
+    }
+
+    if (deleteItem === 400) {
+      myTask.removeTasks(id)
+      showAlert("An error has occurred, the task does not exist.", "error")
+    }
+
+    if (deleteItem === 401) {
+      expiredToken.value = true
+    }
+    showDeleteModal.value = false
   }
-  showDeleteModal.value = false
 }
 
 // Limit model
@@ -325,13 +349,18 @@ watch(
 watch(
   () => route.params.taskId,
   async (newId, oldId) => {
-    if (newId !== undefined) {
-      const res = await getItemById(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
-        newId
-      )
-      if (res.status === 404) {
-        router.push({ name: "TaskNotFound" })
+    myUser.setToken()
+    if (isTokenExpired(myUser.token)) {
+      expiredToken.value = true
+    } else {
+      if (newId !== undefined) {
+        const res = await getItemById(
+          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+          newId
+        )
+        if (res.status === 404) {
+          router.push({ name: "TaskNotFound" })
+        }
       }
     }
   },
@@ -351,7 +380,7 @@ watch(
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-16 mb-20 ml-60">
     <div class="font-bold text-4xl text-black self-start pl-64 w-4/6">
-      {{ boardName }} 
+      {{ boardName }}
     </div>
     <!-- Filter Search-->
     <div class="flex justify-between w-3/5">

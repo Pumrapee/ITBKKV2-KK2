@@ -5,6 +5,31 @@ function getToken() {
   token = localStorage.getItem("token")
 }
 
+//เช็คว่า Token หมดอายุ
+function isTokenExpired(token) {
+  if (!token) return true
+
+  const tokenParts = token.split(".")
+  if (tokenParts.length !== 3) return true
+
+  const base64Url = tokenParts[1]
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+      })
+      .join("")
+  )
+
+  const { exp } = JSON.parse(jsonPayload)
+
+  // ตรวจสอบว่าเวลาปัจจุบันเกินเวลาหมดอายุของ token หรือไม่
+  const currentTime = Math.floor(Date.now() / 1000)
+  return currentTime > exp
+}
+
 async function getItems(url) {
   getToken()
   console.log(token)
@@ -222,4 +247,5 @@ export {
   editLimitStatus,
   login,
   getToken,
+  isTokenExpired,
 }

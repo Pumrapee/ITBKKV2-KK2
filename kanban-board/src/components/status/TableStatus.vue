@@ -10,6 +10,7 @@ import {
   addItem,
   deleteItemById,
   deleteItemByIdToNewId,
+  isTokenExpired,
 } from "@/libs/fetchUtils"
 import { ref, onMounted, watch } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
@@ -34,15 +35,20 @@ const expiredToken = ref(false)
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 onMounted(async () => {
-  if (myStatus.getStatus().length === 0) {
-    const listStatus = await getItems(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
-    )
-    //401
-    if (listStatus === 401) {
-      expiredToken.value = true
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    expiredToken.value = true
+  } else {
+    if (myStatus.getStatus().length === 0) {
+      const listStatus = await getItems(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+      )
+      //401
+      if (listStatus === 401) {
+        expiredToken.value = true
+      }
+      myStatus.addStatus(listStatus)
     }
-    myStatus.addStatus(listStatus)
   }
 })
 
@@ -60,23 +66,28 @@ const showAlert = (message, type) => {
 
 //เปิด Modal
 const openEditStatus = async (idStatus) => {
-  const statusItem = await getItemById(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-    idStatus
-  )
-  if (statusItem.status === 404) {
-    showAlert("An error has occurred, the status does not exist.", "error")
-    myStatus.removeStatus(idStatus)
-    router.go(-1)
-  } else {
-    statusItems.value = statusItem
-    openModal.value = true
-    editMode.value = true
-  }
-
-  if (statusItem === 401) {
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
-    openModal.value = false
+  } else {
+    const statusItem = await getItemById(
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+      idStatus
+    )
+    if (statusItem.status === 404) {
+      showAlert("An error has occurred, the status does not exist.", "error")
+      myStatus.removeStatus(idStatus)
+      router.go(-1)
+    } else {
+      statusItems.value = statusItem
+      openModal.value = true
+      editMode.value = true
+    }
+
+    if (statusItem === 401) {
+      expiredToken.value = true
+      openModal.value = false
+    }
   }
 }
 
@@ -91,85 +102,95 @@ const openModalAdd = () => {
 }
 
 const openDeleteModal = async (id, name) => {
-  const showStatus = await findStatus(
-    `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks/status`,
-    id
-  )
-
-  console.log(showStatus)
-
-  const countTask = myTask.getTasks().filter((listTask) => {
-    const statusName = myStatus.getStatus().find((listStatus) => {
-      return listStatus.id === id
-    })
-    return listTask.status === statusName.name
-  })
-
-  if (showStatus === 200) {
-    showTransferModal.value = true
-  }
-  if (showStatus === 404) {
-    showDeleteModal.value = true
-  }
-  if (showStatus === 401) {
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
-  }
+  } else {
+    const showStatus = await findStatus(
+      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks/status`,
+      id
+    )
 
-  statusDetail.value = {
-    id: id,
-    name: name,
-    countTask: countTask.length,
+    console.log(showStatus)
+
+    const countTask = myTask.getTasks().filter((listTask) => {
+      const statusName = myStatus.getStatus().find((listStatus) => {
+        return listStatus.id === id
+      })
+      return listTask.status === statusName.name
+    })
+
+    if (showStatus === 200) {
+      showTransferModal.value = true
+    }
+    if (showStatus === 404) {
+      showDeleteModal.value = true
+    }
+    if (showStatus === 401) {
+      expiredToken.value = true
+    }
+
+    statusDetail.value = {
+      id: id,
+      name: name,
+      countTask: countTask.length,
+    }
   }
 }
 
 //ปิด Modal
 const closeAddEdit = async (status) => {
-  if (editMode.value) {
-    const { editedItem, statusCode } = await editItem(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-      status.id,
-      {
-        name: status.name,
-        description: status.description,
-        color: status.color,
-      }
-    )
-
-    if (statusCode === 200) {
-      myStatus.updateStatus(editedItem)
-      const listTasks = await getItems(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    expiredToken.value = true
+  } else {
+    if (editMode.value) {
+      const { editedItem, statusCode } = await editItem(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        status.id,
+        {
+          name: status.name,
+          description: status.description,
+          color: status.color,
+        }
       )
-      myTask.clearTask()
-      myTask.addTasks(listTasks)
-      showAlert("The status has been updated", "success")
-    } else {
-      // 400 , 404
-      myStatus.removeStatus(editedItem.id)
-      showAlert("An error has occurred, the status does not exist.", "error")
+
+      if (statusCode === 200) {
+        myStatus.updateStatus(editedItem)
+        const listTasks = await getItems(
+          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+        )
+        myTask.clearTask()
+        myTask.addTasks(listTasks)
+        showAlert("The status has been updated", "success")
+      } else {
+        // 400 , 404
+        myStatus.removeStatus(editedItem.id)
+        showAlert("An error has occurred, the status does not exist.", "error")
+      }
+
+      if (statusCode === 401) {
+        expiredToken.value = true
+      }
     }
 
-    if (statusCode === 401) {
-      expiredToken.value = true
-    }
-  }
+    if (!editMode.value) {
+      const { newTask, statusCode } = await addItem(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        status
+      )
 
-  if (!editMode.value) {
-    const { newTask, statusCode } = await addItem(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-      status
-    )
+      if (statusCode === 201) {
+        myStatus.addOneStatus(newTask)
+        showAlert("The status has been added", "success")
+      } else {
+        // 400 , 500
+        showAlert("An error has occurred, the status does not exist.", "error")
+      }
 
-    if (statusCode === 201) {
-      myStatus.addOneStatus(newTask)
-      showAlert("The status has been added", "success")
-    } else {
-      // 400 , 500
-      showAlert("An error has occurred, the status does not exist.", "error")
-    }
-
-    if (statusCode === 401) {
-      expiredToken.value = true
+      if (statusCode === 401) {
+        expiredToken.value = true
+      }
     }
   }
   openModal.value = false
@@ -178,65 +199,70 @@ const closeAddEdit = async (status) => {
 }
 
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
-  if (showDeleteModal.value) {
-    const deleteItem = await deleteItemById(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-      statusDetail.value.id
-    )
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    expiredToken.value = true
+  } else {
+    if (showDeleteModal.value) {
+      const deleteItem = await deleteItemById(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        statusDetail.value.id
+      )
 
-    if (deleteItem === 200) {
-      myStatus.removeStatus(statusDetail.value.id)
-      showAlert("The status has been deleted", "success")
+      if (deleteItem === 200) {
+        myStatus.removeStatus(statusDetail.value.id)
+        showAlert("The status has been deleted", "success")
+      }
+
+      if (deleteItem === 400) {
+        myStatus.removeStatus(statusDetail.value.id)
+        showAlert("An error has occurred, the status does not exist.", "error")
+      }
+
+      if (deleteItem === 401) {
+        expiredToken.value = true
+      }
     }
 
-    if (deleteItem === 400) {
-      myStatus.removeStatus(statusDetail.value.id)
-      showAlert("An error has occurred, the status does not exist.", "error")
+    if (showTransferModal.value) {
+      const newStatus = await deleteItemByIdToNewId(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        statusDetail.value.id,
+        selectedStatus
+      )
+
+      if (newStatus === 200) {
+        myStatus.removeStatus(statusDetail.id)
+        const listTasks = await getItems(
+          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+        )
+        // หลัง tranfer สำเร้จ ให้ค่าใน task status เปลี่ยน
+        myTask.clearTask()
+        myTask.addTasks(listTasks)
+
+        const listStatus = await getItems(
+          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+        )
+        myStatus.clearStatus()
+        myStatus.addStatus(listStatus)
+        showAlert(
+          `${statusDetail.value.countTask} task(s) have been transferred and the status has been deleted`,
+          "success"
+        )
+      }
+      if (newStatus === 400) {
+        myStatus.removeStatus(filteredStatus)
+        showAlert("An error has occurred, the status does not exist.", "error")
+      }
+
+      if (newStatus === 401) {
+        expiredToken.value = true
+      }
     }
 
-    if (deleteItem === 401) {
-      expiredToken.value = true
-    }
+    showTransferModal.value = false
+    showDeleteModal.value = false
   }
-
-  if (showTransferModal.value) {
-    const newStatus = await deleteItemByIdToNewId(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
-      statusDetail.value.id,
-      selectedStatus
-    )
-
-    if (newStatus === 200) {
-      myStatus.removeStatus(statusDetail.id)
-      const listTasks = await getItems(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
-      )
-      // หลัง tranfer สำเร้จ ให้ค่าใน task status เปลี่ยน
-      myTask.clearTask()
-      myTask.addTasks(listTasks)
-
-      const listStatus = await getItems(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
-      )
-      myStatus.clearStatus()
-      myStatus.addStatus(listStatus)
-      showAlert(
-        `${statusDetail.value.countTask} task(s) have been transferred and the status has been deleted`,
-        "success"
-      )
-    }
-    if (newStatus === 400) {
-      myStatus.removeStatus(filteredStatus)
-      showAlert("An error has occurred, the status does not exist.", "error")
-    }
-
-    if (newStatus === 401) {
-      expiredToken.value = true
-    }
-  }
-
-  showTransferModal.value = false
-  showDeleteModal.value = false
 }
 
 const closeModal = () => {

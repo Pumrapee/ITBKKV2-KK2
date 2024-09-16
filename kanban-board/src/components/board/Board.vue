@@ -2,12 +2,14 @@
 import router from "@/router"
 import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
-import { addItem, getItems } from "@/libs/fetchUtils"
+import { addItem, getItems, isTokenExpired } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
+import { useAuthStore } from "@/stores/loginStore"
 import ExpireToken from "../toast/ExpireToken.vue"
 
 const openModal = ref()
 const myBoard = useBoardStore()
+const myUser = useAuthStore()
 const expiredToken = ref(false)
 
 const openModalAdd = () => {
@@ -15,43 +17,52 @@ const openModalAdd = () => {
 }
 
 onMounted(async () => {
-  const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-  //401
-  if (listBoard === 401) {
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
-  }
+  } else {
+    const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
+    //401
+    if (listBoard === 401) {
+      expiredToken.value = true
+    }
 
-  myBoard.addBoards(listBoard)
+    myBoard.addBoards(listBoard)
 
-  if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
-    router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-    localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
-  } else if (myBoard.navBoard) {
-    router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
-    myBoard.navBoard = false
+    if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
+      router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
+      localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
+    } else if (myBoard.navBoard) {
+      router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
+      myBoard.navBoard = false
+    }
   }
 })
 
 const closeAdd = async (nameBoard) => {
-  console.log(nameBoard)
-  const { newTask, statusCode } = await addItem(
-    `${import.meta.env.VITE_API_URL}boards`,
-    nameBoard
-  )
-
-  if (statusCode === 201) {
-    myBoard.addBoard(newTask)
-    router.push({ name: "task", params: { id: newTask.id } })
-    localStorage.setItem("BoardName", newTask.name)
-  }
-
-  if (statusCode === 401) {
-    alert("There is a problem. Please try again later.")
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
-  }
+  } else {
+    const { newTask, statusCode } = await addItem(
+      `${import.meta.env.VITE_API_URL}boards`,
+      nameBoard
+    )
 
-  openModal.value = false
-  router.go(-1)
+    if (statusCode === 201) {
+      myBoard.addBoard(newTask)
+      router.push({ name: "task", params: { id: newTask.id } })
+      localStorage.setItem("BoardName", newTask.name)
+    }
+
+    if (statusCode === 401) {
+      alert("There is a problem. Please try again later.")
+      expiredToken.value = true
+    }
+
+    openModal.value = false
+    router.go(-1)
+  }
 }
 
 const closeModal = () => {
