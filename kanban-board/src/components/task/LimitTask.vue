@@ -8,6 +8,7 @@ import { useRoute } from "vue-router"
 import { isTokenExpired } from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
 
+
 const props = defineProps({
   showLimitModal: Boolean,
 })
@@ -23,6 +24,7 @@ const showLimitStatus = ref()
 const showWarning = ref()
 const statusShow = ref()
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
+const route = useRoute()
 
 const closelimitModal = async (maxlimit) => {
   myUser.setToken()
@@ -68,6 +70,7 @@ const closelimitModal = async (maxlimit) => {
         isLimitEnabled.value,
         expiredToken.value
       )
+
     }
 
     if (isLimitEnabled.value === false) {
@@ -79,6 +82,7 @@ const closelimitModal = async (maxlimit) => {
       if (status === 401) {
         expiredToken.value = true
       }
+
 
       //เอาค่า fetch เก็บใน store
       myLimit.addLimit(editedLimit)
@@ -131,6 +135,7 @@ watch(
     }
   }
 )
+
 </script>
 
 <template>

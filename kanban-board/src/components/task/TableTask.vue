@@ -77,6 +77,7 @@ onMounted(async () => {
     }
     myLimit.addLimit(limitStatus)
   }
+
 })
 
 //Alert
@@ -375,6 +376,7 @@ watch(
     <!-- Filter Search-->
     <div class="flex justify-between w-3/5">
       <div class="flex justify-start items-center mt-4">
+
         <div class="relative">
           <div class="dropdown">
             <div
@@ -419,6 +421,7 @@ watch(
                     />
                     <div
                       class="shadow-md rounded-full font-medium p-2 text-black w-36 h-10 text-center mb-2 break-all"
+
                       :style="{
                         backgroundColor: myStatus.getStatusColor(status.name),
                       }"
