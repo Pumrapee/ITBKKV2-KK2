@@ -1,13 +1,19 @@
 <script setup>
 import { useRouter } from "vue-router"
 import { useAuthStore } from "@/stores/loginStore"
-import { defineProps } from "vue"
+import { defineProps, onMounted } from "vue"
 
 const props = defineProps({
   showExpiredModal: Boolean,
 })
 const router = useRouter()
 const myUser = useAuthStore()
+
+// onMounted(async () => {
+//   setTimeout(() => {
+//     router.push("/login"), 2000
+//   })
+// })
 
 const goToLogin = () => {
   router.push("/login")

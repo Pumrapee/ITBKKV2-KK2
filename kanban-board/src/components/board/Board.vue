@@ -25,6 +25,9 @@ onMounted(async () => {
     //401
     if (listBoard === 401) {
       expiredToken.value = true
+      setTimeout(() => {
+        router.push({ name: "login" }), 2000
+      })
     }
 
     myBoard.addBoards(listBoard)
@@ -58,11 +61,13 @@ const closeAdd = async (nameBoard) => {
     if (statusCode === 401) {
       alert("There is a problem. Please try again later.")
       expiredToken.value = true
+      setTimeout(() => {
+        router.push({ name: "login" }), 2000
+      })
     }
-
-    openModal.value = false
-    router.go(-1)
   }
+  openModal.value = false
+  router.go(-1)
 }
 
 const closeModal = () => {
@@ -83,7 +88,7 @@ const saveBoardName = (name) => {
         <router-link :to="{ name: 'addBoard' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-button-create btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
