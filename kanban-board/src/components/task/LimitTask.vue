@@ -27,7 +27,6 @@ const emits = defineEmits(["closeLimitModal", "closeCancel"])
 const closelimitModal = async (maxlimit) => {
   myUser.setToken()
   if (isTokenExpired(myUser.token)) {
-    console.log("check token")
     expiredToken.value = true
     emits("closeLimitModal")
   } else {

@@ -9,7 +9,6 @@ const boardName = ref({ name: `${userName} personal board` })
 const emits = defineEmits(["closeModal", "saveAdd"])
 
 const saveAdd = () => {
-  console.log(boardName.value)
   emits("saveAdd", boardName.value)
 }
 

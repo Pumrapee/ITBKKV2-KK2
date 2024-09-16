@@ -41,10 +41,8 @@ const emits = defineEmits(["closeAddModal"])
 onMounted(async () => {
   myUser.setToken()
   if (isTokenExpired(myUser.token)) {
-    console.log("check token")
     expiredToken.value = true
   } else {
-    console.log("not check token")
     expiredToken.value = false
 
     //Task
@@ -69,7 +67,6 @@ onMounted(async () => {
     }
     myStatus.addStatus(listStatus)
     // }
-    console.log(myStatus.getStatus())
     //Limit
     const limitStatus = await getStatusLimits(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
@@ -100,9 +97,7 @@ const openModalEdit = async (id, boolean) => {
   myUser.setToken()
   if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
-    console.log("check token")
   } else {
-    console.log("not check token")
     if (boolean) {
       editMode.value = true
       editDrop.value = true
@@ -115,9 +110,6 @@ const openModalEdit = async (id, boolean) => {
       id
     )
     tasks.value = taskDetail
-
-    console.log(taskDetail)
-    console.log(taskDetail.status)
 
     if (taskDetail.status === 404) {
       router.push({ name: "TaskNotFound" })
@@ -179,7 +171,6 @@ const closeAddEdit = async (task) => {
           status: task.status,
         }
       )
-      console.log(statusCode)
 
       if (statusCode === 200) {
         myTask.updateTask(editedItem)
@@ -197,7 +188,6 @@ const closeAddEdit = async (task) => {
     }
 
     if (task.id === undefined) {
-      console.log(boardId.value)
 
       const { newTask, statusCode } = await addItem(
         `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,

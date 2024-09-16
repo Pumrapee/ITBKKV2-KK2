@@ -111,8 +111,6 @@ const openDeleteModal = async (id, name) => {
       id
     )
 
-    console.log(showStatus)
-
     const countTask = myTask.getTasks().filter((listTask) => {
       const statusName = myStatus.getStatus().find((listStatus) => {
         return listStatus.id === id

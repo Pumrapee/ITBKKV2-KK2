@@ -32,7 +32,6 @@ function isTokenExpired(token) {
 
 async function getItems(url) {
   getToken()
-  console.log(token)
   let data
   try {
     data = await fetch(url, {
@@ -116,7 +115,6 @@ async function findStatus(url, id) {
 
 async function deleteItemById(url, id) {
   //DELETE Method
-  console.log(token)
   getToken()
   try {
     const res = await fetch(`${url}/${id}`, {
@@ -125,7 +123,6 @@ async function deleteItemById(url, id) {
         Authorization: `Bearer ${token}`,
       },
     })
-    console.log(res)
     return res.status
   } catch (error) {}
 }
@@ -140,13 +137,11 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
         Authorization: `Bearer ${token}`,
       },
     })
-    console.log(res.status)
     return res.status
   } catch (error) {}
 }
 
 async function addItem(url, newItem) {
-  console.log(newItem)
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -161,9 +156,6 @@ async function addItem(url, newItem) {
     })
     // Get the HTTP status code
     const statusCode = res.status
-    console.log(res.status)
-    console.log(res)
-
     const newTask = await res.json()
 
     // Return both the added item and the status code
@@ -183,7 +175,6 @@ async function editItem(url, id, editItem) {
       body: JSON.stringify(editItem),
     })
     const statusCode = res.status
-    console.log(statusCode)
     const editedItem = await res.json()
     return { editedItem, statusCode }
   } catch (error) {}
@@ -204,8 +195,6 @@ async function editLimitStatus(url, boolean, maxLimit) {
     )
     const editedLimit = await res.json()
     const status = res.status
-    console.log(res)
-    console.log(status)
     return { editedLimit, status }
   } catch (error) {}
 }

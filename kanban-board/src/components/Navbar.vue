@@ -3,7 +3,6 @@ import { useAuthStore } from "@/stores/loginStore"
 import { useBoardStore } from "@/stores/boardStore"
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
-import router from "@/router"
 
 const authStore = useAuthStore()
 const myBoard = useBoardStore()
