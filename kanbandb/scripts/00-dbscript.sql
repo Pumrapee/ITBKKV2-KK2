@@ -19,7 +19,7 @@ CREATE TABLE `statuses` (
   PRIMARY KEY (`statusId`),
   UNIQUE KEY `status_board_unique` (`statusName`, `boardId`),
   KEY `boardId` (`boardId`),
-  CONSTRAINT `statuses_ibfk_1` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`)
+  CONSTRAINT `statuses_ibfk_1` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `tasks` (
@@ -35,5 +35,5 @@ CREATE TABLE `tasks` (
   KEY `taskStatus` (`taskStatus`),
   KEY `boardId` (`boardId`),
   CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`taskStatus`) REFERENCES `statuses` (`statusId`),
-  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`)
+  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
