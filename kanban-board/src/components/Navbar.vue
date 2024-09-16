@@ -17,6 +17,7 @@ const logout = () => {
   // myTask.clearTask()
   // myBoard.navBoard = false
   // router.push({ name: "login" })
+
 }
 
 const boardAll = () => {

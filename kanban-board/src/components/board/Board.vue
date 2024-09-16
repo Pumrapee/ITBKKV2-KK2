@@ -12,6 +12,7 @@ const myBoard = useBoardStore()
 const myUser = useAuthStore()
 const expiredToken = ref(false)
 
+
 const openModalAdd = () => {
   openModal.value = true
 }
@@ -36,6 +37,7 @@ onMounted(async () => {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
+
   }
 })
 
@@ -73,6 +75,7 @@ const closeModal = () => {
 const saveBoardName = (name) => {
   localStorage.setItem("BoardName", name)
 }
+
 </script>
 
 <template>
