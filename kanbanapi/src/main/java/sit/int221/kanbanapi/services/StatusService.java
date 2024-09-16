@@ -32,7 +32,7 @@ public class StatusService {
 
     public List<Status> getAllBoardStatus(Board board, String username) {
         boardService.checkBoardOwnership(board.getBoardId(), username);
-        return repository.findAllByBoardOrNameIn(board, configuration.getNonLimitedUpdatableDeletableStatuses());
+        return repository.findAllByBoard(board);
     }
 
     public Status getStatusById(Integer id, String boardId, String username) {
@@ -48,7 +48,7 @@ public class StatusService {
         if (repository.existsByNameAndBoard(status.getName(), board)) {
             throw new BadRequestException("Status name must be unique within the board");
         }
-        status.setBoard(board); // Set the board for the status
+        status.setBoard(board);
         return repository.save(status);
     }
 

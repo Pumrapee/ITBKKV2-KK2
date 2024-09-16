@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import sit.int221.kanbanapi.exceptions.*;
 
 import java.util.List;
@@ -99,6 +100,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTokenException
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundExceptionException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(Exception.class)
