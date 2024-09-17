@@ -12,13 +12,13 @@ const myBoard = useBoardStore()
 const myUser = useAuthStore()
 const expiredToken = ref(false)
 
-
 const openModalAdd = () => {
   openModal.value = true
 }
 
 onMounted(async () => {
   myUser.setToken()
+  expiredToken.value = false
   if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
   } else {
@@ -33,11 +33,10 @@ onMounted(async () => {
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
       localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
-    } else if (myBoard.navBoard) {
+    }else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
-
   }
 })
 
@@ -61,10 +60,9 @@ const closeAdd = async (nameBoard) => {
       alert("There is a problem. Please try again later.")
       expiredToken.value = true
     }
-
-    openModal.value = false
-    router.go(-1)
   }
+  openModal.value = false
+  router.go(-1)
 }
 
 const closeModal = () => {
@@ -75,7 +73,6 @@ const closeModal = () => {
 const saveBoardName = (name) => {
   localStorage.setItem("BoardName", name)
 }
-
 </script>
 
 <template>
@@ -86,7 +83,7 @@ const saveBoardName = (name) => {
         <router-link :to="{ name: 'addBoard' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-button-create btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>

@@ -27,7 +27,9 @@ const isButtonDisabled = computed(() => {
 <template>
   <!-- Modal -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
+    <div
+      class="itbkk-modal-new flex items-center justify-center min-h-screen bg-black/[.15]"
+    >
       <div class="bg-white p-10 rounded-lg w-1/3">
         <div class="itbkk-message text-lg font-semibold text-center">
           <div class="flex justify-between items-center mb-4 border-b-2">
@@ -40,17 +42,19 @@ const isButtonDisabled = computed(() => {
               id="name"
               type="text"
               v-model="boardName.name"
+              maxlength="120"
               placeholder="Enter your name board..."
-              class="itbkk-title w-full border border-slate-950 rounded-lg py-2 px-3 input input-ghost"
+              class="itbkk-board-name w-full border border-slate-950 rounded-lg py-2 px-3 input input-ghost"
             />
           </div>
         </div>
 
         <div class="mt-4 flex justify-end">
           <button
-            class="itbkk-button-confirm btn mr-2 bg-green-500 text-white"
+            class="itbkk-button-ok btn mr-2 bg-green-500 text-white disabled:bg-gray-300"
             @click="saveAdd"
             :disabled="isButtonDisabled"
+            :class="isButtonDisabled ? 'disabled disabled:bg-gray-300' : ''"
           >
             Save
           </button>

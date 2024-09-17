@@ -24,7 +24,7 @@ const showAlert = ref(false)
 
 const loginHandler = async () => {
   const { res, token } = await login(
-    `${import.meta.env.VITE_API_URL}login`,
+    `${import.meta.env.VITE_API_URL2}login`,
     username.value,
     password.value
   )

@@ -12,12 +12,6 @@ const userName = localStorage.getItem("user")
 
 const logout = () => {
   authStore.logout()
-  // myBoard.clearBoard()
-  // myStatus.clearStatus()
-  // myTask.clearTask()
-  // myBoard.navBoard = false
-  // router.push({ name: "login" })
-
 }
 
 const boardAll = () => {

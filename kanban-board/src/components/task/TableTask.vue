@@ -46,38 +46,39 @@ onMounted(async () => {
     expiredToken.value = false
 
     //Task
-    // if (myTask.getTasks().length === 0) {
-    const listTasks = await getItems(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
-    )
-    //401
-    if (listTasks === 401) {
-      expiredToken.value = true
+    if (myTask.getTasks().length === 0) {
+      const listTasks = await getItems(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+      )
+      if (listTasks === 401) {
+        expiredToken.value = true
+      } else {
+        myTask.addTasks(listTasks)
+      }
     }
-    myTask.addTasks(listTasks)
-    // }
+
     //Status
-    // if (myStatus.getStatus().length === 0) {
-    const listStatus = await getItems(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
-    )
-    //401
-    if (listStatus === 401) {
-      expiredToken.value = true
+    if (myStatus.getStatus().length === 0) {
+      const listStatus = await getItems(
+        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+      )
+      if (listStatus === 401) {
+        expiredToken.value = true
+      } else {
+        myStatus.addStatus(listStatus)
+      }
     }
-    myStatus.addStatus(listStatus)
-    // }
+
     //Limit
     const limitStatus = await getStatusLimits(
       `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
     )
-    //401
     if (limitStatus === 401) {
       expiredToken.value = true
+    } else {
+      myLimit.addLimit(limitStatus)
     }
-    myLimit.addLimit(limitStatus)
   }
-
 })
 
 //Alert
@@ -189,7 +190,6 @@ const closeAddEdit = async (task) => {
     }
 
     if (task.id === undefined) {
-
       const { newTask, statusCode } = await addItem(
         `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
         task
@@ -376,7 +376,6 @@ watch(
     <!-- Filter Search-->
     <div class="flex justify-between w-3/5">
       <div class="flex justify-start items-center mt-4">
-
         <div class="relative">
           <div class="dropdown">
             <div
@@ -421,7 +420,6 @@ watch(
                     />
                     <div
                       class="shadow-md rounded-full font-medium p-2 text-black w-36 h-10 text-center mb-2 break-all"
-
                       :style="{
                         backgroundColor: myStatus.getStatusColor(status.name),
                       }"
