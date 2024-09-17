@@ -50,7 +50,7 @@ onMounted(async () => {
     //Task
     if (myTask.getTasks().length === 0) {
       const listTasks = await getItems(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
       )
       if (listTasks === 401) {
         expiredToken.value = true
@@ -62,7 +62,7 @@ onMounted(async () => {
     //Status
     if (myStatus.getStatus().length === 0) {
       const listStatus = await getItems(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
       )
       if (listStatus === 401) {
         expiredToken.value = true
@@ -73,7 +73,7 @@ onMounted(async () => {
 
     //Limit
     const limitStatus = await getStatusLimits(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
     )
     if (limitStatus === 401) {
       expiredToken.value = true
@@ -110,7 +110,7 @@ const openModalEdit = async (id, boolean) => {
     }
 
     const taskDetail = await getItemById(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
       id
     )
     tasks.value = taskDetail
@@ -167,7 +167,7 @@ const closeAddEdit = async (task) => {
   } else {
     if (task.id !== undefined) {
       const { editedItem, statusCode } = await editItem(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
         task.id,
         {
           title: task.title,
@@ -194,7 +194,7 @@ const closeAddEdit = async (task) => {
 
     if (task.id === undefined) {
       const { newTask, statusCode } = await addItem(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
         task
       )
 
@@ -227,7 +227,7 @@ const closeDeleteModal = async (id) => {
     expiredToken.value = true
   } else {
     const deleteItem = await deleteItemById(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
       id
     )
 
@@ -349,7 +349,7 @@ watch(
     } else {
       if (newId !== undefined) {
         const res = await getItemById(
-          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`,
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
           newId
         )
         if (res.status === 404) {
