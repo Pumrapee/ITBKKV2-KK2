@@ -40,6 +40,8 @@ const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
   myUser.setToken()
+  expiredToken.value = false
+
   if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
   } else {
@@ -124,6 +126,7 @@ const openModalEdit = async (id, boolean) => {
 
     if (taskDetail === 401) {
       openModal.value = false
+
       expiredToken.value = true
     }
   }
@@ -664,7 +667,8 @@ watch(
     :showAlert="modalAlert.modal"
   />
 
-  <ExpireToken :showExpiredModal="expiredToken" />
+  <!-- <ExpireToken :showExpiredModal="expiredToken" /> -->
+  <ExpireToken v-if="expiredToken" />
 </template>
 
 <style scoped>

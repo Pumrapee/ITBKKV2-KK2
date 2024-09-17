@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore"
 import { getToken } from "@/libs/fetchUtils"
 import { useRouter } from "vue-router"
 

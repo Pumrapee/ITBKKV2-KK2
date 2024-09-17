@@ -378,7 +378,6 @@ watch(
               </div>
             </td>
             <td v-else="task.name !== 'No Status' && task.name !== 'Done'"></td>
-
           </tr>
         </tbody>
       </table>
@@ -408,7 +407,7 @@ watch(
     :showAlert="modalAlert.modal"
   />
 
-  <ExpireToken :showExpiredModal="expiredToken" />
+  <ExpireToken v-if="expiredToken" />
 </template>
 
 <style scoped>

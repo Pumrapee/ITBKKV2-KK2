@@ -23,17 +23,18 @@ onMounted(async () => {
     expiredToken.value = true
   } else {
     const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
-    //401
-    if (listBoard === 401) {
-      expiredToken.value = true
+    if (myBoard.getBoards().length === 0) {
+      //401
+      if (listBoard === 401) {
+        expiredToken.value = true
+      }
+      myBoard.addBoards(listBoard)
     }
-
-    myBoard.addBoards(listBoard)
 
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
       localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
-    }else if (myBoard.navBoard) {
+    } else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
@@ -59,10 +60,10 @@ const closeAdd = async (nameBoard) => {
     if (statusCode === 401) {
       alert("There is a problem. Please try again later.")
       expiredToken.value = true
+      openModal.value = false
     }
   }
   openModal.value = false
-  router.go(-1)
 }
 
 const closeModal = () => {
@@ -138,7 +139,8 @@ const saveBoardName = (name) => {
     @saveAdd="closeAdd"
   />
 
-  <ExpireToken :showExpiredModal="expiredToken" />
+  <!-- <ExpireToken :showExpiredModal="expiredToken" /> -->
+  <ExpireToken v-if="expiredToken" />
 </template>
 
 <style scoped>

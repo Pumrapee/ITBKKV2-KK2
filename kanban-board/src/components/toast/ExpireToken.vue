@@ -1,29 +1,25 @@
 <script setup>
 import { useRouter } from "vue-router"
 import { useAuthStore } from "@/stores/loginStore"
-import { defineProps, onMounted } from "vue"
+import { onMounted } from "vue"
 
-const props = defineProps({
-  showExpiredModal: Boolean,
-})
 const router = useRouter()
 const myUser = useAuthStore()
-
-// onMounted(async () => {
-//   setTimeout(() => {
-//     router.push("/login"), 2000
-//   })
-// })
+onMounted(async () => {
+  setTimeout(() => {
+    router.push({ name: "login" })
+    myUser.logout()
+  }, 3000)
+})
 
 const goToLogin = () => {
-  router.push("/login")
+  router.push({ name: "login" })
   myUser.logout()
 }
 </script>
 
 <template>
   <div
-    v-if="props.showExpiredModal"
     class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
   >
     <div class="card bg-base-100 w-96 shadow-xl">

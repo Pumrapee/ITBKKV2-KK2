@@ -219,7 +219,6 @@ async function login(url, userName, password) {
 
     return { res, token }
   } catch (error) {
-    console.error("Error during login:", error)
     return 500 // Internal server error
   }
 }
