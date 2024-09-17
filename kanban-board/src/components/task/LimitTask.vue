@@ -236,7 +236,7 @@ watch(
     </div>
   </div>
 
-  <ExpireToken :showExpiredModal="expiredToken" />
+  <ExpireToken v-if="expiredToken" />
 </template>
 
 <style scoped>
