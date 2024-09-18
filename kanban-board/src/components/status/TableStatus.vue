@@ -41,7 +41,7 @@ onMounted(async () => {
   } else {
     if (myStatus.getStatus().length === 0) {
       const listStatus = await getItems(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
       )
       //401
       if (listStatus === 401) {
@@ -71,7 +71,7 @@ const openEditStatus = async (idStatus) => {
     expiredToken.value = true
   } else {
     const statusItem = await getItemById(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
       idStatus
     )
     if (statusItem.status === 404) {
@@ -107,7 +107,7 @@ const openDeleteModal = async (id, name) => {
     expiredToken.value = true
   } else {
     const showStatus = await findStatus(
-      `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks/status`,
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/status`,
       id
     )
 
@@ -144,7 +144,7 @@ const closeAddEdit = async (status) => {
   } else {
     if (editMode.value) {
       const { editedItem, statusCode } = await editItem(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
         status.id,
         {
           name: status.name,
@@ -156,7 +156,7 @@ const closeAddEdit = async (status) => {
       if (statusCode === 200) {
         myStatus.updateStatus(editedItem)
         const listTasks = await getItems(
-          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
         )
         myTask.clearTask()
         myTask.addTasks(listTasks)
@@ -174,7 +174,7 @@ const closeAddEdit = async (status) => {
 
     if (!editMode.value) {
       const { newTask, statusCode } = await addItem(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
         status
       )
 
@@ -203,7 +203,7 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
   } else {
     if (showDeleteModal.value) {
       const deleteItem = await deleteItemById(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
         statusDetail.value.id
       )
 
@@ -224,7 +224,7 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
 
     if (showTransferModal.value) {
       const newStatus = await deleteItemByIdToNewId(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
         statusDetail.value.id,
         selectedStatus
       )
@@ -232,14 +232,14 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
       if (newStatus === 200) {
         myStatus.removeStatus(statusDetail.id)
         const listTasks = await getItems(
-          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/tasks`
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
         )
         // หลัง tranfer สำเร้จ ให้ค่าใน task status เปลี่ยน
         myTask.clearTask()
         myTask.addTasks(listTasks)
 
         const listStatus = await getItems(
-          `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
         )
         myStatus.clearStatus()
         myStatus.addStatus(listStatus)

@@ -41,7 +41,7 @@ const closelimitModal = async (maxlimit) => {
       ).map(([name, count]) => ({ name, count }))
 
       const { editedLimit, status } = await editLimitStatus(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
         isLimitEnabled.value,
         maxlimit
       )
@@ -72,7 +72,7 @@ const closelimitModal = async (maxlimit) => {
 
     if (isLimitEnabled.value === false) {
       const { editedLimit, status } = await editLimitStatus(
-        `${import.meta.env.VITE_API_URL}boards/${boardId.value}/statuses`,
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
         isLimitEnabled.value,
         maxlimit
       )

@@ -22,7 +22,7 @@ onMounted(async () => {
   if (isTokenExpired(myUser.token)) {
     expiredToken.value = true
   } else {
-    const listBoard = await getItems(`${import.meta.env.VITE_API_URL}boards`)
+    const listBoard = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
     if (myBoard.getBoards().length === 0) {
       //401
       if (listBoard === 401) {
@@ -47,7 +47,7 @@ const closeAdd = async (nameBoard) => {
     expiredToken.value = true
   } else {
     const { newTask, statusCode } = await addItem(
-      `${import.meta.env.VITE_API_URL}boards`,
+      `${import.meta.env.VITE_API_URL}v3/boards`,
       nameBoard
     )
 
