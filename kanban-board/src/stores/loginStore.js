@@ -10,6 +10,7 @@ export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false)
   const user = ref(null)
   const token = ref("")
+  const userName = ref("")
   const myBoard = useBoardStore()
   const myStatus = useStatusStore()
   const myTask = useTaskStore()
@@ -22,12 +23,16 @@ export const useAuthStore = defineStore("auth", () => {
     token.value = tokenIsUser
     user.value = jwtDecode(tokenIsUser)
     //username
-    localStorage.setItem("user", user.value.name)
+    // userName.value = user.value.name
+    // localStorage.setItem("user", user.value.name)
+    sessionStorage.setItem("user", user.value.name)
+
   }
 
   const logout = () => {
     isAuthenticated.value = false
     user.value = null
+    userName.value = null
     myBoard.clearBoard()
     myStatus.clearStatus()
     myTask.clearTask()
@@ -47,5 +52,6 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     token,
     setToken,
+    userName,
   }
 })

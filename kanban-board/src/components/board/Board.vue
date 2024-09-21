@@ -28,6 +28,10 @@ onMounted(async () => {
       if (listBoard === 401) {
         expiredToken.value = true
       }
+
+      if (listBoard === 400){
+        alert("2222")
+      }
       myBoard.addBoards(listBoard)
     }
 
@@ -54,7 +58,10 @@ const closeAdd = async (nameBoard) => {
     if (statusCode === 201) {
       myBoard.addBoard(newTask)
       router.push({ name: "task", params: { id: newTask.id } })
-      localStorage.setItem("BoardName", newTask.name)
+      myBoard.boardName = newTask.name
+      // localStorage.setItem("BoardName", newTask.name)
+      sessionStorage.setItem("BoardName", newTask.name)
+
     }
 
     if (statusCode === 401) {

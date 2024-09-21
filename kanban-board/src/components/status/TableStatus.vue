@@ -304,7 +304,7 @@ watch(
         <RouterLink :to="{ name: 'AddStatus' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-home btn btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
@@ -325,7 +325,7 @@ watch(
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody class="">
+        <tbody>
           <tr
             v-for="(task, index) in myStatus.getStatus()"
             :key="task.id"
@@ -364,7 +364,7 @@ watch(
                     @click="openEditStatus(task.id)"
                     class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
                   >
-                    <img src="/icons/pen.png" class="w-4" />
+                    <img src="/icons/pen.png" class="w-4 ml-2" />
                   </button>
                 </router-link>
               </div>

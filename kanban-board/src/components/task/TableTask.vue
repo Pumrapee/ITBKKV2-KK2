@@ -3,6 +3,7 @@ import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
 import { useLimitStore } from "@/stores/limitStore"
 import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore"
 import {
   getItemById,
   editItem,
@@ -25,6 +26,7 @@ const myTask = useTaskStore()
 const myStatus = useStatusStore()
 const myLimit = useLimitStore()
 const myUser = useAuthStore()
+const myBoard = useBoardStore()
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -35,7 +37,9 @@ const editDrop = ref(false)
 const boardId = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
-const boardName = ref(localStorage.getItem("BoardName"))
+// const boardName = ref(localStorage.getItem("BoardName"))
+// const boardName = ref(myBoard.boardName)
+const boardName = ref(sessionStorage.getItem("BoardName"))
 const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
@@ -126,7 +130,6 @@ const openModalEdit = async (id, boolean) => {
 
     if (taskDetail === 401) {
       openModal.value = false
-
       expiredToken.value = true
     }
   }
@@ -487,7 +490,7 @@ watch(
         <!-- Limit Button -->
         <button
           @click="openLimitModal"
-          class="flex itbkk-manage-status btn text-l ml-1 bg-black text-white"
+          class="flex btn text-l ml-1 bg-black text-white"
         >
           <img src="/icons/limit.png" class="w-6" />
           Limit
@@ -556,7 +559,11 @@ watch(
 
         <tbody class="" v-if="myTask.getTasks().length > 0">
           <!-- row -->
-          <tr v-for="(task, index) in filteredTasks" :key="task.id" class="itbkk-item">
+          <tr
+            v-for="(task, index) in filteredTasks"
+            :key="task.id"
+            class="itbkk-item"
+          >
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
               <router-link :to="{ name: 'detailTask' }">
@@ -613,12 +620,18 @@ watch(
                   <router-link
                     :to="{ name: 'editTask', params: { taskId: task.id } }"
                   >
-                    <li @click="openModalEdit(task.id, true)" class="itbkk-button-edit">
+                    <li
+                      @click="openModalEdit(task.id, true)"
+                      class="itbkk-button-edit"
+                    >
                       <a>Edit<img src="/icons/pen.png" class="w-4" /></a>
                     </li>
                   </router-link>
 
-                  <li @click="openDeleteModal(task.id, task.title, index)" class="itbkk-button-delete">
+                  <li
+                    @click="openDeleteModal(task.id, task.title, index)"
+                    class="itbkk-button-delete"
+                  >
                     <a>Delete<img src="/icons/trash.png" class="w-6" /></a>
                   </li>
                 </ul>

@@ -16,7 +16,7 @@ import { RouterView } from "vue-router"
   </video>
   <RouterView />
   <!-- footer -->
-  <footer
+  <!-- <footer
     class="fixed bottom-0 left-0 right-0 footer items-center p-2 bg-black text-white font-semibold"
   >
     <aside class="items-center grid-flow-col">
@@ -25,7 +25,7 @@ import { RouterView } from "vue-router"
     <nav class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
       <img src="/icons/logo2.png" class="w-12" />
     </nav>
-  </footer>
+  </footer> -->
 </template>
 
 <style scoped>

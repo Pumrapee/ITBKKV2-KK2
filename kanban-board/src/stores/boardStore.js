@@ -5,6 +5,7 @@ export const useBoardStore = defineStore("board", () => {
   //state
   const board = ref([])
   const navBoard = ref(false)
+  const boardName = ref("")
   //view
   const getBoards = () => {
     return board.value
@@ -45,6 +46,7 @@ export const useBoardStore = defineStore("board", () => {
     removeBoards,
     clearBoard,
     navBoard,
+    boardName
   }
 })
 

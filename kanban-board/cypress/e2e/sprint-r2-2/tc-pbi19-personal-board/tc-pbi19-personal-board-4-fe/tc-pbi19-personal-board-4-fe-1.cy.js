@@ -53,7 +53,7 @@ describe(`TC-PBI19-PERSIONAL-BOARD-4-FE-1\n
         cy.get('.itbkk-modal-status').should('exist').as('modal')
         cy.get('@modal').find('.itbkk-status-name').type("To Review")
         cy.get('@modal').find('.itbkk-button-confirm').should('exist').click()
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.url().should('contain','/status')
 
