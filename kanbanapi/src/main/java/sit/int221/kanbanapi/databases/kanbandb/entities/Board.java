@@ -14,6 +14,11 @@ import java.util.List;
 @Setter
 public class Board {
 
+
+    public enum Visibility {
+        PRIVATE, PUBLIC
+    }
+
     @Id
     @Column(name = "boardId", length = 10)
     private String boardId;
@@ -24,6 +29,10 @@ public class Board {
     @JsonIgnore
     @Column(name = "owneroid", nullable = false, length = 36)
     private String ownerId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false)
+    private Visibility visibility = Visibility.PRIVATE;
 
     @Column(name = "taskLimitEnabled", nullable = false)
     private Boolean taskLimitEnabled;
@@ -39,11 +48,16 @@ public class Board {
     @OneToMany(mappedBy = "board")
     private List<Task> tasks;
 
+
     public String getId() {
         return boardId;
     }
 
     public String getName() {
         return boardName;
+    }
+
+    public String getVisibility() {
+        return visibility.toString();
     }
 }

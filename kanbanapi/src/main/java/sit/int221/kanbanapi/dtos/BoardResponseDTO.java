@@ -10,5 +10,6 @@ import lombok.Setter;
 public class BoardResponseDTO {
     private String id;
     private String name;
+    private String visibility;
     private Owner owner;
 }

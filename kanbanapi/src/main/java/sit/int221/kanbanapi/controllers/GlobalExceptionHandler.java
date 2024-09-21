@@ -75,11 +75,18 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler({DataAccessException.class, HttpMessageNotReadableException.class, BadRequestException.class})
+    @ExceptionHandler({DataAccessException.class, BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleJpaException
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleRequiredRequestBody
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, "Required request body is missing", HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(TaskLimitExceededException.class)
@@ -101,6 +108,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTokenException
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(NoPermission.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<ErrorResponse> handleNoPermissionException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler({NoResourceFoundException.class})
