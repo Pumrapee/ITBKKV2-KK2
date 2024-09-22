@@ -18,8 +18,8 @@ export const useAuthStore = defineStore("auth", () => {
   const login = (newToken) => {
     isAuthenticated.value = true
     //token
-    localStorage.setItem("token", newToken)
-    const tokenIsUser = localStorage.getItem("token")
+    sessionStorage.setItem("token", newToken)
+    const tokenIsUser = sessionStorage.getItem("token")
     token.value = tokenIsUser
     user.value = jwtDecode(tokenIsUser)
     //username
@@ -35,12 +35,11 @@ export const useAuthStore = defineStore("auth", () => {
     myTask.clearTask()
     myBoard.navBoard = false
     router.push({ name: "login" })
-    localStorage.clear()
     sessionStorage.clear()
   }
 
   const setToken = () => {
-    token.value = localStorage.getItem("token")
+    token.value = sessionStorage.getItem("token")
   }
 
   return {
