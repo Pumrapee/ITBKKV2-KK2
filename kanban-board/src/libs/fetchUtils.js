@@ -144,6 +144,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
 }
 
 async function addItem(url, newItem) {
+  getToken()
   try {
     const res = await fetch(url, {
       method: "POST",

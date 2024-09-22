@@ -34,8 +34,8 @@ export const useAuthStore = defineStore("auth", () => {
     myStatus.clearStatus()
     myTask.clearTask()
     myBoard.navBoard = false
-    router.push({ name: "login" })
     sessionStorage.clear()
+    router.push({ name: "login" })
   }
 
   const setToken = () => {

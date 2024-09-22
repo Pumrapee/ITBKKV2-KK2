@@ -2,7 +2,14 @@
 import router from "@/router"
 import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
-import { addItem, getItems, isTokenExpired } from "@/libs/fetchUtils"
+import DeleteBoard from "./DeleteBoard.vue"
+import Alert from "../toast/Alert.vue"
+import {
+  addItem,
+  getItems,
+  isTokenExpired,
+  deleteItemById,
+} from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
 import { useAuthStore } from "@/stores/loginStore"
 import ExpireToken from "../toast/ExpireToken.vue"
@@ -11,6 +18,9 @@ const openModal = ref()
 const myBoard = useBoardStore()
 const myUser = useAuthStore()
 const expiredToken = ref(false)
+const showDeleteModal = ref(false)
+const boardIdDelete = ref("")
+const modalAlert = ref({ message: "", type: "", modal: false })
 
 const openModalAdd = () => {
   openModal.value = true
@@ -27,8 +37,9 @@ onMounted(async () => {
       //401
       if (listBoard === 401) {
         expiredToken.value = true
+      } else {
+        myBoard.addBoards(listBoard)
       }
-      myBoard.addBoards(listBoard)
     }
 
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
@@ -40,6 +51,18 @@ onMounted(async () => {
     }
   }
 })
+
+//Alert
+const showAlert = (message, type) => {
+  modalAlert.value = {
+    message,
+    type,
+    modal: true,
+  }
+  setTimeout(() => {
+    modalAlert.value.modal = false
+  }, 4000)
+}
 
 const closeAdd = async (nameBoard) => {
   myUser.setToken()
@@ -55,8 +78,8 @@ const closeAdd = async (nameBoard) => {
       myBoard.addBoard(newTask)
       router.push({ name: "task", params: { id: newTask.id } })
       myBoard.boardName = newTask.name
-      // localStorage.setItem("BoardName", newTask.name)
       sessionStorage.setItem("BoardName", newTask.name)
+      // showAlert("The board has been updated", "success")
     }
 
     if (statusCode === 401) {
@@ -70,7 +93,31 @@ const closeAdd = async (nameBoard) => {
 
 const closeModal = () => {
   openModal.value = false
-  router.go(-1)
+  showDeleteModal.value = false
+  router.push({ name: "board" })
+}
+
+const openDeleteModal = (id) => {
+  showDeleteModal.value = true
+  boardIdDelete.value = id
+}
+
+const closeDeleteModal = async () => {
+  myUser.setToken()
+  if (isTokenExpired(myUser.token)) {
+    expiredToken.value = true
+  } else {
+    const deleteBoard = await deleteItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardIdDelete.value
+    )
+
+    if (deleteBoard === 200) {
+      myBoard.removeBoards(boardIdDelete.value)
+      showAlert("The board has been deleted", "success")
+    }
+    showDeleteModal.value = false
+  }
 }
 
 const saveBoardName = (name) => {
@@ -120,7 +167,16 @@ const saveBoardName = (name) => {
               </router-link>
             </th>
 
-            <th></th>
+            <th>
+              <div>
+                <button
+                  class="itbkk-button-delete btn bg-red-500"
+                  @click="openDeleteModal(board.id)"
+                >
+                  <img src="/icons/delete.png" class="w-4" />
+                </button>
+              </div>
+            </th>
           </tr>
         </tbody>
 
@@ -141,7 +197,19 @@ const saveBoardName = (name) => {
     @saveAdd="closeAdd"
   />
 
-  <!-- <ExpireToken :showExpiredModal="expiredToken" /> -->
+  <DeleteBoard
+    :showDelete="showDeleteModal"
+    :boardId="boardIdDelete"
+    @closeDeleteBoard="closeDeleteModal"
+    @cancelDelete="closeModal"
+  />
+
+  <Alert
+    :message="modalAlert.message"
+    :type="modalAlert.type"
+    :showAlert="modalAlert.modal"
+  />
+
   <ExpireToken v-if="expiredToken" />
 </template>
 
