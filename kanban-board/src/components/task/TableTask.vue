@@ -34,7 +34,7 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
-const boardId = ref()
+const boardId = ref(route.params.id)
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
 const boardName = ref(sessionStorage.getItem("BoardName"))
@@ -63,6 +63,16 @@ onMounted(async () => {
       } else {
         myTask.addTasks(listTasks)
       }
+    }
+
+  
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    if(boardIdNumber.status === 404){
+      console.log(boardIdNumber.status)
     }
 
     //Status
@@ -126,8 +136,10 @@ const openModalEdit = async (id, boolean) => {
       id
     )
     tasks.value = taskDetail
+    console.log(taskDetail)
 
     if (taskDetail.status === 404) {
+      console.log("404 in edit")
       router.push({ name: "TaskNotFound" })
       myTask.removeTasks(id)
       router.go(-1)
@@ -372,13 +384,6 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
@@ -574,7 +579,7 @@ watch(
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link :to="{ name: 'detailTask' }">
+              <router-link :to="{ name: 'detailTask' , params: { taskId: task.id }  }">
                 <button
                   @click="openModalEdit(task.id)"
                   class="btn btn-ghost h-2"
