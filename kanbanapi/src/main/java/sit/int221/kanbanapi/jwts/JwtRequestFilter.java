@@ -2,6 +2,7 @@ package sit.int221.kanbanapi.jwts;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -41,6 +42,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        String requestURI = request.getRequestURI();
+        if (requestURI.equals("/login")) {
+            chain.doFilter(request, response);
+            return;
+        }
         try {
             final String requestTokenHeader = request.getHeader("Authorization");
             String username = null;
@@ -63,6 +69,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 } else {
                     throw new AuthenticationFailed("JWT Token does not begin with Bearer String");
                 }
+            } else {
+                throw new AuthenticationFailed("Authorization header missing");
+            }
+
+            Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
+            String tokenType = claims.get("token_type", String.class);
+            if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
+                throw new AuthenticationFailed("Invalid token type");
             }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

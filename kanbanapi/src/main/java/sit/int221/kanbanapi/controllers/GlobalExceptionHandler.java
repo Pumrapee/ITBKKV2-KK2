@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -117,7 +118,7 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.FORBIDDEN, request);
     }
 
-    @ExceptionHandler({NoResourceFoundException.class})
+    @ExceptionHandler({NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleNoResourceFoundExceptionException
             (Exception exception, WebRequest request) {
