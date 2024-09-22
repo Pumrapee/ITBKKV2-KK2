@@ -58,7 +58,6 @@ onMounted(async () => {
       if (listTasks === 401) {
         expiredToken.value = true
       } else if (listTasks.status === 404) {
-        console.log("Task onMount 404")
         router.push({ name: "TaskNotFound" })
       } else {
         myTask.addTasks(listTasks)
@@ -71,9 +70,6 @@ onMounted(async () => {
       boardId.value
     )
 
-    if(boardIdNumber.status === 404){
-      console.log(boardIdNumber.status)
-    }
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -83,7 +79,6 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        console.log("Status onMount 404")
         router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
@@ -97,7 +92,6 @@ onMounted(async () => {
     if (limitStatus === 401) {
       expiredToken.value = true
     } else if (limitStatus.status === 404) {
-      console.log("Limit Status onMount 404")
       router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
@@ -136,10 +130,8 @@ const openModalEdit = async (id, boolean) => {
       id
     )
     tasks.value = taskDetail
-    console.log(taskDetail)
 
     if (taskDetail.status === 404) {
-      console.log("404 in edit")
       router.push({ name: "TaskNotFound" })
       myTask.removeTasks(id)
       router.go(-1)

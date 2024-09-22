@@ -47,7 +47,6 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        console.log("Status onMount 404")
         router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
@@ -288,7 +287,6 @@ watch(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
           newId
         )
-        console.log(res)
         if (res.status === 404) {
           router.push({ name: "TaskNotFound" })
         }
