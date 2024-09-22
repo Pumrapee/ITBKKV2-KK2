@@ -38,8 +38,7 @@ public class TaskService {
         return repository.findAll();
     }
 
-    public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy, String boardId, String username) {
-        boardService.checkBoardOwnership(boardId, username);
+    public List<Task> getAllTaskFilteredSorted(List<String> filterStatuses, String sortBy, String boardId) {
         Board board = boardService.getBoardById(boardId);
         String sortProperty = sortBy != null ? sortBy : "createdOn";
         Sort sort = Sort.by(Sort.Order.asc(sortProperty));
@@ -54,15 +53,13 @@ public class TaskService {
         }
     }
 
-    public Task getTaskById(Integer id, String boardId, String username) {
-        boardService.checkBoardOwnership(boardId, username);
+    public Task getTaskById(Integer id) {
         return repository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("Task id " + id + " does not exist !!!"));
     }
 
     @Transactional
-    public Task createTask(Task task, String boardId, String username) {
-        boardService.checkBoardOwnership(boardId, username);
+    public Task createTask(Task task, String boardId) {
         Board board = boardService.getBoardById(boardId);
         task.setBoard(board);
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
@@ -74,16 +71,14 @@ public class TaskService {
     }
 
     @Transactional
-    public Task removeTask(Integer id, String boardId, String username) {
-        boardService.checkBoardOwnership(boardId, username);
+    public Task removeTask(Integer id) {
         Task task = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
         repository.delete(task);
         return task;
     }
 
     @Transactional
-    public Task updateTask(Integer id, Task task, String boardId, String username) {
-        boardService.checkBoardOwnership(boardId, username);
+    public Task updateTask(Integer id, Task task, String boardId) {
         Board board = boardService.getBoardById(boardId);
         task.setBoard(board);
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
@@ -100,8 +95,7 @@ public class TaskService {
     }
 
     @Transactional
-    public void transferTaskStatus(Integer id, Integer newId, String boardId, String username) {
-        boardService.checkBoardOwnership(boardId, username);
+    public void transferTaskStatus(Integer id, Integer newId, String boardId) {
         if (id.equals(newId)) {
             throw new BadRequestException("Destination status for task transfer must be different from the current status");
         }

@@ -38,11 +38,11 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims getAllClaimsFromToken(String token) {
+    public Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
@@ -54,6 +54,7 @@ public class JwtTokenUtil {
         claims.put("oid", user.getOid());
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
+        claims.put("token_type", "access_token");
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
@@ -69,8 +70,29 @@ public class JwtTokenUtil {
                 .compact();
     }
 
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        claims.put("oid", user.getOid());
+        claims.put("token_type", "refresh_token");
+        return doGenerateRefreshToken(claims, userDetails.getUsername());
+    }
+
+    private String doGenerateRefreshToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuer("https://intproj23.sit.kmutt.ac.th/kk2/")
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+                .compact();
+    }
+
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+
 }

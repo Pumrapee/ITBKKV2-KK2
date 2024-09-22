@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,37 +27,62 @@ public class StatusController {
     private BoardService boardService;
 
     @GetMapping("")
-    public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
-        List<Status> statuses = statusService.getAllBoardStatus(boardService.getBoardById(boardId), user.getUsername());
+    public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId,
+                                                     @AuthenticationPrincipal UserDetails user,
+                                                     HttpServletRequest request) {
+        boardService.checkBoardOwnership(boardId, user.getUsername(), request.getMethod());
+        List<Status> statuses = statusService.getAllBoardStatus(boardService.getBoardById(boardId));
         return new ResponseEntity<>(statuses, HttpStatus.OK);
     }
 
     @GetMapping("/{statusId}")
-    public ResponseEntity<Status> getStatusById(@PathVariable Integer statusId, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
-        Status status = statusService.getStatusById(statusId, boardId, user.getUsername());
+    public ResponseEntity<Status> getStatusById(@PathVariable Integer statusId,
+                                                @PathVariable String boardId,
+                                                @AuthenticationPrincipal UserDetails user,
+                                                HttpServletRequest request) {
+        boardService.checkBoardOwnership(boardId, user.getUsername(), request.getMethod());
+        Status status = statusService.getStatusById(statusId);
         return new ResponseEntity<>(status, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<Status> addNewStatus(@Valid @RequestBody Status status, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
-        Status createdStatus = statusService.createStatus(status, boardId, user.getUsername());
+    public ResponseEntity<Status> addNewStatus(@Valid @RequestBody Status status,
+                                               @PathVariable String boardId,
+                                               @AuthenticationPrincipal UserDetails user,
+                                               HttpServletRequest request) {
+        boardService.checkBoardOwnership(boardId, user.getUsername(), request.getMethod());
+        Status createdStatus = statusService.createStatus(status, boardId);
         return new ResponseEntity<>(createdStatus, HttpStatus.CREATED);
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status, @PathVariable Integer statusId, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
-        Status updatedStatus = statusService.updateStatus(statusId, status, boardId, user.getUsername());
+    public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status,
+                                               @PathVariable Integer statusId,
+                                               @PathVariable String boardId,
+                                               @AuthenticationPrincipal UserDetails user,
+                                               HttpServletRequest request) {
+        boardService.checkBoardOwnership(boardId, user.getUsername(), request.getMethod());
+        Status updatedStatus = statusService.updateStatus(statusId, status, boardId);
         return new ResponseEntity<>(updatedStatus, HttpStatus.OK);
     }
 
     @DeleteMapping("/{statusId}")
-    public void removeStatus(@PathVariable Integer statusId, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
-        statusService.removeStatus(statusId, boardId, user.getUsername());
+    public void removeStatus(@PathVariable Integer statusId,
+                             @PathVariable String boardId,
+                             @AuthenticationPrincipal UserDetails user,
+                             HttpServletRequest request) {
+        boardService.checkBoardOwnership(boardId, user.getUsername(), request.getMethod());
+        statusService.removeStatus(statusId);
     }
 
     @DeleteMapping("/{statusId}/{newStatusId}")
-    public void transferStatus(@PathVariable Integer statusId, @PathVariable Integer newStatusId, @PathVariable String boardId, @AuthenticationPrincipal UserDetails user) {
-        taskService.transferTaskStatus(statusId, newStatusId, boardId, user.getUsername());
-        statusService.removeStatus(statusId, boardId, user.getUsername());
+    public void transferStatus(@PathVariable Integer statusId,
+                               @PathVariable Integer newStatusId,
+                               @PathVariable String boardId,
+                               @AuthenticationPrincipal UserDetails user,
+                               HttpServletRequest request) {
+        boardService.checkBoardOwnership(boardId, user.getUsername(), request.getMethod());
+        taskService.transferTaskStatus(statusId, newStatusId, boardId);
+        statusService.removeStatus(statusId);
     }
 }

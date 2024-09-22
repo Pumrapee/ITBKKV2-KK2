@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,11 +76,18 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler({DataAccessException.class, HttpMessageNotReadableException.class, BadRequestException.class})
+    @ExceptionHandler({DataAccessException.class, BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleJpaException
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleRequiredRequestBody
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, "Required request body is missing", HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(TaskLimitExceededException.class)
@@ -103,7 +111,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, request);
     }
 
-    @ExceptionHandler({NoResourceFoundException.class})
+    @ExceptionHandler(NoPermission.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<ErrorResponse> handleNoPermissionException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleNoResourceFoundExceptionException
             (Exception exception, WebRequest request) {

@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -11,15 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import sit.int221.kanbanapi.configs.StatusConfig;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.dtos.*;
-import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.UserService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,16 +43,16 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Board> getBoardById(@PathVariable String id, @AuthenticationPrincipal UserDetails user) {
-        User owner = boardService.checkBoardOwnership(id, user.getUsername());
+    public ResponseEntity<Board> getBoardById(@PathVariable String id, @AuthenticationPrincipal UserDetails user, HttpServletRequest request) {
+        User owner = boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
         Board board = boardService.getBoardById(id);
-        BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), new Owner(owner.getOid(), owner.getName()));
+        BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(owner.getOid(), owner.getName()));
         return new ResponseEntity(boardResponseDTO, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/statuses/maximum-task")
-    public ResponseEntity<Board> getBoardTaskLimit(@PathVariable String id, @AuthenticationPrincipal UserDetails user) {
-        User owner = boardService.checkBoardOwnership(id, user.getUsername());
+    public ResponseEntity<Board> getBoardTaskLimit(@PathVariable String id, @AuthenticationPrincipal UserDetails user, HttpServletRequest request) {
+        User owner = boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
         Board board = boardService.getBoardById(id);
         BoardTaskLimitDTO boardTaskLimitDTO = mapper.map(board, BoardTaskLimitDTO.class);
         return new ResponseEntity(boardTaskLimitDTO, HttpStatus.OK);
@@ -63,32 +61,45 @@ public class BoardController {
     @PostMapping("")
     public ResponseEntity<Board> createNewBoard(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardCreateRequestDTO newBoard) {
         Board board = boardService.createBoard(user, newBoard.getName());
-        BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), new Owner(board.getOwnerId(), user.getUsername()));
+        BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
         return new ResponseEntity(newBoardDTO, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Board> updateBoard(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardCreateRequestDTO newBoard, @PathVariable String id) {
+    public ResponseEntity<Board> updateBoard(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardCreateRequestDTO newBoard, @PathVariable String id, HttpServletRequest request) {
+        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
         Board toUpdate = mapper.map(newBoard, Board.class);
-        Board board = boardService.updateBoard(id, toUpdate, user.getUsername());
-        BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), new Owner(board.getOwnerId(), user.getUsername()));
+        Board board = boardService.updateBoard(id, toUpdate);
+        BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
         return new ResponseEntity(newBoardDTO, HttpStatus.OK);
     }
 
     @PatchMapping("/{id}/statuses/maximum-task")
-    public ResponseEntity<Board> updateBoardTaskLimit(@AuthenticationPrincipal UserDetails user, @PathVariable String id, @RequestParam @NotNull Boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
+    public ResponseEntity<Board> updateBoardTaskLimit(@AuthenticationPrincipal UserDetails user, @PathVariable String id, @RequestParam @NotNull Boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus, HttpServletRequest request) {
+        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
         Board board = boardService.getBoardById(id);
         board.setTaskLimitEnabled(taskLimitEnabled);
         board.setMaxTasksPerStatus(maxTasksPerStatus);
-        Board newLimit = boardService.updateBoard(id, board, user.getUsername());
+        Board newLimit = boardService.updateBoard(id, board);
         BoardTaskLimitDTO boardTaskLimitDTO = mapper.map(newLimit, BoardTaskLimitDTO.class);
         return new ResponseEntity(boardTaskLimitDTO, HttpStatus.OK);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Board> updateBoardVisibility(@AuthenticationPrincipal UserDetails user, @PathVariable String id, @Valid @RequestBody BoardVisibilityDTO boardVisibilityRequestDTO, HttpServletRequest request) {
+        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        Board board = boardService.getBoardById(id);
+        board.setVisibility(boardVisibilityRequestDTO.getVisibility());
+        Board newVisibility = boardService.updateBoard(id, board);
+        BoardVisibilityDTO boardVisibilityResponseDTO = mapper.map(newVisibility, BoardVisibilityDTO.class);
+        return new ResponseEntity(boardVisibilityResponseDTO, HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Board> removeBoard(@AuthenticationPrincipal UserDetails user, @PathVariable String id) {
-        Board board = boardService.removeBoard(id, user.getUsername());
-        BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), new Owner(board.getOwnerId(), user.getUsername()));
+    public ResponseEntity<Board> removeBoard(@AuthenticationPrincipal UserDetails user, @PathVariable String id, HttpServletRequest request) {
+        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        Board board = boardService.removeBoard(id);
+        BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
         return new ResponseEntity(newBoardDTO, HttpStatus.OK);
     }
 }
