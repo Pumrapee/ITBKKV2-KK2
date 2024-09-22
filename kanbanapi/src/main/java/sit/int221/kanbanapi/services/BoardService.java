@@ -13,6 +13,8 @@ import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
+import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
+import sit.int221.kanbanapi.exceptions.NoPermission;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +35,7 @@ public class BoardService {
     }
 
     public Board getBoardById(String boardId) {
-        return  boardRepository.findById(boardId).orElseThrow(() -> new BadRequestException("Board "+ boardId + " does not exist"));
+        return  boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board "+ boardId + " does not exist"));
     }
 
     @Transactional
@@ -54,16 +56,14 @@ public class BoardService {
     }
 
     @Transactional
-    public Board removeBoard(String boardId, String username) {
-        checkBoardOwnership(boardId, username);
+    public Board removeBoard(String boardId) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new BadRequestException("Board "+ boardId + " does not exist"));
         boardRepository.delete(board);
         return board;
     }
 
     @Transactional
-    public Board updateBoard(String boardId, Board newBoard, String username) {
-        checkBoardOwnership(boardId, username);
+    public Board updateBoard(String boardId, Board newBoard) {
         Board board = getBoardById(boardId);
         board.setBoardName(newBoard.getBoardName());
         board.setTaskLimitEnabled(newBoard.getTaskLimitEnabled());
@@ -71,11 +71,15 @@ public class BoardService {
         return boardRepository.save(board);
     }
 
-    public User checkBoardOwnership(String boardId, String username) {
+    public User checkBoardOwnership(String boardId, String username, String requestMethod) {
         Board board = getBoardById(boardId);
-        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new BadRequestException("User "+ board.getOwnerId() + " does not exist"));
-        if (!owner.getUsername().equals(username)) {
-            throw new AuthenticationFailed("You do not have permission to perform this action.");
+        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new BadRequestException("User " + board.getOwnerId() + " does not exist"));
+        Boolean isOwner = owner.getUsername().equals(username);
+        if (!isOwner && board.getVisibility().equals("PRIVATE")) {
+            throw new NoPermission("You do not have permission to perform this action.");
+        }
+        if (!isOwner && board.getVisibility().equals("PUBLIC") && !requestMethod.equals("GET")) {
+            throw new NoPermission("You do not have permission to perform this action.");
         }
         return owner;
     }
