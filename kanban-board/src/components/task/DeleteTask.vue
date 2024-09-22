@@ -23,7 +23,7 @@ const cancelDelete = () => {
       <div class="bg-white p-10 rounded-lg w-1/3">
         <div class="itbkk-message text-lg font-semibold text-center">
           <p style="word-wrap: break-word">
-            Do you want to delete the task <br />
+            Do you want to delete the task number <br />
             <span class="text-blue-400"
               >"number {{ detailDelete.index }} -
               {{ detailDelete.title }}"</span

@@ -46,8 +46,12 @@ onMounted(async () => {
       //401
       if (listStatus === 401) {
         expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        console.log("Status onMount 404")
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myStatus.addStatus(listStatus)
       }
-      myStatus.addStatus(listStatus)
     }
   }
 })
@@ -304,7 +308,7 @@ watch(
         <RouterLink :to="{ name: 'AddStatus' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-home btn btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
@@ -325,7 +329,7 @@ watch(
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody class="">
+        <tbody>
           <tr
             v-for="(task, index) in myStatus.getStatus()"
             :key="task.id"
@@ -356,15 +360,15 @@ watch(
               v-if="task.name !== 'No Status' && task.name !== 'Done'"
               class="ml-10 flex"
             >
-              <div class="mr-2">
+              <div class="mr-2 itbkk-button-edit">
                 <router-link
                   :to="{ name: 'EditStatus', params: { statusId: task.id } }"
                 >
                   <button
                     @click="openEditStatus(task.id)"
-                    class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
+                    class="btn btn-ghost h-auto bg-yellow-100"
                   >
-                    <img src="/icons/pen.png" class="w-4" />
+                    <img src="/icons/pen.png" class="w-4 ml-2" />
                   </button>
                 </router-link>
               </div>

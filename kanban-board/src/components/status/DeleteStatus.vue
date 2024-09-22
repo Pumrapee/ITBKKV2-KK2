@@ -65,9 +65,10 @@ const deleteButton = computed(() => {
     <div v-if="showDeleteStatus" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div class="bg-white p-10 rounded-lg w-1/3">
-        <div class="itbkk-message text-lg font-semibold text-center">
-          <p style="word-wrap: break-word">
-            Do you want to delete the <br />
+        <div class=" text-lg font-semibold text-center break-words">
+          <p class="itbkk-message">
+            Do you want to delete the task number 
+            <br />
             <span class="text-blue-400">{{ detailStatus.name }}</span>
             <span> status?</span>
           </p>

@@ -42,7 +42,7 @@ const addEditSave = (editTask) => {
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
   setTimeout(() => {
     editMode.value = false
-  }, 1000)
+  }, 500)
   emits("saveAddEdit", editedTask)
 }
 
@@ -155,7 +155,7 @@ watch(props, () => {
   <!-- Modal window -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="bg-white p-6 rounded-lg w-11/12 max-w-3xl">
+      <div class="itbkk-modal-task bg-white p-6 rounded-lg w-11/12 max-w-3xl">
         <div class="flex justify-between items-center mb-4 border-b-2">
           <h2 class="text-2xl font-bold text-blue-400 mb-2">
             {{
@@ -225,7 +225,14 @@ watch(props, () => {
                   : 'italic text-gray-500'
               "
               placeholder="No Description Provided"
-            ></textarea>
+            >
+            {{
+                newTask.description
+                  ? newTask.description
+                  : "No Description Provided"
+              }}
+          </textarea
+            >
             <div v-if="editMode" class="flex justify-between">
               <p class="text-red-400">
                 {{ errorTask.description }}

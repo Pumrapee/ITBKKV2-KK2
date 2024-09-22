@@ -33,7 +33,7 @@ onMounted(async () => {
 
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-      localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
+      sessionStorage.setItem("BoardName", myBoard.getBoards()[0].name)
     } else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
@@ -54,7 +54,9 @@ const closeAdd = async (nameBoard) => {
     if (statusCode === 201) {
       myBoard.addBoard(newTask)
       router.push({ name: "task", params: { id: newTask.id } })
-      localStorage.setItem("BoardName", newTask.name)
+      myBoard.boardName = newTask.name
+      // localStorage.setItem("BoardName", newTask.name)
+      sessionStorage.setItem("BoardName", newTask.name)
     }
 
     if (statusCode === 401) {
@@ -72,7 +74,7 @@ const closeModal = () => {
 }
 
 const saveBoardName = (name) => {
-  localStorage.setItem("BoardName", name)
+  sessionStorage.setItem("BoardName", name)
 }
 </script>
 
