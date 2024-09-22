@@ -29,8 +29,8 @@ const editMode = ref(false)
 const statusDetail = ref()
 const showTransferModal = ref(false)
 const showDeleteModal = ref(false)
-const boardId = ref()
 const route = useRoute()
+const boardId = ref(route.params.id)
 const expiredToken = ref(false)
 const modalAlert = ref({ message: "", type: "", modal: false })
 
@@ -47,7 +47,6 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        console.log("Status onMount 404")
         router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
@@ -78,6 +77,7 @@ const openEditStatus = async (idStatus) => {
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
       idStatus
     )
+    console.log(statusItem)
     if (statusItem.status === 404) {
       showAlert("An error has occurred, the status does not exist.", "error")
       myStatus.removeStatus(idStatus)
@@ -274,10 +274,24 @@ const closeModal = () => {
   router.push({ name: "tableStatus" })
 }
 
+// route path ถ้าไม่มี id นั้น
 watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
+  () => route.params.statusId,
+  async (newId, oldId) => {
+    myUser.setToken()
+    if (isTokenExpired(myUser.token)) {
+      expiredToken.value = true
+    } else {
+      if (newId !== undefined) {
+        const res = await getItemById(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
+          newId
+        )
+        if (res.status === 404) {
+          router.push({ name: "TaskNotFound" })
+        }
+      }
+    }
   },
   { immediate: true }
 )

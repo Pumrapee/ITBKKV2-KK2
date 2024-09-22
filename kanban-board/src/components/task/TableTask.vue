@@ -34,7 +34,7 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
-const boardId = ref()
+const boardId = ref(route.params.id)
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
 const boardName = ref(sessionStorage.getItem("BoardName"))
@@ -58,12 +58,18 @@ onMounted(async () => {
       if (listTasks === 401) {
         expiredToken.value = true
       } else if (listTasks.status === 404) {
-        console.log("Task onMount 404")
         router.push({ name: "TaskNotFound" })
       } else {
         myTask.addTasks(listTasks)
       }
     }
+
+  
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -73,7 +79,6 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        console.log("Status onMount 404")
         router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
@@ -87,7 +92,6 @@ onMounted(async () => {
     if (limitStatus === 401) {
       expiredToken.value = true
     } else if (limitStatus.status === 404) {
-      console.log("Limit Status onMount 404")
       router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
@@ -372,13 +376,6 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
@@ -574,7 +571,7 @@ watch(
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link :to="{ name: 'detailTask' }">
+              <router-link :to="{ name: 'detailTask' , params: { taskId: task.id }  }">
                 <button
                   @click="openModalEdit(task.id)"
                   class="btn btn-ghost h-2"

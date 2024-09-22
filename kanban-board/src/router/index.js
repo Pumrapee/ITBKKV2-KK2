@@ -37,7 +37,7 @@ const router = createRouter({
       component: HomeView,
       children: [
         {
-          path: "task",
+          path: "task/:taskId",
           name: "detailTask",
           component: AddEditTask,
         },
