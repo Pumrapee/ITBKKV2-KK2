@@ -44,7 +44,7 @@ public class BoardController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoardById(@PathVariable String id, @AuthenticationPrincipal UserDetails user, HttpServletRequest request) {
-        User owner = boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        User owner = boardService.checkBoardOwnership(id, user, request.getMethod());
         Board board = boardService.getBoardById(id);
         BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(owner.getOid(), owner.getName()));
         return new ResponseEntity(boardResponseDTO, HttpStatus.OK);
@@ -52,7 +52,7 @@ public class BoardController {
 
     @GetMapping("/{id}/statuses/maximum-task")
     public ResponseEntity<Board> getBoardTaskLimit(@PathVariable String id, @AuthenticationPrincipal UserDetails user, HttpServletRequest request) {
-        User owner = boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        User owner = boardService.checkBoardOwnership(id, user, request.getMethod());
         Board board = boardService.getBoardById(id);
         BoardTaskLimitDTO boardTaskLimitDTO = mapper.map(board, BoardTaskLimitDTO.class);
         return new ResponseEntity(boardTaskLimitDTO, HttpStatus.OK);
@@ -67,7 +67,7 @@ public class BoardController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Board> updateBoard(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardCreateRequestDTO newBoard, @PathVariable String id, HttpServletRequest request) {
-        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        boardService.checkBoardOwnership(id, user, request.getMethod());
         Board toUpdate = mapper.map(newBoard, Board.class);
         Board board = boardService.updateBoard(id, toUpdate);
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
@@ -76,7 +76,7 @@ public class BoardController {
 
     @PatchMapping("/{id}/statuses/maximum-task")
     public ResponseEntity<Board> updateBoardTaskLimit(@AuthenticationPrincipal UserDetails user, @PathVariable String id, @RequestParam @NotNull Boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus, HttpServletRequest request) {
-        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        boardService.checkBoardOwnership(id, user, request.getMethod());
         Board board = boardService.getBoardById(id);
         board.setTaskLimitEnabled(taskLimitEnabled);
         board.setMaxTasksPerStatus(maxTasksPerStatus);
@@ -87,7 +87,7 @@ public class BoardController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Board> updateBoardVisibility(@AuthenticationPrincipal UserDetails user, @PathVariable String id, @Valid @RequestBody BoardVisibilityDTO boardVisibilityRequestDTO, HttpServletRequest request) {
-        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        boardService.checkBoardOwnership(id, user, request.getMethod());
         Board board = boardService.getBoardById(id);
         board.setVisibility(boardVisibilityRequestDTO.getVisibility());
         Board newVisibility = boardService.updateBoard(id, board);
@@ -97,7 +97,7 @@ public class BoardController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Board> removeBoard(@AuthenticationPrincipal UserDetails user, @PathVariable String id, HttpServletRequest request) {
-        boardService.checkBoardOwnership(id, user.getUsername(), request.getMethod());
+        boardService.checkBoardOwnership(id, user, request.getMethod());
         Board board = boardService.removeBoard(id);
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
         return new ResponseEntity(newBoardDTO, HttpStatus.OK);

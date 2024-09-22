@@ -57,6 +57,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     jwtToken = requestTokenHeader.substring(7);
                     try {
                         username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                        Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
+                        String tokenType = claims.get("token_type", String.class);
+                        if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
+                            throw new AuthenticationFailed("Invalid token type");
+                        }
                     } catch (IllegalArgumentException e) {
                         throw new AuthenticationFailed("Unable to get JWT Token");
                     } catch (ExpiredJwtException e) {
@@ -69,14 +74,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 } else {
                     throw new AuthenticationFailed("JWT Token does not begin with Bearer String");
                 }
+            } else if (request.getMethod().equals("GET")){
+                chain.doFilter(request, response);
+                return;
             } else {
                 throw new AuthenticationFailed("Authorization header missing");
-            }
-
-            Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
-            String tokenType = claims.get("token_type", String.class);
-            if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
-                throw new AuthenticationFailed("Invalid token type");
             }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
