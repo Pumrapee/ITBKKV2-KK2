@@ -28,16 +28,12 @@ onMounted(async () => {
       if (listBoard === 401) {
         expiredToken.value = true
       }
-
-      if (listBoard === 400){
-        alert("2222")
-      }
       myBoard.addBoards(listBoard)
     }
 
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-      localStorage.setItem("BoardName", myBoard.getBoards()[0].name)
+      sessionStorage.setItem("BoardName", myBoard.getBoards()[0].name)
     } else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
@@ -61,7 +57,6 @@ const closeAdd = async (nameBoard) => {
       myBoard.boardName = newTask.name
       // localStorage.setItem("BoardName", newTask.name)
       sessionStorage.setItem("BoardName", newTask.name)
-
     }
 
     if (statusCode === 401) {
@@ -79,7 +74,7 @@ const closeModal = () => {
 }
 
 const saveBoardName = (name) => {
-  localStorage.setItem("BoardName", name)
+  sessionStorage.setItem("BoardName", name)
 }
 </script>
 

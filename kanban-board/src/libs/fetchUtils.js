@@ -51,6 +51,7 @@ async function getItems(url) {
   } catch (error) {
     if (data.status === 404) return 404
     if (data.status === 401) return 401
+    if (data.status === 400) return 400
   }
 }
 
@@ -69,6 +70,7 @@ async function getStatusLimits(url) {
   } catch (error) {
     if (data.status === 404) return 404
     if (data.status === 401) return 401
+    if (data.status === 400) return 400
   }
 }
 

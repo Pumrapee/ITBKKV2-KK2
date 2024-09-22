@@ -23,10 +23,7 @@ export const useAuthStore = defineStore("auth", () => {
     token.value = tokenIsUser
     user.value = jwtDecode(tokenIsUser)
     //username
-    // userName.value = user.value.name
-    // localStorage.setItem("user", user.value.name)
     sessionStorage.setItem("user", user.value.name)
-
   }
 
   const logout = () => {
@@ -39,6 +36,7 @@ export const useAuthStore = defineStore("auth", () => {
     myBoard.navBoard = false
     router.push({ name: "login" })
     localStorage.clear()
+    sessionStorage.clear()
   }
 
   const setToken = () => {

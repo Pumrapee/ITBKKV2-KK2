@@ -37,8 +37,6 @@ const editDrop = ref(false)
 const boardId = ref()
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
-// const boardName = ref(localStorage.getItem("BoardName"))
-// const boardName = ref(myBoard.boardName)
 const boardName = ref(sessionStorage.getItem("BoardName"))
 const emits = defineEmits(["closeAddModal"])
 
@@ -56,8 +54,12 @@ onMounted(async () => {
       const listTasks = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
       )
+
       if (listTasks === 401) {
         expiredToken.value = true
+      } else if (listTasks.status === 404) {
+        console.log("Task onMount 404")
+        router.push({ name: "TaskNotFound" })
       } else {
         myTask.addTasks(listTasks)
       }
@@ -70,6 +72,9 @@ onMounted(async () => {
       )
       if (listStatus === 401) {
         expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        console.log("Status onMount 404")
+        router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
       }
@@ -81,6 +86,9 @@ onMounted(async () => {
     )
     if (limitStatus === 401) {
       expiredToken.value = true
+    } else if (limitStatus.status === 404) {
+      console.log("Limit Status onMount 404")
+      router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
     }

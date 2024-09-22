@@ -46,7 +46,7 @@ export const useBoardStore = defineStore("board", () => {
     removeBoards,
     clearBoard,
     navBoard,
-    boardName
+    boardName,
   }
 })
 

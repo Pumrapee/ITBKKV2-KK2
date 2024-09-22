@@ -46,8 +46,12 @@ onMounted(async () => {
       //401
       if (listStatus === 401) {
         expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        console.log("Status onMount 404")
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myStatus.addStatus(listStatus)
       }
-      myStatus.addStatus(listStatus)
     }
   }
 })
@@ -356,13 +360,13 @@ watch(
               v-if="task.name !== 'No Status' && task.name !== 'Done'"
               class="ml-10 flex"
             >
-              <div class="mr-2">
+              <div class="mr-2 itbkk-button-edit">
                 <router-link
                   :to="{ name: 'EditStatus', params: { statusId: task.id } }"
                 >
                   <button
                     @click="openEditStatus(task.id)"
-                    class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
+                    class="btn btn-ghost h-auto bg-yellow-100"
                   >
                     <img src="/icons/pen.png" class="w-4 ml-2" />
                   </button>
