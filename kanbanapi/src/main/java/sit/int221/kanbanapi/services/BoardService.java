@@ -18,6 +18,7 @@ import sit.int221.kanbanapi.exceptions.NoPermission;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BoardService {
@@ -71,14 +72,19 @@ public class BoardService {
         return boardRepository.save(board);
     }
 
-    public User checkBoardOwnership(String boardId, String username, String requestMethod) {
+    public User checkBoardOwnership(String boardId, UserDetails user, String requestMethod) {
         Board board = getBoardById(boardId);
         User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new BadRequestException("User " + board.getOwnerId() + " does not exist"));
-        Boolean isOwner = owner.getUsername().equals(username);
-        if (!isOwner && board.getVisibility().equals("PRIVATE")) {
-            throw new NoPermission("You do not have permission to perform this action.");
-        }
-        if (!isOwner && board.getVisibility().equals("PUBLIC") && !requestMethod.equals("GET")) {
+        if (user != null) {
+            String username = user.getUsername();
+            Boolean isOwner = owner.getUsername().equals(username);
+            if (!isOwner && board.getVisibility().equals("PRIVATE")) {
+                throw new NoPermission("You do not have permission to perform this action.");
+            }
+            if (!isOwner && board.getVisibility().equals("PUBLIC") && !requestMethod.equals("GET")) {
+                throw new NoPermission("You do not have permission to perform this action.");
+            }
+        } else if (board.getVisibility().equals("PRIVATE") || !requestMethod.equals("GET")){
             throw new NoPermission("You do not have permission to perform this action.");
         }
         return owner;
