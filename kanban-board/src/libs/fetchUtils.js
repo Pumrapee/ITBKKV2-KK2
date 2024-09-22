@@ -2,7 +2,7 @@
 let token = undefined
 
 function getToken() {
-  token = localStorage.getItem("token")
+  token = sessionStorage.getItem("token")
 }
 
 //เช็คว่า Token หมดอายุ
