@@ -225,6 +225,29 @@ async function login(url, userName, password) {
   }
 }
 
+async function Visibility(boardId, newVisibility) {
+  getToken()
+  try {
+    const res = await fetch(`http://localhost:8080/v3/boards/${boardId}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        visibility: newVisibility,
+      }),
+    })
+    const statusCode = res.status
+    const responseBody = await res.json()
+
+    return { responseBody, statusCode }
+  } catch (error) {
+    console.error("Error in patching visibility", error)
+  }
+}
+
+
 export {
   getItems,
   getItemById,
@@ -238,4 +261,5 @@ export {
   login,
   getToken,
   isTokenExpired,
+  Visibility,
 }

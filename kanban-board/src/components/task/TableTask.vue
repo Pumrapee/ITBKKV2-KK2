@@ -1,9 +1,9 @@
 <script setup>
-import { useTaskStore } from "@/stores/taskStore"
-import { useStatusStore } from "@/stores/statusStore"
-import { useLimitStore } from "@/stores/limitStore"
-import { useAuthStore } from "@/stores/loginStore"
-import { useBoardStore } from "@/stores/boardStore"
+import { useTaskStore } from '@/stores/taskStore'
+import { useStatusStore } from '@/stores/statusStore'
+import { useLimitStore } from '@/stores/limitStore'
+import { useAuthStore } from '@/stores/loginStore'
+import { useBoardStore } from '@/stores/boardStore'
 import {
   getItemById,
   editItem,
@@ -12,15 +12,16 @@ import {
   getItems,
   getStatusLimits,
   isTokenExpired,
-} from "@/libs/fetchUtils"
-import { defineEmits, computed, ref, watch, onMounted } from "vue"
-import AddEditTask from "./AddEditTask.vue"
-import DeleteTask from "./DeleteTask.vue"
-import LimitTask from "./LimitTask.vue"
-import ExpireToken from "../toast/ExpireToken.vue"
-import router from "@/router"
-import AlertComponent from "../toast/Alert.vue"
-import { useRoute } from "vue-router"
+  Visibility
+} from '@/libs/fetchUtils'
+import { defineEmits, computed, ref, watch, onMounted } from 'vue'
+import AddEditTask from './AddEditTask.vue'
+import DeleteTask from './DeleteTask.vue'
+import LimitTask from './LimitTask.vue'
+import ExpireToken from '../toast/ExpireToken.vue'
+import router from '@/router'
+import AlertComponent from '../toast/Alert.vue'
+import { useRoute } from 'vue-router'
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
@@ -35,10 +36,10 @@ const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
 const boardId = ref(route.params.id)
-const modalAlert = ref({ message: "", type: "", modal: false })
+const modalAlert = ref({ message: '', type: '', modal: false })
 const expiredToken = ref(false)
-const boardName = ref(sessionStorage.getItem("BoardName"))
-const emits = defineEmits(["closeAddModal"])
+const boardName = ref(sessionStorage.getItem('BoardName'))
+const emits = defineEmits(['closeAddModal'])
 
 onMounted(async () => {
   myUser.setToken()
@@ -58,18 +59,16 @@ onMounted(async () => {
       if (listTasks === 401) {
         expiredToken.value = true
       } else if (listTasks.status === 404) {
-        router.push({ name: "TaskNotFound" })
+        router.push({ name: 'TaskNotFound' })
       } else {
         myTask.addTasks(listTasks)
       }
     }
 
-  
     const boardIdNumber = await getItemById(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardId.value
     )
-
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -79,7 +78,7 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        router.push({ name: "TaskNotFound" })
+        router.push({ name: 'TaskNotFound' })
       } else {
         myStatus.addStatus(listStatus)
       }
@@ -92,7 +91,7 @@ onMounted(async () => {
     if (limitStatus === 401) {
       expiredToken.value = true
     } else if (limitStatus.status === 404) {
-      router.push({ name: "TaskNotFound" })
+      router.push({ name: 'TaskNotFound' })
     } else {
       myLimit.addLimit(limitStatus)
     }
@@ -104,7 +103,7 @@ const showAlert = (message, type) => {
   modalAlert.value = {
     message,
     type,
-    modal: true,
+    modal: true
   }
   setTimeout(() => {
     modalAlert.value.modal = false
@@ -132,7 +131,7 @@ const openModalEdit = async (id, boolean) => {
     tasks.value = taskDetail
 
     if (taskDetail.status === 404) {
-      router.push({ name: "TaskNotFound" })
+      router.push({ name: 'TaskNotFound' })
       myTask.removeTasks(id)
       router.go(-1)
     } else {
@@ -152,14 +151,14 @@ const openModalAdd = () => {
   openModal.value = true
   editMode.value = true
   const selected = ref()
-  selected.value = "No Status"
+  selected.value = 'No Status'
 
   tasks.value = {
     id: undefined,
-    title: "",
-    description: "",
-    assignees: "",
-    status: selected.value,
+    title: '',
+    description: '',
+    assignees: '',
+    status: selected.value
   }
 }
 
@@ -169,7 +168,7 @@ const openDeleteModal = (id, title, index) => {
   listDelete.value = {
     id: id,
     title: title,
-    index: index + 1,
+    index: index + 1
   }
 }
 
@@ -188,18 +187,18 @@ const closeAddEdit = async (task) => {
           title: task.title,
           description: task.description,
           assignees: task.assignees,
-          status: task.status,
+          status: task.status
         }
       )
 
       if (statusCode === 200) {
         myTask.updateTask(editedItem)
-        showAlert("The task has been updated", "success")
+        showAlert('The task has been updated', 'success')
       }
 
       if (statusCode === 400 || statusCode === 404) {
         myTask.removeTasks(task.id)
-        showAlert("An error has occurred, the task does not exist.", "error")
+        showAlert('An error has occurred, the task does not exist.', 'error')
       }
 
       if (statusCode === 401) {
@@ -215,12 +214,12 @@ const closeAddEdit = async (task) => {
 
       if (statusCode === 201) {
         myTask.addTask(newTask)
-        showAlert("The task has been successfully added", "success")
+        showAlert('The task has been successfully added', 'success')
       }
 
       //Alert status
       if (statusCode === 400) {
-        showAlert("An error has occurred, the task does not exist.", "error")
+        showAlert('An error has occurred, the task does not exist.', 'error')
       }
 
       if (statusCode === 401) {
@@ -248,12 +247,12 @@ const closeDeleteModal = async (id) => {
 
     if (deleteItem === 200) {
       myTask.removeTasks(id)
-      showAlert("The task has been deleted", "success")
+      showAlert('The task has been deleted', 'success')
     }
 
     if (deleteItem === 400) {
       myTask.removeTasks(id)
-      showAlert("An error has occurred, the task does not exist.", "error")
+      showAlert('An error has occurred, the task does not exist.', 'error')
     }
 
     if (deleteItem === 401) {
@@ -268,13 +267,13 @@ const closeLimitModal = (maxLimit, limitBoolean, expiredToken) => {
   if (limitBoolean === false && expiredToken === false) {
     showAlert(
       `The Kanban board has disabled the task limit in each status.`,
-      "success"
+      'success'
     )
   }
   if (limitBoolean === true && expiredToken === false) {
     showAlert(
       `The Kanban board now limits ${maxLimit} tasks in each status.`,
-      "success"
+      'success'
     )
   }
 
@@ -287,33 +286,33 @@ const closeModal = () => {
   showLimitModal.value = false
   editMode.value = false
 
-  router.push({ name: "task" })
+  router.push({ name: 'task' })
 }
 
 //Sort status
-const sortStatus = ref("default")
+const sortStatus = ref('default')
 const listTaskStore = ref(myTask.getTasks())
 
 const handleSortChange = async (status) => {
   // default -> asc -> desc
   // ถ้าเป็น default -> asc
-  if (status === "default") {
+  if (status === 'default') {
     listTaskStore.value = myTask
       .getTasks()
       .sort((a, b) => a.status.localeCompare(b.status))
-    sortStatus.value = "asc"
+    sortStatus.value = 'asc'
   }
   // ถ้าเป็น asc -> desc
-  if (status === "asc") {
+  if (status === 'asc') {
     listTaskStore.value = myTask
       .getTasks()
       .sort((a, b) => b.status.localeCompare(a.status))
-    sortStatus.value = "desc"
+    sortStatus.value = 'desc'
   }
   // ถ้าเป็น desc -> default
-  if (status === "desc") {
+  if (status === 'desc') {
     listTaskStore.value = myTask.getTasks().sort((a, b) => a.id - b.id)
-    sortStatus.value = "default"
+    sortStatus.value = 'default'
   }
 }
 
@@ -368,7 +367,7 @@ watch(
           newId
         )
         if (res.status === 404) {
-          router.push({ name: "TaskNotFound" })
+          router.push({ name: 'TaskNotFound' })
         }
       }
     }
@@ -376,14 +375,90 @@ watch(
   { immediate: true }
 )
 
+const isPrivate = ref(true) // เริ่มต้นเป็น private
+const showModal = ref(false) // ควบคุมการแสดง modal
+
+// เปิด modal เมื่อคลิกที่ toggle
+const openModalVisibility = () => {
+  showModal.value = true
+}
+
+// ยืนยันการเปลี่ยนแปลง visibility
+const confirmVisibilityChange = async () => {
+  showModal.value = false
+  const newVisibility = isPrivate.value ? 'PUBLIC' : 'PRIVATE'
+
+  const { statusCode } = await Visibility(boardId.value, newVisibility)
+
+  if (statusCode === 200) {
+    alert(`Visibility changed to ${newVisibility}`)
+    isPrivate.value = !isPrivate.value // อัปเดตค่า toggle ให้สอดคล้องกับ visibility
+  } else if (statusCode === 401) {
+    alert('Authentication expired. Redirecting to login.')
+    router.push({ name: 'login' }) // Redirect ไปที่หน้า login
+  } else if (statusCode === 403) {
+    alert('You do not have permission to change board visibility')
+  } else {
+    alert('An error occurred. Please try again later.')
+  }
+}
+
+// ยกเลิกการเปลี่ยนแปลง visibility
+const cancelVisibilityChange = () => {
+  showModal.value = false
+}
+
+// ดึงค่า visibility เมื่อโหลดหน้าแรก
+onMounted(async () => {
+  const boardData = await getItemById(
+    `${import.meta.env.VITE_API_URL}v3/boards`,
+    boardId.value
+  )
+
+  if (boardData.visibility === 'PRIVATE') {
+    isPrivate.value = true // เริ่มต้นค่าเป็น private
+  } else if (boardData.visibility === 'PUBLIC') {
+    isPrivate.value = false // เริ่มต้นค่าเป็น public
+  }
+})
 </script>
 
 <template>
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-10 ml-60">
-    <div class="font-bold text-4xl text-black self-center pb-5">
-      {{ boardName }}
+    <div
+      class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between"
+    >
+      <span>{{ boardName }}</span>
+      <div class="form-control">
+        <label class="label cursor-pointer flex items-center">
+          <!-- Toggle Visibility -->
+          <input
+            type="checkbox"
+            class="toggle m-2"
+            @click="openModalVisibility"
+          />
+          <span class="label-text">{{ isPrivate ? 'Private' : 'Public' }}</span>
+        </label>
+      </div>
     </div>
+
+    <!-- Modal for Visibility Confirmation -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-box">
+        <p>
+          Do you want to change board visibility to
+          {{ isPrivate ? 'Public' : 'Private' }}?
+        </p>
+        <div class="modal-action">
+          <button @click="confirmVisibilityChange" class="btn btn-primary">
+            Confirm
+          </button>
+          <button @click="cancelVisibilityChange" class="btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Filter Search-->
     <div class="flex justify-between w-4/5">
       <div class="flex justify-start items-center mt-4">
@@ -409,7 +484,7 @@ watch(
                 role="button"
                 class="p-1 text-gray-400 flex-grow min-w-[120px] outline-none cursor-pointer"
               >
-                {{ filterStatus.length > 0 ? "" : "Filter Enter..." }}
+                {{ filterStatus.length > 0 ? '' : 'Filter Enter...' }}
               </div>
             </div>
             <ul
@@ -432,7 +507,7 @@ watch(
                     <div
                       class="shadow-md rounded-full font-medium p-2 text-black w-36 h-10 text-center mb-2 break-all"
                       :style="{
-                        backgroundColor: myStatus.getStatusColor(status.name),
+                        backgroundColor: myStatus.getStatusColor(status.name)
                       }"
                     >
                       <span class="label-text">{{ status.name }}</span>
@@ -533,7 +608,7 @@ watch(
                   xmlns="http://www.w3.org/2000/svg"
                   :class="{
                     'text-blue-500': sortStatus === 'default',
-                    '': sortStatus !== 'default',
+                    '': sortStatus !== 'default'
                   }"
                   width="20"
                   height="20"
@@ -550,7 +625,7 @@ watch(
                           default:
                             'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
                           asc: 'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
-                          desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z',
+                          desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z'
                         }[sortStatus]
                       "
                     />
@@ -571,7 +646,9 @@ watch(
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link :to="{ name: 'detailTask' , params: { taskId: task.id }  }">
+              <router-link
+                :to="{ name: 'detailTask', params: { taskId: task.id } }"
+              >
                 <button
                   @click="openModalEdit(task.id)"
                   class="btn btn-ghost h-2"
@@ -590,7 +667,7 @@ watch(
               <div
                 class="shadow-md rounded-full p-2 text-black w-36 text-center font-medium"
                 :style="{
-                  'background-color': myStatus.getStatusColor(task.status),
+                  'background-color': myStatus.getStatusColor(task.status)
                 }"
               >
                 {{ task.status }}
