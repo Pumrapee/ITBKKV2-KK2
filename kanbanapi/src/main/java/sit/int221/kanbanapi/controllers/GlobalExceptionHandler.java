@@ -125,12 +125,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponse> handleAllUncaughtException
-            (Exception exception, WebRequest request) {
-        return buildErrorResponse(exception, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
-    }
+//    @ExceptionHandler(Exception.class)
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public ResponseEntity<ErrorResponse> handleAllUncaughtException
+//            (Exception exception, WebRequest request) {
+//        return buildErrorResponse(exception, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
+//    }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(
             Exception exception, HttpStatus httpStatus, WebRequest request) {

@@ -53,9 +53,9 @@ public class TaskService {
         }
     }
 
-    public Task getTaskById(Integer id) {
-        return repository.findById(id).orElseThrow(
-                () -> new ItemNotFoundException("Task id " + id + " does not exist !!!"));
+    public Task getTaskById(String boardId,Integer id) {
+        Task task = checkBoardTask(boardId, id);
+        return task;
     }
 
     @Transactional
@@ -71,8 +71,8 @@ public class TaskService {
     }
 
     @Transactional
-    public Task removeTask(Integer id) {
-        Task task = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
+    public Task removeTask(String boardId, Integer id) {
+        Task task = checkBoardTask(boardId, id);
         repository.delete(task);
         return task;
     }
@@ -80,7 +80,9 @@ public class TaskService {
     @Transactional
     public Task updateTask(Integer id, Task task, String boardId) {
         Board board = boardService.getBoardById(boardId);
-        task.setBoard(board);
+        if (board != task.getBoard()) {
+            throw new BadRequestException("Task " + id + " is not belong to board " + board.getId() + " !!!");
+        }
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
                 || statusLimitCheck(boardId, countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));
@@ -102,6 +104,9 @@ public class TaskService {
         Board board = boardService.getBoardById(boardId);
         Status oldStatus = statusRepository.findById(id).orElseThrow(() -> new BadRequestException("The specified status for task transfer does not exist"));
         Status newStatus = statusRepository.findById(newId).orElseThrow(() -> new BadRequestException("The specified status for task transfer does not exist"));
+        if (!oldStatus.getBoard().equals(board) || !newStatus.getBoard().equals(board)) {
+            throw new BadRequestException("Status " + id + "or" + newId + " is not belong to board " + board.getId() + " !!!");
+        }
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(oldStatus.getName())){
             throw new BadRequestException("The status name '"+ oldStatus.getName() + "' cannot be transferred");
         }
@@ -132,7 +137,7 @@ public class TaskService {
         }
     }
 
-    public boolean allStatusLimitCheck(StatusConfig newConfig, String boardId) {
+    public Boolean allStatusLimitCheck(StatusConfig newConfig, String boardId) {
         Board board = boardService.getBoardById(boardId);
         if (newConfig.getTaskLimitEnabled()) {
             return repository.countTasksByStatus(board).stream().allMatch(tasks -> tasks <= newConfig.getMaxTasksPerStatus());
@@ -140,5 +145,14 @@ public class TaskService {
             return true;
         }
     }
+    private Task checkBoardTask(String boardId, Integer id) {
+        Board board = boardService.getBoardById(boardId);
+        Task task = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Task " + id + " does not exist !!!"));
+        if (!task.getBoard().equals(board)) {
+            throw new BadRequestException("Task " + id + " is not belong to board " + board.getId() + " !!!");
+        }
+        return task;
+    }
+
 }
 

@@ -31,6 +31,9 @@ public class BoardService {
     @Autowired
     private StatusRepository statusRepository;
 
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+
     public List<Board> getUserBoards(String user) {
         return boardRepository.findByOwnerId(userRepository.findByUsername(user).getOid());
     }
@@ -72,8 +75,9 @@ public class BoardService {
         return boardRepository.save(board);
     }
 
-    public User checkBoardOwnership(String boardId, UserDetails user, String requestMethod) {
+    public User checkBoardOwnership(String boardId, String requestMethod) {
         Board board = getBoardById(boardId);
+        UserDetails user = jwtUserDetailsService.getCurrentUser();
         User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new BadRequestException("User " + board.getOwnerId() + " does not exist"));
         if (user != null) {
             String username = user.getUsername();
