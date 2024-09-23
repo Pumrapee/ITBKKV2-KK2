@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.configs.StatusConfig;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
@@ -24,6 +25,9 @@ public class StatusService {
     private BoardService boardService;
 
     @Autowired
+    private BoardRepository boardRepository;
+
+    @Autowired
     private StatusConfig configuration;
 
     public List<Status> getAllStatus() {
@@ -34,9 +38,9 @@ public class StatusService {
         return repository.findAllByBoard(board);
     }
 
-    public Status getStatusById(Integer id) {
-        return repository.findById(id).orElseThrow(
-                () -> new ItemNotFoundException("Status " + id + " does not exist !!!"));
+    public Status getStatusById(String boardId, Integer id) {
+        Status status = checkBoardStatus(boardId, id);
+        return status;
     }
 
     @Transactional
@@ -50,8 +54,8 @@ public class StatusService {
     }
 
     @Transactional
-    public Status removeStatus(Integer id) {
-        Status status = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
+    public Status removeStatus(String boardId, Integer id) {
+        Status status = checkBoardStatus(boardId, id);
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(status.getName())) {
             throw new BadRequestException("The status name '"+ status.getName() + "' cannot be deleted.");
         } else {
@@ -64,6 +68,9 @@ public class StatusService {
     public Status updateStatus(Integer id, Status status, String boardId) {
         Board board = boardService.getBoardById(boardId);
         Status existingStatus = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
+        if (!status.getBoard().equals(board)) {
+            throw new BadRequestException("Status " + id + " is not belong to board " + board.getId() + " !!!");
+        }
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(existingStatus.getName())) {
             throw new BadRequestException("The status name '" + existingStatus.getName() + "' cannot be changed.");
         }
@@ -78,7 +85,16 @@ public class StatusService {
 
     public Status getStatusByName(String statusName, String boardId) {
         Board board = boardService.getBoardById(boardId);
-        return repository.findByNameAndBoard(statusName, board).orElseThrow(
-                () -> new BadRequestException("Status " + statusName + " does not exist"));
+        Status status = repository.findByNameAndBoard(statusName, board).orElseThrow(() -> new BadRequestException("Status " + statusName + " does not exist"));
+        return status;
+    }
+
+    private Status checkBoardStatus(String boardId, Integer id) {
+        Board board = boardService.getBoardById(boardId);
+        Status status = repository.findById(id).orElseThrow(() -> new ItemNotFoundException("Status " + id + " does not exist !!!"));
+        if (!status.getBoard().equals(board)) {
+            throw new BadRequestException("Status " + id + " is not belong to board " + board.getId() + " !!!");
+        }
+        return status;
     }
 }
