@@ -22,6 +22,7 @@ import ExpireToken from '../toast/ExpireToken.vue'
 import router from '@/router'
 import AlertComponent from '../toast/Alert.vue'
 import { useRoute } from 'vue-router'
+import ModalVisibility from '../toast/ModalVisibility.vue'
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
@@ -375,40 +376,36 @@ watch(
   { immediate: true }
 )
 
-const isPrivate = ref(true) // เริ่มต้นเป็น private
-const showModal = ref(false) // ควบคุมการแสดง modal
+const isPrivate = ref(true)
+const showModalVisibility = ref(false)
 
-// เปิด modal เมื่อคลิกที่ toggle
 const openModalVisibility = () => {
-  showModal.value = true
+  showModalVisibility.value = true
 }
 
-// ยืนยันการเปลี่ยนแปลง visibility
 const confirmVisibilityChange = async () => {
-  showModal.value = false
+  showModalVisibility.value = false
   const newVisibility = isPrivate.value ? 'PUBLIC' : 'PRIVATE'
 
   const { statusCode } = await Visibility(boardId.value, newVisibility)
 
   if (statusCode === 200) {
-    alert(`Visibility changed to ${newVisibility}`)
-    isPrivate.value = !isPrivate.value // อัปเดตค่า toggle ให้สอดคล้องกับ visibility
+    console.log(`Visibility changed to ${newVisibility}`)
+    isPrivate.value = !isPrivate.value
   } else if (statusCode === 401) {
-    alert('Authentication expired. Redirecting to login.')
-    router.push({ name: 'login' }) // Redirect ไปที่หน้า login
+    console.error('Authentication expired. Redirecting to login.')
+    router.push({ name: 'login' })
   } else if (statusCode === 403) {
-    alert('You do not have permission to change board visibility')
+    console.error('You do not have permission to change board visibility')
   } else {
-    alert('An error occurred. Please try again later.')
+    console.error('An error occurred. Please try again later.')
   }
 }
 
-// ยกเลิกการเปลี่ยนแปลง visibility
 const cancelVisibilityChange = () => {
-  showModal.value = false
+  showModalVisibility.value = false
 }
 
-// ดึงค่า visibility เมื่อโหลดหน้าแรก
 onMounted(async () => {
   const boardData = await getItemById(
     `${import.meta.env.VITE_API_URL}v3/boards`,
@@ -416,9 +413,9 @@ onMounted(async () => {
   )
 
   if (boardData.visibility === 'PRIVATE') {
-    isPrivate.value = true // เริ่มต้นค่าเป็น private
+    isPrivate.value = true
   } else if (boardData.visibility === 'PUBLIC') {
-    isPrivate.value = false // เริ่มต้นค่าเป็น public
+    isPrivate.value = false
   }
 })
 </script>
@@ -440,22 +437,6 @@ onMounted(async () => {
           />
           <span class="label-text">{{ isPrivate ? 'Private' : 'Public' }}</span>
         </label>
-      </div>
-    </div>
-
-    <!-- Modal for Visibility Confirmation -->
-    <div v-if="showModal" class="modal">
-      <div class="modal-box">
-        <p>
-          Do you want to change board visibility to
-          {{ isPrivate ? 'Public' : 'Private' }}?
-        </p>
-        <div class="modal-action">
-          <button @click="confirmVisibilityChange" class="btn btn-primary">
-            Confirm
-          </button>
-          <button @click="cancelVisibilityChange" class="btn">Cancel</button>
-        </div>
       </div>
     </div>
 
@@ -764,6 +745,14 @@ onMounted(async () => {
 
   <!-- <ExpireToken :showExpiredModal="expiredToken" /> -->
   <ExpireToken v-if="expiredToken" />
+
+  <!-- Use VisibilityModal -->
+  <ModalVisibility
+    :isPrivate="isPrivate"
+    :showModalVisibility="showModalVisibility"
+    @confirm="confirmVisibilityChange"
+    @cancel="cancelVisibilityChange"
+  />
 </template>
 
 <style scoped>
