@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v3/boards")
-@CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
+@CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th", "http://localhost:5173", "http://intproj23.sit.kmutt.ac.th", "https://intproj23.sit.kmutt.ac.th"})
 public class BoardController {
     @Autowired
     BoardService boardService;
@@ -34,9 +34,7 @@ public class BoardController {
     UserService userService;
     @Autowired
     ModelMapper mapper;
-    @Qualifier("securityFilterChain")
-    @Autowired
-    private SecurityFilterChain securityFilterChain;
+
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
