@@ -28,9 +28,8 @@ public class StatusController {
 
     @GetMapping("")
     public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId,
-                                                     @AuthenticationPrincipal UserDetails user,
                                                      HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, user, request.getMethod());
+        boardService.checkBoardOwnership(boardId, request.getMethod());
         List<Status> statuses = statusService.getAllBoardStatus(boardService.getBoardById(boardId));
         return new ResponseEntity<>(statuses, HttpStatus.OK);
     }
@@ -38,19 +37,17 @@ public class StatusController {
     @GetMapping("/{statusId}")
     public ResponseEntity<Status> getStatusById(@PathVariable Integer statusId,
                                                 @PathVariable String boardId,
-                                                @AuthenticationPrincipal UserDetails user,
                                                 HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, user, request.getMethod());
-        Status status = statusService.getStatusById(statusId);
+        boardService.checkBoardOwnership(boardId, request.getMethod());
+        Status status = statusService.getStatusById(boardId, statusId);
         return new ResponseEntity<>(status, HttpStatus.OK);
     }
 
     @PostMapping("")
     public ResponseEntity<Status> addNewStatus(@Valid @RequestBody Status status,
                                                @PathVariable String boardId,
-                                               @AuthenticationPrincipal UserDetails user,
                                                HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, user, request.getMethod());
+        boardService.checkBoardOwnership(boardId, request.getMethod());
         Status createdStatus = statusService.createStatus(status, boardId);
         return new ResponseEntity<>(createdStatus, HttpStatus.CREATED);
     }
@@ -59,9 +56,8 @@ public class StatusController {
     public ResponseEntity<Status> updateStatus(@Valid @RequestBody Status status,
                                                @PathVariable Integer statusId,
                                                @PathVariable String boardId,
-                                               @AuthenticationPrincipal UserDetails user,
                                                HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, user, request.getMethod());
+        boardService.checkBoardOwnership(boardId, request.getMethod());
         Status updatedStatus = statusService.updateStatus(statusId, status, boardId);
         return new ResponseEntity<>(updatedStatus, HttpStatus.OK);
     }
@@ -69,20 +65,18 @@ public class StatusController {
     @DeleteMapping("/{statusId}")
     public void removeStatus(@PathVariable Integer statusId,
                              @PathVariable String boardId,
-                             @AuthenticationPrincipal UserDetails user,
                              HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, user, request.getMethod());
-        statusService.removeStatus(statusId);
+        boardService.checkBoardOwnership(boardId, request.getMethod());
+        statusService.removeStatus(boardId, statusId);
     }
 
     @DeleteMapping("/{statusId}/{newStatusId}")
     public void transferStatus(@PathVariable Integer statusId,
                                @PathVariable Integer newStatusId,
                                @PathVariable String boardId,
-                               @AuthenticationPrincipal UserDetails user,
                                HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, user, request.getMethod());
+        boardService.checkBoardOwnership(boardId, request.getMethod());
         taskService.transferTaskStatus(statusId, newStatusId, boardId);
-        statusService.removeStatus(statusId);
+        statusService.removeStatus(boardId, statusId);
     }
 }
