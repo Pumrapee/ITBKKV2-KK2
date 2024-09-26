@@ -376,22 +376,24 @@ watch(
   { immediate: true }
 )
 
-const isPrivate = ref(true)
+const isPublic = ref(false)
 const showModalVisibility = ref(false)
+const originalIsPublic = ref(isPublic.value)
 
 const openModalVisibility = () => {
+  originalIsPublic.value = isPublic.value
   showModalVisibility.value = true
 }
 
 const confirmVisibilityChange = async () => {
   showModalVisibility.value = false
-  const newVisibility = isPrivate.value ? 'PUBLIC' : 'PRIVATE'
+  const newVisibility = isPublic.value ? 'PUBLIC' : 'PRIVATE'
 
   const { statusCode } = await Visibility(boardId.value, newVisibility)
 
   if (statusCode === 200) {
     console.log(`Visibility changed to ${newVisibility}`)
-    isPrivate.value = !isPrivate.value
+    //isPublic.value = !isPublic.value
   } else if (statusCode === 401) {
     console.error('Authentication expired. Redirecting to login.')
     router.push({ name: 'login' })
@@ -403,6 +405,7 @@ const confirmVisibilityChange = async () => {
 }
 
 const cancelVisibilityChange = () => {
+  isPublic.value = originalIsPublic.value
   showModalVisibility.value = false
 }
 
@@ -413,10 +416,21 @@ onMounted(async () => {
   )
 
   if (boardData.visibility === 'PRIVATE') {
-    isPrivate.value = true
+    isPublic.value = false // Private จะเป็นค่า true
   } else if (boardData.visibility === 'PUBLIC') {
-    isPrivate.value = false
+    console.log('dawda')
+    isPublic.value = true // Public จะเป็นค่า false
   }
+})
+
+// ตรวจสอบว่าเป็นเจ้าของบอร์ดหรือไม่
+const isOwner = computed(() => {
+  return myBoard.getBoardOwnerId === myUser.getUserId
+})
+
+// ตรวจสอบสิทธิ์การแก้ไขบอร์ด
+const isEditable = computed(() => {
+  return isOwner.value
 })
 </script>
 
@@ -430,12 +444,15 @@ onMounted(async () => {
       <div class="form-control">
         <label class="label cursor-pointer flex items-center">
           <!-- Toggle Visibility -->
+          <!-- ดักในฟังก์ชั่น @click -->
           <input
             type="checkbox"
             class="toggle m-2"
+            v-model="isPublic"
             @click="openModalVisibility"
           />
-          <span class="label-text">{{ isPrivate ? 'Private' : 'Public' }}</span>
+          <!-- แสดงสถานะว่า Private เมื่อ checkbox ปิด และ Public เมื่อ checkbox เปิด -->
+          <span class="label-text">{{ isPublic ? 'Public' : 'Private' }}</span>
         </label>
       </div>
     </div>
@@ -526,6 +543,7 @@ onMounted(async () => {
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
+            :disabled="!isOwner"
           >
             <svg
               class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -560,8 +578,14 @@ onMounted(async () => {
         <!-- Add Button -->
         <router-link :to="{ name: 'addTask' }">
           <button
+            :disabled="!isEditable"
             @click="openModalAdd"
-            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+            :class="[
+              'itbkk-button-add btn btn-circle border-black0 ml-2',
+              isEditable
+                ? 'bg-black text-white'
+                : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+            ]"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
@@ -748,7 +772,7 @@ onMounted(async () => {
 
   <!-- Use VisibilityModal -->
   <ModalVisibility
-    :isPrivate="isPrivate"
+    :isPublic="isPublic"
     :showModalVisibility="showModalVisibility"
     @confirm="confirmVisibilityChange"
     @cancel="cancelVisibilityChange"

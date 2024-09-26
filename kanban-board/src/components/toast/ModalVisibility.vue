@@ -3,7 +3,7 @@
 import { defineEmits, defineProps } from 'vue'
 
 const props = defineProps({
-  isPrivate: Boolean,
+  isPublic: Boolean,
   showModalVisibility: Boolean,
 })
 
@@ -27,7 +27,7 @@ const cancelVisibilityChange = () => {
       <div class="card-body font-medium">
         <p>
           Do you want to change board visibility to
-          {{ isPrivate ? 'Public' : 'Private' }}?
+          {{ isPublic ? 'Public' : 'Private' }}?
         </p>
         <div class="card-actions justify-end">
           <button @click="confirmVisibilityChange" class="btn bg-black text-white">
