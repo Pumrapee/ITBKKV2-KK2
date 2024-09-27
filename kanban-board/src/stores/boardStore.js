@@ -2,15 +2,22 @@ import { ref } from "vue"
 import { defineStore, acceptHMRUpdate } from "pinia"
 
 export const useBoardStore = defineStore("board", () => {
-  //state
+  // state
   const board = ref([])
   const navBoard = ref(false)
   const boardName = ref("")
-  //view
+  const boardOwnerId = ref(null) // เพิ่มฟิลด์สำหรับเก็บ ID เจ้าของบอร์ด
+
+  // view
   const getBoards = () => {
     return board.value
   }
-  //actions
+
+  const getBoardOwnerId = () => {
+    return boardOwnerId.value // ฟังก์ชันเพื่อดึง ownerId ของบอร์ด
+  }
+
+  // actions
   const addBoards = (newBoard) => {
     // loop array
     newBoard.forEach(addBoard)
@@ -28,6 +35,10 @@ export const useBoardStore = defineStore("board", () => {
     })
   }
 
+  const setBoardOwner = (ownerId) => {
+    boardOwnerId.value = ownerId // ฟังก์ชันสำหรับตั้งค่า ownerId ของบอร์ด
+  }
+
   const removeBoards = (removeId) => {
     board.value.splice(
       board.value.findIndex((todo) => todo.id === removeId),
@@ -38,6 +49,7 @@ export const useBoardStore = defineStore("board", () => {
   const clearBoard = () => {
     return (board.value = [])
   }
+
   return {
     getBoards,
     addBoards,
@@ -47,6 +59,8 @@ export const useBoardStore = defineStore("board", () => {
     clearBoard,
     navBoard,
     boardName,
+    getBoardOwnerId, // เพิ่มการคืนค่า getBoardOwnerId
+    setBoardOwner, // เพิ่มฟังก์ชันสำหรับตั้งค่าเจ้าของบอร์ด
   }
 })
 

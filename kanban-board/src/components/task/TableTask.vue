@@ -543,6 +543,7 @@ const isEditable = computed(() => {
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
+            :class="{ 'opacity-50 cursor-not-allowed': !isOwner }"
             :disabled="!isOwner"
           >
             <svg
@@ -570,6 +571,8 @@ const isEditable = computed(() => {
         <button
           @click="openLimitModal"
           class="flex btn text-l ml-1 bg-black text-white"
+          :class="{ 'opacity-50 cursor-not-allowed': !isOwner }"
+            :disabled="!isOwner"
         >
           <img src="/icons/limit.png" class="w-6" />
           Limit
