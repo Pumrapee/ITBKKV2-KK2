@@ -29,9 +29,8 @@ const loginHandler = async () => {
     username.value,
     password.value
   )
+
   if (res.status === 200) {
-    // const Token = setToken(token)
-    // authStore.setToken(token)
     authStore.login(token)
     getToken()
     router.push({ name: "board" })

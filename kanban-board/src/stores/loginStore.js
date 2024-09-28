@@ -18,10 +18,12 @@ export const useAuthStore = defineStore("auth", () => {
   const login = (newToken) => {
     isAuthenticated.value = true
     //token
-    sessionStorage.setItem("token", newToken)
+    sessionStorage.setItem("token", newToken.access_token)
+    sessionStorage.setItem("refreshToken", newToken.refresh_token)
     const tokenIsUser = sessionStorage.getItem("token")
     token.value = tokenIsUser
     user.value = jwtDecode(tokenIsUser)
+    userName.value = user.value.name 
     //username
     sessionStorage.setItem("user", user.value.name)
   }
@@ -30,6 +32,7 @@ export const useAuthStore = defineStore("auth", () => {
     isAuthenticated.value = false
     user.value = null
     userName.value = null
+    token.value = ""
     myBoard.clearBoard()
     myStatus.clearStatus()
     myTask.clearTask()
@@ -42,6 +45,13 @@ export const useAuthStore = defineStore("auth", () => {
     token.value = sessionStorage.getItem("token")
   }
 
+  const setNewToken = (newRefreshToken) => {
+    token.value = newRefreshToken
+    sessionStorage.setItem("token", newRefreshToken)
+  }
+
+
+
   return {
     isAuthenticated,
     user,
@@ -49,6 +59,7 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     token,
     setToken,
+    setNewToken,
     userName,
   }
 })

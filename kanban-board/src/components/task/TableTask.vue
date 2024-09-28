@@ -11,7 +11,7 @@ import {
   deleteItemById,
   getItems,
   getStatusLimits,
-  isTokenExpired,
+  checkAndRefreshToken,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -37,16 +37,23 @@ const editDrop = ref(false)
 const boardId = ref(route.params.id)
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
-const boardName = ref(sessionStorage.getItem("BoardName"))
+const boardName = ref()
+const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
 
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     expiredToken.value = false
 
     //Task
@@ -64,12 +71,11 @@ onMounted(async () => {
       }
     }
 
-  
-    const boardIdNumber = await getItemById(
+    const boardByIdName = await getItemById(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardId.value
     )
-
+    boardName.value = boardByIdName.name
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -97,6 +103,10 @@ onMounted(async () => {
       myLimit.addLimit(limitStatus)
     }
   }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+  }
 })
 
 //Alert
@@ -115,9 +125,16 @@ const showAlert = (message, type) => {
 // Edit Modal
 const openModalEdit = async (id, boolean) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     if (boolean) {
       editMode.value = true
       editDrop.value = true
@@ -144,6 +161,11 @@ const openModalEdit = async (id, boolean) => {
       openModal.value = false
       expiredToken.value = true
     }
+  }
+
+  if (checkToken.statusCode === 401) {
+    openModal.value = false
+    expiredToken.value = true
   }
 }
 
@@ -177,9 +199,16 @@ const openDeleteModal = (id, title, index) => {
 // Add Edit Modal
 const closeAddEdit = async (task) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (task.id !== undefined) {
       const { editedItem, statusCode } = await editItem(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
@@ -205,6 +234,10 @@ const closeAddEdit = async (task) => {
       if (statusCode === 401) {
         expiredToken.value = true
       }
+    } else {
+      openModal.value = false
+      router.push({ name: "task" })
+      editMode.value = false
     }
 
     if (task.id === undefined) {
@@ -226,21 +259,33 @@ const closeAddEdit = async (task) => {
       if (statusCode === 401) {
         expiredToken.value = true
       }
+    } else {
+      openModal.value = false
+      router.push({ name: "task" })
+      editMode.value = false
     }
   }
 
-  openModal.value = false
-  // router.push({ name: "task" })
-  router.go(-1)
-  editMode.value = false
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+    editMode.value = false
+  }
 }
 
 // Delete Modal
 const closeDeleteModal = async (id) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     const deleteItem = await deleteItemById(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
       id
@@ -259,6 +304,11 @@ const closeDeleteModal = async (id) => {
     if (deleteItem === 401) {
       expiredToken.value = true
     }
+    showDeleteModal.value = false
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
     showDeleteModal.value = false
   }
 }
@@ -359,9 +409,15 @@ watch(
   () => route.params.taskId,
   async (newId, oldId) => {
     myUser.setToken()
-    if (isTokenExpired(myUser.token)) {
-      expiredToken.value = true
-    } else {
+
+    const checkToken = await checkAndRefreshToken(
+      `${import.meta.env.VITE_API_URL}token`,
+      myUser.token,
+      refreshToken.value
+    )
+    if (checkToken.statusCode === 200) {
+      //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+      myUser.setNewToken(checkToken.accessNewToken)
       if (newId !== undefined) {
         const res = await getItemById(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
@@ -372,10 +428,13 @@ watch(
         }
       }
     }
+
+    if (checkToken.statusCode === 401) {
+      expiredToken.value = true
+    }
   },
   { immediate: true }
 )
-
 </script>
 
 <template>
@@ -571,7 +630,9 @@ watch(
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link :to="{ name: 'detailTask' , params: { taskId: task.id }  }">
+              <router-link
+                :to="{ name: 'detailTask', params: { taskId: task.id } }"
+              >
                 <button
                   @click="openModalEdit(task.id)"
                   class="btn btn-ghost h-2"

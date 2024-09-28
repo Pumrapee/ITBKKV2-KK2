@@ -7,8 +7,8 @@ import Alert from "../toast/Alert.vue"
 import {
   addItem,
   getItems,
-  isTokenExpired,
   deleteItemById,
+  checkAndRefreshToken,
 } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
 import { useAuthStore } from "@/stores/loginStore"
@@ -20,6 +20,7 @@ const myUser = useAuthStore()
 const expiredToken = ref(false)
 const showDeleteModal = ref(false)
 const boardIdDelete = ref("")
+const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 const openModalAdd = () => {
@@ -29,9 +30,18 @@ const openModalAdd = () => {
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+    expiredToken.value = false
+
     const listBoard = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
     if (myBoard.getBoards().length === 0) {
       //401
@@ -44,31 +54,30 @@ onMounted(async () => {
 
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-      sessionStorage.setItem("BoardName", myBoard.getBoards()[0].name)
     } else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
   }
-})
 
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
-}
+})
 
 const closeAdd = async (nameBoard) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const { newTask, statusCode } = await addItem(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       nameBoard
@@ -78,7 +87,6 @@ const closeAdd = async (nameBoard) => {
       myBoard.addBoard(newTask)
       router.push({ name: "task", params: { id: newTask.id } })
       myBoard.boardName = newTask.name
-      sessionStorage.setItem("BoardName", newTask.name)
       // showAlert("The board has been updated", "success")
     }
 
@@ -87,8 +95,13 @@ const closeAdd = async (nameBoard) => {
       expiredToken.value = true
       openModal.value = false
     }
+    openModal.value = false
   }
-  openModal.value = false
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+  }
 }
 
 const closeModal = () => {
@@ -104,9 +117,17 @@ const openDeleteModal = (id) => {
 
 const closeDeleteModal = async () => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const deleteBoard = await deleteItemById(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardIdDelete.value
@@ -118,10 +139,23 @@ const closeDeleteModal = async () => {
     }
     showDeleteModal.value = false
   }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    showDeleteModal.value = false
+  }
 }
 
-const saveBoardName = (name) => {
-  sessionStorage.setItem("BoardName", name)
+//Alert
+const showAlert = (message, type) => {
+  modalAlert.value = {
+    message,
+    type,
+    modal: true,
+  }
+  setTimeout(() => {
+    modalAlert.value.modal = false
+  }, 4000)
 }
 </script>
 
@@ -158,10 +192,7 @@ const saveBoardName = (name) => {
 
             <th>
               <router-link :to="{ name: 'task', params: { id: board.id } }">
-                <button
-                  class="btn btn-ghost h-2"
-                  @click="saveBoardName(board.name)"
-                >
+                <button class="btn btn-ghost h-2">
                   {{ board.name }}
                 </button>
               </router-link>
