@@ -31,6 +31,7 @@ onMounted(async () => {
       myBoard.addBoards(listBoard)
     }
 
+
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
       sessionStorage.setItem("BoardName", myBoard.getBoards()[0].name)

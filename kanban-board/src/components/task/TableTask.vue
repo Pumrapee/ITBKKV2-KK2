@@ -41,6 +41,16 @@ const modalAlert = ref({ message: '', type: '', modal: false })
 const expiredToken = ref(false)
 const boardName = ref(sessionStorage.getItem('BoardName'))
 const emits = defineEmits(['closeAddModal'])
+const disabledIfnotOwner = ref(false)
+const nameOwnerBoard = ref()
+
+
+
+// user name login
+const userName = sessionStorage.getItem("user")
+
+
+console.log(userName)
 
 onMounted(async () => {
   myUser.setToken()
@@ -70,6 +80,14 @@ onMounted(async () => {
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardId.value
     )
+
+    nameOwnerBoard.value = boardIdNumber.owner.name
+
+    if(nameOwnerBoard.value !== userName){
+      disabledIfnotOwner.value = true
+    }
+
+
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -381,6 +399,9 @@ const showModalVisibility = ref(false)
 const originalIsPublic = ref(isPublic.value)
 
 const openModalVisibility = () => {
+  // if(disabledIfnotOwner.value){
+  //   return
+  // }
   originalIsPublic.value = isPublic.value
   showModalVisibility.value = true
 }
@@ -415,6 +436,8 @@ onMounted(async () => {
     boardId.value
   )
 
+
+
   if (boardData.visibility === 'PRIVATE') {
     isPublic.value = false // Private จะเป็นค่า true
   } else if (boardData.visibility === 'PUBLIC') {
@@ -424,14 +447,15 @@ onMounted(async () => {
 })
 
 // ตรวจสอบว่าเป็นเจ้าของบอร์ดหรือไม่
-const isOwner = computed(() => {
-  return myBoard.getBoardOwnerId === myUser.getUserId
-})
+// const isOwner = computed(() => {
+//   return myBoard.getBoardOwnerId === myUser.getUserId
+// })
+
 
 // ตรวจสอบสิทธิ์การแก้ไขบอร์ด
-const isEditable = computed(() => {
-  return isOwner.value
-})
+// const isEditable = computed(() => {
+//   return isOwner.value
+// })
 </script>
 
 <template>
@@ -446,6 +470,7 @@ const isEditable = computed(() => {
           <!-- Toggle Visibility -->
           <!-- ดักในฟังก์ชั่น @click -->
           <input
+            :disabled="disabledIfnotOwner"
             type="checkbox"
             class="toggle m-2"
             v-model="isPublic"
@@ -543,8 +568,7 @@ const isEditable = computed(() => {
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
-            :class="{ 'opacity-50 cursor-not-allowed': !isOwner }"
-            :disabled="!isOwner"
+            
           >
             <svg
               class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -570,9 +594,9 @@ const isEditable = computed(() => {
         <!-- Limit Button -->
         <button
           @click="openLimitModal"
+          :disabled="disabledIfnotOwner"
           class="flex btn text-l ml-1 bg-black text-white"
-          :class="{ 'opacity-50 cursor-not-allowed': !isOwner }"
-            :disabled="!isOwner"
+       
         >
           <img src="/icons/limit.png" class="w-6" />
           Limit
@@ -581,14 +605,12 @@ const isEditable = computed(() => {
         <!-- Add Button -->
         <router-link :to="{ name: 'addTask' }">
           <button
-            :disabled="!isEditable"
+            
             @click="openModalAdd"
-            :class="[
-              'itbkk-button-add btn btn-circle border-black0 ml-2',
-              isEditable
-                ? 'bg-black text-white'
-                : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-            ]"
+            :disabled="disabledIfnotOwner"
+            class= 'itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white'
+               
+          
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
