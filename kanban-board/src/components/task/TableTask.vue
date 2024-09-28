@@ -3,6 +3,7 @@ import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
 import { useLimitStore } from "@/stores/limitStore"
 import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore"
 import {
   getItemById,
   editItem,
@@ -10,7 +11,7 @@ import {
   deleteItemById,
   getItems,
   getStatusLimits,
-  isTokenExpired,
+  checkAndRefreshToken,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -25,6 +26,7 @@ const myTask = useTaskStore()
 const myStatus = useStatusStore()
 const myLimit = useLimitStore()
 const myUser = useAuthStore()
+const myBoard = useBoardStore()
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -32,19 +34,26 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
-const boardId = ref()
+const boardId = ref(route.params.id)
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
-const boardName = ref(localStorage.getItem("BoardName"))
+const boardName = ref()
+const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeAddModal"])
 
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
 
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     expiredToken.value = false
 
     //Task
@@ -52,12 +61,21 @@ onMounted(async () => {
       const listTasks = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
       )
+
       if (listTasks === 401) {
         expiredToken.value = true
+      } else if (listTasks.status === 404) {
+        router.push({ name: "TaskNotFound" })
       } else {
         myTask.addTasks(listTasks)
       }
     }
+
+    const boardByIdName = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+    boardName.value = boardByIdName.name
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -66,6 +84,8 @@ onMounted(async () => {
       )
       if (listStatus === 401) {
         expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
       }
@@ -77,9 +97,15 @@ onMounted(async () => {
     )
     if (limitStatus === 401) {
       expiredToken.value = true
+    } else if (limitStatus.status === 404) {
+      router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
     }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
 })
 
@@ -99,9 +125,16 @@ const showAlert = (message, type) => {
 // Edit Modal
 const openModalEdit = async (id, boolean) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     if (boolean) {
       editMode.value = true
       editDrop.value = true
@@ -126,9 +159,13 @@ const openModalEdit = async (id, boolean) => {
 
     if (taskDetail === 401) {
       openModal.value = false
-
       expiredToken.value = true
     }
+  }
+
+  if (checkToken.statusCode === 401) {
+    openModal.value = false
+    expiredToken.value = true
   }
 }
 
@@ -162,9 +199,16 @@ const openDeleteModal = (id, title, index) => {
 // Add Edit Modal
 const closeAddEdit = async (task) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (task.id !== undefined) {
       const { editedItem, statusCode } = await editItem(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
@@ -190,6 +234,10 @@ const closeAddEdit = async (task) => {
       if (statusCode === 401) {
         expiredToken.value = true
       }
+    } else {
+      openModal.value = false
+      router.push({ name: "task" })
+      editMode.value = false
     }
 
     if (task.id === undefined) {
@@ -211,21 +259,33 @@ const closeAddEdit = async (task) => {
       if (statusCode === 401) {
         expiredToken.value = true
       }
+    } else {
+      openModal.value = false
+      router.push({ name: "task" })
+      editMode.value = false
     }
   }
 
-  openModal.value = false
-  // router.push({ name: "task" })
-  router.go(-1)
-  editMode.value = false
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+    editMode.value = false
+  }
 }
 
 // Delete Modal
 const closeDeleteModal = async (id) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     const deleteItem = await deleteItemById(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
       id
@@ -244,6 +304,11 @@ const closeDeleteModal = async (id) => {
     if (deleteItem === 401) {
       expiredToken.value = true
     }
+    showDeleteModal.value = false
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
     showDeleteModal.value = false
   }
 }
@@ -344,9 +409,15 @@ watch(
   () => route.params.taskId,
   async (newId, oldId) => {
     myUser.setToken()
-    if (isTokenExpired(myUser.token)) {
-      expiredToken.value = true
-    } else {
+
+    const checkToken = await checkAndRefreshToken(
+      `${import.meta.env.VITE_API_URL}token`,
+      myUser.token,
+      refreshToken.value
+    )
+    if (checkToken.statusCode === 200) {
+      //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+      myUser.setNewToken(checkToken.accessNewToken)
       if (newId !== undefined) {
         const res = await getItemById(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
@@ -357,14 +428,10 @@ watch(
         }
       }
     }
-  },
-  { immediate: true }
-)
 
-watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
+    if (checkToken.statusCode === 401) {
+      expiredToken.value = true
+    }
   },
   { immediate: true }
 )
@@ -372,12 +439,12 @@ watch(
 
 <template>
   <!-- Head -->
-  <div class="bounce-in-top flex flex-col items-center mt-16 mb-20 ml-60">
-    <div class="font-bold text-4xl text-black self-start pl-64 w-4/6">
+  <div class="bounce-in-top flex flex-col items-center mt-10 ml-60">
+    <div class="font-bold text-4xl text-black self-center pb-5">
       {{ boardName }}
     </div>
     <!-- Filter Search-->
-    <div class="flex justify-between w-3/5">
+    <div class="flex justify-between w-4/5">
       <div class="flex justify-start items-center mt-4">
         <div class="relative">
           <div class="dropdown">
@@ -487,7 +554,7 @@ watch(
         <!-- Limit Button -->
         <button
           @click="openLimitModal"
-          class="flex itbkk-manage-status btn text-l ml-1 bg-black text-white"
+          class="flex btn text-l ml-1 bg-black text-white"
         >
           <img src="/icons/limit.png" class="w-6" />
           Limit
@@ -506,7 +573,7 @@ watch(
     </div>
 
     <!-- Table -->
-    <div class="border border-black rounded-md w-3/5 mt-4">
+    <div class="border border-black rounded-md w-4/5 mt-4">
       <table class="table">
         <!-- head -->
         <thead class="bg-black">
@@ -556,10 +623,16 @@ watch(
 
         <tbody class="" v-if="myTask.getTasks().length > 0">
           <!-- row -->
-          <tr v-for="(task, index) in filteredTasks" :key="task.id">
+          <tr
+            v-for="(task, index) in filteredTasks"
+            :key="task.id"
+            class="itbkk-item"
+          >
             <th class="text-black pl-20">{{ index + 1 }}</th>
             <td class="itbkk-title itbkk-button-edit pl-15">
-              <router-link :to="{ name: 'detailTask' }">
+              <router-link
+                :to="{ name: 'detailTask', params: { taskId: task.id } }"
+              >
                 <button
                   @click="openModalEdit(task.id)"
                   class="btn btn-ghost h-2"
@@ -585,7 +658,7 @@ watch(
               </div>
             </td>
             <td>
-              <div class="dropdown dropdown-right">
+              <div class="dropdown dropdown-right mr-10 itbkk-button-action">
                 <div tabindex="0" role="button" class="m-1">
                   <svg
                     class="h-4"
@@ -613,12 +686,18 @@ watch(
                   <router-link
                     :to="{ name: 'editTask', params: { taskId: task.id } }"
                   >
-                    <li @click="openModalEdit(task.id, true)">
+                    <li
+                      @click="openModalEdit(task.id, true)"
+                      class="itbkk-button-edit"
+                    >
                       <a>Edit<img src="/icons/pen.png" class="w-4" /></a>
                     </li>
                   </router-link>
 
-                  <li @click="openDeleteModal(task.id, task.title, index)">
+                  <li
+                    @click="openDeleteModal(task.id, task.title, index)"
+                    class="itbkk-button-delete"
+                  >
                     <a>Delete<img src="/icons/trash.png" class="w-6" /></a>
                   </li>
                 </ul>

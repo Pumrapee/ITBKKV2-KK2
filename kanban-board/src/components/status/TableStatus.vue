@@ -10,7 +10,7 @@ import {
   addItem,
   deleteItemById,
   deleteItemByIdToNewId,
-  isTokenExpired,
+  checkAndRefreshToken,
 } from "@/libs/fetchUtils"
 import { ref, onMounted, watch } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
@@ -29,16 +29,25 @@ const editMode = ref(false)
 const statusDetail = ref()
 const showTransferModal = ref(false)
 const showDeleteModal = ref(false)
-const boardId = ref()
 const route = useRoute()
+const boardId = ref(route.params.id)
 const expiredToken = ref(false)
+const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 onMounted(async () => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (myStatus.getStatus().length === 0) {
       const listStatus = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
@@ -46,9 +55,16 @@ onMounted(async () => {
       //401
       if (listStatus === 401) {
         expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myStatus.addStatus(listStatus)
       }
-      myStatus.addStatus(listStatus)
     }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
 })
 
@@ -67,13 +83,22 @@ const showAlert = (message, type) => {
 //เปิด Modal
 const openEditStatus = async (idStatus) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const statusItem = await getItemById(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
       idStatus
     )
+
     if (statusItem.status === 404) {
       showAlert("An error has occurred, the status does not exist.", "error")
       myStatus.removeStatus(idStatus)
@@ -89,6 +114,11 @@ const openEditStatus = async (idStatus) => {
       openModal.value = false
     }
   }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+  }
 }
 
 const openModalAdd = () => {
@@ -103,9 +133,16 @@ const openModalAdd = () => {
 
 const openDeleteModal = async (id, name) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     const showStatus = await findStatus(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/status`,
       id
@@ -125,6 +162,8 @@ const openDeleteModal = async (id, name) => {
       showDeleteModal.value = true
     }
     if (showStatus === 401) {
+      // showTransferModal.value = false
+      // showDeleteModal.value = false
       expiredToken.value = true
     }
 
@@ -134,14 +173,28 @@ const openDeleteModal = async (id, name) => {
       countTask: countTask.length,
     }
   }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    // showTransferModal.value = false
+    // showDeleteModal.value = false
+  }
 }
 
 //ปิด Modal
 const closeAddEdit = async (status) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (editMode.value) {
       const { editedItem, statusCode } = await editItem(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
@@ -169,6 +222,8 @@ const closeAddEdit = async (status) => {
 
       if (statusCode === 401) {
         expiredToken.value = true
+        openModal.value = false
+        editMode.value = false
       }
     }
 
@@ -181,6 +236,7 @@ const closeAddEdit = async (status) => {
       if (statusCode === 201) {
         myStatus.addOneStatus(newTask)
         showAlert("The status has been added", "success")
+        myStatus.getStatus()
       } else {
         // 400 , 500
         showAlert("An error has occurred, the status does not exist.", "error")
@@ -188,19 +244,35 @@ const closeAddEdit = async (status) => {
 
       if (statusCode === 401) {
         expiredToken.value = true
+        openModal.value = false
+        editMode.value = false
       }
     }
+    openModal.value = false
+    editMode.value = false
+    router.go(-1)
   }
-  openModal.value = false
-  editMode.value = false
-  router.go(-1)
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+    editMode.value = false
+  }
 }
 
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (showDeleteModal.value) {
       const deleteItem = await deleteItemById(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
@@ -257,7 +329,12 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
         expiredToken.value = true
       }
     }
+    showTransferModal.value = false
+    showDeleteModal.value = false
+  }
 
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
     showTransferModal.value = false
     showDeleteModal.value = false
   }
@@ -270,10 +347,36 @@ const closeModal = () => {
   router.push({ name: "tableStatus" })
 }
 
+// route path ถ้าไม่มี id นั้น
 watch(
-  () => route.params.id,
-  (newId) => {
-    boardId.value = newId
+  () => route.params.statusId,
+  async (newId, oldId) => {
+    myUser.setToken()
+
+    const checkToken = await checkAndRefreshToken(
+      `${import.meta.env.VITE_API_URL}token`,
+      myUser.token,
+      refreshToken.value
+    )
+
+    if (checkToken.statusCode === 200) {
+      //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+      myUser.setNewToken(checkToken.accessNewToken)
+
+      if (newId !== undefined) {
+        const res = await getItemById(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
+          newId
+        )
+        if (res.status === 404) {
+          router.push({ name: "TaskNotFound" })
+        }
+      }
+    }
+
+    if (checkToken.statusCode === 401) {
+      expiredToken.value = true
+    }
   },
   { immediate: true }
 )
@@ -304,7 +407,7 @@ watch(
         <RouterLink :to="{ name: 'AddStatus' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-home btn btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
@@ -325,7 +428,7 @@ watch(
             <th class="pl-20">Action</th>
           </tr>
         </thead>
-        <tbody class="">
+        <tbody>
           <tr
             v-for="(task, index) in myStatus.getStatus()"
             :key="task.id"
@@ -356,15 +459,15 @@ watch(
               v-if="task.name !== 'No Status' && task.name !== 'Done'"
               class="ml-10 flex"
             >
-              <div class="mr-2">
+              <div class="mr-2 itbkk-button-edit">
                 <router-link
                   :to="{ name: 'EditStatus', params: { statusId: task.id } }"
                 >
                   <button
                     @click="openEditStatus(task.id)"
-                    class="itbkk-button-edit btn btn-ghost h-auto bg-yellow-100"
+                    class="btn btn-ghost h-auto bg-yellow-100"
                   >
-                    <img src="/icons/pen.png" class="w-4" />
+                    <img src="/icons/pen.png" class="w-4 ml-2" />
                   </button>
                 </router-link>
               </div>

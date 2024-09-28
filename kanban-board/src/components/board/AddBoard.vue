@@ -1,10 +1,15 @@
 <script setup>
 import { defineProps, defineEmits, ref, computed } from "vue"
+import { useAuthStore } from "@/stores/loginStore"
 
 const props = defineProps({
   showModal: Boolean,
 })
-const userName = localStorage.getItem("user")
+const myUser = useAuthStore()
+// const userName = localStorage.getItem("user")
+// const userName = myUser.userName
+const userName = sessionStorage.getItem("user")
+
 const boardName = ref({ name: `${userName} personal board` })
 const emits = defineEmits(["closeModal", "saveAdd"])
 

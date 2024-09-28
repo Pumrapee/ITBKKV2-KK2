@@ -10,6 +10,7 @@ export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false)
   const user = ref(null)
   const token = ref("")
+  const userName = ref("")
   const myBoard = useBoardStore()
   const myStatus = useStatusStore()
   const myTask = useTaskStore()
@@ -17,28 +18,39 @@ export const useAuthStore = defineStore("auth", () => {
   const login = (newToken) => {
     isAuthenticated.value = true
     //token
-    localStorage.setItem("token", newToken)
-    const tokenIsUser = localStorage.getItem("token")
+    sessionStorage.setItem("token", newToken.access_token)
+    sessionStorage.setItem("refreshToken", newToken.refresh_token)
+    const tokenIsUser = sessionStorage.getItem("token")
     token.value = tokenIsUser
     user.value = jwtDecode(tokenIsUser)
+    userName.value = user.value.name 
     //username
-    localStorage.setItem("user", user.value.name)
+    sessionStorage.setItem("user", user.value.name)
   }
 
   const logout = () => {
     isAuthenticated.value = false
     user.value = null
+    userName.value = null
+    token.value = ""
     myBoard.clearBoard()
     myStatus.clearStatus()
     myTask.clearTask()
     myBoard.navBoard = false
+    sessionStorage.clear()
     router.push({ name: "login" })
-    localStorage.clear()
   }
 
   const setToken = () => {
-    token.value = localStorage.getItem("token")
+    token.value = sessionStorage.getItem("token")
   }
+
+  const setNewToken = (newRefreshToken) => {
+    token.value = newRefreshToken
+    sessionStorage.setItem("token", newRefreshToken)
+  }
+
+
 
   return {
     isAuthenticated,
@@ -47,5 +59,7 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     token,
     setToken,
+    setNewToken,
+    userName,
   }
 })

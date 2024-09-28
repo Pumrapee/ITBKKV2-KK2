@@ -8,7 +8,7 @@ const authStore = useAuthStore()
 const myBoard = useBoardStore()
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
-const userName = localStorage.getItem("user")
+const userName = sessionStorage.getItem("user")
 
 const logout = () => {
   authStore.logout()
@@ -53,6 +53,7 @@ const boardAll = () => {
       </ul>
     </div>
   </div>
+
   <!-- Sidebar Toggle Button -->
   <button
     data-drawer-target="sidebar-multi-level-sidebar"
