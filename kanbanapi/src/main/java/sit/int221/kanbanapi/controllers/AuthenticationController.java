@@ -21,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("")
-@CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th","http://localhost:5173","http://intproj23.sit.kmutt.ac.th"})
+@CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th", "http://localhost:5173", "http://intproj23.sit.kmutt.ac.th", "https://intproj23.sit.kmutt.ac.th"})
 public class AuthenticationController {
 
     @Autowired

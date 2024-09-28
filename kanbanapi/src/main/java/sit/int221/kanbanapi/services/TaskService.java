@@ -79,10 +79,9 @@ public class TaskService {
 
     @Transactional
     public Task updateTask(Integer id, Task task, String boardId) {
+        checkBoardTask(boardId, id);
         Board board = boardService.getBoardById(boardId);
-        if (board != task.getBoard()) {
-            throw new BadRequestException("Task " + id + " is not belong to board " + board.getId() + " !!!");
-        }
+
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(task.getTaskStatus().getName())
                 || statusLimitCheck(boardId, countTasksByStatus(task.getTaskStatus().getId(), board) + 1)) {
             Task existingTask = repository.findById(id).orElseThrow(() -> new BadRequestException("Task id " + id + " does not exist !!!"));

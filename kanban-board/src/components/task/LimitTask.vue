@@ -5,7 +5,9 @@ import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
 import { useAuthStore } from "@/stores/loginStore"
 import { useRoute } from "vue-router"
-import { isTokenExpired } from "@/libs/fetchUtils"
+import {
+  checkAndRefreshToken,
+} from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
 
 const props = defineProps({
@@ -21,15 +23,22 @@ const myTask = useTaskStore()
 const showLimitStatus = ref()
 const showWarning = ref()
 const statusShow = ref()
+const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
 const route = useRoute()
 
 const closelimitModal = async (maxlimit) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-    emits("closeLimitModal")
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     if (isLimitEnabled.value === true) {
       const statusNotStatus = Object.entries(
         myTask.getTasks().reduce((taskacc, task) => {
@@ -89,6 +98,11 @@ const closelimitModal = async (maxlimit) => {
         expiredToken.value
       )
     }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    emits("closeLimitModal")
   }
 }
 
