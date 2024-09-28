@@ -88,9 +88,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                 return;
                             }
                         }
+                    } else {
+                        throw new AuthenticationFailed("JWT Token has expired");
                     }
-                    throw new AuthenticationFailed("JWT Token has expired");
-
                 } catch (Exception e) {
                     throw new AuthenticationFailed(e.getMessage());
                 }
