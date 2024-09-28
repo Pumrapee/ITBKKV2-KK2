@@ -34,6 +34,11 @@ public class BoardController {
     UserService userService;
     @Autowired
     ModelMapper mapper;
+    @Qualifier("securityFilterChain")
+    @Autowired
+    private SecurityFilterChain securityFilterChain;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;

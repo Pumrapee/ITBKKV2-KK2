@@ -67,10 +67,7 @@ public class StatusService {
     @Transactional
     public Status updateStatus(Integer id, Status status, String boardId) {
         Board board = boardService.getBoardById(boardId);
-        Status existingStatus = repository.findById(id).orElseThrow(() -> new BadRequestException("Status "+ id + " does not exist"));
-        if (!status.getBoard().equals(board)) {
-            throw new BadRequestException("Status " + id + " is not belong to board " + board.getId() + " !!!");
-        }
+        Status existingStatus = checkBoardStatus(boardId, id);
         if (configuration.getNonLimitedUpdatableDeletableStatuses().contains(existingStatus.getName())) {
             throw new BadRequestException("The status name '" + existingStatus.getName() + "' cannot be changed.");
         }

@@ -2,7 +2,7 @@
 let token = undefined
 
 function getToken() {
-  token = localStorage.getItem("token")
+  token = sessionStorage.getItem("token")
 }
 
 //เช็คว่า Token หมดอายุ
@@ -30,6 +30,46 @@ function isTokenExpired(token) {
   return currentTime > exp
 }
 
+// ฟังก์ชันเช็คและรีเฟรช Token หากหมดอายุ
+async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
+  // ตรวจสอบว่า token หมดอายุหรือไม่
+  if (isTokenExpired(tokenExpired)) {
+    console.log("Token หมดอายุแล้ว")
+    try {
+      const res = await fetch(`${url}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      })
+
+      const statusCode = res.status
+
+      if (statusCode === 401) {
+        console.log("Token หมดอายุแล้วจากเซิร์ฟเวอร์, statusCode 401")
+        return { statusCode: 401, accessNewToken: null }
+      }
+
+      // รับ status code และ token ใหม่ (หากสำเร็จ)
+      if (statusCode === 200) {
+        const data = await res.json()
+        const accessNewToken = data.access_token
+
+        console.log("new token:", accessNewToken)
+        console.log("status code:", statusCode)
+
+        return { statusCode, accessNewToken }
+      }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการรีเฟรช token:", error)
+      return { statusCode: 500, accessNewToken: null } // คืนค่า statusCode 500 เมื่อเกิดข้อผิดพลาด
+    }
+  } else {
+    return { statusCode: 200, accessNewToken: tokenExpired } // คืนค่า statusCode 500 เมื่อเกิดข้อผิดพลาด
+  }
+}
+
 async function getItems(url) {
   getToken()
   let data
@@ -51,6 +91,7 @@ async function getItems(url) {
   } catch (error) {
     if (data.status === 404) return 404
     if (data.status === 401) return 401
+    if (data.status === 400) return 400
   }
 }
 
@@ -69,6 +110,7 @@ async function getStatusLimits(url) {
   } catch (error) {
     if (data.status === 404) return 404
     if (data.status === 401) return 401
+    if (data.status === 400) return 400
   }
 }
 
@@ -142,6 +184,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
 }
 
 async function addItem(url, newItem) {
+  getToken()
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -215,7 +258,7 @@ async function login(url, userName, password) {
 
     // Return status code for further processing
     const data = await res.json()
-    const token = data.access_token
+    const token = data
 
     return { res, token }
   } catch (error) {
@@ -236,4 +279,5 @@ export {
   login,
   getToken,
   isTokenExpired,
+  checkAndRefreshToken,
 }
