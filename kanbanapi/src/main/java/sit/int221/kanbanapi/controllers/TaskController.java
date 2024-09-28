@@ -41,9 +41,7 @@ public class TaskController {
     public ResponseEntity<List<SimpleTaskDTO>> getAllTaskFilteredSorted(
             @RequestParam(required = false) List<String> filterStatuses,
             @RequestParam(required = false, defaultValue = "createdOn") String sortBy,
-            @PathVariable String boardId,
-            HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, request.getMethod());
+            @PathVariable String boardId) {
         List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy, boardId);
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
                 .map(task -> modelMapper.map(task, SimpleTaskDTO.class))
@@ -53,9 +51,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TaskDTO> getTaskById(@PathVariable Integer id,
-                                               @PathVariable String boardId,
-                                               HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, request.getMethod());
+                                               @PathVariable String boardId) {
         Task task = taskService.getTaskById(boardId, id);
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);
@@ -63,9 +59,7 @@ public class TaskController {
 
     @PostMapping("")
     public ResponseEntity<TaskCreateUpdateDTO> addNewTask(@Valid @RequestBody TaskCreateUpdateDTO task,
-                                                          @PathVariable String boardId,
-                                                          HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, request.getMethod());
+                                                          @PathVariable String boardId) {
         Task newTask = modelMapper.map(task, Task.class);
         newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId));
         Task createdTask = taskService.createTask(newTask, boardId);
@@ -77,9 +71,7 @@ public class TaskController {
     public ResponseEntity<TaskCreateUpdateDTO> updateTask(
             @Valid @RequestBody TaskCreateUpdateDTO task,
             @PathVariable Integer id,
-            @PathVariable String boardId,
-            HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, request.getMethod());
+            @PathVariable String boardId) {
         Task newTask = modelMapper.map(task, Task.class);
         newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId));
         Task updatedTask = taskService.updateTask(id, newTask, boardId);
@@ -89,9 +81,7 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<SimpleTaskDTO> removeTask(@PathVariable Integer id,
-                                                    @PathVariable String boardId,
-                                                    HttpServletRequest request) {
-        boardService.checkBoardOwnership(boardId, request.getMethod());
+                                                    @PathVariable String boardId) {
         Task deletedTask = taskService.removeTask(boardId, id);
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
         return new ResponseEntity<>(taskDTO, HttpStatus.OK);

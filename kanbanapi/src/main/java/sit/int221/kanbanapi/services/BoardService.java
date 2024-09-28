@@ -75,12 +75,12 @@ public class BoardService {
         return boardRepository.save(board);
     }
 
-    public User checkBoardOwnership(String boardId, String requestMethod) {
+    public User checkBoardOwnership(String boardId, String requestMethod, String userOid) {
         Board board = getBoardById(boardId);
-        UserDetails user = jwtUserDetailsService.getCurrentUser();
-        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new BadRequestException("User " + board.getOwnerId() + " does not exist"));
-        if (user != null) {
-            String username = user.getUsername();
+        User currentUser = userRepository.findById(userOid).orElseThrow(() -> new AuthenticationFailed("User " + userOid + " does not exist"));
+        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new AuthenticationFailed("User " + board.getOwnerId() + " does not exist"));
+        if (currentUser != null) {
+            String username = currentUser.getUsername();
             Boolean isOwner = owner.getUsername().equals(username);
             if (!isOwner && board.getVisibility().equals("PRIVATE")) {
                 throw new NoPermission("You do not have permission to perform this action.");
