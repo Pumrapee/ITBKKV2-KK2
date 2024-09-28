@@ -3,6 +3,7 @@ services:
     image: nginx:alpine
     volumes:
       - ./kanbanproxy:/etc/nginx/conf.d
+      - ./ssl:/ssl
     depends_on:
       - fe
       - api
@@ -11,6 +12,7 @@ services:
         ipv4_address: 172.15.0.2
     ports:
       - "80:80"
+      - "443:443"
     restart: unless-stopped
 
   fe:
