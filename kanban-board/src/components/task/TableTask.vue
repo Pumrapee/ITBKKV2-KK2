@@ -1,9 +1,9 @@
 <script setup>
-import { useTaskStore } from '@/stores/taskStore'
-import { useStatusStore } from '@/stores/statusStore'
-import { useLimitStore } from '@/stores/limitStore'
-import { useAuthStore } from '@/stores/loginStore'
-import { useBoardStore } from '@/stores/boardStore'
+import { useTaskStore } from "@/stores/taskStore"
+import { useStatusStore } from "@/stores/statusStore"
+import { useLimitStore } from "@/stores/limitStore"
+import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore"
 import {
   getItemById,
   editItem,
@@ -12,17 +12,17 @@ import {
   getItems,
   getStatusLimits,
   isTokenExpired,
-  Visibility
-} from '@/libs/fetchUtils'
-import { defineEmits, computed, ref, watch, onMounted } from 'vue'
-import AddEditTask from './AddEditTask.vue'
-import DeleteTask from './DeleteTask.vue'
-import LimitTask from './LimitTask.vue'
-import ExpireToken from '../toast/ExpireToken.vue'
-import router from '@/router'
-import AlertComponent from '../toast/Alert.vue'
-import { useRoute } from 'vue-router'
-import ModalVisibility from '../toast/ModalVisibility.vue'
+  Visibility,
+} from "@/libs/fetchUtils"
+import { defineEmits, computed, ref, watch, onMounted } from "vue"
+import AddEditTask from "./AddEditTask.vue"
+import DeleteTask from "./DeleteTask.vue"
+import LimitTask from "./LimitTask.vue"
+import ExpireToken from "../toast/ExpireToken.vue"
+import router from "@/router"
+import AlertComponent from "../toast/Alert.vue"
+import { useRoute } from "vue-router"
+import ModalVisibility from "../toast/ModalVisibility.vue"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
@@ -37,18 +37,15 @@ const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
 const boardId = ref(route.params.id)
-const modalAlert = ref({ message: '', type: '', modal: false })
+const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
-const boardName = ref(sessionStorage.getItem('BoardName'))
-const emits = defineEmits(['closeAddModal'])
+const boardName = ref(sessionStorage.getItem("BoardName"))
+const emits = defineEmits(["closeAddModal"])
 const disabledIfnotOwner = ref(false)
 const nameOwnerBoard = ref()
 
-
-
 // user name login
 const userName = sessionStorage.getItem("user")
-
 
 console.log(userName)
 
@@ -70,7 +67,7 @@ onMounted(async () => {
       if (listTasks === 401) {
         expiredToken.value = true
       } else if (listTasks.status === 404) {
-        router.push({ name: 'TaskNotFound' })
+        router.push({ name: "TaskNotFound" })
       } else {
         myTask.addTasks(listTasks)
       }
@@ -83,11 +80,9 @@ onMounted(async () => {
 
     nameOwnerBoard.value = boardIdNumber.owner.name
 
-    if(nameOwnerBoard.value !== userName){
+    if (nameOwnerBoard.value !== userName) {
       disabledIfnotOwner.value = true
     }
-
-
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -97,7 +92,7 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        router.push({ name: 'TaskNotFound' })
+        router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
       }
@@ -110,7 +105,7 @@ onMounted(async () => {
     if (limitStatus === 401) {
       expiredToken.value = true
     } else if (limitStatus.status === 404) {
-      router.push({ name: 'TaskNotFound' })
+      router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
     }
@@ -122,7 +117,7 @@ const showAlert = (message, type) => {
   modalAlert.value = {
     message,
     type,
-    modal: true
+    modal: true,
   }
   setTimeout(() => {
     modalAlert.value.modal = false
@@ -150,7 +145,7 @@ const openModalEdit = async (id, boolean) => {
     tasks.value = taskDetail
 
     if (taskDetail.status === 404) {
-      router.push({ name: 'TaskNotFound' })
+      router.push({ name: "TaskNotFound" })
       myTask.removeTasks(id)
       router.go(-1)
     } else {
@@ -170,14 +165,14 @@ const openModalAdd = () => {
   openModal.value = true
   editMode.value = true
   const selected = ref()
-  selected.value = 'No Status'
+  selected.value = "No Status"
 
   tasks.value = {
     id: undefined,
-    title: '',
-    description: '',
-    assignees: '',
-    status: selected.value
+    title: "",
+    description: "",
+    assignees: "",
+    status: selected.value,
   }
 }
 
@@ -187,7 +182,7 @@ const openDeleteModal = (id, title, index) => {
   listDelete.value = {
     id: id,
     title: title,
-    index: index + 1
+    index: index + 1,
   }
 }
 
@@ -206,18 +201,18 @@ const closeAddEdit = async (task) => {
           title: task.title,
           description: task.description,
           assignees: task.assignees,
-          status: task.status
+          status: task.status,
         }
       )
 
       if (statusCode === 200) {
         myTask.updateTask(editedItem)
-        showAlert('The task has been updated', 'success')
+        showAlert("The task has been updated", "success")
       }
 
       if (statusCode === 400 || statusCode === 404) {
         myTask.removeTasks(task.id)
-        showAlert('An error has occurred, the task does not exist.', 'error')
+        showAlert("An error has occurred, the task does not exist.", "error")
       }
 
       if (statusCode === 401) {
@@ -233,12 +228,12 @@ const closeAddEdit = async (task) => {
 
       if (statusCode === 201) {
         myTask.addTask(newTask)
-        showAlert('The task has been successfully added', 'success')
+        showAlert("The task has been successfully added", "success")
       }
 
       //Alert status
       if (statusCode === 400) {
-        showAlert('An error has occurred, the task does not exist.', 'error')
+        showAlert("An error has occurred, the task does not exist.", "error")
       }
 
       if (statusCode === 401) {
@@ -266,12 +261,12 @@ const closeDeleteModal = async (id) => {
 
     if (deleteItem === 200) {
       myTask.removeTasks(id)
-      showAlert('The task has been deleted', 'success')
+      showAlert("The task has been deleted", "success")
     }
 
     if (deleteItem === 400) {
       myTask.removeTasks(id)
-      showAlert('An error has occurred, the task does not exist.', 'error')
+      showAlert("An error has occurred, the task does not exist.", "error")
     }
 
     if (deleteItem === 401) {
@@ -286,13 +281,13 @@ const closeLimitModal = (maxLimit, limitBoolean, expiredToken) => {
   if (limitBoolean === false && expiredToken === false) {
     showAlert(
       `The Kanban board has disabled the task limit in each status.`,
-      'success'
+      "success"
     )
   }
   if (limitBoolean === true && expiredToken === false) {
     showAlert(
       `The Kanban board now limits ${maxLimit} tasks in each status.`,
-      'success'
+      "success"
     )
   }
 
@@ -305,33 +300,33 @@ const closeModal = () => {
   showLimitModal.value = false
   editMode.value = false
 
-  router.push({ name: 'task' })
+  router.push({ name: "task" })
 }
 
 //Sort status
-const sortStatus = ref('default')
+const sortStatus = ref("default")
 const listTaskStore = ref(myTask.getTasks())
 
 const handleSortChange = async (status) => {
   // default -> asc -> desc
   // ถ้าเป็น default -> asc
-  if (status === 'default') {
+  if (status === "default") {
     listTaskStore.value = myTask
       .getTasks()
       .sort((a, b) => a.status.localeCompare(b.status))
-    sortStatus.value = 'asc'
+    sortStatus.value = "asc"
   }
   // ถ้าเป็น asc -> desc
-  if (status === 'asc') {
+  if (status === "asc") {
     listTaskStore.value = myTask
       .getTasks()
       .sort((a, b) => b.status.localeCompare(a.status))
-    sortStatus.value = 'desc'
+    sortStatus.value = "desc"
   }
   // ถ้าเป็น desc -> default
-  if (status === 'desc') {
+  if (status === "desc") {
     listTaskStore.value = myTask.getTasks().sort((a, b) => a.id - b.id)
-    sortStatus.value = 'default'
+    sortStatus.value = "default"
   }
 }
 
@@ -386,7 +381,7 @@ watch(
           newId
         )
         if (res.status === 404) {
-          router.push({ name: 'TaskNotFound' })
+          router.push({ name: "TaskNotFound" })
         }
       }
     }
@@ -408,7 +403,7 @@ const openModalVisibility = () => {
 
 const confirmVisibilityChange = async () => {
   showModalVisibility.value = false
-  const newVisibility = isPublic.value ? 'PUBLIC' : 'PRIVATE'
+  const newVisibility = isPublic.value ? "PUBLIC" : "PRIVATE"
 
   const { statusCode } = await Visibility(boardId.value, newVisibility)
 
@@ -416,12 +411,12 @@ const confirmVisibilityChange = async () => {
     console.log(`Visibility changed to ${newVisibility}`)
     //isPublic.value = !isPublic.value
   } else if (statusCode === 401) {
-    console.error('Authentication expired. Redirecting to login.')
-    router.push({ name: 'login' })
+    console.error("Authentication expired. Redirecting to login.")
+    router.push({ name: "login" })
   } else if (statusCode === 403) {
-    console.error('You do not have permission to change board visibility')
+    console.error("You do not have permission to change board visibility")
   } else {
-    console.error('An error occurred. Please try again later.')
+    console.error("An error occurred. Please try again later.")
   }
 }
 
@@ -436,17 +431,13 @@ onMounted(async () => {
     boardId.value
   )
 
-
-
-  if (boardData.visibility === 'PRIVATE') {
+  if (boardData.visibility === "PRIVATE") {
     isPublic.value = false // Private จะเป็นค่า true
-  } else if (boardData.visibility === 'PUBLIC') {
-    console.log('dawda')
+  } else if (boardData.visibility === "PUBLIC") {
+    console.log("dawda")
     isPublic.value = true // Public จะเป็นค่า false
   }
 })
-
-
 </script>
 
 <template>
@@ -468,7 +459,7 @@ onMounted(async () => {
             @click="openModalVisibility"
           />
           <!-- แสดงสถานะว่า Private เมื่อ checkbox ปิด และ Public เมื่อ checkbox เปิด -->
-          <span class="label-text">{{ isPublic ? 'Public' : 'Private' }}</span>
+          <span class="label-text">{{ isPublic ? "Public" : "Private" }}</span>
         </label>
       </div>
     </div>
@@ -498,7 +489,7 @@ onMounted(async () => {
                 role="button"
                 class="p-1 text-gray-400 flex-grow min-w-[120px] outline-none cursor-pointer"
               >
-                {{ filterStatus.length > 0 ? '' : 'Filter Enter...' }}
+                {{ filterStatus.length > 0 ? "" : "Filter Enter..." }}
               </div>
             </div>
             <ul
@@ -521,7 +512,7 @@ onMounted(async () => {
                     <div
                       class="shadow-md rounded-full font-medium p-2 text-black w-36 h-10 text-center mb-2 break-all"
                       :style="{
-                        backgroundColor: myStatus.getStatusColor(status.name)
+                        backgroundColor: myStatus.getStatusColor(status.name),
                       }"
                     >
                       <span class="label-text">{{ status.name }}</span>
@@ -559,7 +550,6 @@ onMounted(async () => {
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
-            
           >
             <svg
               class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -587,7 +577,6 @@ onMounted(async () => {
           @click="openLimitModal"
           :disabled="disabledIfnotOwner"
           class="flex btn text-l ml-1 bg-black text-white"
-       
         >
           <img src="/icons/limit.png" class="w-6" />
           Limit
@@ -596,12 +585,9 @@ onMounted(async () => {
         <!-- Add Button -->
         <router-link :to="{ name: 'addTask' }">
           <button
-            
             @click="openModalAdd"
             :disabled="disabledIfnotOwner"
-            class= 'itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white'
-               
-          
+            class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
@@ -629,7 +615,7 @@ onMounted(async () => {
                   xmlns="http://www.w3.org/2000/svg"
                   :class="{
                     'text-blue-500': sortStatus === 'default',
-                    '': sortStatus !== 'default'
+                    '': sortStatus !== 'default',
                   }"
                   width="20"
                   height="20"
@@ -646,7 +632,7 @@ onMounted(async () => {
                           default:
                             'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
                           asc: 'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
-                          desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z'
+                          desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z',
                         }[sortStatus]
                       "
                     />
@@ -688,7 +674,7 @@ onMounted(async () => {
               <div
                 class="shadow-md rounded-full p-2 text-black w-36 text-center font-medium"
                 :style="{
-                  'background-color': myStatus.getStatusColor(task.status)
+                  'background-color': myStatus.getStatusColor(task.status),
                 }"
               >
                 {{ task.status }}
