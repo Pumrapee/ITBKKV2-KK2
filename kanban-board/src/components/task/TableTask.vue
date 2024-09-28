@@ -446,16 +446,7 @@ onMounted(async () => {
   }
 })
 
-// ตรวจสอบว่าเป็นเจ้าของบอร์ดหรือไม่
-// const isOwner = computed(() => {
-//   return myBoard.getBoardOwnerId === myUser.getUserId
-// })
 
-
-// ตรวจสอบสิทธิ์การแก้ไขบอร์ด
-// const isEditable = computed(() => {
-//   return isOwner.value
-// })
 </script>
 
 <template>

@@ -1,90 +1,115 @@
-import { createRouter, createWebHistory } from "vue-router"
-import HomeView from "@/views/HomeView.vue"
-import AddEditTask from "@/components/task/AddEditTask.vue"
-import StatusView from "@/views/StatusView.vue"
-import NotFoundView from "../views/NotFoundView.vue"
-import AddEditStatus from "@/components/status/AddEditStatus.vue"
-import LoginPage from "@/components/LoginPage.vue"
-import BoardView from "@/views/BoardView.vue"
-import AddBoard from "@/components/board/AddBoard.vue"
-import { useAuthStore } from "@/stores/loginStore"
-import { getToken } from "@/libs/fetchUtils"
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '@/views/HomeView.vue'
+import AddEditTask from '@/components/task/AddEditTask.vue'
+import StatusView from '@/views/StatusView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
+import AddEditStatus from '@/components/status/AddEditStatus.vue'
+import LoginPage from '@/components/LoginPage.vue'
+import BoardView from '@/views/BoardView.vue'
+import AddBoard from '@/components/board/AddBoard.vue'
+import { useAuthStore } from '@/stores/loginStore'
+import { getToken, getItems } from '@/libs/fetchUtils'
+import ForbiddenView from '@/views/ForbiddenView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/login",
-      name: "login",
-      component: LoginPage,
+      path: '/login',
+      name: 'login',
+      component: LoginPage
     },
     {
-      path: "/board",
-      name: "board",
+      path: '/board',
+      name: 'board',
       component: BoardView,
       children: [
         {
-          path: "add",
-          name: "addBoard",
-          component: AddBoard,
-        },
-      ],
+          path: 'add',
+          name: 'addBoard',
+          component: AddBoard
+        }
+      ]
     },
 
     {
-      path: "/board/:id",
-      name: "task",
+      path: '/board/:id',
+      name: 'task',
       component: HomeView,
+      beforeEnter: async (to, from, next) => {
+        const { id: boardId } = to.params
+        try {
+          const response = await getItems(
+            `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
+          )
+
+        
+          if (response.status === 403) {
+            next({ name: 'forbidden' })
+          } else ( next() )
+          console.log(response.status)
+          console.log(typeof(response) === 'object')
+          //typeof(response) === 'object' ? next() : next({ name: 'TaskNotFound' })
+        } catch (error) {
+          next({ name: 'TaskNotFound' })
+        }
+      },
       children: [
         {
-          path: "task/:taskId",
-          name: "detailTask",
-          component: AddEditTask,
+          path: 'task/:taskId',
+          name: 'detailTask',
+          component: AddEditTask
         },
         {
-          path: "task/:taskId/edit",
-          name: "editTask",
-          component: AddEditTask,
+          path: 'task/:taskId/edit',
+          name: 'editTask',
+          component: AddEditTask
         },
         {
-          path: "task/add",
-          name: "addTask",
-          component: AddEditTask,
-        },
-      ],
+          path: 'task/add',
+          name: 'addTask',
+          component: AddEditTask
+        }
+      ]
     },
     {
-      path: "/board/:id/status",
-      name: "tableStatus",
+      path: '/board/:id/status',
+      name: 'tableStatus',
       component: StatusView,
       children: [
         {
-          path: "add",
-          name: "AddStatus",
-          component: AddEditStatus,
+          path: 'add',
+          name: 'AddStatus',
+          component: AddEditStatus
         },
         {
-          path: ":statusId/edit",
-          name: "EditStatus",
-          component: AddEditStatus,
-        },
-      ],
+          path: ':statusId/edit',
+          name: 'EditStatus',
+          component: AddEditStatus
+        }
+      ]
     },
     {
-      path: "/",
-      redirect: { name: "login" },
+      path: '/',
+      redirect: { name: 'login' }
     },
     {
-      path: "/notfound",
-      name: "TaskNotFound",
-      component: NotFoundView,
+      path: '/notfound',
+      name: 'TaskNotFound',
+      component: NotFoundView
     },
     {
-      path: "/:pathMatch(.*)*",
-      name: "notFound",
-      component: NotFoundView,
+      path: '/:pathMatch(.*)*',
+      name: 'notFound',
+      component: NotFoundView
     },
-  ],
+    {
+      path: '/forbidden',
+      name: 'forbidden',
+      component: ForbiddenView
+    },
+   
+  ]
 })
 
 router.beforeEach((to, from, next) => {
@@ -101,5 +126,7 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+
 
 export default router

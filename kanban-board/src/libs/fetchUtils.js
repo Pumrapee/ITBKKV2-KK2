@@ -45,13 +45,14 @@ async function getItems(url) {
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
-
+    
     const items = await data.json()
     return items
   } catch (error) {
     if (data.status === 404) return 404
     if (data.status === 401) return 401
     if (data.status === 400) return 400
+    if (data.status === 403) return 403
   }
 }
 
