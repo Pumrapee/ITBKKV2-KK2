@@ -32,9 +32,6 @@ public class TaskController {
     private StatusService statusService;
 
     @Autowired
-    private BoardService boardService;
-
-    @Autowired
     private ModelMapper modelMapper;
 
     @GetMapping("")
