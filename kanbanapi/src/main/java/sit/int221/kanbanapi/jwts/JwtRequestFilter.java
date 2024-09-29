@@ -83,7 +83,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     if (requestMethod.equals("GET")) {
                         if (boardId != null) {
                             Board board = boardService.getBoardById(boardId);
-                            if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                            if (board.getVisibility().equals("PUBLIC")) {
                                 chain.doFilter(request, response);
                                 return;
                             }
@@ -95,7 +95,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     if (requestMethod.equals("GET")) {
                         if (boardId != null) {
                             Board board = boardService.getBoardById(boardId);
-                            if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                            if (board.getVisibility().equals("PUBLIC")) {
                                 chain.doFilter(request, response);
                                 return;
                             }
@@ -107,7 +107,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             } else if (requestMethod.equals("GET")) {
                 if (boardId != null) {
                     Board board = boardService.getBoardById(boardId);
-                    if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                    if (board.getVisibility().equals("PUBLIC")) {
                         chain.doFilter(request, response);
                         return;
                     } else {
