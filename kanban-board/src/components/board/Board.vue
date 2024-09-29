@@ -52,6 +52,7 @@ onMounted(async () => {
       }
     }
 
+
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
     } else if (myBoard.navBoard) {

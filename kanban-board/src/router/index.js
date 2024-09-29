@@ -8,7 +8,28 @@ import LoginPage from "@/components/LoginPage.vue"
 import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken } from "@/libs/fetchUtils"
+import { getToken, getItems } from "@/libs/fetchUtils"
+import ForbiddenView from "@/views/ForbiddenView.vue"
+
+const checkBoardAccess = async (to, from, next) => {
+  const { id: boardId } = to.params
+  try {
+    const response = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
+    )
+
+    if (response.status === 403) {
+      next({ name: "forbidden" })
+    } else {
+      next()
+    }
+
+    console.log(response.status)
+    console.log(typeof response === "object")
+  } catch (error) {
+    next({ name: "TaskNotFound" })
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +56,7 @@ const router = createRouter({
       path: "/board/:id",
       name: "task",
       component: HomeView,
+      beforeEnter: checkBoardAccess,
       children: [
         {
           path: "task/:taskId",
@@ -57,6 +79,7 @@ const router = createRouter({
       path: "/board/:id/status",
       name: "tableStatus",
       component: StatusView,
+      beforeEnter: checkBoardAccess,
       children: [
         {
           path: "add",
@@ -83,6 +106,11 @@ const router = createRouter({
       path: "/:pathMatch(.*)*",
       name: "notFound",
       component: NotFoundView,
+    },
+    {
+      path: "/forbidden",
+      name: "forbidden",
+      component: ForbiddenView,
     },
   ],
 })

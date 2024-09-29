@@ -45,12 +45,16 @@ export const useAuthStore = defineStore("auth", () => {
     token.value = sessionStorage.getItem("token")
   }
 
+
+  // เพิ่มฟังก์ชัน getUserId
+  const getUserId = () => {
+    return user.value ? user.value.id : null // คืนค่า ID ของผู้ใช้หาก login แล้ว
+  }
+
   const setNewToken = (newRefreshToken) => {
     token.value = newRefreshToken
     sessionStorage.setItem("token", newRefreshToken)
   }
-
-
 
   return {
     isAuthenticated,
@@ -61,5 +65,6 @@ export const useAuthStore = defineStore("auth", () => {
     setToken,
     setNewToken,
     userName,
+    getUserId, // เพิ่มการคืนค่า getUserId
   }
 })

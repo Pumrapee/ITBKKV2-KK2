@@ -35,8 +35,26 @@ const expiredToken = ref(false)
 const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
 
+const disabledIfNotOwner = ref(false)
+const nameOwnerBoard = ref()
+
+// user name login
+const userName = sessionStorage.getItem("user")
+console.log(userName)
+
 onMounted(async () => {
   myUser.setToken()
+
+  const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    nameOwnerBoard.value = boardIdNumber.owner.name
+
+    if(nameOwnerBoard.value !== userName){
+      disabledIfNotOwner.value = true
+    }
 
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -397,6 +415,7 @@ watch(
       <div class="flex items-center">
         <RouterLink :to="{ name: 'task' }">
           <button
+          
             @click="openAddStatus"
             class="itbkk-button-home btn mr-1 bg-black text-white"
           >
@@ -406,7 +425,8 @@ watch(
         </RouterLink>
         <RouterLink :to="{ name: 'AddStatus' }">
           <button
-            @click="openModalAdd"
+          :disabled="disabledIfNotOwner"
+                      @click="openModalAdd"
             class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
           >
             <img src="/icons/plus.png" class="w-4" />
@@ -464,7 +484,8 @@ watch(
                   :to="{ name: 'EditStatus', params: { statusId: task.id } }"
                 >
                   <button
-                    @click="openEditStatus(task.id)"
+                  :disabled="disabledIfNotOwner"
+                  @click="openEditStatus(task.id)"
                     class="btn btn-ghost h-auto bg-yellow-100"
                   >
                     <img src="/icons/pen.png" class="w-4 ml-2" />
@@ -473,6 +494,8 @@ watch(
               </div>
               <div>
                 <button
+                :disabled="disabledIfNotOwner"
+
                   class="itbkk-button-delete btn bg-red-500"
                   @click="openDeleteModal(task.id, task.name)"
                 >

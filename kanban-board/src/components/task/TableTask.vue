@@ -11,6 +11,7 @@ import {
   deleteItemById,
   getItems,
   getStatusLimits,
+  Visibility,
   checkAndRefreshToken,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
@@ -21,6 +22,7 @@ import ExpireToken from "../toast/ExpireToken.vue"
 import router from "@/router"
 import AlertComponent from "../toast/Alert.vue"
 import { useRoute } from "vue-router"
+import ModalVisibility from "../toast/ModalVisibility.vue"
 
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
@@ -40,6 +42,13 @@ const expiredToken = ref(false)
 const boardName = ref()
 const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeAddModal"])
+const disabledIfnotOwner = ref(false)
+const nameOwnerBoard = ref()
+
+// user name login
+const userName = sessionStorage.getItem("user")
+
+console.log(userName)
 
 onMounted(async () => {
   myUser.setToken()
@@ -71,6 +80,17 @@ onMounted(async () => {
       }
     }
 
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    nameOwnerBoard.value = boardIdNumber.owner.name
+
+    if (nameOwnerBoard.value !== userName) {
+      disabledIfnotOwner.value = true
+    }
+    
     const boardByIdName = await getItemById(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardId.value
@@ -435,14 +455,84 @@ watch(
   },
   { immediate: true }
 )
+
+
+const isPublic = ref(false)
+const showModalVisibility = ref(false)
+const originalIsPublic = ref(isPublic.value)
+
+const openModalVisibility = () => {
+  // if(disabledIfnotOwner.value){
+  //   return
+  // }
+  originalIsPublic.value = isPublic.value
+  showModalVisibility.value = true
+}
+
+const confirmVisibilityChange = async () => {
+  showModalVisibility.value = false
+  const newVisibility = isPublic.value ? "PUBLIC" : "PRIVATE"
+
+  const { statusCode } = await Visibility(boardId.value, newVisibility)
+
+  if (statusCode === 200) {
+    console.log(`Visibility changed to ${newVisibility}`)
+    //isPublic.value = !isPublic.value
+  } else if (statusCode === 401) {
+    console.error("Authentication expired. Redirecting to login.")
+    router.push({ name: "login" })
+  } else if (statusCode === 403) {
+    console.error("You do not have permission to change board visibility")
+  } else {
+    console.error("An error occurred. Please try again later.")
+  }
+}
+
+const cancelVisibilityChange = () => {
+  isPublic.value = originalIsPublic.value
+  showModalVisibility.value = false
+}
+
+onMounted(async () => {
+  const boardData = await getItemById(
+    `${import.meta.env.VITE_API_URL}v3/boards`,
+    boardId.value
+  )
+
+  if (boardData.visibility === "PRIVATE") {
+    isPublic.value = false // Private จะเป็นค่า true
+  } else if (boardData.visibility === "PUBLIC") {
+    console.log("dawda")
+    isPublic.value = true // Public จะเป็นค่า false
+  }
+})
+
 </script>
 
 <template>
   <!-- Head -->
   <div class="bounce-in-top flex flex-col items-center mt-10 ml-60">
-    <div class="font-bold text-4xl text-black self-center pb-5">
-      {{ boardName }}
+    <div
+      class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between"
+    >
+      <span>{{ boardName }}</span>
+      <div class="form-control">
+        <label class="label cursor-pointer flex items-center">
+          <!-- Toggle Visibility -->
+          <!-- ดักในฟังก์ชั่น @click -->
+          <input
+            :disabled="disabledIfnotOwner"
+            type="checkbox"
+            class="toggle m-2"
+            v-model="isPublic"
+            @click="openModalVisibility"
+          />
+          <!-- แสดงสถานะว่า Private เมื่อ checkbox ปิด และ Public เมื่อ checkbox เปิด -->
+          <span class="label-text">{{ isPublic ? "Public" : "Private" }}</span>
+        </label>
+      </div>
     </div>
+
     <!-- Filter Search-->
     <div class="flex justify-between w-4/5">
       <div class="flex justify-start items-center mt-4">
@@ -554,6 +644,7 @@ watch(
         <!-- Limit Button -->
         <button
           @click="openLimitModal"
+          :disabled="disabledIfnotOwner"
           class="flex btn text-l ml-1 bg-black text-white"
         >
           <img src="/icons/limit.png" class="w-6" />
@@ -564,7 +655,8 @@ watch(
         <router-link :to="{ name: 'addTask' }">
           <button
             @click="openModalAdd"
-            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+            :disabled="disabledIfnotOwner"
+            class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
@@ -748,6 +840,14 @@ watch(
 
   <!-- <ExpireToken :showExpiredModal="expiredToken" /> -->
   <ExpireToken v-if="expiredToken" />
+
+  <!-- Use VisibilityModal -->
+  <ModalVisibility
+    :isPublic="isPublic"
+    :showModalVisibility="showModalVisibility"
+    @confirm="confirmVisibilityChange"
+    @cancel="cancelVisibilityChange"
+  />
 </template>
 
 <style scoped>
