@@ -81,9 +81,16 @@ public class StatusService {
     }
 
     public Status getStatusByName(String statusName, String boardId) {
-        Board board = boardService.getBoardById(boardId);
-        Status status = repository.findByNameAndBoard(statusName, board).orElseThrow(() -> new BadRequestException("Status " + statusName + " does not exist"));
-        return status;
+        try {
+            Integer statusId = Integer.parseInt(statusName);
+            return checkBoardStatus(boardId, statusId);
+        } catch (NumberFormatException e) {
+            Board board = boardService.getBoardById(boardId);
+            if (statusName == null || statusName.isBlank()) {
+                return repository.findByNameAndBoard("No Status", board).orElseThrow(() -> new BadRequestException("Status " + statusName + " does not exist"));
+            }
+            return repository.findByNameAndBoard(statusName, board).orElseThrow(() -> new BadRequestException("Status " + statusName + " does not exist"));
+        }
     }
 
     private Status checkBoardStatus(String boardId, Integer id) {

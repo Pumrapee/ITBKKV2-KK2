@@ -24,6 +24,7 @@ import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ErrorResponse;
+import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.JwtTokenUtil;
 import sit.int221.kanbanapi.services.JwtUserDetailsService;
@@ -50,6 +51,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
         String requestMethod = request.getMethod();
+        String boardId = extractBoardIdFromURI(requestURI);
 
         if (requestURI.equals("/login")) {
             chain.doFilter(request, response);
@@ -73,14 +75,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         throw new AuthenticationFailed("Invalid token type");
                     }
                     String userOid = claims.get("oid", String.class);
-                    String boardId = extractBoardIdFromURI(requestURI);
                     if (boardId != null) {
                         boardService.checkBoardOwnership(boardId, requestMethod, userOid);
                     }
-
+                } catch (ItemNotFoundException e) {
+                    throw new ItemNotFoundException(e.getMessage());
                 } catch (ExpiredJwtException e) {
                     if (requestMethod.equals("GET")) {
-                        String boardId = extractBoardIdFromURI(requestURI);
                         if (boardId != null) {
                             Board board = boardService.getBoardById(boardId);
                             if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
@@ -92,10 +93,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         throw new AuthenticationFailed("JWT Token has expired");
                     }
                 } catch (Exception e) {
-                    throw new AuthenticationFailed(e.getMessage());
+                    if (requestMethod.equals("GET")) {
+                        if (boardId != null) {
+                            Board board = boardService.getBoardById(boardId);
+                            if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                                chain.doFilter(request, response);
+                                return;
+                            }
+                        }
+                    } else {
+                        throw new AuthenticationFailed(e.getMessage());
+                    }
                 }
             } else if (requestMethod.equals("GET")) {
-                String boardId = extractBoardIdFromURI(requestURI);
                 if (boardId != null) {
                     Board board = boardService.getBoardById(boardId);
                     if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
@@ -120,6 +130,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
         } catch (AuthenticationFailed ex) {
             buildErrorResponse(response, ex, HttpStatus.UNAUTHORIZED, request);
+        } catch (ItemNotFoundException ex) {
+            buildErrorResponse(response, ex, HttpStatus.NOT_FOUND, request);
         }
     }
 

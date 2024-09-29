@@ -77,8 +77,8 @@ public class BoardService {
 
     public User checkBoardOwnership(String boardId, String requestMethod, String userOid) {
         Board board = getBoardById(boardId);
-        User currentUser = userRepository.findById(userOid).orElseThrow(() -> new AuthenticationFailed("User " + userOid + " does not exist"));
-        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new AuthenticationFailed("User " + board.getOwnerId() + " does not exist"));
+        User currentUser = userRepository.findById(userOid).orElseThrow(() -> new ItemNotFoundException("User " + userOid + " does not exist"));
+        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new ItemNotFoundException("User " + board.getOwnerId() + " does not exist"));
         if (currentUser != null) {
             String username = currentUser.getUsername();
             Boolean isOwner = owner.getUsername().equals(username);
