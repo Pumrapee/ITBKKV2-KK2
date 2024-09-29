@@ -110,6 +110,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
                         chain.doFilter(request, response);
                         return;
+                    } else {
+                        throw new NoPermission("You do not have permission to perform this action.");
                     }
                 }
             } else {

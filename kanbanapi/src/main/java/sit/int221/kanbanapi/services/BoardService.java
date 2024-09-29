@@ -79,7 +79,6 @@ public class BoardService {
         Board board = getBoardById(boardId);
         if (userOid != null) {
             Boolean isOwner = board.getOwnerId().equals(userOid);
-            System.out.println(isOwner);
             if (!isOwner && board.getVisibility().equals("PRIVATE")) {
                 throw new NoPermission("You do not have permission to perform this action.");
             }
