@@ -23,7 +23,7 @@ const myTask = useTaskStore()
 const showLimitStatus = ref()
 const showWarning = ref()
 const statusShow = ref()
-const refreshToken = ref(sessionStorage.getItem("refreshToken"))
+const refreshToken = ref(localStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeLimitModal", "closeCancel"])
 const route = useRoute()
 

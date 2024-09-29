@@ -7,6 +7,7 @@ import { useTaskStore } from "../../stores/taskStore"
 const props = defineProps({
   showModal: Boolean,
   task: Object,
+  ownerBoard: String,
   editModeModal: Boolean,
   editDrop: Boolean,
 })
@@ -148,6 +149,11 @@ watch(props, () => {
   if (props.editModeModal) {
     editMode.value = props.editModeModal
   }
+})
+console.log(props.ownerBoard)
+const canEdit = computed(() => {
+  const userName = localStorage.getItem("user")
+  return userName === props.ownerBoard
 })
 </script>
 
@@ -326,9 +332,8 @@ watch(props, () => {
             <div v-else class="mt-5"></div>
           </div>
         </div>
-
         <div class="flex justify-end mt-4">
-          <div>
+          <div v-if="canEdit" class="flex">
             <router-link
               v-if="task?.id"
               :to="{
@@ -337,26 +342,26 @@ watch(props, () => {
               }"
             >
               <button
-                v-show="!editMode"
+                v-if="!editMode"
                 @click="enableEditMode"
                 class="btn btn-info h-2 mr-3"
               >
                 Edit
               </button>
             </router-link>
-
-            <button
-              v-show="editMode"
-              class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
-              @click="addEditSave(newTask)"
-              :disabled="changeTask"
-            >
-              Save
-            </button>
-            <button class="itbkk-button-cancel btn" @click="closeModal">
-              Cancel
-            </button>
           </div>
+
+          <button
+            v-show="editMode"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
+            @click="addEditSave(newTask)"
+            :disabled="changeTask"
+          >
+            Save
+          </button>
+          <button class="itbkk-button-cancel btn" @click="closeModal">
+            Cancel
+          </button>
         </div>
       </div>
     </div>

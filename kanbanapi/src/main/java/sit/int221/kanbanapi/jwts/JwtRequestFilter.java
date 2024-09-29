@@ -21,10 +21,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.ExpiredJwtException;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
-import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
-import sit.int221.kanbanapi.exceptions.BadRequestException;
-import sit.int221.kanbanapi.exceptions.ErrorResponse;
-import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
+import sit.int221.kanbanapi.exceptions.*;
 import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.JwtTokenUtil;
 import sit.int221.kanbanapi.services.JwtUserDetailsService;
@@ -78,39 +75,47 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     if (boardId != null) {
                         boardService.checkBoardOwnership(boardId, requestMethod, userOid);
                     }
-                } catch (ItemNotFoundException e) {
-                    throw new ItemNotFoundException(e.getMessage());
-                } catch (ExpiredJwtException e) {
+                } catch (ItemNotFoundException ex) {
+                    throw new ItemNotFoundException(ex.getMessage());
+                } catch (NoPermission ex) {
+                    throw new NoPermission(ex.getMessage());
+                } catch (ExpiredJwtException ex) {
                     if (requestMethod.equals("GET")) {
                         if (boardId != null) {
                             Board board = boardService.getBoardById(boardId);
-                            if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                            if (board.getVisibility().equals("PUBLIC")) {
                                 chain.doFilter(request, response);
                                 return;
+                            }else{
+                                throw new AuthenticationFailed("JWT Token has expired");
                             }
                         }
                     } else {
                         throw new AuthenticationFailed("JWT Token has expired");
                     }
-                } catch (Exception e) {
+                } catch (Exception ex) {
                     if (requestMethod.equals("GET")) {
                         if (boardId != null) {
                             Board board = boardService.getBoardById(boardId);
-                            if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                            if (board.getVisibility().equals("PUBLIC")) {
                                 chain.doFilter(request, response);
                                 return;
+                            }else {
+                                throw new AuthenticationFailed(ex.getMessage());
                             }
                         }
                     } else {
-                        throw new AuthenticationFailed(e.getMessage());
+                        throw new AuthenticationFailed(ex.getMessage());
                     }
                 }
             } else if (requestMethod.equals("GET")) {
                 if (boardId != null) {
                     Board board = boardService.getBoardById(boardId);
-                    if (board.getVisibility().equals(Board.Visibility.PUBLIC)) {
+                    if (board.getVisibility().equals("PUBLIC")) {
                         chain.doFilter(request, response);
                         return;
+                    } else {
+                        throw new NoPermission("You do not have permission to perform this action.");
                     }
                 }
             } else {
@@ -132,8 +137,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             buildErrorResponse(response, ex, HttpStatus.UNAUTHORIZED, request);
         } catch (ItemNotFoundException ex) {
             buildErrorResponse(response, ex, HttpStatus.NOT_FOUND, request);
-        } catch (Exception e) {
-            buildErrorResponse(response, e, HttpStatus.UNAUTHORIZED, request);
+        } catch (NoPermission ex) {
+            buildErrorResponse(response, ex, HttpStatus.FORBIDDEN, request);
+        } catch (Exception ex) {
+            buildErrorResponse(response, ex, HttpStatus.UNAUTHORIZED, request);
         }
     }
 

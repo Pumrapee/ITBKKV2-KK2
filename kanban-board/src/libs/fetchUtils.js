@@ -1,16 +1,47 @@
+import router from "@/router"
+
 //function ที่ติดต่อ back-end.
-let token = undefined
+let tokenStorage = undefined
+let refresh_token = localStorage.getItem("refreshToken")
 
 function getToken() {
-  token = sessionStorage.getItem("token")
+  tokenStorage = localStorage.getItem("token")
+}
+
+function tokenIsNull(token) {
+  console.log(token)
+  // return token ? { Authorization: `Bearer ${token}` } : {}
+  return !token || token === "null" || token === null || token === ""
+    ? {}
+    : { Authorization: `Bearer ${token}` }
 }
 
 //เช็คว่า Token หมดอายุ
 function isTokenExpired(token) {
-  if (!token) return true
+  console.log(token)
+  // if (!token) return true
 
-  const tokenParts = token.split(".")
-  if (tokenParts.length !== 3) return true
+  // if (!token) {
+  //   console.log("ไม่มี token1")
+  //   return false
+  // }
+
+  // Validate the token format
+  if (
+    (!token && !refresh_token) ||
+    (token === "null" && !refresh_token) ||
+    token === "null"
+  ) {
+    console.log("ไม่มี token2")
+    return false
+  }
+
+  // if (token === "null") {
+  //   return false
+  // }
+
+  const tokenParts = token?.split(".")
+  if (tokenParts?.length !== 3) return true
 
   const base64Url = tokenParts[1]
   const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
@@ -33,7 +64,9 @@ function isTokenExpired(token) {
 // ฟังก์ชันเช็คและรีเฟรช Token หากหมดอายุ
 async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
   // ตรวจสอบว่า token หมดอายุหรือไม่
-  if (isTokenExpired(tokenExpired)) {
+  console.log(tokenExpired)
+  console.log(isTokenExpired(tokenStorage))
+  if (isTokenExpired(tokenStorage)) {
     console.log("Token หมดอายุแล้ว")
     try {
       const res = await fetch(`${url}`, {
@@ -72,20 +105,28 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
 
 async function getItems(url) {
   getToken()
+  console.log()
   let data
+  console.log(tokenIsNull(tokenStorage))
   try {
     data = await fetch(url, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
 
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
-    
+
+    // if (data.status === 403) {
+    //   console.log("londgodasdsadsa")
+    //   router.push({ name: "forbidden" })
+    // }
+
     const items = await data.json()
     return items
   } catch (error) {
@@ -102,9 +143,10 @@ async function getStatusLimits(url) {
     data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
     const items = await data.json()
     return items
@@ -121,9 +163,10 @@ async function getItemById(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
 
     if (data.status === 401) {
@@ -146,9 +189,10 @@ async function findStatus(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
     return data.status
   } catch (error) {
@@ -163,7 +207,7 @@ async function deleteItemById(url, id) {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
     })
     return res.status
@@ -177,7 +221,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
     })
     return res.status
@@ -191,7 +235,7 @@ async function addItem(url, newItem) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
       body: JSON.stringify({
         //destrucuring
@@ -214,7 +258,7 @@ async function editItem(url, id, editItem) {
       method: "PUT",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
       body: JSON.stringify(editItem),
     })
@@ -233,7 +277,7 @@ async function editLimitStatus(url, boolean, maxLimit) {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokenStorage}`,
         },
       }
     )
@@ -274,7 +318,7 @@ async function Visibility(boardId, newVisibility) {
       method: "PATCH",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
       body: JSON.stringify({
         visibility: newVisibility,
@@ -289,6 +333,24 @@ async function Visibility(boardId, newVisibility) {
   }
 }
 
+async function getBoardItems(url) {
+  getToken()
+
+  // Check if the token is present
+  if (!tokenStorage) {
+    console.log("No token provided. Exiting function.")
+    return // Exit the function if there is no token
+  }
+
+  const headers = { Authorization: `Bearer ${tokenStorage}` } // Set headers with the token
+  try {
+    const response = await fetch(url, { headers })
+    const items = await response.json()
+    return items
+  } catch (error) {
+    console.log(`error : ${error}`)
+  }
+}
 
 export {
   getItems,
@@ -305,4 +367,5 @@ export {
   isTokenExpired,
   Visibility,
   checkAndRefreshToken,
+  getBoardItems,
 }

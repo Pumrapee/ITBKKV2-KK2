@@ -32,14 +32,14 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const boardId = ref(route.params.id)
 const expiredToken = ref(false)
-const refreshToken = ref(sessionStorage.getItem("refreshToken"))
+const refreshToken = ref(localStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 const disabledIfNotOwner = ref(false)
 const nameOwnerBoard = ref()
 
 // user name login
-const userName = sessionStorage.getItem("user")
+const userName = localStorage.getItem("user")
 console.log(userName)
 
 onMounted(async () => {
