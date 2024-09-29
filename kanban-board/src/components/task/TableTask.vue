@@ -48,6 +48,11 @@ const nameOwnerBoard = ref()
 // user name login
 const userName = sessionStorage.getItem("user")
 
+// visibility
+const isPublic = ref(false)
+const showModalVisibility = ref(false)
+const originalIsPublic = ref(isPublic.value)
+
 console.log(userName)
 
 onMounted(async () => {
@@ -80,6 +85,7 @@ onMounted(async () => {
       }
     }
 
+    //Board
     const boardIdNumber = await getItemById(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardId.value
@@ -90,12 +96,15 @@ onMounted(async () => {
     if (nameOwnerBoard.value !== userName) {
       disabledIfnotOwner.value = true
     }
-    
-    const boardByIdName = await getItemById(
-      `${import.meta.env.VITE_API_URL}v3/boards`,
-      boardId.value
-    )
-    boardName.value = boardByIdName.name
+
+    boardName.value = boardIdNumber.name
+
+    if (boardIdNumber.visibility === "PRIVATE") {
+      isPublic.value = false // Private จะเป็นค่า false
+    } else if (boardIdNumber.visibility === "PUBLIC") {
+      console.log("dawda")
+      isPublic.value = true // Public จะเป็นค่า true
+    }
 
     //Status
     if (myStatus.getStatus().length === 0) {
@@ -360,6 +369,40 @@ const closeModal = () => {
   router.push({ name: "task" })
 }
 
+// Visibility modal
+const openModalVisibility = () => {
+  // if(disabledIfnotOwner.value){
+  //   return
+  // }
+  originalIsPublic.value = isPublic.value
+  showModalVisibility.value = true
+}
+
+
+const confirmVisibilityChange = async () => {
+  showModalVisibility.value = false
+  const newVisibility = isPublic.value ? "PUBLIC" : "PRIVATE"
+
+  const { statusCode } = await Visibility(boardId.value, newVisibility)
+
+  if (statusCode === 200) {
+    console.log(`Visibility changed to ${newVisibility}`)
+    //isPublic.value = !isPublic.value
+  } else if (statusCode === 401) {
+    console.error("Authentication expired. Redirecting to login.")
+    router.push({ name: "login" })
+  } else if (statusCode === 403) {
+    console.error("You do not have permission to change board visibility")
+  } else {
+    console.error("An error occurred. Please try again later.")
+  }
+}
+
+const cancelVisibilityChange = () => {
+  isPublic.value = originalIsPublic.value
+  showModalVisibility.value = false
+}
+
 //Sort status
 const sortStatus = ref("default")
 const listTaskStore = ref(myTask.getTasks())
@@ -455,58 +498,6 @@ watch(
   },
   { immediate: true }
 )
-
-
-const isPublic = ref(false)
-const showModalVisibility = ref(false)
-const originalIsPublic = ref(isPublic.value)
-
-const openModalVisibility = () => {
-  // if(disabledIfnotOwner.value){
-  //   return
-  // }
-  originalIsPublic.value = isPublic.value
-  showModalVisibility.value = true
-}
-
-const confirmVisibilityChange = async () => {
-  showModalVisibility.value = false
-  const newVisibility = isPublic.value ? "PUBLIC" : "PRIVATE"
-
-  const { statusCode } = await Visibility(boardId.value, newVisibility)
-
-  if (statusCode === 200) {
-    console.log(`Visibility changed to ${newVisibility}`)
-    //isPublic.value = !isPublic.value
-  } else if (statusCode === 401) {
-    console.error("Authentication expired. Redirecting to login.")
-    router.push({ name: "login" })
-  } else if (statusCode === 403) {
-    console.error("You do not have permission to change board visibility")
-  } else {
-    console.error("An error occurred. Please try again later.")
-  }
-}
-
-const cancelVisibilityChange = () => {
-  isPublic.value = originalIsPublic.value
-  showModalVisibility.value = false
-}
-
-onMounted(async () => {
-  const boardData = await getItemById(
-    `${import.meta.env.VITE_API_URL}v3/boards`,
-    boardId.value
-  )
-
-  if (boardData.visibility === "PRIVATE") {
-    isPublic.value = false // Private จะเป็นค่า true
-  } else if (boardData.visibility === "PUBLIC") {
-    console.log("dawda")
-    isPublic.value = true // Public จะเป็นค่า false
-  }
-})
-
 </script>
 
 <template>
@@ -750,7 +741,7 @@ onMounted(async () => {
               </div>
             </td>
             <td>
-              <div class="dropdown dropdown-right mr-10 itbkk-button-action">
+              <div v-if="!disabledIfnotOwner" class="dropdown dropdown-right mr-10 itbkk-button-action">
                 <div tabindex="0" role="button" class="m-1">
                   <svg
                     class="h-4"
@@ -771,6 +762,7 @@ onMounted(async () => {
                     </g>
                   </svg>
                 </div>
+
                 <ul
                   tabindex="0"
                   class="dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
@@ -814,6 +806,7 @@ onMounted(async () => {
     :showModal="openModal"
     :task="tasks"
     :editModeModal="editMode"
+    :ownerBoard="nameOwnerBoard"
     @saveAddEdit="closeAddEdit"
     @closeModal="closeModal"
   />
