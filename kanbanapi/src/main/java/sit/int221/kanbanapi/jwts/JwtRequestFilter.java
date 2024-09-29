@@ -132,6 +132,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             buildErrorResponse(response, ex, HttpStatus.UNAUTHORIZED, request);
         } catch (ItemNotFoundException ex) {
             buildErrorResponse(response, ex, HttpStatus.NOT_FOUND, request);
+        } catch (Exception e) {
+            buildErrorResponse(response, e, HttpStatus.UNAUTHORIZED, request);
         }
     }
 

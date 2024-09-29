@@ -14,9 +14,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.dtos.*;
+import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.JwtUserDetailsService;
 import sit.int221.kanbanapi.services.UserService;
@@ -41,6 +43,9 @@ public class BoardController {
     @GetMapping("")
     public ResponseEntity<List<Board>> getAllBoard() {
         UserDetails user = jwtUserDetailsService.getCurrentUser();
+        if (user == null) {
+            throw new AuthenticationFailed("No user");
+        }
         List<Board> boards = boardService.getUserBoards(user.getUsername());
         List<BoardListDTO> boardListDTOS = boards.stream().map(board -> {
             BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
