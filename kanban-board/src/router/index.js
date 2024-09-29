@@ -8,7 +8,7 @@ import LoginPage from "@/components/LoginPage.vue"
 import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken, getItems } from "@/libs/fetchUtils"
+import { getToken, getItems, getBoardItems } from "@/libs/fetchUtils"
 import ForbiddenView from "@/views/ForbiddenView.vue"
 
 const checkBoardAccess = async (to, from, next) => {
@@ -24,8 +24,6 @@ const checkBoardAccess = async (to, from, next) => {
       next()
     }
 
-    console.log(response.status)
-    console.log(typeof response === "object")
   } catch (error) {
     next({ name: "TaskNotFound" })
   }
@@ -115,19 +113,55 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  const token = sessionStorage.getItem("token")
+  const token = localStorage.getItem("token")
 
-  if (!authStore.isAuthenticated && !token && to.name !== "login") {
-    next({ name: "login" })
-  } else {
-    if (token) {
-      authStore.isAuthenticated = true
-      getToken()
+  // ตรวจสอบเส้นทาง task หรือ tableStatus ที่มี id
+  if (
+    (to.name === "task" && to.params.id) ||
+    (to.name === "tableStatus" && to.params.id)
+  ) {
+    const boardId = to.params.id
+    console.log(boardId)
+
+    // เรียก API เพื่อเช็คว่า board เป็น public หรือ private
+    const board = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
+    )
+
+    console.log(board)
+    console.log(board.status)
+    console.log(board.visibility)
+    if (board.status === 403) {
+      return next({ name: "forbidden" })
     }
-    next()
+
+    if (board) {
+      // ถ้าเป็น public สามารถเข้าถึงได้โดยไม่ต้องมี token
+      if (board.visibility === "PUBLIC") {
+        return next()
+      }
+
+      // ถ้าเป็น private และไม่มี token ให้ไปหน้า login
+      if (board.visibility === "PRIVATE" && !token) {
+        return next({ name: "login" })
+      }
+    }
   }
+
+  if ((to.name === "board" && !token) || (to.name === "board" && token === "null")) {
+    return next({ name: "login" })
+  }
+
+  // ถ้ามี token ให้ทำการ authenticate
+  if (token) {
+    authStore.isAuthenticated = true
+    getToken()
+  }
+
+  // ถ้าไม่มีปัญหาใด ๆ ให้ไปต่อใน route
+  next()
 })
 
 export default router

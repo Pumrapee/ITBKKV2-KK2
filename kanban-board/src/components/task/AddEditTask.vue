@@ -152,7 +152,7 @@ watch(props, () => {
 })
 console.log(props.ownerBoard)
 const canEdit = computed(() => {
-  const userName = sessionStorage.getItem("user")
+  const userName = localStorage.getItem("user")
   return userName === props.ownerBoard
 })
 </script>

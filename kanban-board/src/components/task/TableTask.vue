@@ -40,13 +40,13 @@ const boardId = ref(route.params.id)
 const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
 const boardName = ref()
-const refreshToken = ref(sessionStorage.getItem("refreshToken"))
+const refreshToken = ref(localStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeAddModal"])
 const disabledIfnotOwner = ref(false)
 const nameOwnerBoard = ref()
 
 // user name login
-const userName = sessionStorage.getItem("user")
+const userName = localStorage.getItem("user")
 
 // visibility
 const isPublic = ref(false)
@@ -378,23 +378,34 @@ const openModalVisibility = () => {
   showModalVisibility.value = true
 }
 
-
 const confirmVisibilityChange = async () => {
   showModalVisibility.value = false
   const newVisibility = isPublic.value ? "PUBLIC" : "PRIVATE"
 
-  const { statusCode } = await Visibility(boardId.value, newVisibility)
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
 
-  if (statusCode === 200) {
-    console.log(`Visibility changed to ${newVisibility}`)
-    //isPublic.value = !isPublic.value
-  } else if (statusCode === 401) {
-    console.error("Authentication expired. Redirecting to login.")
-    router.push({ name: "login" })
-  } else if (statusCode === 403) {
-    console.error("You do not have permission to change board visibility")
-  } else {
-    console.error("An error occurred. Please try again later.")
+  if (checkToken.statusCode === 200) {
+    const { statusCode } = await Visibility(boardId.value, newVisibility)
+
+    if (statusCode === 200) {
+      console.log(`Visibility changed to ${newVisibility}`)
+      //isPublic.value = !isPublic.value
+    } else if (statusCode === 401) {
+      console.error("Authentication expired. Redirecting to login.")
+      router.push({ name: "login" })
+    } else if (statusCode === 403) {
+      console.error("You do not have permission to change board visibility")
+    } else {
+      console.error("An error occurred. Please try again later.")
+    }
+  }
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    showModalVisibility.value = false
   }
 }
 
@@ -507,21 +518,6 @@ watch(
       class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between"
     >
       <span>{{ boardName }}</span>
-      <div class="form-control">
-        <label class="label cursor-pointer flex items-center">
-          <!-- Toggle Visibility -->
-          <!-- ดักในฟังก์ชั่น @click -->
-          <input
-            :disabled="disabledIfnotOwner"
-            type="checkbox"
-            class="toggle m-2"
-            v-model="isPublic"
-            @click="openModalVisibility"
-          />
-          <!-- แสดงสถานะว่า Private เมื่อ checkbox ปิด และ Public เมื่อ checkbox เปิด -->
-          <span class="label-text">{{ isPublic ? "Public" : "Private" }}</span>
-        </label>
-      </div>
     </div>
 
     <!-- Filter Search-->
@@ -605,8 +601,25 @@ watch(
         </div>
       </div>
 
-      <!-- Status -->
       <div class="flex justify-end items-center">
+        <!-- Toggle Visibility -->
+        <div class="form-control">
+          <label class="label cursor-pointer flex items-center">
+            <input
+              :disabled="disabledIfnotOwner"
+              type="checkbox"
+              class="toggle m-2"
+              v-model="isPublic"
+              @click="openModalVisibility"
+            />
+            <!-- แสดงสถานะว่า Private เมื่อ checkbox ปิด และ Public เมื่อ checkbox เปิด -->
+            <span class="label-text">{{
+              isPublic ? "Public" : "Private"
+            }}</span>
+          </label>
+        </div>
+
+        <!-- Status -->
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
             class="itbkk-manage-status btn text-l bg-black text-white ml-1"
@@ -741,7 +754,10 @@ watch(
               </div>
             </td>
             <td>
-              <div v-if="!disabledIfnotOwner" class="dropdown dropdown-right mr-10 itbkk-button-action">
+              <div
+                v-if="!disabledIfnotOwner"
+                class="dropdown dropdown-right mr-10 itbkk-button-action"
+              >
                 <div tabindex="0" role="button" class="m-1">
                   <svg
                     class="h-4"
