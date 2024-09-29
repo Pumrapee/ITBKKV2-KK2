@@ -29,9 +29,8 @@ const loginHandler = async () => {
     username.value,
     password.value
   )
+
   if (res.status === 200) {
-    // const Token = setToken(token)
-    // authStore.setToken(token)
     authStore.login(token)
     getToken()
     router.push({ name: "board" })
@@ -145,7 +144,7 @@ const loginHandler = async () => {
       </form>
     </div>
   </div>
-   <!-- footer -->
+  <!-- footer -->
   <footer
     class="fixed bottom-0 left-0 right-0 footer items-center p-2 bg-black text-white font-semibold"
   >

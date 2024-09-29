@@ -10,7 +10,7 @@ import {
   addItem,
   deleteItemById,
   deleteItemByIdToNewId,
-  isTokenExpired,
+  checkAndRefreshToken,
 } from "@/libs/fetchUtils"
 import { ref, onMounted, watch } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
@@ -32,6 +32,7 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const boardId = ref(route.params.id)
 const expiredToken = ref(false)
+const refreshToken = ref(sessionStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 const disabledIfNotOwner = ref(false)
@@ -55,9 +56,16 @@ onMounted(async () => {
       disabledIfNotOwner.value = true
     }
 
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (myStatus.getStatus().length === 0) {
       const listStatus = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
@@ -71,6 +79,10 @@ onMounted(async () => {
         myStatus.addStatus(listStatus)
       }
     }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
 })
 
@@ -89,14 +101,22 @@ const showAlert = (message, type) => {
 //เปิด Modal
 const openEditStatus = async (idStatus) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const statusItem = await getItemById(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
       idStatus
     )
-    console.log(statusItem)
+
     if (statusItem.status === 404) {
       showAlert("An error has occurred, the status does not exist.", "error")
       myStatus.removeStatus(idStatus)
@@ -112,6 +132,11 @@ const openEditStatus = async (idStatus) => {
       openModal.value = false
     }
   }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+  }
 }
 
 const openModalAdd = () => {
@@ -126,9 +151,16 @@ const openModalAdd = () => {
 
 const openDeleteModal = async (id, name) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
     const showStatus = await findStatus(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/status`,
       id
@@ -148,6 +180,8 @@ const openDeleteModal = async (id, name) => {
       showDeleteModal.value = true
     }
     if (showStatus === 401) {
+      // showTransferModal.value = false
+      // showDeleteModal.value = false
       expiredToken.value = true
     }
 
@@ -157,14 +191,28 @@ const openDeleteModal = async (id, name) => {
       countTask: countTask.length,
     }
   }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    // showTransferModal.value = false
+    // showDeleteModal.value = false
+  }
 }
 
 //ปิด Modal
 const closeAddEdit = async (status) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+  
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (editMode.value) {
       const { editedItem, statusCode } = await editItem(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
@@ -192,6 +240,8 @@ const closeAddEdit = async (status) => {
 
       if (statusCode === 401) {
         expiredToken.value = true
+        openModal.value = false
+        editMode.value = false
       }
     }
 
@@ -204,6 +254,7 @@ const closeAddEdit = async (status) => {
       if (statusCode === 201) {
         myStatus.addOneStatus(newTask)
         showAlert("The status has been added", "success")
+        myStatus.getStatus()
       } else {
         // 400 , 500
         showAlert("An error has occurred, the status does not exist.", "error")
@@ -211,19 +262,35 @@ const closeAddEdit = async (status) => {
 
       if (statusCode === 401) {
         expiredToken.value = true
+        openModal.value = false
+        editMode.value = false
       }
     }
+    openModal.value = false
+    editMode.value = false
+    router.go(-1)
   }
-  openModal.value = false
-  editMode.value = false
-  router.go(-1)
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    openModal.value = false
+    editMode.value = false
+  }
 }
 
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
   myUser.setToken()
-  if (isTokenExpired(myUser.token)) {
-    expiredToken.value = true
-  } else {
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (showDeleteModal.value) {
       const deleteItem = await deleteItemById(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
@@ -280,7 +347,12 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
         expiredToken.value = true
       }
     }
+    showTransferModal.value = false
+    showDeleteModal.value = false
+  }
 
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
     showTransferModal.value = false
     showDeleteModal.value = false
   }
@@ -298,9 +370,17 @@ watch(
   () => route.params.statusId,
   async (newId, oldId) => {
     myUser.setToken()
-    if (isTokenExpired(myUser.token)) {
-      expiredToken.value = true
-    } else {
+
+    const checkToken = await checkAndRefreshToken(
+      `${import.meta.env.VITE_API_URL}token`,
+      myUser.token,
+      refreshToken.value
+    )
+
+    if (checkToken.statusCode === 200) {
+      //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+      myUser.setNewToken(checkToken.accessNewToken)
+
       if (newId !== undefined) {
         const res = await getItemById(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
@@ -310,6 +390,10 @@ watch(
           router.push({ name: "TaskNotFound" })
         }
       }
+    }
+
+    if (checkToken.statusCode === 401) {
+      expiredToken.value = true
     }
   },
   { immediate: true }
