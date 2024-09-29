@@ -75,13 +75,11 @@ public class BoardService {
         return boardRepository.save(board);
     }
 
-    public User checkBoardOwnership(String boardId, String requestMethod, String userOid) {
+    public void checkBoardOwnership(String boardId, String requestMethod, String userOid) {
         Board board = getBoardById(boardId);
-        User currentUser = userRepository.findById(userOid).orElseThrow(() -> new ItemNotFoundException("User " + userOid + " does not exist"));
-        User owner = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new ItemNotFoundException("User " + board.getOwnerId() + " does not exist"));
-        if (currentUser != null) {
-            String username = currentUser.getUsername();
-            Boolean isOwner = owner.getUsername().equals(username);
+        if (userOid != null) {
+            Boolean isOwner = board.getOwnerId().equals(userOid);
+            System.out.println(isOwner);
             if (!isOwner && board.getVisibility().equals("PRIVATE")) {
                 throw new NoPermission("You do not have permission to perform this action.");
             }
@@ -91,7 +89,6 @@ public class BoardService {
         } else if (board.getVisibility().equals("PRIVATE") || !requestMethod.equals("GET")){
             throw new NoPermission("You do not have permission to perform this action.");
         }
-        return owner;
     }
 
     private void createDefaultStatuses(Board board) {
