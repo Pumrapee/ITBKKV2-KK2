@@ -9,7 +9,6 @@ function getToken() {
 }
 
 function tokenIsNull(token) {
-  console.log(token)
   // return token ? { Authorization: `Bearer ${token}` } : {}
   return !token || token === "null" || token === null || token === ""
     ? {}
@@ -18,11 +17,9 @@ function tokenIsNull(token) {
 
 //เช็คว่า Token หมดอายุ
 function isTokenExpired(token) {
-  console.log(token)
   // if (!token) return true
 
   // if (!token) {
-  //   console.log("ไม่มี token1")
   //   return false
   // }
 
@@ -32,7 +29,6 @@ function isTokenExpired(token) {
     (token === "null" && !refresh_token) ||
     token === "null"
   ) {
-    console.log("ไม่มี token2")
     return false
   }
 
@@ -64,10 +60,8 @@ function isTokenExpired(token) {
 // ฟังก์ชันเช็คและรีเฟรช Token หากหมดอายุ
 async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
   // ตรวจสอบว่า token หมดอายุหรือไม่
-  console.log(tokenExpired)
-  console.log(isTokenExpired(tokenStorage))
+
   if (isTokenExpired(tokenStorage)) {
-    console.log("Token หมดอายุแล้ว")
     try {
       const res = await fetch(`${url}`, {
         method: "POST",
@@ -80,7 +74,6 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
       const statusCode = res.status
 
       if (statusCode === 401) {
-        console.log("Token หมดอายุแล้วจากเซิร์ฟเวอร์, statusCode 401")
         return { statusCode: 401, accessNewToken: null }
       }
 
@@ -89,13 +82,9 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
         const data = await res.json()
         const accessNewToken = data.access_token
 
-        console.log("new token:", accessNewToken)
-        console.log("status code:", statusCode)
-
         return { statusCode, accessNewToken }
       }
     } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการรีเฟรช token:", error)
       return { statusCode: 500, accessNewToken: null } // คืนค่า statusCode 500 เมื่อเกิดข้อผิดพลาด
     }
   } else {
@@ -105,9 +94,7 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
 
 async function getItems(url) {
   getToken()
-  console.log()
   let data
-  console.log(tokenIsNull(tokenStorage))
   try {
     data = await fetch(url, {
       //GET Method
@@ -123,7 +110,6 @@ async function getItems(url) {
     }
 
     // if (data.status === 403) {
-    //   console.log("londgodasdsadsa")
     //   router.push({ name: "forbidden" })
     // }
 
@@ -338,7 +324,6 @@ async function getBoardItems(url) {
 
   // Check if the token is present
   if (!tokenStorage) {
-    console.log("No token provided. Exiting function.")
     return // Exit the function if there is no token
   }
 
@@ -348,7 +333,6 @@ async function getBoardItems(url) {
     const items = await response.json()
     return items
   } catch (error) {
-    console.log(`error : ${error}`)
   }
 }
 

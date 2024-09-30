@@ -19,13 +19,36 @@ const checkBoardAccess = async (to, from, next) => {
     )
 
     if (response.status === 403) {
-      next({ name: "forbidden" })
-    } else {
-      next()
+     return next({ name: "forbidden" })
     }
 
+    if (response.status === 404) {
+      return next({ name: "notFound" })
+    }
+
+    if (response.visibility === "PUBLIC") {
+      // Restrict access to 'add' and 'edit' paths if no token is present
+      if (
+        (to.name === "addTask" ||
+          to.name === "editTask" ||
+          to.name === "AddStatus" ||
+          to.name === "EditStatus") &&
+        (!token || token === "null")
+      ) {
+        return next({ name: "forbidden" })
+      }
+    }
+    return next()
+
+    // // If the board is private, check for a token
+    // if (response.visibility === "PRIVATE") {
+    //   if (!token) {
+    //     return next({ name: "login" })
+    //   }
+    //   return next()
+    // }
   } catch (error) {
-    next({ name: "TaskNotFound" })
+    next({ name: "forbidden" })
   }
 }
 
@@ -116,24 +139,22 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const token = localStorage.getItem("token")
+  const boardId = to.params.id
 
   // ตรวจสอบเส้นทาง task หรือ tableStatus ที่มี id
   if (
     (to.name === "task" && to.params.id) ||
     (to.name === "tableStatus" && to.params.id)
   ) {
-    const boardId = to.params.id
-    console.log(boardId)
 
     // เรียก API เพื่อเช็คว่า board เป็น public หรือ private
     const board = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
     )
 
-    console.log(board)
-    console.log(board.status)
-    console.log(board.visibility)
+
     if (board.status === 403) {
+
       return next({ name: "forbidden" })
     }
 
@@ -150,9 +171,19 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  if ((to.name === "board" && !token) || (to.name === "board" && token === "null")) {
+  if (
+    (to.name === "board" && !token) ||
+    (to.name === "board" && token === "null")
+  ) {
     return next({ name: "login" })
   }
+
+  // if (
+  //   (to.name === "forbidden" && !token) ||
+  //   (to.name === "forbidden" && token === "null")
+  // ) {
+  //   return next({ name: "task", params: { id: boardId } })
+  // }
 
   // ถ้ามี token ให้ทำการ authenticate
   if (token) {
@@ -161,7 +192,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // ถ้าไม่มีปัญหาใด ๆ ให้ไปต่อใน route
-  next()
+  return next()
 })
 
 export default router

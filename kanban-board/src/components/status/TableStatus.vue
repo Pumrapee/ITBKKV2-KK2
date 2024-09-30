@@ -40,7 +40,6 @@ const nameOwnerBoard = ref()
 
 // user name login
 const userName = localStorage.getItem("user")
-console.log(userName)
 
 onMounted(async () => {
   myUser.setToken()

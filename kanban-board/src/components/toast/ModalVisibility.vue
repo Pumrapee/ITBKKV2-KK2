@@ -21,19 +21,19 @@ const cancelVisibilityChange = () => {
 <template>
   <div
     v-if="showModalVisibility"
-    class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+    class="itbkk-modal-alert fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
   >
     <div class="card bg-base-100 w-96 shadow-xl">
-      <div class="card-body font-medium">
+      <div class="itbkk-message card-body font-medium">
         <p>
           Do you want to change board visibility to
-          {{ isPublic ? 'Public' : 'Private' }}?
+          {{ isPublic ? 'public' : 'private' }}?
         </p>
         <div class="card-actions justify-end">
-          <button @click="confirmVisibilityChange" class="btn bg-black text-white">
+          <button @click="confirmVisibilityChange" class="itbkk-button-confirm btn bg-black text-white">
             Confirm
           </button>
-          <button @click="cancelVisibilityChange" class="btn">
+          <button @click="cancelVisibilityChange" class="itbkk-button-cancel btn">
             Cancel
           </button>
         </div>

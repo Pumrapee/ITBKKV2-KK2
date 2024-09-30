@@ -53,8 +53,6 @@ const isPublic = ref(false)
 const showModalVisibility = ref(false)
 const originalIsPublic = ref(isPublic.value)
 
-console.log(userName)
-
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
@@ -102,7 +100,6 @@ onMounted(async () => {
     if (boardIdNumber.visibility === "PRIVATE") {
       isPublic.value = false // Private จะเป็นค่า false
     } else if (boardIdNumber.visibility === "PUBLIC") {
-      console.log("dawda")
       isPublic.value = true // Public จะเป็นค่า true
     }
 
@@ -392,7 +389,6 @@ const confirmVisibilityChange = async () => {
     const { statusCode } = await Visibility(boardId.value, newVisibility)
 
     if (statusCode === 200) {
-      console.log(`Visibility changed to ${newVisibility}`)
       //isPublic.value = !isPublic.value
     } else if (statusCode === 401) {
       console.error("Authentication expired. Redirecting to login.")
@@ -603,7 +599,7 @@ watch(
 
       <div class="flex justify-end items-center">
         <!-- Toggle Visibility -->
-        <div class="form-control">
+        <div class="itbkk-board-visibility form-control">
           <label class="label cursor-pointer flex items-center">
             <input
               :disabled="disabledIfnotOwner"
