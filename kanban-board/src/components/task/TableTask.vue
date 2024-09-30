@@ -89,7 +89,9 @@ onMounted(async () => {
       boardId.value
     )
 
-    nameOwnerBoard.value = boardIdNumber.owner.name
+    if (!boardIdNumber || boardIdNumber.status === 404) {
+      nameOwnerBoard.value = boardIdNumber.owner.name
+    }
 
     if (nameOwnerBoard.value !== userName) {
       disabledIfnotOwner.value = true
@@ -599,28 +601,29 @@ watch(
 
       <div class="flex justify-end items-center">
         <!-- Toggle Visibility -->
-<div class="itbkk-board-visibility form-control relative group">
-  <label class="label cursor-pointer flex items-center">
-    <input
-      :disabled="disabledIfnotOwner"
-      type="checkbox"
-      class="toggle m-2"
-      v-model="isPublic"
-      @click="openModalVisibility"
-    />
-    
-    <span class="label-text">{{ isPublic ? "Public" : "Private" }}</span>
-  </label>
+        <div class="itbkk-board-visibility form-control relative group">
+          <label class="label cursor-pointer flex items-center">
+            <input
+              :disabled="disabledIfnotOwner"
+              type="checkbox"
+              class="toggle m-2"
+              v-model="isPublic"
+              @click="openModalVisibility"
+            />
 
-  <!-- Tooltip -->
-  <div
-    v-if="disabledIfnotOwner"
-    class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
-  >
-    You need to be board owner to perform this action.
-  </div>
-</div>
+            <span class="label-text">{{
+              isPublic ? "Public" : "Private"
+            }}</span>
+          </label>
 
+          <!-- Tooltip -->
+          <div
+            v-if="disabledIfnotOwner"
+            class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+          >
+            You need to be board owner to perform this action.
+          </div>
+        </div>
 
         <!-- Status -->
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
@@ -650,44 +653,43 @@ watch(
 
         <!-- Limit Button -->
         <div class="relative group">
-        <button
-          @click="openLimitModal"
-          :disabled="disabledIfnotOwner"
-          class="flex btn text-l ml-1 bg-black text-white"
-        >
-          <img src="/icons/limit.png" class="w-6" />
-          Limit
-        </button>
+          <button
+            @click="openLimitModal"
+            :disabled="disabledIfnotOwner"
+            class="flex btn text-l ml-1 bg-black text-white"
+          >
+            <img src="/icons/limit.png" class="w-6" />
+            Limit
+          </button>
           <!-- Tooltip -->
-  <div
-    v-if="disabledIfnotOwner"
-    class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
-  >
-    You need to be board owner to perform this action.
-  </div>
-</div>
+          <div
+            v-if="disabledIfnotOwner"
+            class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+          >
+            You need to be board owner to perform this action.
+          </div>
+        </div>
 
         <!-- Add Button -->
-<div class="relative group">
-  <router-link :to="{ name: 'addTask' }">
-    <button
-      @click="openModalAdd"
-      :disabled="disabledIfnotOwner"
-      class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
-    >
-      <img src="/icons/plus.png" class="w-4" />
-    </button>
-  </router-link>
-  
-  <!-- Tooltip -->
-  <div
-    v-if="disabledIfnotOwner"
-    class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
-  >
-    You need to be board owner to perform this action.
-  </div>
-</div>
+        <div class="relative group">
+          <router-link :to="{ name: 'addTask' }">
+            <button
+              @click="openModalAdd"
+              :disabled="disabledIfnotOwner"
+              class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
+            >
+              <img src="/icons/plus.png" class="w-4" />
+            </button>
+          </router-link>
 
+          <!-- Tooltip -->
+          <div
+            v-if="disabledIfnotOwner"
+            class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+          >
+            You need to be board owner to perform this action.
+          </div>
+        </div>
       </div>
     </div>
 
