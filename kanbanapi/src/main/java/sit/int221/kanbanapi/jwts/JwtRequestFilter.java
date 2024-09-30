@@ -87,6 +87,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                 chain.doFilter(request, response);
                                 return;
                             }else{
+
                                 throw new AuthenticationFailed("JWT Token has expired");
                             }
                         }
@@ -101,6 +102,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                 chain.doFilter(request, response);
                                 return;
                             }else {
+
                                 throw new AuthenticationFailed(ex.getMessage());
                             }
                         }
