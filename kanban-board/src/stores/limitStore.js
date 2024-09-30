@@ -12,7 +12,11 @@ export const useLimitStore = defineStore("limitStatus", () => {
     return (limitisStatus.value = limit)
   }
 
-  return { addLimit, getLimit }
+  const clearLimit = () => {
+    return limitisStatus.value = {}
+  }
+
+  return { addLimit, getLimit , clearLimit }
 })
 
 if (import.meta.hot) {

@@ -1,16 +1,43 @@
+import router from "@/router"
+
 //function ที่ติดต่อ back-end.
-let token = undefined
+let tokenStorage = undefined
+let refresh_token = localStorage.getItem("refreshToken")
 
 function getToken() {
-  token = sessionStorage.getItem("token")
+  tokenStorage = localStorage.getItem("token")
+}
+
+function tokenIsNull(token) {
+  // return token ? { Authorization: `Bearer ${token}` } : {}
+  return !token || token === "null" || token === null || token === ""
+    ? {}
+    : { Authorization: `Bearer ${token}` }
 }
 
 //เช็คว่า Token หมดอายุ
 function isTokenExpired(token) {
-  if (!token) return true
+  // if (!token) return true
 
-  const tokenParts = token.split(".")
-  if (tokenParts.length !== 3) return true
+  // if (!token) {
+  //   return false
+  // }
+
+  // Validate the token format
+  if (
+    (!token && !refresh_token) ||
+    (token === "null" && !refresh_token) ||
+    token === "null"
+  ) {
+    return false
+  }
+
+  // if (token === "null") {
+  //   return false
+  // }
+
+  const tokenParts = token?.split(".")
+  if (tokenParts?.length !== 3) return true
 
   const base64Url = tokenParts[1]
   const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
@@ -33,8 +60,8 @@ function isTokenExpired(token) {
 // ฟังก์ชันเช็คและรีเฟรช Token หากหมดอายุ
 async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
   // ตรวจสอบว่า token หมดอายุหรือไม่
-  if (isTokenExpired(tokenExpired)) {
-    console.log("Token หมดอายุแล้ว")
+
+  if (isTokenExpired(tokenStorage)) {
     try {
       const res = await fetch(`${url}`, {
         method: "POST",
@@ -47,7 +74,6 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
       const statusCode = res.status
 
       if (statusCode === 401) {
-        console.log("Token หมดอายุแล้วจากเซิร์ฟเวอร์, statusCode 401")
         return { statusCode: 401, accessNewToken: null }
       }
 
@@ -56,13 +82,9 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
         const data = await res.json()
         const accessNewToken = data.access_token
 
-        console.log("new token:", accessNewToken)
-        console.log("status code:", statusCode)
-
         return { statusCode, accessNewToken }
       }
     } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการรีเฟรช token:", error)
       return { statusCode: 500, accessNewToken: null } // คืนค่า statusCode 500 เมื่อเกิดข้อผิดพลาด
     }
   } else {
@@ -77,14 +99,19 @@ async function getItems(url) {
     data = await fetch(url, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
 
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
+
+    // if (data.status === 403) {
+    //   router.push({ name: "forbidden" })
+    // }
 
     const items = await data.json()
     return items
@@ -92,6 +119,7 @@ async function getItems(url) {
     if (data.status === 404) return 404
     if (data.status === 401) return 401
     if (data.status === 400) return 400
+    if (data.status === 403) return 403
   }
 }
 
@@ -101,9 +129,10 @@ async function getStatusLimits(url) {
     data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
     const items = await data.json()
     return items
@@ -120,9 +149,10 @@ async function getItemById(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
 
     if (data.status === 401) {
@@ -145,9 +175,10 @@ async function findStatus(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${tokenStorage}`,
+      // },
+      headers: tokenIsNull(tokenStorage),
     })
     return data.status
   } catch (error) {
@@ -162,7 +193,7 @@ async function deleteItemById(url, id) {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
     })
     return res.status
@@ -176,7 +207,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
     })
     return res.status
@@ -190,7 +221,7 @@ async function addItem(url, newItem) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
       body: JSON.stringify({
         //destrucuring
@@ -213,7 +244,7 @@ async function editItem(url, id, editItem) {
       method: "PUT",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenStorage}`,
       },
       body: JSON.stringify(editItem),
     })
@@ -232,7 +263,7 @@ async function editLimitStatus(url, boolean, maxLimit) {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokenStorage}`,
         },
       }
     )
@@ -266,6 +297,45 @@ async function login(url, userName, password) {
   }
 }
 
+async function Visibility(boardId, newVisibility) {
+  getToken()
+  try {
+    const res = await fetch(`http://localhost:8080/v3/boards/${boardId}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${tokenStorage}`,
+      },
+      body: JSON.stringify({
+        visibility: newVisibility,
+      }),
+    })
+    const statusCode = res.status
+    const responseBody = await res.json()
+
+    return { responseBody, statusCode }
+  } catch (error) {
+    console.error("Error in patching visibility", error)
+  }
+}
+
+async function getBoardItems(url) {
+  getToken()
+
+  // Check if the token is present
+  if (!tokenStorage) {
+    return // Exit the function if there is no token
+  }
+
+  const headers = { Authorization: `Bearer ${tokenStorage}` } // Set headers with the token
+  try {
+    const response = await fetch(url, { headers })
+    const items = await response.json()
+    return items
+  } catch (error) {
+  }
+}
+
 export {
   getItems,
   getItemById,
@@ -279,5 +349,7 @@ export {
   login,
   getToken,
   isTokenExpired,
+  Visibility,
   checkAndRefreshToken,
+  getBoardItems,
 }

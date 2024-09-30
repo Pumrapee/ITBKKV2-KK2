@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode"
 import { useBoardStore } from "@/stores/boardStore"
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
+import { useLimitStore } from "./limitStore"
 import router from "@/router"
 
 export const useAuthStore = defineStore("auth", () => {
@@ -14,18 +15,19 @@ export const useAuthStore = defineStore("auth", () => {
   const myBoard = useBoardStore()
   const myStatus = useStatusStore()
   const myTask = useTaskStore()
+  const myLimit = useLimitStore()
 
   const login = (newToken) => {
     isAuthenticated.value = true
     //token
-    sessionStorage.setItem("token", newToken.access_token)
-    sessionStorage.setItem("refreshToken", newToken.refresh_token)
-    const tokenIsUser = sessionStorage.getItem("token")
+    localStorage.setItem("token", newToken.access_token)
+    localStorage.setItem("refreshToken", newToken.refresh_token)
+    const tokenIsUser = localStorage.getItem("token")
     token.value = tokenIsUser
     user.value = jwtDecode(tokenIsUser)
-    userName.value = user.value.name 
+    userName.value = user.value.name
     //username
-    sessionStorage.setItem("user", user.value.name)
+    localStorage.setItem("user", user.value.name)
   }
 
   const logout = () => {
@@ -36,21 +38,32 @@ export const useAuthStore = defineStore("auth", () => {
     myBoard.clearBoard()
     myStatus.clearStatus()
     myTask.clearTask()
+    myLimit.clearLimit()
     myBoard.navBoard = false
-    sessionStorage.clear()
+    localStorage.clear()
     router.push({ name: "login" })
   }
 
   const setToken = () => {
-    token.value = sessionStorage.getItem("token")
+    token.value = localStorage.getItem("token")
+  }
+
+  const accessDenied = () => {
+    myBoard.clearBoard()
+    myStatus.clearStatus()
+    myTask.clearTask()
+    myLimit.clearLimit()
+  }
+
+  // เพิ่มฟังก์ชัน getUserId
+  const getUserId = () => {
+    return user.value ? user.value.id : null // คืนค่า ID ของผู้ใช้หาก login แล้ว
   }
 
   const setNewToken = (newRefreshToken) => {
     token.value = newRefreshToken
-    sessionStorage.setItem("token", newRefreshToken)
+    localStorage.setItem("token", newRefreshToken)
   }
-
-
 
   return {
     isAuthenticated,
@@ -61,5 +74,7 @@ export const useAuthStore = defineStore("auth", () => {
     setToken,
     setNewToken,
     userName,
+    accessDenied,
+    getUserId, // เพิ่มการคืนค่า getUserId
   }
 })

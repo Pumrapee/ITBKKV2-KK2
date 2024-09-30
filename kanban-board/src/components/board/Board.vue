@@ -9,6 +9,7 @@ import {
   getItems,
   deleteItemById,
   checkAndRefreshToken,
+  getBoardItems
 } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
 import { useAuthStore } from "@/stores/loginStore"
@@ -20,7 +21,7 @@ const myUser = useAuthStore()
 const expiredToken = ref(false)
 const showDeleteModal = ref(false)
 const boardIdDelete = ref("")
-const refreshToken = ref(sessionStorage.getItem("refreshToken"))
+const refreshToken = ref(localStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
 
 const openModalAdd = () => {
@@ -42,7 +43,7 @@ onMounted(async () => {
     myUser.setNewToken(checkToken.accessNewToken)
     expiredToken.value = false
 
-    const listBoard = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
+    const listBoard = await getBoardItems(`${import.meta.env.VITE_API_URL}v3/boards`)
     if (myBoard.getBoards().length === 0) {
       //401
       if (listBoard === 401) {
@@ -51,6 +52,7 @@ onMounted(async () => {
         myBoard.addBoards(listBoard)
       }
     }
+
 
     if (myBoard.getBoards().length > 0 && !myBoard.navBoard) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })

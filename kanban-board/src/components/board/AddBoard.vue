@@ -8,7 +8,7 @@ const props = defineProps({
 const myUser = useAuthStore()
 // const userName = localStorage.getItem("user")
 // const userName = myUser.userName
-const userName = sessionStorage.getItem("user")
+const userName = localStorage.getItem("user")
 
 const boardName = ref({ name: `${userName} personal board` })
 const emits = defineEmits(["closeModal", "saveAdd"])

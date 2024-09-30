@@ -8,7 +8,7 @@ const authStore = useAuthStore()
 const myBoard = useBoardStore()
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
-const userName = sessionStorage.getItem("user")
+const userName = localStorage.getItem("user")
 
 const logout = () => {
   authStore.logout()

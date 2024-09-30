@@ -86,7 +86,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                             if (board.getVisibility().equals("PUBLIC")) {
                                 chain.doFilter(request, response);
                                 return;
-                            } else {
+                            }else{
+
                                 throw new AuthenticationFailed("JWT Token has expired");
                             }
                         }
@@ -100,7 +101,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                             if (board.getVisibility().equals("PUBLIC")) {
                                 chain.doFilter(request, response);
                                 return;
-                            } else {
+                            }else {
+
                                 throw new AuthenticationFailed(ex.getMessage());
                             }
                         }

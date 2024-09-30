@@ -3,13 +3,12 @@ import { onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "@/stores/loginStore"
 
-const myUser = useAuthStore()
-
 const router = useRouter()
+const myUser = useAuthStore()
 
 onMounted(() => {
   setTimeout(() => {
-    localStorage.clear()
+    myUser.accessDenied()
     router.push({ name: "board" })
   }, 3000)
 })
@@ -21,8 +20,8 @@ onMounted(() => {
       class="card w-2/5 bg-slate-100 text-black bg-opacity-90 backdrop-blur rounded-lg shadow-lg p-8"
     >
       <div class="card-body items-center text-center">
-        <h2 class="card-title text-red-500 text-4xl">Not Found! 404</h2>
-        <p>The requested task does not exist</p>
+        <h2 class="card-title text-red-500 text-4xl">403</h2>
+        <p>Access denied, you do not have permission to view this page.</p>
       </div>
     </div>
   </div>

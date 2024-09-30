@@ -144,7 +144,6 @@ const loginHandler = async () => {
       </form>
     </div>
   </div>
-
   <!-- footer -->
   <footer
     class="fixed bottom-0 left-0 right-0 footer items-center p-2 bg-black text-white font-semibold"
