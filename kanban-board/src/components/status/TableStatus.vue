@@ -400,7 +400,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-16 mb-20 ml-30">
+  <div class="flex flex-col items-center mt-32 mb-20 ml-30">
     <!-- Navigation -->
     <div class="bounce-in-top flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">

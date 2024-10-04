@@ -297,10 +297,10 @@ async function login(url, userName, password) {
   }
 }
 
-async function Visibility(boardId, newVisibility) {
+async function Visibility(url,boardId, newVisibility) {
   getToken()
   try {
-    const res = await fetch(`http://localhost:8080/v3/boards/${boardId}`, {
+    const res = await fetch(`${url}/${boardId}`, {
       method: "PATCH",
       headers: {
         "content-type": "application/json",
