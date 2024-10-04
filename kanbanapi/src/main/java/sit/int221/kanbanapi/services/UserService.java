@@ -13,4 +13,8 @@ public class UserService {
     public User getUserById(String oid) {
         return userRepository.findById(oid).orElseThrow(() -> new BadRequestException("User "+ oid + " does not exist"));
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new BadRequestException("User "+ email + " does not exist"));
+    }
 }

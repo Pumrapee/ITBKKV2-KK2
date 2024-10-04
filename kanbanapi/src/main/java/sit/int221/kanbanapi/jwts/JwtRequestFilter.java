@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,13 +22,17 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.ExpiredJwtException;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.exceptions.*;
 import sit.int221.kanbanapi.services.BoardService;
+import sit.int221.kanbanapi.services.CollabService;
 import sit.int221.kanbanapi.services.JwtTokenUtil;
 import sit.int221.kanbanapi.services.JwtUserDetailsService;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @Component
@@ -41,6 +46,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private BoardService boardService;
+
+    @Autowired
+    private CollabRepository collabRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -67,49 +75,33 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     username = jwtTokenUtil.getUsernameFromToken(jwtToken);
                     Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
 
-                    String tokenType = claims.get("token_type", String.class);
-                    if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
-                        throw new AuthenticationFailed("Invalid token type");
-                    }
+//                    String tokenType = claims.get("token_type", String.class);
+//                    if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
+//                        throw new AuthenticationFailed("Invalid token type");
+//                    }
+
                     String userOid = claims.get("oid", String.class);
+
+                    // Validate board access and user permissions
                     if (boardId != null) {
-                        boardService.checkBoardOwnership(boardId, requestMethod, userOid);
+                        validateBoardAccess(requestMethod, boardId, userOid);
                     }
+
+                    // Set authentication if token is valid
+                    setAuthenticationIfValid(request, username, jwtToken);
+                } catch (AuthenticationFailed ex) {
+                    throw new AuthenticationFailed(ex.getMessage());
                 } catch (ItemNotFoundException ex) {
                     throw new ItemNotFoundException(ex.getMessage());
+                } catch (CollaboratorConflict ex) {
+                    throw new CollaboratorConflict(ex.getMessage());
                 } catch (NoPermission ex) {
                     throw new NoPermission(ex.getMessage());
-                } catch (ExpiredJwtException ex) {
-                    if (requestMethod.equals("GET")) {
-                        if (boardId != null) {
-                            Board board = boardService.getBoardById(boardId);
-                            if (board.getVisibility().equals("PUBLIC")) {
-                                chain.doFilter(request, response);
-                                return;
-                            }else{
-
-                                throw new AuthenticationFailed("JWT Token has expired");
-                            }
-                        }
-                    } else {
-                        throw new AuthenticationFailed("JWT Token has expired");
-                    }
                 } catch (Exception ex) {
-                    if (requestMethod.equals("GET")) {
-                        if (boardId != null) {
-                            Board board = boardService.getBoardById(boardId);
-                            if (board.getVisibility().equals("PUBLIC")) {
-                                chain.doFilter(request, response);
-                                return;
-                            }else {
-
-                                throw new AuthenticationFailed(ex.getMessage());
-                            }
-                        }
-                    } else {
-                        throw new AuthenticationFailed(ex.getMessage());
-                    }
+                    handleTokenException(requestMethod, boardId, request, response, chain, ex);
+                    return;
                 }
+
             } else if (requestMethod.equals("GET")) {
                 if (boardId != null) {
                     Board board = boardService.getBoardById(boardId);
@@ -124,26 +116,82 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 throw new AuthenticationFailed("Authorization header missing");
             }
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                }
-            }
-
             chain.doFilter(request, response);
-        } catch (AuthenticationFailed ex) {
-            buildErrorResponse(response, ex, HttpStatus.UNAUTHORIZED, request);
-        } catch (ItemNotFoundException ex) {
-            buildErrorResponse(response, ex, HttpStatus.NOT_FOUND, request);
-        } catch (NoPermission ex) {
-            buildErrorResponse(response, ex, HttpStatus.FORBIDDEN, request);
-        } catch (Exception ex) {
-            buildErrorResponse(response, ex, HttpStatus.UNAUTHORIZED, request);
+
+        } catch (AuthenticationFailed | ItemNotFoundException | CollaboratorConflict | NoPermission ex) {
+            buildErrorResponse(response, ex, getHttpStatus(ex), request);
         }
+    }
+
+    private void validateBoardAccess(String requestMethod, String boardId, String userOid) {
+        Board board = boardService.getBoardById(boardId);
+
+        if (board.getOwnerId().equals(userOid)) {
+            return;
+        }
+
+        if (board.getVisibility().equals("PUBLIC") && requestMethod.equals("GET")) {
+            return;
+        }
+
+        Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
+                .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
+
+        String accessRight = collab.getAccessRight().toString();
+
+        if (accessRight.equals("WRITE")) {
+            return;
+        } else if (accessRight.equals("READ")) {
+            if (!requestMethod.equals("GET")) {
+                throw new NoPermission("You do not have permission to perform this action.");
+            }
+        } else {
+            throw new NoPermission("You do not have permission to perform this action.");
+        }
+    }
+
+    private void setAuthenticationIfValid(HttpServletRequest request, String username, String jwtToken) {
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(username);
+            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                setAuthentication(request, userDetails);
+            }
+        }
+    }
+
+    private void setAuthentication(HttpServletRequest request, UserDetails userDetails) {
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    }
+
+    private void handleTokenException(String requestMethod, String boardId,
+                                      HttpServletRequest request, HttpServletResponse response,
+                                      FilterChain chain, Exception ex)
+            throws IOException, ServletException {
+
+        if (requestMethod.equals("GET") && boardId != null) {
+            Board board = boardService.getBoardById(boardId);
+            if (board.getVisibility().equals("PUBLIC")) {
+                chain.doFilter(request, response);
+                return;
+            }
+        }
+
+        if (ex instanceof ExpiredJwtException) {
+            throw new AuthenticationFailed("JWT Token has expired");
+        } else if (ex instanceof MalformedJwtException) {
+            throw new AuthenticationFailed("Malformed JWT token");
+        } else if (ex instanceof UnsupportedJwtException) {
+            throw new AuthenticationFailed("Unsupported JWT token");
+        } else if (ex instanceof SignatureException) {
+            throw new AuthenticationFailed("Invalid JWT signature");
+        } else if (ex instanceof IllegalArgumentException) {
+            throw new AuthenticationFailed("JWT token compact of handler are invalid");
+        }
+
+        throw new AuthenticationFailed(ex.getMessage());
     }
 
     private String extractBoardIdFromURI(String requestURI) {
@@ -160,5 +208,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         response.setStatus(httpStatus.value());
         response.setContentType("application/json");
         response.getWriter().write(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(errorResponse));
+    }
+
+    private HttpStatus getHttpStatus(Exception ex) {
+        if (ex instanceof NoPermission) {
+            return HttpStatus.FORBIDDEN;
+        } else if (ex instanceof ItemNotFoundException) {
+            return HttpStatus.NOT_FOUND;
+        } else if (ex instanceof CollaboratorConflict) {
+            return HttpStatus.CONFLICT;
+        } else {
+            return HttpStatus.UNAUTHORIZED;
+        }
     }
 }

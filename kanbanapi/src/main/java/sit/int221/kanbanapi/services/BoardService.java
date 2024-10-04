@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
@@ -33,6 +35,8 @@ public class BoardService {
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
+    @Autowired
+    private CollabRepository collabRepository;
 
     public List<Board> getUserBoards(String user) {
         return boardRepository.findByOwnerId(userRepository.findByUsername(user).getOid());
@@ -73,21 +77,6 @@ public class BoardService {
         board.setTaskLimitEnabled(newBoard.getTaskLimitEnabled());
         board.setMaxTasksPerStatus(newBoard.getMaxTasksPerStatus());
         return boardRepository.save(board);
-    }
-
-    public void checkBoardOwnership(String boardId, String requestMethod, String userOid) {
-        Board board = getBoardById(boardId);
-        if (userOid != null) {
-            Boolean isOwner = board.getOwnerId().equals(userOid);
-            if (!isOwner && board.getVisibility().equals("PRIVATE")) {
-                throw new NoPermission("You do not have permission to perform this action.");
-            }
-            if (!isOwner && board.getVisibility().equals("PUBLIC") && !requestMethod.equals("GET")) {
-                throw new NoPermission("You do not have permission to perform this action.");
-            }
-        } else if (board.getVisibility().equals("PRIVATE") || !requestMethod.equals("GET")){
-            throw new NoPermission("You do not have permission to perform this action.");
-        }
     }
 
     private void createDefaultStatuses(Board board) {
