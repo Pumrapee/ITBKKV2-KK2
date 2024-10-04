@@ -40,9 +40,6 @@ public class BoardController {
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
-    @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
-
     @GetMapping("")
     public ResponseEntity<List<Board>> getAllBoard() {
         UserDetails user = jwtUserDetailsService.getCurrentUser();
