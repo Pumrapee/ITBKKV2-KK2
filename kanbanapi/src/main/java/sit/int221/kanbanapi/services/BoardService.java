@@ -15,6 +15,7 @@ import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
 import sit.int221.kanbanapi.dtos.BoardListDTO;
+import sit.int221.kanbanapi.dtos.Owner;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -55,14 +56,18 @@ public class BoardService {
                 }).collect(Collectors.toList());
         List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
                 .map(board -> {
-            BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
-            boardListDTO.setRole("OWNER");
-            return boardListDTO;
+                    User boardUser = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+                    BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
+                    boardListDTO.setRole("OWNER");
+                    boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
+                    return boardListDTO;
         }).collect(Collectors.toList());
         List<BoardListDTO> collabBoardListDTOS = collabBoards.stream()
                 .map(board -> {
+                    User boardUser = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
                     boardListDTO.setRole("COLLABORATOR");
+                    boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
                     return boardListDTO;
                 }).collect(Collectors.toList());
         List<BoardListDTO> allBoards = new ArrayList<>(ownedBoardListDTOS);

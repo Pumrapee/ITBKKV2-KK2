@@ -74,10 +74,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 try {
                     username = jwtTokenUtil.getUsernameFromToken(jwtToken);
                     Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
-//                    String tokenType = claims.get("token_type", String.class);
-//                    if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
-//                        throw new AuthenticationFailed("Invalid token type");
-//                    }
+
+                    String tokenType = claims.get("token_type", String.class);
+                    if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
+                        throw new AuthenticationFailed("Invalid token type");
+                    }
 
                     String userOid = claims.get("oid", String.class);
 
@@ -141,7 +142,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 } else if (accessRight.equals("READ") && !requestMethod.equals("GET")) {
                     throw new NoPermission("You do not have permission to perform this action.");
                 }
-            } else if (accessRight.equals("WRITE") && requestMethod.equals("GET")) {
+            } else if (requestMethod.equals("GET")) {
                 return;
             } else {
                 throw new NoPermission("You do not have permission to manage the board.");
