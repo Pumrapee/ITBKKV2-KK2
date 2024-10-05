@@ -6,8 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BoardListDTO {
-    String id;
-    String name;
-    String visibility;
-    String role;
+    private String id;
+    private String name;
+    private String visibility;
+    private String role;
+    private Owner owner;
 }
