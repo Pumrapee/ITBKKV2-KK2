@@ -36,4 +36,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role = Role.STUDENT;
+
+    public String getCollaboratorName() {
+        return name;
+    }
+
+    public String getCollaboratorEmail() {
+        return email;
+    }
 }
