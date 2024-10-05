@@ -2,6 +2,7 @@ package sit.int221.kanbanapi.services;
 
 import io.viascom.nanoid.NanoId;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
+import sit.int221.kanbanapi.dtos.BoardListDTO;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
@@ -38,7 +40,10 @@ public class BoardService {
     @Autowired
     private CollabRepository collabRepository;
 
-    public List<Board> getUserBoards(String user) {
+    @Autowired
+    ModelMapper mapper;
+
+    public List<BoardListDTO> getUserBoards(String user) {
         String userOid = userRepository.findByUsername(user).getOid();
         List<Board> ownedBoards = boardRepository.findByOwnerId(userOid);
         List<Collab> collaborations = collabRepository.findByUserOid(userOid);
@@ -47,10 +52,21 @@ public class BoardService {
                     Board board = boardRepository.findById(collab.getBoardId())
                             .orElseThrow(() -> new ItemNotFoundException("Board not found for id: " + collab.getBoardId()));
                     return board;
-                })
-                .collect(Collectors.toList());
-        List<Board> allBoards = new ArrayList<>(ownedBoards);
-        allBoards.addAll(collabBoards);
+                }).collect(Collectors.toList());
+        List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
+                .map(board -> {
+            BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
+            boardListDTO.setRole("OWNER");
+            return boardListDTO;
+        }).collect(Collectors.toList());
+        List<BoardListDTO> collabBoardListDTOS = collabBoards.stream()
+                .map(board -> {
+                    BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
+                    boardListDTO.setRole("COLLABORATOR");
+                    return boardListDTO;
+                }).collect(Collectors.toList());
+        List<BoardListDTO> allBoards = new ArrayList<>(ownedBoardListDTOS);
+        allBoards.addAll(collabBoardListDTOS);
         return allBoards;
     }
 
