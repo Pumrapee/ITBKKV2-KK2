@@ -74,7 +74,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 try {
                     username = jwtTokenUtil.getUsernameFromToken(jwtToken);
                     Claims claims = jwtTokenUtil.getAllClaimsFromToken(jwtToken);
-
 //                    String tokenType = claims.get("token_type", String.class);
 //                    if (!tokenType.equals("access_token") && !requestURI.equals("/token")) {
 //                        throw new AuthenticationFailed("Invalid token type");
@@ -82,12 +81,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                     String userOid = claims.get("oid", String.class);
 
-                    // Validate board access and user permissions
                     if (boardId != null) {
-                        validateBoardAccess(requestMethod, boardId, userOid);
+                        validateBoardAccess(requestMethod, boardId, userOid, requestURI);
                     }
 
-                    // Set authentication if token is valid
                     setAuthenticationIfValid(request, username, jwtToken);
                 } catch (AuthenticationFailed ex) {
                     throw new AuthenticationFailed(ex.getMessage());
@@ -123,32 +120,43 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private void validateBoardAccess(String requestMethod, String boardId, String userOid) {
+    private void validateBoardAccess(String requestMethod, String boardId, String userOid, String requestURI) {
         Board board = boardService.getBoardById(boardId);
 
         if (board.getOwnerId().equals(userOid)) {
             return;
-        }
-
-        if (board.getVisibility().equals("PUBLIC") && requestMethod.equals("GET")) {
+        } else if (board.getVisibility().equals("PUBLIC") && requestMethod.equals("GET")) {
             return;
-        }
-
-        Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
-                .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
-
-        String accessRight = collab.getAccessRight().toString();
-
-        if (accessRight.equals("WRITE")) {
+        } else if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
             return;
-        } else if (accessRight.equals("READ")) {
-            if (!requestMethod.equals("GET")) {
-                throw new NoPermission("You do not have permission to perform this action.");
-            }
         } else {
-            throw new NoPermission("You do not have permission to perform this action.");
+            Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
+                    .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
+
+            String accessRight = collab.getAccessRight().toString();
+
+            if (isTaskOrStatusRequest(requestURI)) {
+                if (accessRight.equals("WRITE")) {
+                    return;
+                } else if (accessRight.equals("READ") && !requestMethod.equals("GET")) {
+                    throw new NoPermission("You do not have permission to perform this action.");
+                }
+            } else if (accessRight.equals("WRITE") && requestMethod.equals("GET")) {
+                return;
+            } else {
+                throw new NoPermission("You do not have permission to manage the board.");
+            }
         }
     }
+
+    private boolean isTaskOrStatusRequest(String requestURI) {
+        return requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/(tasks|statuses|collabs)(/.*)?");
+    }
+
+    private boolean isSelfCollabRemovalRequest(String requestMethod, String requestURI, String userOid) {
+        return (requestMethod.equals("DELETE") && requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/collabs/" + userOid));
+    }
+
 
     private void setAuthenticationIfValid(HttpServletRequest request, String username, String jwtToken) {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

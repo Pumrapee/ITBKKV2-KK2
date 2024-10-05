@@ -18,9 +18,11 @@ import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.exceptions.NoPermission;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BoardService {
@@ -34,12 +36,22 @@ public class BoardService {
     private StatusRepository statusRepository;
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
-    @Autowired
     private CollabRepository collabRepository;
 
     public List<Board> getUserBoards(String user) {
-        return boardRepository.findByOwnerId(userRepository.findByUsername(user).getOid());
+        String userOid = userRepository.findByUsername(user).getOid();
+        List<Board> ownedBoards = boardRepository.findByOwnerId(userOid);
+        List<Collab> collaborations = collabRepository.findByUserOid(userOid);
+        List<Board> collabBoards = collaborations.stream()
+                .map(collab -> {
+                    Board board = boardRepository.findById(collab.getBoardId())
+                            .orElseThrow(() -> new ItemNotFoundException("Board not found for id: " + collab.getBoardId()));
+                    return board;
+                })
+                .collect(Collectors.toList());
+        List<Board> allBoards = new ArrayList<>(ownedBoards);
+        allBoards.addAll(collabBoards);
+        return allBoards;
     }
 
     public Board getBoardById(String boardId) {

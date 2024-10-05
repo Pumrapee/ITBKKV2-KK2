@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface CollabRepository extends JpaRepository<Collab, CollabId> {
     List<Collab> findByBoardId(String boardId);
     Optional<Collab> findByBoardIdAndUserOid(String boardId, String userOid);
+    List<Collab> findByUserOid(String userOid);
 }
