@@ -8,4 +8,5 @@ import lombok.Setter;
 public class BoardListDTO {
     String id;
     String name;
+    String visibility;
 }
