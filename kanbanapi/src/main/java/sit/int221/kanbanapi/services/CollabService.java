@@ -64,7 +64,7 @@ public class CollabService {
         Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
         User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        if (currentUser.getOid().equals(board.getOwnerId())) {
+        if (!currentUser.getOid().equals(board.getOwnerId())) {
             throw new AuthenticationFailed("You do not have permission to perform this action.");
         }
         collab.setAccessRight(collabAccessEditRequestDTO.getAccess_right());
