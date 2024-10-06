@@ -48,7 +48,6 @@ public class Board {
     @OneToMany(mappedBy = "board")
     private List<Task> tasks;
 
-
     public String getId() {
         return boardId;
     }
