@@ -1,7 +1,7 @@
 <script setup>
-import { useStatusStore } from "@/stores/statusStore"
-import { useTaskStore } from "@/stores/taskStore"
-import { useAuthStore } from "@/stores/loginStore"
+import { useStatusStore } from '@/stores/statusStore'
+import { useTaskStore } from '@/stores/taskStore'
+import { useAuthStore } from '@/stores/loginStore'
 import {
   getItemById,
   findStatus,
@@ -10,15 +10,15 @@ import {
   addItem,
   deleteItemById,
   deleteItemByIdToNewId,
-  checkAndRefreshToken,
-} from "@/libs/fetchUtils"
-import { ref, onMounted, watch } from "vue"
-import AddEditStatus from "@/components/status/AddEditStatus.vue"
-import DeleteStatus from "@/components/status/DeleteStatus.vue"
-import AlertComponent from "@/components/toast/Alert.vue"
-import ExpireToken from "../toast/ExpireToken.vue"
-import router from "@/router"
-import { useRoute } from "vue-router"
+  checkAndRefreshToken
+} from '@/libs/fetchUtils'
+import { ref, onMounted, watch } from 'vue'
+import AddEditStatus from '@/components/status/AddEditStatus.vue'
+import DeleteStatus from '@/components/status/DeleteStatus.vue'
+import AlertComponent from '@/components/toast/Alert.vue'
+import ExpireToken from '../toast/ExpireToken.vue'
+import router from '@/router'
+import { useRoute } from 'vue-router'
 
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
@@ -32,29 +32,28 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const boardId = ref(route.params.id)
 const expiredToken = ref(false)
-const refreshToken = ref(localStorage.getItem("refreshToken"))
-const modalAlert = ref({ message: "", type: "", modal: false })
+const refreshToken = ref(localStorage.getItem('refreshToken'))
+const modalAlert = ref({ message: '', type: '', modal: false })
 
 const disabledIfNotOwner = ref(false)
 const nameOwnerBoard = ref()
 
 // user name login
-const userName = localStorage.getItem("user")
-console.log(userName)
+const userName = localStorage.getItem('user')
 
 onMounted(async () => {
   myUser.setToken()
 
   const boardIdNumber = await getItemById(
-      `${import.meta.env.VITE_API_URL}v3/boards`,
-      boardId.value
-    )
+    `${import.meta.env.VITE_API_URL}v3/boards`,
+    boardId.value
+  )
 
-    nameOwnerBoard.value = boardIdNumber.owner.name
+  nameOwnerBoard.value = boardIdNumber.owner.name
 
-    if(nameOwnerBoard.value !== userName){
-      disabledIfNotOwner.value = true
-    }
+  if (nameOwnerBoard.value !== userName) {
+    disabledIfNotOwner.value = true
+  }
 
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -74,7 +73,7 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        router.push({ name: "TaskNotFound" })
+        router.push({ name: 'TaskNotFound' })
       } else {
         myStatus.addStatus(listStatus)
       }
@@ -91,7 +90,7 @@ const showAlert = (message, type) => {
   modalAlert.value = {
     message,
     type,
-    modal: true,
+    modal: true
   }
   setTimeout(() => {
     modalAlert.value.modal = false
@@ -118,7 +117,7 @@ const openEditStatus = async (idStatus) => {
     )
 
     if (statusItem.status === 404) {
-      showAlert("An error has occurred, the status does not exist.", "error")
+      showAlert('An error has occurred, the status does not exist.', 'error')
       myStatus.removeStatus(idStatus)
       router.go(-1)
     } else {
@@ -143,9 +142,9 @@ const openModalAdd = () => {
   openModal.value = true
   statusItems.value = {
     id: undefined,
-    name: "",
-    description: "",
-    color: "#FFFFFF",
+    name: '',
+    description: '',
+    color: '#FFFFFF'
   }
 }
 
@@ -188,7 +187,7 @@ const openDeleteModal = async (id, name) => {
     statusDetail.value = {
       id: id,
       name: name,
-      countTask: countTask.length,
+      countTask: countTask.length
     }
   }
 
@@ -202,7 +201,7 @@ const openDeleteModal = async (id, name) => {
 //ปิด Modal
 const closeAddEdit = async (status) => {
   myUser.setToken()
-  
+
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
     myUser.token,
@@ -220,7 +219,7 @@ const closeAddEdit = async (status) => {
         {
           name: status.name,
           description: status.description,
-          color: status.color,
+          color: status.color
         }
       )
 
@@ -231,11 +230,11 @@ const closeAddEdit = async (status) => {
         )
         myTask.clearTask()
         myTask.addTasks(listTasks)
-        showAlert("The status has been updated", "success")
+        showAlert('The status has been updated', 'success')
       } else {
         // 400 , 404
         myStatus.removeStatus(editedItem.id)
-        showAlert("An error has occurred, the status does not exist.", "error")
+        showAlert('An error has occurred, the status does not exist.', 'error')
       }
 
       if (statusCode === 401) {
@@ -253,11 +252,11 @@ const closeAddEdit = async (status) => {
 
       if (statusCode === 201) {
         myStatus.addOneStatus(newTask)
-        showAlert("The status has been added", "success")
+        showAlert('The status has been added', 'success')
         myStatus.getStatus()
       } else {
         // 400 , 500
-        showAlert("An error has occurred, the status does not exist.", "error")
+        showAlert('An error has occurred, the status does not exist.', 'error')
       }
 
       if (statusCode === 401) {
@@ -299,12 +298,12 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
 
       if (deleteItem === 200) {
         myStatus.removeStatus(statusDetail.value.id)
-        showAlert("The status has been deleted", "success")
+        showAlert('The status has been deleted', 'success')
       }
 
       if (deleteItem === 400) {
         myStatus.removeStatus(statusDetail.value.id)
-        showAlert("An error has occurred, the status does not exist.", "error")
+        showAlert('An error has occurred, the status does not exist.', 'error')
       }
 
       if (deleteItem === 401) {
@@ -335,12 +334,12 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
         myStatus.addStatus(listStatus)
         showAlert(
           `${statusDetail.value.countTask} task(s) have been transferred and the status has been deleted`,
-          "success"
+          'success'
         )
       }
       if (newStatus === 400) {
         myStatus.removeStatus(filteredStatus)
-        showAlert("An error has occurred, the status does not exist.", "error")
+        showAlert('An error has occurred, the status does not exist.', 'error')
       }
 
       if (newStatus === 401) {
@@ -362,7 +361,7 @@ const closeModal = () => {
   openModal.value = false
   showTransferModal.value = false
   showDeleteModal.value = false
-  router.push({ name: "tableStatus" })
+  router.push({ name: 'tableStatus' })
 }
 
 // route path ถ้าไม่มี id นั้น
@@ -387,7 +386,7 @@ watch(
           newId
         )
         if (res.status === 404) {
-          router.push({ name: "TaskNotFound" })
+          router.push({ name: 'TaskNotFound' })
         }
       }
     }
@@ -401,7 +400,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-16 mb-20 ml-30">
+  <div class="flex flex-col items-center mt-32 mb-20 ml-30">
     <!-- Navigation -->
     <div class="bounce-in-top flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">
@@ -415,7 +414,6 @@ watch(
       <div class="flex items-center">
         <RouterLink :to="{ name: 'task' }">
           <button
-          
             @click="openAddStatus"
             class="itbkk-button-home btn mr-1 bg-black text-white"
           >
@@ -424,13 +422,23 @@ watch(
           </button>
         </RouterLink>
         <RouterLink :to="{ name: 'AddStatus' }">
-          <button
-          :disabled="disabledIfNotOwner"
-                      @click="openModalAdd"
-            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
-          >
-            <img src="/icons/plus.png" class="w-4" />
-          </button>
+          <div class="relative group inline-block">
+            <button
+              :disabled="disabledIfNotOwner"
+              @click="openModalAdd"
+              class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+            >
+              <img src="/icons/plus.png" class="w-4" />
+            </button>
+
+            <!-- Tooltip -->
+            <div
+              v-if="disabledIfNotOwner"
+              class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+            >
+              You need to be board owner to perform this action.
+            </div>
+          </div>
         </RouterLink>
       </div>
     </div>
@@ -483,24 +491,41 @@ watch(
                 <router-link
                   :to="{ name: 'EditStatus', params: { statusId: task.id } }"
                 >
-                  <button
-                  :disabled="disabledIfNotOwner"
-                  @click="openEditStatus(task.id)"
-                    class="btn btn-ghost h-auto bg-yellow-100"
-                  >
-                    <img src="/icons/pen.png" class="w-4 ml-2" />
-                  </button>
+                  <div class="relative group inline-block">
+                    <button
+                      :disabled="disabledIfNotOwner"
+                      @click="openEditStatus(task.id)"
+                      class="btn btn-ghost h-auto bg-yellow-100"
+                    >
+                      <img src="/icons/pen.png" class="w-4 ml-2" />
+                    </button>
+
+                    <!-- Tooltip -->
+                    <div
+                      v-if="disabledIfNotOwner"
+                      class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                    >
+                      You need to be board owner to perform this action.
+                    </div>
+                  </div>
                 </router-link>
               </div>
-              <div>
+              <div class="relative group inline-block">
                 <button
-                :disabled="disabledIfNotOwner"
-
+                  :disabled="disabledIfNotOwner"
                   class="itbkk-button-delete btn bg-red-500"
                   @click="openDeleteModal(task.id, task.name)"
                 >
                   <img src="/icons/delete.png" class="w-4" />
                 </button>
+
+                <!-- Tooltip -->
+                <div
+                  v-if="disabledIfNotOwner"
+                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                >
+                  You need to be board owner to perform this action.
+                </div>
               </div>
             </td>
             <td v-else="task.name !== 'No Status' && task.name !== 'Done'"></td>

@@ -150,7 +150,6 @@ watch(props, () => {
     editMode.value = props.editModeModal
   }
 })
-console.log(props.ownerBoard)
 const canEdit = computed(() => {
   const userName = localStorage.getItem("user")
   return userName === props.ownerBoard

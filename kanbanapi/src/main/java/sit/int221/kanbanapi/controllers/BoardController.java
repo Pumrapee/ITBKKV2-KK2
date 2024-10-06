@@ -46,11 +46,7 @@ public class BoardController {
         if (user == null) {
             throw new AuthenticationFailed("No user");
         }
-        List<Board> boards = boardService.getUserBoards(user.getUsername());
-        List<BoardListDTO> boardListDTOS = boards.stream().map(board -> {
-            BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
-            return boardListDTO;
-        }).collect(Collectors.toList());
+        List<BoardListDTO> boardListDTOS = boardService.getUserBoards(user.getUsername());
         return new ResponseEntity(boardListDTOS, HttpStatus.OK);
     }
 
