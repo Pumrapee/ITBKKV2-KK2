@@ -368,9 +368,6 @@ const closeModal = () => {
 
 // Visibility modal
 const openModalVisibility = () => {
-  // if(disabledIfnotOwner.value){
-  //   return
-  // }
   originalIsPublic.value = isPublic.value
   showModalVisibility.value = true
 }
@@ -386,11 +383,12 @@ const confirmVisibilityChange = async () => {
   )
 
   if (checkToken.statusCode === 200) {
-    const { statusCode } = await Visibility(
+    const { responseBody, statusCode } = await Visibility(
       `${import.meta.env.VITE_API_URL}v3/boards`,
       boardId.value,
       newVisibility
     )
+    myBoard.updateVisibility(boardId.value, responseBody)
 
     if (statusCode === 200) {
       //isPublic.value = !isPublic.value
@@ -605,20 +603,19 @@ watch(
       <div class="flex justify-end items-center">
         <!-- Toggle Visibility -->
         <div class="itbkk-board-visibility form-control relative group">
-          <label class="label cursor-pointer flex items-center">
+          <label class="label cursor-pointer flex flex-col items-center">
+            <span class="label-text font-bold">{{
+              isPublic ? "Public" : "Private"
+            }}</span>
+
             <input
               :disabled="disabledIfnotOwner"
               type="checkbox"
-              class="toggle m-2"
+              class="toggle m-1"
               v-model="isPublic"
               @click="openModalVisibility"
             />
-
-            <span class="label-text">{{
-              isPublic ? "Public" : "Private"
-            }}</span>
           </label>
-
           <!-- Tooltip -->
           <div
             v-if="disabledIfnotOwner"
@@ -628,6 +625,14 @@ watch(
           </div>
         </div>
 
+        <!-- Collaborator -->
+        <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
+          <button
+            class="itbkk-manage-status btn text-l bg-black text-white ml-1"
+          >
+            Manage Collaborator
+          </button>
+        </router-link>
         <!-- Status -->
         <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
           <button
