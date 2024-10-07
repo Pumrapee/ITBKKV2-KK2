@@ -10,5 +10,6 @@ public class BoardListDTO {
     private String name;
     private String visibility;
     private String role;
+    private String accessRight;
     private Owner owner;
 }
