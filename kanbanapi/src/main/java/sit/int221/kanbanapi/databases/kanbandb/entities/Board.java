@@ -1,11 +1,13 @@
 package sit.int221.kanbanapi.databases.kanbandb.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -47,6 +49,10 @@ public class Board {
     @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<Task> tasks;
+
+    @Column(name = "createdOn", insertable = false, updatable = false)
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
+    private OffsetDateTime createdOn;
 
     public String getId() {
         return boardId;
