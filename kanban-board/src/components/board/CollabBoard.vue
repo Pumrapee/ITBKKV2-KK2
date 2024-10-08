@@ -3,17 +3,25 @@ import { onMounted, ref } from "vue"
 import { useBoardStore } from "@/stores/boardStore"
 import { useAuthStore } from "@/stores/loginStore"
 import { useRoute } from "vue-router"
-import { getItems, checkAndRefreshToken, addItem } from "@/libs/fetchUtils"
+import {
+  getItems,
+  checkAndRefreshToken,
+  addItem,
+  getItemById,
+} from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "./AddCollabBoard.vue"
+import Alert from "../toast/Alert.vue"
 
 const route = useRoute()
 const boardId = ref(route.params.id)
 const myBoard = useBoardStore()
 const myUser = useAuthStore()
+const boardName = ref()
 const expiredToken = ref(false)
 const openModal = ref(false)
-
+const modalAlert = ref({ message: "", type: "", modal: false })
+const collab = ref()
 const refreshToken = ref(localStorage.getItem("refreshToken"))
 
 onMounted(async () => {
@@ -31,15 +39,24 @@ onMounted(async () => {
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
     )
 
+    //Collab
     if (collabList === 401) {
       expiredToken.value = true
     } else {
       if (myBoard.getCollabs().length === 0) {
+        collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+
         myBoard.addCollabs(collabList)
-        console.log(myBoard.getCollabs())
       }
     }
-    console.log(collabList)
+
+    //Board
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    boardName.value = boardIdNumber.name
   }
 
   if (checkToken.statusCode === 401) {
@@ -50,44 +67,79 @@ console.log(myBoard.getCollabs())
 
 const openModalAdd = () => {
   openModal.value = true
+  collab.value = {
+    email: "",
+    access_right: "READ",
+  }
 }
 
 const closeAddCollab = async (newCollab) => {
-  const { newTask, statusCode } = await addItem(
-    `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`,
-    newCollab.value
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
   )
 
-  if (statusCode === 201) {
-    myBoard.clearCollaborator()
-    const collabList = await getItems(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+  if (checkToken.statusCode === 200) {
+    const { newTask, statusCode } = await addItem(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`,
+      newCollab.value
     )
-    myBoard.addCollabs(collabList)
 
-    openModal.value = false
+    if (statusCode === 201) {
+      myBoard.clearCollaborator()
+      const collabList = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+      )
+      collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+      myBoard.addCollabs(collabList)
+      openModal.value = false
+      showAlert("The collaborator has been successfully added.", "success")
+    } else if (statusCode === 401) {
+      openModal.value = false
+      expiredToken.value = true
+    } else if (statusCode === 403) {
+      showAlert(
+        "You do not have permission to add board collaborator.",
+        "error"
+      )
+      openModal.value = false
+    } else if (statusCode === 404) {
+      showAlert("The user does not exist.", "error")
+    } else if (statusCode === 409) {
+      showAlert("The user is already the collaborator of this board.", "error")
+    } else {
+      showAlert("There is a problem. Please try again later.", "error")
+    }
+    collab.value = {
+      email: "",
+      access_right: "READ",
+    }
+    console.log(boardId.value)
+    console.log(newCollab.value)
   }
 
-  if (statusCode === 401) {
-    openModal.value = false
+  if (checkToken.statusCode === 401) {
     expiredToken.value = true
   }
-
-  if (statusCode === 403) {
-    alert("You do not have permission to add board collaborator.")
-    openModal.value = false
-  }
-
-  if (statusCode === 404) {
-    alert("The user does not exist.")
-  }
-
-  console.log(boardId.value)
-  console.log(newCollab.value)
 }
 
 const closeModal = () => {
   openModal.value = false
+}
+
+//Alert
+const showAlert = (message, type) => {
+  modalAlert.value = {
+    message,
+    type,
+    modal: true,
+  }
+  setTimeout(() => {
+    modalAlert.value.modal = false
+  }, 4000)
 }
 </script>
 
@@ -103,8 +155,8 @@ const closeModal = () => {
     <div class="bounce-in-top flex justify-between w-4/5">
       <div class="flex text-sm breadcrumbs text-black">
         <ul>
-          <li class="itbkk-button-home">
-            <RouterLink :to="{ name: 'task' }"> Board Name</RouterLink>
+          <li class="itbkk-board-name font-bold text-base">
+            <RouterLink :to="{ name: 'task' }">{{ boardName }}</RouterLink>
           </li>
           <li>Collaborator</li>
         </ul>
@@ -113,7 +165,7 @@ const closeModal = () => {
         <!-- <RouterLink :to="{ name: 'AddStatus' }"> -->
         <button
           @click="openModalAdd"
-          class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+          class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
         >
           <img src="/icons/plus.png" class="w-4" />
         </button>
@@ -143,9 +195,9 @@ const closeModal = () => {
             class="itbkk-item"
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
-            <td class="pl-10">{{ collab.name }}</td>
-            <td class="pl-20">{{ collab.email }}</td>
-            <td class="pl-40">
+            <td class="itbkk-name pl-10">{{ collab.name }}</td>
+            <td class="itbkk-email pl-20">{{ collab.email }}</td>
+            <td class="itbkk-access-right pl-40">
               <p
                 class="shadow-md rounded-full h-auto max-w-40 font-medium text-center p-3 break-all bg-white"
               >
@@ -153,7 +205,7 @@ const closeModal = () => {
               </p>
             </td>
 
-            <td></td>
+            <td class="itbkk-collab-remove"></td>
           </tr>
         </tbody>
 
@@ -170,8 +222,15 @@ const closeModal = () => {
 
   <AddCollabBoard
     :showModal="openModal"
+    :collabs="collab"
     @closeModal="closeModal"
     @addCollab="closeAddCollab"
+  />
+
+  <Alert
+    :message="modalAlert.message"
+    :type="modalAlert.type"
+    :showAlert="modalAlert.modal"
   />
 
   <ExpireToken v-if="expiredToken" />

@@ -628,7 +628,7 @@ watch(
         <!-- Collaborator -->
         <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
           <button
-            class="itbkk-manage-status btn text-l bg-black text-white ml-1"
+            class="itbkk-manage-collaborator btn text-l bg-black text-white ml-1"
           >
             Manage Collaborator
           </button>
