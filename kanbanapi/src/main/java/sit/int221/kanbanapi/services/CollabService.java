@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
+import sit.int221.kanbanapi.databases.kanbandb.entities.CollabId;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
@@ -14,6 +15,7 @@ import sit.int221.kanbanapi.dtos.CollabAccessEditRequestDTO;
 import sit.int221.kanbanapi.dtos.CollabAddRequestDTO;
 import sit.int221.kanbanapi.dtos.CollabAddRespondDTO;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
+import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.CollaboratorConflict;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 
@@ -43,6 +45,9 @@ public class CollabService {
     public CollabAddRespondDTO addCollaborator(String boardId, CollabAddRequestDTO collabAddRequestDTO) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
         User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
+        if (collabRepository.existsById(new CollabId(boardId, newCollab.getOid()))) {
+            throw new CollaboratorConflict("Collaborator already exist!!!");
+        }
         User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
         Boolean isOwner = currentUser.getOid().equals(board.getOwnerId());
         if (!isOwner) {
