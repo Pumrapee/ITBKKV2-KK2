@@ -7,12 +7,11 @@ import java.time.OffsetDateTime;
 
 @Getter
 @Setter
-public class BoardListDTO {
-    private String id;
+public class CollaboratorDTO {
+    private String oid;
     private String name;
-    private String visibility;
-    private String role;
+    private String email;
     private String accessRight;
-    private OffsetDateTime createdOn;
-    private Owner owner;
+    private OffsetDateTime addedOn;
 }
+

@@ -2,23 +2,30 @@ package sit.int221.kanbanapi.services;
 
 import io.viascom.nanoid.NanoId;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
+import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
+import sit.int221.kanbanapi.dtos.BoardListDTO;
+import sit.int221.kanbanapi.dtos.Owner;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.exceptions.NoPermission;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BoardService {
@@ -32,10 +39,46 @@ public class BoardService {
     private StatusRepository statusRepository;
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+    private CollabRepository collabRepository;
 
-    public List<Board> getUserBoards(String user) {
-        return boardRepository.findByOwnerId(userRepository.findByUsername(user).getOid());
+    @Autowired
+    ModelMapper mapper;
+
+    public List<BoardListDTO> getUserBoards(String user) {
+        String userOid = userRepository.findByUsername(user).getOid();
+        List<Board> ownedBoards = boardRepository.findByOwnerId(userOid);
+        List<Collab> collaborations = collabRepository.findByUserOid(userOid);
+        List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
+                .map(board -> {
+                    User boardUser = userRepository.findById(board.getOwnerId())
+                            .orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+                    BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
+                    boardListDTO.setRole("OWNER");
+                    boardListDTO.setAccessRight("OWNER");
+                    boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
+                    return boardListDTO;
+                })
+                .collect(Collectors.toList());
+
+        List<BoardListDTO> collabBoardListDTOS = collaborations.stream()
+                .map(collab -> {
+                    Board board = boardRepository.findById(collab.getBoardId())
+                            .orElseThrow(() -> new ItemNotFoundException("Board not found for id: " + collab.getBoardId()));
+                    User boardUser = userRepository.findById(board.getOwnerId())
+                            .orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+
+                    BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
+                    boardListDTO.setRole("COLLABORATOR");
+                    boardListDTO.setAccessRight(collab.getAccessRight().toString());
+                    boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
+                    return boardListDTO;
+                })
+                .collect(Collectors.toList());
+
+        // Combine owned and collaborator boards
+        List<BoardListDTO> allBoards = new ArrayList<>(ownedBoardListDTOS);
+        allBoards.addAll(collabBoardListDTOS);
+        return allBoards;
     }
 
     public Board getBoardById(String boardId) {
@@ -73,21 +116,6 @@ public class BoardService {
         board.setTaskLimitEnabled(newBoard.getTaskLimitEnabled());
         board.setMaxTasksPerStatus(newBoard.getMaxTasksPerStatus());
         return boardRepository.save(board);
-    }
-
-    public void checkBoardOwnership(String boardId, String requestMethod, String userOid) {
-        Board board = getBoardById(boardId);
-        if (userOid != null) {
-            Boolean isOwner = board.getOwnerId().equals(userOid);
-            if (!isOwner && board.getVisibility().equals("PRIVATE")) {
-                throw new NoPermission("You do not have permission to perform this action.");
-            }
-            if (!isOwner && board.getVisibility().equals("PUBLIC") && !requestMethod.equals("GET")) {
-                throw new NoPermission("You do not have permission to perform this action.");
-            }
-        } else if (board.getVisibility().equals("PRIVATE") || !requestMethod.equals("GET")){
-            throw new NoPermission("You do not have permission to perform this action.");
-        }
     }
 
     private void createDefaultStatuses(Board board) {

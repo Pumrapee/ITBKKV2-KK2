@@ -8,6 +8,7 @@ CREATE TABLE `boards` (
   `visibility` ENUM('PRIVATE', 'PUBLIC') NOT NULL DEFAULT 'PRIVATE',
   `taskLimitEnabled` boolean NOT NULL,
   `maxTasksPerStatus` int NOT NULL,
+  `createdOn` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`boardId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -37,4 +38,13 @@ CREATE TABLE `tasks` (
   KEY `boardId` (`boardId`),
   CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`taskStatus`) REFERENCES `statuses` (`statusId`),
   CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `collabs` (
+  `boardId` varchar(10) NOT NULL,
+  `userOid` varchar(36) NOT NULL,
+  `accessRight` ENUM('READ', 'WRITE') NOT NULL DEFAULT 'READ',
+  `addedOn` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`boardId`, `userOid`),
+  CONSTRAINT `collabs_ibfk_1` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
