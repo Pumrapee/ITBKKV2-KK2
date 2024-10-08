@@ -52,6 +52,8 @@ onMounted(async () => {
       if (listBoard === 401) {
         expiredToken.value = true
       } else {
+        listBoard.sort((a, b) => new Date(a.createdOn) - new Date(b.createdOn))
+
         const ownerBoard = listBoard.filter((boards) => {
           return boards.role === "OWNER"
         })
@@ -62,7 +64,6 @@ onMounted(async () => {
           return boards.role === "COLLABORATOR"
         })
         myBoard.addBoardsCollab(collabBoard)
-        console.log(listBoard)
       }
     }
 
@@ -167,10 +168,7 @@ const closeDeleteModal = async () => {
   }
 }
 
-const openLeaveModal = async (boardId) => {
-  // const collabId = await getItems(`${import.meta.env.VITE_API_URL}v3/boards/${boardId}/collabs`)
-  // console.log(collabId)
-}
+const openLeaveModal = async (boardId) => {}
 
 //Alert
 const showAlert = (message, type) => {
@@ -197,7 +195,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
         <button
           @click="activeTab = 'personal'"
           :class="activeTab === 'personal' ? 'border-b-2 border-blue-500' : ''"
-          class="inline-block p-4 border-b-2 rounded-t-lg text-lg"
+          class="itbkk-personal-board inline-block p-4 border-b-2 rounded-t-lg text-lg"
           id="personal-tab"
           type="button"
           role="tab"
@@ -211,7 +209,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
         <button
           @click="activeTab = 'collab'"
           :class="activeTab === 'collab' ? 'border-b-2 border-blue-500' : ''"
-          class="inline-block p-4 border-b-2 rounded-t-lg text-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+          class="itbkk-collab-board inline-block p-4 border-b-2 rounded-t-lg text-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
           id="collab-tab"
           type="button"
           role="tab"
@@ -254,20 +252,23 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody class="" v-if="myBoard.getBoards().length > 0">
+            <tbody
+              class="itbkk-personal-item"
+              v-if="myBoard.getBoards().length > 0"
+            >
               <tr v-for="(board, index) in myBoard.getBoards()">
                 <th class="text-black pl-20">{{ index + 1 }}</th>
 
                 <th>
                   <router-link :to="{ name: 'task', params: { id: board.id } }">
-                    <button class="btn btn-ghost h-2">
+                    <button class="itbkk-board-name btn btn-ghost h-2">
                       {{ board.name }}
                     </button>
                   </router-link>
                 </th>
                 <th>
                   <div
-                    class="shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
+                    class="itbkk-board-visibility shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
                     :class="{
                       'bg-green-500': board.visibility === 'PUBLIC',
                       'bg-orange-300': board.visibility === 'PRIVATE',
@@ -322,26 +323,35 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody class="" v-if="myBoard.getBoardCollab().length > 0">
+            <tbody
+              class="itbkk-collab-item"
+              v-if="myBoard.getBoardCollab().length > 0"
+            >
               <tr v-for="(boardCollab, index) in myBoard.getBoardCollab()">
                 <th class="text-black pl-20">{{ index + 1 }}</th>
 
                 <th>
-                  <p class="h-2 mb-3">
+                  <p class="itbkk-board-name h-2 mb-3">
                     {{ boardCollab.name }}
                   </p>
                 </th>
                 <th>
-                  <p class="h-2 mb-3 ml-5">
+                  <p class="itbkk-owner-name h-2 mb-3 ml-5">
                     {{ boardCollab.owner.name }}
                   </p>
                 </th>
-                <th></th>
+                <th>
+                  <p
+                    class="itbkk-access-right shadow-md rounded-full h-auto max-w-20 font-medium text-center p-3 break-all bg-white ml-6"
+                  >
+                    {{ boardCollab.accessRight }}
+                  </p>
+                </th>
 
                 <th>
                   <div>
                     <button
-                      class="itbkk-button-delete"
+                      class="itbkk-leave-board"
                       @click="openLeaveModal(boardCollab.id)"
                     >
                       <svg
