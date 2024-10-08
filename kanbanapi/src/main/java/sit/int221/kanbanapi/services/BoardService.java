@@ -48,28 +48,34 @@ public class BoardService {
         String userOid = userRepository.findByUsername(user).getOid();
         List<Board> ownedBoards = boardRepository.findByOwnerId(userOid);
         List<Collab> collaborations = collabRepository.findByUserOid(userOid);
-        List<Board> collabBoards = collaborations.stream()
+        List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
+                .map(board -> {
+                    User boardUser = userRepository.findById(board.getOwnerId())
+                            .orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+                    BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
+                    boardListDTO.setRole("OWNER");
+                    boardListDTO.setAccessRight("OWNER");
+                    boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
+                    return boardListDTO;
+                })
+                .collect(Collectors.toList());
+
+        List<BoardListDTO> collabBoardListDTOS = collaborations.stream()
                 .map(collab -> {
                     Board board = boardRepository.findById(collab.getBoardId())
                             .orElseThrow(() -> new ItemNotFoundException("Board not found for id: " + collab.getBoardId()));
-                    return board;
-                }).collect(Collectors.toList());
-        List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
-                .map(board -> {
-                    User boardUser = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
-                    BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
-                    boardListDTO.setRole("OWNER");
-                    boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
-                    return boardListDTO;
-        }).collect(Collectors.toList());
-        List<BoardListDTO> collabBoardListDTOS = collabBoards.stream()
-                .map(board -> {
-                    User boardUser = userRepository.findById(board.getOwnerId()).orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+                    User boardUser = userRepository.findById(board.getOwnerId())
+                            .orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
                     boardListDTO.setRole("COLLABORATOR");
+                    boardListDTO.setAccessRight(collab.getAccessRight().toString());
                     boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
                     return boardListDTO;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
+
+        // Combine owned and collaborator boards
         List<BoardListDTO> allBoards = new ArrayList<>(ownedBoardListDTOS);
         allBoards.addAll(collabBoardListDTOS);
         return allBoards;
