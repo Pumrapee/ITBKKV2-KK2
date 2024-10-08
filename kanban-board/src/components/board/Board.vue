@@ -78,8 +78,6 @@ onMounted(async () => {
       myBoard.navBoard = false
     }
 
-    if ((myBoard.getCollabs().length = 0)) {
-    }
   }
 
   if (checkToken.statusCode === 401) {
