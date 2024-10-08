@@ -215,6 +215,8 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
 }
 
 async function addItem(url, newItem) {
+  console.log(url)
+  console.log(newItem)
   getToken()
   try {
     const res = await fetch(url, {
@@ -297,10 +299,10 @@ async function login(url, userName, password) {
   }
 }
 
-async function Visibility(boardId, newVisibility) {
+async function Visibility(url, boardId, newVisibility) {
   getToken()
   try {
-    const res = await fetch(`http://localhost:8080/v3/boards/${boardId}`, {
+    const res = await fetch(`${url}/${boardId}`, {
       method: "PATCH",
       headers: {
         "content-type": "application/json",
@@ -332,8 +334,7 @@ async function getBoardItems(url) {
     const response = await fetch(url, { headers })
     const items = await response.json()
     return items
-  } catch (error) {
-  }
+  } catch (error) {}
 }
 
 export {

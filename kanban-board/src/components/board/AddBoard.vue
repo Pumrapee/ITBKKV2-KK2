@@ -6,8 +6,6 @@ const props = defineProps({
   showModal: Boolean,
 })
 const myUser = useAuthStore()
-// const userName = localStorage.getItem("user")
-// const userName = myUser.userName
 const userName = localStorage.getItem("user")
 
 const boardName = ref({ name: `${userName} personal board` })

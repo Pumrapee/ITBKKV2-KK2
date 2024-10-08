@@ -7,6 +7,7 @@ import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import LoginPage from "@/components/LoginPage.vue"
 import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
+import CollabView from "@/views/CollabView.vue"
 import { useAuthStore } from "@/stores/loginStore"
 import { getToken, getItems, getBoardItems } from "@/libs/fetchUtils"
 import ForbiddenView from "@/views/ForbiddenView.vue"
@@ -19,7 +20,7 @@ const checkBoardAccess = async (to, from, next) => {
     )
 
     if (response.status === 403) {
-     return next({ name: "forbidden" })
+      return next({ name: "forbidden" })
     }
 
     if (response.status === 404) {
@@ -97,6 +98,12 @@ const router = createRouter({
       ],
     },
     {
+      path: "/board/:id/collab",
+      name: "collabBoard",
+      component: CollabView,
+    },
+
+    {
       path: "/board/:id/status",
       name: "tableStatus",
       component: StatusView,
@@ -146,15 +153,12 @@ router.beforeEach(async (to, from, next) => {
     (to.name === "task" && to.params.id) ||
     (to.name === "tableStatus" && to.params.id)
   ) {
-
     // เรียก API เพื่อเช็คว่า board เป็น public หรือ private
     const board = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
     )
 
-
     if (board.status === 403) {
-
       return next({ name: "forbidden" })
     }
 

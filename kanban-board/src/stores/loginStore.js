@@ -36,6 +36,8 @@ export const useAuthStore = defineStore("auth", () => {
     userName.value = null
     token.value = ""
     myBoard.clearBoard()
+    myBoard.clearBoardCollab()
+    myBoard.clearCollaborator()
     myStatus.clearStatus()
     myTask.clearTask()
     myLimit.clearLimit()
@@ -50,6 +52,8 @@ export const useAuthStore = defineStore("auth", () => {
 
   const accessDenied = () => {
     myBoard.clearBoard()
+    myBoard.clearBoardCollab()
+    myBoard.clearCollaborator()
     myStatus.clearStatus()
     myTask.clearTask()
     myLimit.clearLimit()
