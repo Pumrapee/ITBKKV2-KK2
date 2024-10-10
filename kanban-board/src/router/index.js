@@ -15,6 +15,9 @@ import ForbiddenView from "@/views/ForbiddenView.vue"
 const checkBoardAccess = async (to, from, next) => {
   const { id: boardId } = to.params
   try {
+    const board = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
+    console.log(board)
+
     const response = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
     )
@@ -26,6 +29,8 @@ const checkBoardAccess = async (to, from, next) => {
     if (response.status === 404) {
       return next({ name: "notFound" })
     }
+
+    console.log(response)
 
     if (response.visibility === "PUBLIC") {
       // Restrict access to 'add' and 'edit' paths if no token is present
@@ -100,6 +105,7 @@ const router = createRouter({
     {
       path: "/board/:id/collab",
       name: "collabBoard",
+      beforeEnter: checkBoardAccess,
       component: CollabView,
     },
 
