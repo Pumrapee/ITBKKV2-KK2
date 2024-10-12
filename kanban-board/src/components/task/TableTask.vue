@@ -91,10 +91,6 @@ onMounted(async () => {
 
     nameOwnerBoard.value = boardIdNumber.owner.name
 
-    if (nameOwnerBoard.value !== userName) {
-      disabledIfnotOwner.value = true
-    }
-
     boardName.value = boardIdNumber.name
 
     if (boardIdNumber.visibility === "PRIVATE") {
@@ -127,6 +123,40 @@ onMounted(async () => {
       router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
+    }
+
+    //Collab
+    if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+    )
+    if (collabList === 401) {
+      expiredToken.value = true
+    } else {
+      if (myBoard.getCollabs().length === 0) {
+        collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+
+        myBoard.addCollabs(collabList)
+      }
+    }
+    }
+
+    function validateBoardAccess(isOwner, accessRight) {
+    if (accessRight !== undefined) {
+      // If the user is the owner, they have full access
+      if (isOwner) {
+          return false;
+      }
+
+      // If the user has WRITE access, they can manage tasks and statuses
+      if (accessRight === "WRITE") {
+          return false;
+      }
+    }
+    return true;
+  } 
+    if (validateBoardAccess(nameOwnerBoard.value === userName ,myBoard.getCollabs().find(collab => collab.oid === localStorage.getItem('oid')).accessRight)) {
+      disabledIfnotOwner.value = true
     }
   }
 

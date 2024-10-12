@@ -7,7 +7,8 @@ import {
   getItems,
   checkAndRefreshToken,
   addItem,
-  getItemById
+  getItemById,
+  patchItem
 } from '@/libs/fetchUtils'
 import ExpireToken from '../toast/ExpireToken.vue'
 import AddCollabBoard from './AddCollabBoard.vue'
@@ -35,7 +36,8 @@ onMounted(async () => {
   )
 
   if (checkToken.statusCode === 200) {
-    const collabList = await getItems(
+    if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
     )
 
@@ -49,6 +51,8 @@ onMounted(async () => {
         myBoard.addCollabs(collabList)
       }
     }
+    }
+  
 
     //Board
     const boardIdNumber = await getItemById(
@@ -194,7 +198,6 @@ const openDeleteModal = async (id, name) => {
 
 const changeAccessRight = async (collab, newRight) => {
   collab.accessRight = newRight
-
   myUser.setToken()
 
   const checkToken = await checkAndRefreshToken(
@@ -204,9 +207,9 @@ const changeAccessRight = async (collab, newRight) => {
   )
 
   if (checkToken.statusCode === 200) {
-    const { statusCode } = await addItem(
+    const { statusCode } = await patchItem(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs/${
-        collab.id
+        collab.oid
       }`,
       { access_right: newRight }
     )

@@ -28,6 +28,8 @@ export const useAuthStore = defineStore("auth", () => {
     userName.value = user.value.name
     //username
     localStorage.setItem("user", user.value.name)
+    //oid
+    localStorage.setItem("oid", user.value.oid)
   }
 
   const logout = () => {

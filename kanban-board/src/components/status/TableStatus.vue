@@ -2,6 +2,7 @@
 import { useStatusStore } from '@/stores/statusStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useAuthStore } from '@/stores/loginStore'
+import { useBoardStore } from '@/stores/boardStore'
 import {
   getItemById,
   findStatus,
@@ -23,6 +24,7 @@ import { useRoute } from 'vue-router'
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const myUser = useAuthStore()
+const myBoard = useBoardStore()
 const statusItems = ref({})
 const openModal = ref()
 const editMode = ref(false)
@@ -49,9 +51,39 @@ onMounted(async () => {
     boardId.value
   )
 
-  nameOwnerBoard.value = boardIdNumber.owner.name
+  //Collab
+  if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+    )
+    if (collabList === 401) {
+      expiredToken.value = true
+    } else {
+      if (myBoard.getCollabs().length === 0) {
+        collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
 
-  if (nameOwnerBoard.value !== userName) {
+        myBoard.addCollabs(collabList)
+      }
+    }
+  }
+
+  nameOwnerBoard.value = boardIdNumber.owner.name
+  function validateBoardAccess(isOwner, accessRight) {
+    if (accessRight !== undefined) {
+      // If the user is the owner, they have full access
+      if (isOwner) {
+          return false;
+      }
+
+      // If the user has WRITE access, they can manage tasks and statuses
+      if (accessRight === "WRITE") {
+          return false;
+      }
+    }
+    return true;
+  }
+  
+  if (validateBoardAccess(nameOwnerBoard.value === userName ,myBoard.getCollabs().find(collab => collab.oid === localStorage.getItem('oid')).accessRight)) {
     disabledIfNotOwner.value = true
   }
 
