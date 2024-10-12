@@ -402,7 +402,7 @@ watch(
 <template>
   <div class="flex flex-col items-center mt-32 mb-20 ml-30">
     <!-- Navigation -->
-    <div class="bounce-in-top flex justify-between w-3/5 ml-52">
+    <div class=" flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">
         <ul>
           <li class="itbkk-button-home">
@@ -445,7 +445,7 @@ watch(
 
     <!-- Status Table -->
     <div
-      class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
+      class=" overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
     >
       <table class="table">
         <thead class="bg-black">

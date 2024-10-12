@@ -512,7 +512,7 @@ watch(
 
 <template>
   <!-- Head -->
-  <div class="bounce-in-top flex flex-col items-center mt-28 ml-60">
+  <div class=" flex flex-col items-center mt-28 ml-60">
     <div
       class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between ml-20"
     >
@@ -628,7 +628,7 @@ watch(
         <!-- Collaborator -->
         <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
           <button
-            class="itbkk-manage-status btn text-l bg-black text-white ml-1"
+            class="itbkk-manage-collaborator btn text-l bg-black text-white ml-1"
           >
             Manage Collaborator
           </button>
@@ -672,7 +672,7 @@ watch(
           <!-- Tooltip -->
           <div
             v-if="disabledIfnotOwner"
-            class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+            class="absolute bottom-full mb-2 hidden  px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
           >
             You need to be board owner to perform this action.
           </div>
@@ -693,7 +693,7 @@ watch(
           <!-- Tooltip -->
           <div
             v-if="disabledIfnotOwner"
-            class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+            class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
           >
             You need to be board owner to perform this action.
           </div>
