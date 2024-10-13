@@ -141,21 +141,24 @@ onMounted(async () => {
     }
     }
 
-    function validateBoardAccess(isOwner, accessRight) {
-    if (accessRight !== undefined) {
-      // If the user is the owner, they have full access
+    function validateBoardAccess(isOwner, userOid) {
       if (isOwner) {
           return false;
       }
-
-      // If the user has WRITE access, they can manage tasks and statuses
-      if (accessRight === "WRITE") {
-          return false;
+      const collab = myBoard.getCollabs().find(collab => collab.oid === userOid)
+      let accessRight;
+      if (collab !== undefined) { 
+        accessRight = collab.accessRight
       }
-    }
-    return true;
-  } 
-    if (validateBoardAccess(nameOwnerBoard.value === userName ,myBoard.getCollabs().find(collab => collab.oid === localStorage.getItem('oid')).accessRight)) {
+        if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+            return false;
+        }
+      }
+      return true;
+    } 
+    if (validateBoardAccess(nameOwnerBoard.value === userName ,localStorage.getItem('oid'))) {
       disabledIfnotOwner.value = true
     }
   }

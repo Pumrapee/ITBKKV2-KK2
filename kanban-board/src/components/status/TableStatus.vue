@@ -68,24 +68,26 @@ onMounted(async () => {
   }
 
   nameOwnerBoard.value = boardIdNumber.owner.name
-  function validateBoardAccess(isOwner, accessRight) {
-    if (accessRight !== undefined) {
-      // If the user is the owner, they have full access
+  function validateBoardAccess(isOwner, userOid) {
       if (isOwner) {
           return false;
       }
-
-      // If the user has WRITE access, they can manage tasks and statuses
-      if (accessRight === "WRITE") {
-          return false;
+      const collab = myBoard.getCollabs().find(collab => collab.oid === userOid)
+      let accessRight;
+      if (collab !== undefined) { 
+        accessRight = collab.accessRight
       }
+        if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+            return false;
+        }
+      }
+      return true;
+    } 
+    if (validateBoardAccess(nameOwnerBoard.value === userName ,localStorage.getItem('oid'))) {
+      disabledIfNotOwner.value = true
     }
-    return true;
-  }
-  
-  if (validateBoardAccess(nameOwnerBoard.value === userName ,myBoard.getCollabs().find(collab => collab.oid === localStorage.getItem('oid')).accessRight)) {
-    disabledIfNotOwner.value = true
-  }
 
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,

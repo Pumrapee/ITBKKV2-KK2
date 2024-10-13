@@ -8,7 +8,8 @@ import {
   checkAndRefreshToken,
   addItem,
   getItemById,
-  patchItem
+  patchItem,
+  deleteItemById
 } from '@/libs/fetchUtils'
 import ExpireToken from '../toast/ExpireToken.vue'
 import AddCollabBoard from './AddCollabBoard.vue'
@@ -27,6 +28,8 @@ const collab = ref()
 const refreshToken = ref(localStorage.getItem('refreshToken'))
 const showDeleteModal = ref(false)
 const collaboratorToRemove = ref({ id: '', name: '' })
+const nameOwnerBoard = ref()
+const disabledIfNotOwner = ref()
 
 onMounted(async () => {
   myUser.setToken()
@@ -63,10 +66,15 @@ onMounted(async () => {
     )
 
     boardName.value = boardIdNumber.name
+    nameOwnerBoard.value = boardIdNumber.owner.name
   }
 
   if (checkToken.statusCode === 401) {
     expiredToken.value = true
+  }
+
+  if (nameOwnerBoard.value !== localStorage.getItem("user")) {
+    disabledIfNotOwner.value = true
   }
 })
 console.log(myBoard.getCollabs())
@@ -154,7 +162,7 @@ const openDeleteModal = (id, name) => {
 }
 
 const confirmRemoveCollaborator = async () => {
-  const { statusCode } = await patchItem(
+  const { statusCode } = await deleteItemById(
     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs/${
       collaboratorToRemove.value.id
     }`,
@@ -241,6 +249,7 @@ const confirmAccessRightChange = async () => {
         <button
           @click="openModalAdd"
           class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
+          :disabled="disabledIfNotOwner"
         >
           <img src="/icons/plus.png" class="w-4" />
         </button>
@@ -277,6 +286,7 @@ const confirmAccessRightChange = async () => {
                 <label
                   tabindex="0"
                   class="btn btn-ghost shadow-md rounded-full h-auto w-28 font-medium text-center p-3 break-all bg-white"
+                  :disabled="disabledIfNotOwner"
                 >
                   {{ collab.accessRight }}
                   <svg
