@@ -44,6 +44,7 @@ const refreshToken = ref(localStorage.getItem("refreshToken"))
 const emits = defineEmits(["closeAddModal"])
 const disabledIfnotOwner = ref(false)
 const nameOwnerBoard = ref()
+const disabledVisibility = ref()
 
 // user name login
 const userName = localStorage.getItem("user")
@@ -91,10 +92,6 @@ onMounted(async () => {
 
     nameOwnerBoard.value = boardIdNumber.owner.name
 
-    if (nameOwnerBoard.value !== userName) {
-      disabledIfnotOwner.value = true
-    }
-
     boardName.value = boardIdNumber.name
 
     if (boardIdNumber.visibility === "PRIVATE") {
@@ -127,6 +124,63 @@ onMounted(async () => {
       router.push({ name: "TaskNotFound" })
     } else {
       myLimit.addLimit(limitStatus)
+    }
+
+    //Collab
+    if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+      )
+      if (collabList === 401) {
+        expiredToken.value = true
+      } else {
+        if (myBoard.getCollabs().length === 0) {
+          collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+
+          myBoard.addCollabs(collabList)
+        }
+      }
+    }
+
+    function validateBoardAccess(isOwner, userOid) {
+      if (isOwner) {
+        return false
+      }
+
+      const collab = myBoard
+        .getCollabs()
+        .find((collab) => collab.oid === userOid)
+      let accessRight
+
+      if (collab !== undefined) {
+        accessRight = collab.accessRight
+      }
+      if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+          return false
+        }
+      }
+      return true
+    }
+
+    myBoard.clearCollaborator()
+    const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+    )
+    myBoard.addCollabs(collabList)
+
+    if (
+      validateBoardAccess(
+        nameOwnerBoard.value === userName,
+        localStorage.getItem("oid")
+      )
+    ) {
+      disabledIfnotOwner.value = true
+    }
+
+    if (nameOwnerBoard.value !== userName) {
+      disabledVisibility.value = true
     }
   }
 
@@ -512,7 +566,7 @@ watch(
 
 <template>
   <!-- Head -->
-  <div class="bounce-in-top flex flex-col items-center mt-28 ml-60">
+  <div class="flex flex-col items-center mt-28 ml-60">
     <div
       class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between ml-20"
     >
@@ -609,7 +663,7 @@ watch(
             }}</span>
 
             <input
-              :disabled="disabledIfnotOwner"
+              :disabled="disabledVisibility"
               type="checkbox"
               class="toggle m-1"
               v-model="isPublic"
@@ -618,7 +672,7 @@ watch(
           </label>
           <!-- Tooltip -->
           <div
-            v-if="disabledIfnotOwner"
+            v-if="disabledVisibility"
             class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
           >
             You need to be board owner to perform this action.
@@ -672,7 +726,7 @@ watch(
           <!-- Tooltip -->
           <div
             v-if="disabledIfnotOwner"
-            class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+            class="absolute bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
           >
             You need to be board owner to perform this action.
           </div>
@@ -693,7 +747,7 @@ watch(
           <!-- Tooltip -->
           <div
             v-if="disabledIfnotOwner"
-            class="absolute bottom-full mb-2 hidden w-max px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+            class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
           >
             You need to be board owner to perform this action.
           </div>

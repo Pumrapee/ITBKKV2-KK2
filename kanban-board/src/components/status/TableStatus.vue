@@ -2,6 +2,7 @@
 import { useStatusStore } from '@/stores/statusStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useAuthStore } from '@/stores/loginStore'
+import { useBoardStore } from '@/stores/boardStore'
 import {
   getItemById,
   findStatus,
@@ -23,6 +24,7 @@ import { useRoute } from 'vue-router'
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const myUser = useAuthStore()
+const myBoard = useBoardStore()
 const statusItems = ref({})
 const openModal = ref()
 const editMode = ref(false)
@@ -49,11 +51,43 @@ onMounted(async () => {
     boardId.value
   )
 
-  nameOwnerBoard.value = boardIdNumber.owner.name
+  //Collab
+  if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+    )
+    if (collabList === 401) {
+      expiredToken.value = true
+    } else {
+      if (myBoard.getCollabs().length === 0) {
+        collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
 
-  if (nameOwnerBoard.value !== userName) {
-    disabledIfNotOwner.value = true
+        myBoard.addCollabs(collabList)
+      }
+    }
   }
+
+  nameOwnerBoard.value = boardIdNumber.owner.name
+  function validateBoardAccess(isOwner, userOid) {
+      if (isOwner) {
+          return false;
+      }
+      const collab = myBoard.getCollabs().find(collab => collab.oid === userOid)
+      let accessRight;
+      if (collab !== undefined) { 
+        accessRight = collab.accessRight
+      }
+        if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+            return false;
+        }
+      }
+      return true;
+    } 
+    if (validateBoardAccess(nameOwnerBoard.value === userName ,localStorage.getItem('oid'))) {
+      disabledIfNotOwner.value = true
+    }
 
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -402,7 +436,7 @@ watch(
 <template>
   <div class="flex flex-col items-center mt-32 mb-20 ml-30">
     <!-- Navigation -->
-    <div class="bounce-in-top flex justify-between w-3/5 ml-52">
+    <div class=" flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">
         <ul>
           <li class="itbkk-button-home">
@@ -445,7 +479,7 @@ watch(
 
     <!-- Status Table -->
     <div
-      class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
+      class=" overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
     >
       <table class="table">
         <thead class="bg-black">

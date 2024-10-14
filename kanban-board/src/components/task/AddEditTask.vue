@@ -162,7 +162,7 @@ const canEdit = computed(() => {
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div class="itbkk-modal-task bg-white p-6 rounded-lg w-11/12 max-w-3xl">
         <div class="flex justify-between items-center mb-4 border-b-2">
-          <h2 class="text-2xl font-bold text-blue-400 mb-2">
+          <h2 class="text-2xl font-bold text-black mb-2">
             {{
               task?.id === undefined
                 ? "Add Task"
@@ -186,7 +186,7 @@ const canEdit = computed(() => {
         </div>
 
         <div class="mb-4">
-          <label for="title" class="block text-blue-400 font-bold mb-2"
+          <label for="title" class="block text-black font-bold mb-2"
             >Title</label
           >
           <input
@@ -195,7 +195,7 @@ const canEdit = computed(() => {
             v-model="newTask.title"
             :readonly="!editMode"
             placeholder="Enter Title here..."
-            class="itbkk-title w-full border border-blue-400 rounded-lg py-2 px-3 input input-ghost"
+            class="itbkk-title w-full border border-black rounded-lg py-2 px-3 input input-ghost"
           />
           <div v-if="editMode" class="flex justify-between">
             <p class="text-red-400">
@@ -216,14 +216,14 @@ const canEdit = computed(() => {
 
         <div class="flex">
           <div class="w-2/3 mr-2">
-            <label for="description" class="block text-blue-400 font-bold mb-2"
+            <label for="description" class="block text-black font-bold mb-2"
               >Description</label
             >
             <textarea
               id="description"
               :readonly="!editMode"
               v-model="newTask.description"
-              class="itbkk-description w-full border border-blue-400 rounded-lg py-3 px-3 h-72 textarea textarea-ghost"
+              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-72 textarea textarea-ghost"
               :class="
                 newTask.description
                   ? 'bg-white text-black'
@@ -255,14 +255,14 @@ const canEdit = computed(() => {
 
           <div class="w-1/3">
             <div>
-              <label for="assignees" class="block text-blue-400 font-bold mb-2"
+              <label for="assignees" class="block text-black font-bold mb-2"
                 >Assignees</label
               >
               <textarea
                 id="assignees"
                 :readonly="!editMode"
                 v-model="newTask.assignees"
-                class="itbkk-assignees w-full border border-blue-400 rounded-lg py-3 px-3 h-42 textarea textarea-ghost"
+                class="itbkk-assignees w-full border border-black rounded-lg py-3 px-3 h-42 textarea textarea-ghost"
                 :class="
                   newTask.assignees
                     ? 'bg-white text-black'
@@ -286,7 +286,7 @@ const canEdit = computed(() => {
             </div>
 
             <div>
-              <label for="status" class="block text-blue-400 font-bold mb-2"
+              <label for="status" class="block text-black font-bold mb-2"
                 >Status</label
               >
               <select
@@ -310,19 +310,19 @@ const canEdit = computed(() => {
 
             <div v-if="task?.id" class="mt-5">
               <p
-                class="itbkk-timezone pl-3 font-semibold text-sm text-blue-400"
+                class="itbkk-timezone pl-3 font-semibold text-sm text-black"
               >
                 Time Zone :
                 {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
               </p>
               <p
-                class="itbkk-created-on pl-3 font-semibold text-sm text-blue-400"
+                class="itbkk-created-on pl-3 font-semibold text-sm text-black"
               >
                 Created On :
                 {{ new Date(task.createdOn).toLocaleString("en-GB") }}
               </p>
               <p
-                class="itbkk-updated-on pl-3 font-semibold text-sm text-blue-400"
+                class="itbkk-updated-on pl-3 font-semibold text-sm text-black"
               >
                 Updated On :
                 {{ new Date(task.updatedOn).toLocaleString("en-GB") }}
@@ -343,7 +343,7 @@ const canEdit = computed(() => {
               <button
                 v-if="!editMode"
                 @click="enableEditMode"
-                class="btn btn-info h-2 mr-3"
+                class="btn bg-blue-400 text-white h-2 mr-3"
               >
                 Edit
               </button>

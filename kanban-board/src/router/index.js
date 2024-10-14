@@ -19,7 +19,6 @@ const checkBoardAccess = async (to, from, next) => {
     const response = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
     )
-    console.log(response)
 
     if (token === "null" || (!token && response.visibility === "PUBLIC")) {
       if (
@@ -34,16 +33,13 @@ const checkBoardAccess = async (to, from, next) => {
         return next()
       }
     } else {
-      console.log("board ")
       const board = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
-      console.log(board)
 
       const checkIsCollab = board?.some((boarded) => {
         return boarded.owner.oid === response.owner.oid
       })
 
       if (response.visibility === "PUBLIC") {
-        console.log("2")
         if (
           to.name === "addTask" ||
           to.name === "editTask" ||
@@ -58,7 +54,6 @@ const checkBoardAccess = async (to, from, next) => {
       }
 
       if (checkIsCollab) {
-        console.log("1")
         if (
           to.name === "addTask" ||
           to.name === "editTask" ||
@@ -80,7 +75,6 @@ const checkBoardAccess = async (to, from, next) => {
       return next()
     }
   } catch (error) {
-    console.log("5")
     next({ name: "forbidden" })
   }
 }
@@ -177,7 +171,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  console.log("3")
   const authStore = useAuthStore()
   const token = localStorage.getItem("token")
   const boardId = to.params.id
