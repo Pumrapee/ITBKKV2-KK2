@@ -31,7 +31,7 @@ const changeCollab = computed(() => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   if (ownerEmail.email === newCollab.value.email) {
-    errorTask.value.email = "It is Owner email"
+    errorTask.value.email = "Board owner cannot be collaborator of his/her own board"
   } else if (!emailPattern.test(newCollab.value.email)) {
     errorTask.value.email = "Invalid email format"
   } else {

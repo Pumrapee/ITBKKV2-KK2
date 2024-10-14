@@ -105,6 +105,8 @@ async function getItems(url) {
       headers: tokenIsNull(tokenStorage),
     })
 
+    console.log(data)
+
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }

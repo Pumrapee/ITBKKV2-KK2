@@ -16,7 +16,9 @@ import AddCollabBoard from './AddCollabBoard.vue'
 import Alert from '../toast/Alert.vue'
 import RemoveCollaborator from './RemoveCollaborator.vue'
 
+
 const route = useRoute()
+const router = useRouter()
 const boardId = ref(route.params.id)
 const myBoard = useBoardStore()
 const myUser = useAuthStore()

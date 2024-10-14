@@ -73,11 +73,16 @@ onMounted(async () => {
       myBoard.getBoardCollab().length === 0
     ) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
+    } else if (
+      myBoard.getBoards().length === 1 &&
+      myBoard.navBoard &&
+      myBoard.getBoardCollab().length === 0
+    ) {
+      router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
     } else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
-
   }
 
   if (checkToken.statusCode === 401) {
@@ -329,9 +334,13 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 <th class="text-black pl-20">{{ index + 1 }}</th>
 
                 <th>
-                  <p class="itbkk-board-name h-2 mb-3">
-                    {{ boardCollab.name }}
-                  </p>
+                  <router-link
+                    :to="{ name: 'task', params: { id: boardCollab.id } }"
+                  >
+                    <button class="itbkk-board-name btn btn-ghost h-2">
+                      {{ boardCollab.name }}
+                    </button>
+                  </router-link>
                 </th>
                 <th>
                   <p class="itbkk-owner-name h-2 mb-3 ml-5">
