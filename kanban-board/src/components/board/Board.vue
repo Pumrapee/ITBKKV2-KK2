@@ -3,6 +3,7 @@ import router from "@/router"
 import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import DeleteBoard from "./DeleteBoard.vue"
+import RemoveCollaborator from "./RemoveCollaborator.vue"
 import Alert from "../toast/Alert.vue"
 import {
   addItem,
@@ -21,13 +22,12 @@ const myBoard = useBoardStore()
 const myUser = useAuthStore()
 const expiredToken = ref(false)
 const showDeleteModal = ref(false)
+const showLeaveModal = ref(false)
 const boardIdDelete = ref("")
+const collabsName = ref("")
+const ownerIdBoard = ref(localStorage.getItem("oid"))
 const refreshToken = ref(localStorage.getItem("refreshToken"))
 const modalAlert = ref({ message: "", type: "", modal: false })
-
-const openModalAdd = () => {
-  openModal.value = true
-}
 
 onMounted(async () => {
   myUser.setToken()
@@ -90,6 +90,21 @@ onMounted(async () => {
   }
 })
 
+const openModalAdd = () => {
+  openModal.value = true
+}
+
+const openLeaveModal = async (boardId, collabName) => {
+  showLeaveModal.value = true
+  boardIdDelete.value = boardId
+  collabsName.value = collabName
+}
+
+const openDeleteModal = (id) => {
+  showDeleteModal.value = true
+  boardIdDelete.value = id
+}
+
 const closeAdd = async (nameBoard) => {
   myUser.setToken()
 
@@ -132,12 +147,8 @@ const closeAdd = async (nameBoard) => {
 const closeModal = () => {
   openModal.value = false
   showDeleteModal.value = false
+  showLeaveModal.value = false
   router.push({ name: "board" })
-}
-
-const openDeleteModal = (id) => {
-  showDeleteModal.value = true
-  boardIdDelete.value = id
 }
 
 const closeDeleteModal = async () => {
@@ -161,7 +172,11 @@ const closeDeleteModal = async () => {
     if (deleteBoard === 200) {
       myBoard.removeBoards(boardIdDelete.value)
       showAlert("The board has been deleted", "success")
+    } else if (deleteBoard === 401) {
+      expiredToken.value = true
+      showDeleteModal.value = false
     }
+
     showDeleteModal.value = false
   }
 
@@ -171,7 +186,49 @@ const closeDeleteModal = async () => {
   }
 }
 
-const openLeaveModal = async (boardId) => {}
+const closeLeaveModal = async () => {
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+    const statusCode = await deleteItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardIdDelete.value}/collabs`,
+      ownerIdBoard.value
+    )
+
+    if (statusCode === 200) {
+      myBoard.removeBoardCollab(ownerIdBoard.value) // ลบ collaborator ออกจาก list
+      showLeaveModal.value = false
+      showAlert("Collaborator removed successfully.", "success")
+    } else if (statusCode === 403) {
+      showAlert(
+        "You do not have permission to add board collaborator.",
+        "error"
+      )
+    } else if (statusCode === 404) {
+      myBoard.removeBoardCollab(ownerIdBoard.value)
+      showLeaveModal.value = false
+      showAlert(`${collabsName.value} is not a collaborator.`, "error")
+    } else if (statusCode === 401) {
+      expiredToken.value = true
+      showLeaveModal.value = false
+    } else {
+      showAlert("Failed to remove collaborator. Please try again.", "error")
+    }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    showLeaveModal.value = false
+  }
+}
 
 //Alert
 const showAlert = (message, type) => {
@@ -359,7 +416,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                   <div>
                     <button
                       class="itbkk-leave-board"
-                      @click="openLeaveModal(boardCollab.id)"
+                      @click="openLeaveModal(boardCollab.id, boardCollab.name)"
                     >
                       <svg
                         class="w-6 h-6 text-gray-800 dark:text-white"
@@ -420,6 +477,13 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
   />
 
   <ExpireToken v-if="expiredToken" />
+
+  <RemoveCollaborator
+    :showLeave="showLeaveModal"
+    :selectedCollabName="collabsName"
+    @cancelDelete="closeModal"
+    @confirmRemove="closeLeaveModal"
+  />
 </template>
 
 <style scoped>

@@ -1,35 +1,33 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useBoardStore } from '@/stores/boardStore'
-import { useAuthStore } from '@/stores/loginStore'
-import { useRoute } from 'vue-router'
+import { onMounted, ref } from "vue"
+import { useBoardStore } from "@/stores/boardStore"
+import { useAuthStore } from "@/stores/loginStore"
+import { useRoute } from "vue-router"
 import {
   getItems,
   checkAndRefreshToken,
   addItem,
   getItemById,
   patchItem,
-  deleteItemById
-} from '@/libs/fetchUtils'
-import ExpireToken from '../toast/ExpireToken.vue'
-import AddCollabBoard from './AddCollabBoard.vue'
-import Alert from '../toast/Alert.vue'
-import RemoveCollaborator from './RemoveCollaborator.vue'
-
+  deleteItemById,
+} from "@/libs/fetchUtils"
+import ExpireToken from "../toast/ExpireToken.vue"
+import AddCollabBoard from "./AddCollabBoard.vue"
+import Alert from "../toast/Alert.vue"
+import RemoveCollaborator from "./RemoveCollaborator.vue"
 
 const route = useRoute()
-const router = useRouter()
 const boardId = ref(route.params.id)
 const myBoard = useBoardStore()
 const myUser = useAuthStore()
 const boardName = ref()
 const expiredToken = ref(false)
 const openModal = ref(false)
-const modalAlert = ref({ message: '', type: '', modal: false })
+const modalAlert = ref({ message: "", type: "", modal: false })
 const collab = ref()
-const refreshToken = ref(localStorage.getItem('refreshToken'))
+const refreshToken = ref(localStorage.getItem("refreshToken"))
 const showDeleteModal = ref(false)
-const collaboratorToRemove = ref({ id: '', name: '' })
+const collaboratorToRemove = ref({ id: "", name: "" })
 const nameOwnerBoard = ref()
 const disabledIfNotOwner = ref()
 
@@ -79,13 +77,12 @@ onMounted(async () => {
     disabledIfNotOwner.value = true
   }
 })
-console.log(myBoard.getCollabs())
 
 const openModalAdd = () => {
   openModal.value = true
   collab.value = {
-    email: '',
-    access_right: 'READ'
+    email: "",
+    access_right: "READ",
   }
 }
 
@@ -112,33 +109,33 @@ const closeAddCollab = async (newCollab) => {
       collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
       myBoard.addCollabs(collabList)
       openModal.value = false
-      showAlert('The collaborator has been successfully added.', 'success')
+      showAlert("The collaborator has been successfully added.", "success")
     } else if (statusCode === 401) {
       openModal.value = false
       expiredToken.value = true
     } else if (statusCode === 403) {
       showAlert(
-        'You do not have permission to add board collaborator.',
-        'error'
+        "You do not have permission to add board collaborator.",
+        "error"
       )
       openModal.value = false
     } else if (statusCode === 404) {
-      showAlert('The user does not exist.', 'error')
+      showAlert("The user does not exist.", "error")
     } else if (statusCode === 409) {
-      showAlert('The user is already the collaborator of this board.', 'error')
+      showAlert("The user is already the collaborator of this board.", "error")
     } else {
-      showAlert('There is a problem. Please try again later.', 'error')
+      showAlert("There is a problem. Please try again later.", "error")
     }
     collab.value = {
-      email: '',
-      access_right: 'READ'
+      email: "",
+      access_right: "READ",
     }
-    console.log(boardId.value)
-    console.log(newCollab.value)
+ 
   }
 
   if (checkToken.statusCode === 401) {
     expiredToken.value = true
+    openModal.value = false
   }
 }
 
@@ -151,7 +148,7 @@ const showAlert = (message, type) => {
   modalAlert.value = {
     message,
     type,
-    modal: true
+    modal: true,
   }
   setTimeout(() => {
     modalAlert.value.modal = false
@@ -164,23 +161,49 @@ const openDeleteModal = (id, name) => {
 }
 
 const confirmRemoveCollaborator = async () => {
-  const { statusCode } = await deleteItemById(
-    `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs/${
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    const statusCode = await deleteItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`,
       collaboratorToRemove.value.id
-    }`,
-    { removed: true }
-  );
+    )
 
-  if (statusCode === 200) {
-    showAlert("Collaborator removed successfully.", "success");
-    myBoard.removeCollab(collaboratorToRemove.value.id); // ลบ collaborator ออกจาก list
-    showDeleteModal.value = false; // ปิด modal
-  } else {
-    showAlert("Failed to remove collaborator. Please try again.", "error");
+    if (statusCode === 200) {
+      showAlert("Collaborator removed successfully.", "success")
+      myBoard.removeCollab(collaboratorToRemove.value.id) // ลบ collaborator ออกจาก list
+      showDeleteModal.value = false // ปิด modal
+    } else if (statusCode === 403) {
+      showAlert(
+        "You do not have permission to add board collaborator.",
+        "error"
+      )
+    } else if (statusCode === 404) {
+      myBoard.removeCollab(collaboratorToRemove.value.id)
+      showDeleteModal.value = false
+      showAlert(
+        `${collaboratorToRemove.value.name} is not a collaborator.`,
+        "error"
+      )
+    } else if (statusCode === 401) {
+      expiredToken.value = true
+      showDeleteModal.value = false
+    } else {
+      showAlert("There is a problem. Please try again later.", "error")
+    }
   }
-};
 
-
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    showDeleteModal.value = false
+  }
+}
 
 const changeAccessRight = async (collab, newRight) => {
   collab.accessRight = newRight
@@ -201,21 +224,32 @@ const changeAccessRight = async (collab, newRight) => {
     )
 
     if (statusCode === 200) {
-      showAlert('Access right updated successfully.', 'success')
+      showAlert("Access right updated successfully.", "success")
+    } else if (statusCode === 403) {
+      showAlert(
+        "You do not have permission to add board collaborator.",
+        "error"
+      )
     } else {
-      showAlert('Failed to update access right. Please try again.', 'error')
+      showAlert("There is a problem. Please try again later.", "error")
     }
-  } else if (checkToken.statusCode === 401) {
+  }
+
+  if (checkToken.statusCode === 401) {
     expiredToken.value = true
   }
 }
 
 const showAccessModal = ref(false)
 const selectedCollab = ref(null) // เก็บ collaborator ที่เลือก
-const newAccessRight = ref('') // เก็บสิทธิ์ใหม่
-const selectedCollabName = ref('')
+const newAccessRight = ref("") // เก็บสิทธิ์ใหม่
+const selectedCollabName = ref("")
 
 const openAccessModal = (collab, accessRight) => {
+  if (collab.accessRight === accessRight) {
+    return // ถ้าค่าเท่ากัน จะไม่ทำการเปิด Modal
+  }
+
   selectedCollab.value = collab
   newAccessRight.value = accessRight
   showAccessModal.value = true
@@ -284,7 +318,7 @@ const confirmAccessRightChange = async () => {
             <td class="itbkk-name pl-10">{{ collab.name }}</td>
             <td class="itbkk-email pl-10">{{ collab.email }}</td>
             <td class="itbkk-access-right pl-10">
-              <div class="dropdown dropdown-bottom">
+              <div class="dropdown">
                 <label
                   tabindex="0"
                   class="btn btn-ghost shadow-md rounded-full h-auto w-28 font-medium text-center p-3 break-all bg-white"
@@ -311,7 +345,7 @@ const confirmAccessRightChange = async () => {
                 </label>
                 <ul
                   tabindex="0"
-                  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
                 >
                   <li>
                     <a @click="openAccessModal(collab, 'READ')">READ</a>
@@ -386,14 +420,11 @@ const confirmAccessRightChange = async () => {
   />
 
   <RemoveCollaborator
-  :showDelete="showDeleteModal"
-  :selectedCollabName="collaboratorToRemove.name"
-  :selectedCollabId="collaboratorToRemove.id" 
-  @confirmRemove="confirmRemoveCollaborator"
-  @closeDeleteBoard="showDeleteModal = false"
-  @cancelDelete="showDeleteModal = false"
-/>
-
+    :showDelete="showDeleteModal"
+    :selectedCollabName="collaboratorToRemove.name"
+    @confirmRemove="confirmRemoveCollaborator"
+    @cancelDelete="showDeleteModal = false"
+  />
 
   <Alert
     :message="modalAlert.message"

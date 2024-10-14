@@ -4,7 +4,6 @@ import { useBoardStore } from "@/stores/boardStore"
 import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
 import { ref } from "vue"
-import { getItems, getItemById, checkAndRefreshToken } from "@/libs/fetchUtils"
 
 const authStore = useAuthStore()
 const myBoard = useBoardStore()
@@ -12,7 +11,6 @@ const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const userName = localStorage.getItem("user")
 const isDropdownOpen = ref(false)
-const refreshToken = ref(localStorage.getItem("refreshToken"))
 
 const logout = () => {
   authStore.logout()
@@ -20,6 +18,7 @@ const logout = () => {
 
 const boardAll = () => {
   // myBoard.clearBoard()
+  myBoard.clearBoardCollab()
   myStatus.clearStatus()
   myTask.clearTask()
   myBoard.navBoard = true

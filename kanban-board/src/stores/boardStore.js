@@ -69,6 +69,20 @@ export const useBoardStore = defineStore("board", () => {
     )
   }
 
+  const removeCollab = (removeId) => {
+    collaborator.value.splice(
+      collaborator.value.findIndex((todo) => todo.oid === removeId),
+      1
+    )
+  }
+
+  const removeBoardCollab = (removeId) => {
+    boardCollab.value.splice(
+      boardCollab.value.findIndex((todo) => todo.owner.oid === removeId),
+      1
+    )
+  }
+
   const clearBoard = () => {
     return (board.value = [])
   }
@@ -107,6 +121,8 @@ export const useBoardStore = defineStore("board", () => {
     addCollabs,
     addCollab,
     getCollabs,
+    removeCollab,
+    removeBoardCollab,
     getBoardOwnerId, // เพิ่มการคืนค่า getBoardOwnerId
     setBoardOwner, // เพิ่มฟังก์ชันสำหรับตั้งค่าเจ้าของบอร์ด
     updateVisibility,
