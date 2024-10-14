@@ -48,11 +48,6 @@ public class CollabService {
         if (collabRepository.existsById(new CollabId(boardId, newCollab.getOid()))) {
             throw new CollaboratorConflict("Collaborator already exist!!!");
         }
-        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        Boolean isOwner = currentUser.getOid().equals(board.getOwnerId());
-        if (!isOwner) {
-            throw new AuthenticationFailed("You do not have permission to perform this action.");
-        }
         if (board.getOwnerId().equals(newCollab.getOid())) {
             throw new CollaboratorConflict("You are a board owner.");
         }
@@ -67,11 +62,6 @@ public class CollabService {
 
     public Collab collabAccess(String boardId, String userOid, CollabAccessEditRequestDTO collabAccessEditRequestDTO) {
         Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
-        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        if (!currentUser.getOid().equals(board.getOwnerId())) {
-            throw new AuthenticationFailed("You do not have permission to perform this action.");
-        }
         collab.setAccessRight(collabAccessEditRequestDTO.getAccess_right());
         return collabRepository.save(collab);
     }
