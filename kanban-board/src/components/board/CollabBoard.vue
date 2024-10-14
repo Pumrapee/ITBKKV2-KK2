@@ -12,8 +12,10 @@ import {
 import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "./AddCollabBoard.vue"
 import Alert from "../toast/Alert.vue"
+import { useRouter } from "vue-router"
 
 const route = useRoute()
+const router = useRouter()
 const boardId = ref(route.params.id)
 const myBoard = useBoardStore()
 const myUser = useAuthStore()
