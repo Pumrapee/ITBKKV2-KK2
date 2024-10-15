@@ -82,7 +82,7 @@ const openModalAdd = () => {
   openModal.value = true
   collab.value = {
     email: "",
-    access_right: "READ",
+    accessRight: "READ",
   }
 }
 
@@ -128,7 +128,7 @@ const closeAddCollab = async (newCollab) => {
     }
     collab.value = {
       email: "",
-      access_right: "READ",
+      accessRight: "READ",
     }
  
   }
@@ -220,7 +220,7 @@ const changeAccessRight = async (collab, newRight) => {
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs/${
         collab.oid
       }`,
-      { access_right: newRight }
+      { accessRight: newRight }
     )
 
     if (statusCode === 200) {
