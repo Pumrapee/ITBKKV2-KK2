@@ -21,7 +21,7 @@ const addCollab = async () => {
 
 const closeModal = () => {
   newCollab.value.email = ""
-  newCollab.value.access_right = "READ"
+  newCollab.value.accessRight = "READ"
   emits("closeModal")
 }
 
@@ -86,7 +86,7 @@ watch(props, () => {
 
             <select
               class="itbkk-access-right pl-10 border-2 rounded-lg h-10 pr-5 w-full ml-3 border-blue-400"
-              v-model="newCollab.access_right"
+              v-model="newCollab.accessRight"
             >
               <option value="READ">READ</option>
               <option value="WRITE">WRITE</option>
