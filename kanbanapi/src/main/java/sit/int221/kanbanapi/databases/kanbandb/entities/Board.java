@@ -43,12 +43,16 @@ public class Board {
     private Integer maxTasksPerStatus;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<Status> statuses;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<Task> tasks;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "collabBoard", cascade = CascadeType.ALL)
+    private List<Collab> collabs;
 
     @Column(name = "createdOn", insertable = false, updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")

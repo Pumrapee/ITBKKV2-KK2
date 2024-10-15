@@ -128,16 +128,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         } else if (board.getVisibility().equals("PUBLIC") && requestMethod.equals("GET")) {
             return;
-        } else if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
-            return;
         } else {
             Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
                     .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
-
+            if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
+                return;
+            }
             String accessRight = collab.getAccessRight().toString();
 
-            if (isTaskOrStatusRequest(requestURI)) {
+            if (isTaskOrStatusOrCollabRequest(requestURI)) {
                 if (accessRight.equals("WRITE")) {
+                    if (isCollabRequest(requestURI) && !requestMethod.equals("GET")) {
+                        throw new NoPermission("You do not have permission to perform this action");
+                    }
                     return;
                 } else if (accessRight.equals("READ") && !requestMethod.equals("GET")) {
                     throw new NoPermission("You do not have permission to perform this action.");
@@ -150,12 +153,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isTaskOrStatusRequest(String requestURI) {
+    private boolean isTaskOrStatusOrCollabRequest(String requestURI) {
         return requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/(tasks|statuses|collabs)(/.*)?");
     }
 
     private boolean isSelfCollabRemovalRequest(String requestMethod, String requestURI, String userOid) {
         return (requestMethod.equals("DELETE") && requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/collabs/" + userOid));
+    }
+
+    private boolean isCollabRequest(String requestURI) {
+        return requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/collabs(/.*)?");
     }
 
 

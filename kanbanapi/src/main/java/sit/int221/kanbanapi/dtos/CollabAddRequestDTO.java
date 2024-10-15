@@ -12,9 +12,9 @@ public class CollabAddRequestDTO {
     @NotNull
     private String email;
     @ValidEnum(enumClass = Collab.AccessRight.class, message = "access_right must be either 'READ' or 'WRITE'.")
-    private String access_right;
+    private String accessRight;
 
     public Collab.AccessRight getAccess_right() {
-        return Collab.AccessRight.valueOf(access_right.toUpperCase());
+        return Collab.AccessRight.valueOf(accessRight.toUpperCase());
     }
 }
