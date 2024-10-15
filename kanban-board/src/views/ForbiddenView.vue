@@ -15,12 +15,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex-container relative z-10">
-    <div
-      class="card w-2/5 bg-slate-100 text-black bg-opacity-90 backdrop-blur rounded-lg shadow-lg p-8"
-    >
-      <div class="card-body items-center text-center">
-        <h2 class="card-title text-red-500 text-4xl">403</h2>
+  <div class="flex justify-center items-center h-screen relative z-10">
+    <div class="flex flex-col items-center">
+      <img src="/errorPage/403_forbidden.png" class="w-96" />
+      <div class="card-body text-center">
         <p>Access denied, you do not have permission to view this page.</p>
       </div>
     </div>
