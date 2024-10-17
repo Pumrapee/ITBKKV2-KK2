@@ -442,17 +442,21 @@ const confirmVisibilityChange = async () => {
       boardId.value,
       newVisibility
     )
-    myBoard.updateVisibility(boardId.value, responseBody)
 
     if (statusCode === 200) {
-      //isPublic.value = !isPublic.value
+      myBoard.updateVisibility(boardId.value, responseBody)
+      showAlert(`The Kanban board change visibility success.`, "success")
     } else if (statusCode === 401) {
-      console.error("Authentication expired. Redirecting to login.")
-      router.push({ name: "login" })
+      expiredToken.value = true
+      showModalVisibility.value = false
+      return 
     } else if (statusCode === 403) {
-      console.error("You do not have permission to change board visibility")
+      showAlert(
+        "You do not have permission to change board visibility",
+        "error"
+      )
     } else {
-      console.error("An error occurred. Please try again later.")
+      showAlert("There is a problem. Please try again later.", "error")
     }
   }
 
@@ -738,6 +742,7 @@ watch(
             <button
               @click="openModalAdd"
               :disabled="disabledIfnotOwner"
+              :class="{ disabled: disabledIfnotOwner }"
               class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
             >
               <img src="/icons/plus.png" class="w-4" />
@@ -868,7 +873,7 @@ watch(
 
                 <ul
                   tabindex="0"
-                  class="dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
+                  class="itbkk-button-action dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
                 >
                   <router-link
                     :to="{ name: 'editTask', params: { taskId: task.id } }"

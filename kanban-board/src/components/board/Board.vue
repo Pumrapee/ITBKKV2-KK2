@@ -49,7 +49,7 @@ onMounted(async () => {
     )
     if (myBoard.getBoards().length === 0) {
       //401
-      if (listBoard === 401) {
+      if (!listBoard || listBoard === 401) {
         expiredToken.value = true
       } else {
         listBoard.sort((a, b) => new Date(a.createdOn) - new Date(b.createdOn))
@@ -328,7 +328,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 </th>
                 <th>
                   <div
-                    class="itbkk-board-visibility shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
+                    class="shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
                     :class="{
                       'bg-green-500': board.visibility === 'PUBLIC',
                       'bg-orange-300': board.visibility === 'PRIVATE',
