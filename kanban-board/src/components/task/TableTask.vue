@@ -442,15 +442,17 @@ const confirmVisibilityChange = async () => {
       boardId.value,
       newVisibility
     )
-    myBoard.updateVisibility(boardId.value, responseBody)
+    myBoard.updateVisibility(boardId.value, responseBody);
 
     if (statusCode === 200) {
-      //isPublic.value = !isPublic.value
+      // isPublic.value = !isPublic.value
     } else if (statusCode === 401) {
       console.error("Authentication expired. Redirecting to login.")
-      router.push({ name: "login" })
+      router.push({ name: "login" });
     } else if (statusCode === 403) {
-      console.error("You do not have permission to change board visibility")
+      console.error("You do not have permission to change board visibility.")
+    } else if (statusCode === 500) {
+      console.error("Server error occurred. Please try again later.")
     } else {
       console.error("An error occurred. Please try again later.")
     }
@@ -461,6 +463,7 @@ const confirmVisibilityChange = async () => {
     showModalVisibility.value = false
   }
 }
+
 
 const cancelVisibilityChange = () => {
   isPublic.value = originalIsPublic.value
