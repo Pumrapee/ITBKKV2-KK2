@@ -29,21 +29,21 @@ public class StatusController {
     @GetMapping("")
     public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId) {
         List<Status> statuses = statusService.getAllBoardStatus(boardService.getBoardById(boardId));
-        return new ResponseEntity<>(statuses, HttpStatus.OK);
+        return ResponseEntity.ok(statuses);
     }
 
     @GetMapping("/{statusId}")
     public ResponseEntity<Status> getStatusById(@PathVariable Integer statusId,
                                                 @PathVariable String boardId) {
         Status status = statusService.getStatusById(boardId, statusId);
-        return new ResponseEntity<>(status, HttpStatus.OK);
+        return ResponseEntity.ok(status);
     }
 
     @PostMapping("")
     public ResponseEntity<Status> addNewStatus(@Valid @RequestBody Status status,
                                                @PathVariable String boardId) {
         Status createdStatus = statusService.createStatus(status, boardId);
-        return new ResponseEntity<>(createdStatus, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
 
     @PutMapping("/{statusId}")
@@ -51,13 +51,12 @@ public class StatusController {
                                                @PathVariable Integer statusId,
                                                @PathVariable String boardId) {
         Status updatedStatus = statusService.updateStatus(statusId, status, boardId);
-        return new ResponseEntity<>(updatedStatus, HttpStatus.OK);
+        return ResponseEntity.ok(updatedStatus);
     }
 
     @DeleteMapping("/{statusId}")
     public void removeStatus(@PathVariable Integer statusId,
-                             @PathVariable String boardId,
-                             HttpServletRequest request) {
+                             @PathVariable String boardId) {
         statusService.removeStatus(boardId, statusId);
     }
 

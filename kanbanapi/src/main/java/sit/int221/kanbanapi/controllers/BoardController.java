@@ -41,71 +41,81 @@ public class BoardController {
     private JwtUserDetailsService jwtUserDetailsService;
 
     @GetMapping("")
-    public ResponseEntity<List<Board>> getAllBoard() {
+    public ResponseEntity<List<BoardListDTO>> getAllBoard() {
         UserDetails user = jwtUserDetailsService.getCurrentUser();
         if (user == null) {
             throw new AuthenticationFailed("No user");
         }
         List<BoardListDTO> boardListDTOS = boardService.getUserBoards(user.getUsername());
-        return new ResponseEntity(boardListDTOS, HttpStatus.OK);
+        return ResponseEntity.ok(boardListDTOS);
     }
 
+//    @GetMapping("")
+//    public ResponseEntity<BoardAndCollabBoardListDTO> getAllBoard() {
+//        UserDetails user = jwtUserDetailsService.getCurrentUser();
+//        if (user == null) {
+//            throw new AuthenticationFailed("No user");
+//        }
+//        BoardAndCollabBoardListDTO boardListDTOS = boardService.getUserBoards(user.getUsername());
+//        return ResponseEntity.ok(boardListDTOS);
+//    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Board> getBoardById(@PathVariable String id) {
+    public ResponseEntity<BoardResponseDTO> getBoardById(@PathVariable String id) {
         User owner = userService.getUserById(boardService.getBoardById(id).getOwnerId());
         Board board = boardService.getBoardById(id);
         BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(owner.getOid(), owner.getName()));
-        return new ResponseEntity(boardResponseDTO, HttpStatus.OK);
+        return ResponseEntity.ok(boardResponseDTO);
     }
 
     @GetMapping("/{id}/statuses/maximum-task")
-    public ResponseEntity<Board> getBoardTaskLimit(@PathVariable String id) {
+    public ResponseEntity<BoardTaskLimitDTO> getBoardTaskLimit(@PathVariable String id) {
         Board board = boardService.getBoardById(id);
         BoardTaskLimitDTO boardTaskLimitDTO = mapper.map(board, BoardTaskLimitDTO.class);
-        return new ResponseEntity(boardTaskLimitDTO, HttpStatus.OK);
+        return ResponseEntity.ok(boardTaskLimitDTO);
     }
 
     @PostMapping("")
-    public ResponseEntity<Board> createNewBoard(@Valid @RequestBody BoardCreateRequestDTO newBoard) {
+    public ResponseEntity<BoardResponseDTO> createNewBoard(@Valid @RequestBody BoardCreateRequestDTO newBoard) {
         UserDetails user = jwtUserDetailsService.getCurrentUser();
         Board board = boardService.createBoard(user, newBoard.getName());
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
-        return new ResponseEntity(newBoardDTO, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newBoardDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Board> updateBoard(@Valid @RequestBody BoardCreateRequestDTO newBoard, @PathVariable String id) {
+    public ResponseEntity<BoardResponseDTO> updateBoard(@Valid @RequestBody BoardCreateRequestDTO newBoard, @PathVariable String id) {
         User owner = userService.getUserById(boardService.getBoardById(id).getOwnerId());
         Board toUpdate = mapper.map(newBoard, Board.class);
         Board board = boardService.updateBoard(id, toUpdate);
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(owner.getOid(), owner.getUsername()));
-        return new ResponseEntity(newBoardDTO, HttpStatus.OK);
+        return ResponseEntity.ok(newBoardDTO);
     }
 
     @PatchMapping("/{id}/statuses/maximum-task")
-    public ResponseEntity<Board> updateBoardTaskLimit(@PathVariable String id, @RequestParam @NotNull Boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
+    public ResponseEntity<BoardTaskLimitDTO> updateBoardTaskLimit(@PathVariable String id, @RequestParam @NotNull Boolean taskLimitEnabled, @RequestParam @NotNull @Min(0) @Max(30) Integer maxTasksPerStatus) {
         Board board = boardService.getBoardById(id);
         board.setTaskLimitEnabled(taskLimitEnabled);
         board.setMaxTasksPerStatus(maxTasksPerStatus);
         Board newLimit = boardService.updateBoard(id, board);
         BoardTaskLimitDTO boardTaskLimitDTO = mapper.map(newLimit, BoardTaskLimitDTO.class);
-        return new ResponseEntity(boardTaskLimitDTO, HttpStatus.OK);
+        return ResponseEntity.ok(boardTaskLimitDTO);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Board> updateBoardVisibility(@PathVariable String id, @Valid @RequestBody BoardVisibilityDTO boardVisibilityRequestDTO) {
+    public ResponseEntity<BoardVisibilityDTO> updateBoardVisibility(@PathVariable String id, @Valid @RequestBody BoardVisibilityDTO boardVisibilityRequestDTO) {
         Board board = boardService.getBoardById(id);
         board.setVisibility(boardVisibilityRequestDTO.getVisibility());
         Board newVisibility = boardService.updateBoard(id, board);
         BoardVisibilityDTO boardVisibilityResponseDTO = mapper.map(newVisibility, BoardVisibilityDTO.class);
-        return new ResponseEntity(boardVisibilityResponseDTO, HttpStatus.OK);
+        return ResponseEntity.ok(boardVisibilityResponseDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Board> removeBoard(@PathVariable String id) {
+    public ResponseEntity<BoardResponseDTO> removeBoard(@PathVariable String id) {
         User owner = userService.getUserById(boardService.getBoardById(id).getOwnerId());
         Board board = boardService.removeBoard(id);
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(owner.getOid(), owner.getUsername()));
-        return new ResponseEntity(newBoardDTO, HttpStatus.OK);
+        return ResponseEntity.ok(newBoardDTO);
     }
 }
