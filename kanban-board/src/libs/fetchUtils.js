@@ -105,7 +105,6 @@ async function getItems(url) {
       headers: tokenIsNull(tokenStorage),
     })
 
-
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
@@ -216,7 +215,6 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
 }
 
 async function addItem(url, newItem) {
-
   getToken()
   try {
     const res = await fetch(url, {
@@ -313,7 +311,11 @@ async function Visibility(url, boardId, newVisibility) {
       }),
     })
     const statusCode = res.status
-    const responseBody = await res.json()
+    let responseBody
+
+    if (res.status === 200) {
+      responseBody = await res.json()
+    }
 
     return { responseBody, statusCode }
   } catch (error) {
@@ -338,7 +340,6 @@ async function getBoardItems(url) {
 }
 
 async function patchItem(url, newItem) {
-
   getToken()
   try {
     const res = await fetch(url, {

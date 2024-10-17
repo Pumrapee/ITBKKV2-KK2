@@ -67,10 +67,10 @@ const deleteButton = computed(() => {
       <div class="bg-white p-10 rounded-lg w-1/3">
         <div class=" text-lg font-semibold text-center break-words">
           <p class="itbkk-message">
-            Do you want to delete the task number 
+            Do you want to delete the
             <br />
             <span class="text-blue-400">{{ detailStatus.name }}</span>
-            <span> status?</span>
+            <span> status</span>
           </p>
         </div>
 
