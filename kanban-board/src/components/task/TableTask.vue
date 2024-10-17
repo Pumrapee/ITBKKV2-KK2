@@ -442,7 +442,7 @@ const confirmVisibilityChange = async () => {
       boardId.value,
       newVisibility
     )
-
+    
     if (statusCode === 200) {
       myBoard.updateVisibility(boardId.value, responseBody)
       showAlert(`The Kanban board change visibility success.`, "success")
@@ -455,6 +455,7 @@ const confirmVisibilityChange = async () => {
         "You do not have permission to change board visibility",
         "error"
       )
+
     } else {
       showAlert("There is a problem. Please try again later.", "error")
     }
@@ -465,6 +466,7 @@ const confirmVisibilityChange = async () => {
     showModalVisibility.value = false
   }
 }
+
 
 const cancelVisibilityChange = () => {
   isPublic.value = originalIsPublic.value
