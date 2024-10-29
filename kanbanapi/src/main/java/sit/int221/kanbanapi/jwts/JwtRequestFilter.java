@@ -131,10 +131,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         } else {
             Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
                     .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
+            String accessRight = collab.getAccessRight().toString();
+
             if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
                 return;
             }
-            String accessRight = collab.getAccessRight().toString();
 
             if (isTaskOrStatusOrCollabRequest(requestURI)) {
                 if (accessRight.equals("WRITE")) {
@@ -154,15 +155,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private boolean isTaskOrStatusOrCollabRequest(String requestURI) {
-        return requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/(tasks|statuses|collabs)(/.*)?");
+        return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/(tasks|statuses|collabs)(/.*)?");
     }
 
     private boolean isSelfCollabRemovalRequest(String requestMethod, String requestURI, String userOid) {
-        return (requestMethod.equals("DELETE") && requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/collabs/" + userOid));
+        return (requestMethod.equals("DELETE") && requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs/" + userOid));
     }
 
     private boolean isCollabRequest(String requestURI) {
-        return requestURI.matches(".*/boards/[a-zA-Z0-9\\-]+/collabs(/.*)?");
+        return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs(/.*)?");
     }
 
 

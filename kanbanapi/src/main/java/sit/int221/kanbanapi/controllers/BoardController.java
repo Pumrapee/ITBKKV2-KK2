@@ -41,24 +41,14 @@ public class BoardController {
     private JwtUserDetailsService jwtUserDetailsService;
 
     @GetMapping("")
-    public ResponseEntity<List<BoardListDTO>> getAllBoard() {
+    public ResponseEntity<BoardAndCollabBoardListDTO> getAllBoard() {
         UserDetails user = jwtUserDetailsService.getCurrentUser();
         if (user == null) {
             throw new AuthenticationFailed("No user");
         }
-        List<BoardListDTO> boardListDTOS = boardService.getUserBoards(user.getUsername());
+        BoardAndCollabBoardListDTO boardListDTOS = boardService.getUserBoards(user.getUsername());
         return ResponseEntity.ok(boardListDTOS);
     }
-
-//    @GetMapping("")
-//    public ResponseEntity<BoardAndCollabBoardListDTO> getAllBoard() {
-//        UserDetails user = jwtUserDetailsService.getCurrentUser();
-//        if (user == null) {
-//            throw new AuthenticationFailed("No user");
-//        }
-//        BoardAndCollabBoardListDTO boardListDTOS = boardService.getUserBoards(user.getUsername());
-//        return ResponseEntity.ok(boardListDTOS);
-//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BoardResponseDTO> getBoardById(@PathVariable String id) {
