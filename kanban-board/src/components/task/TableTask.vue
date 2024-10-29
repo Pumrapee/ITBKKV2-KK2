@@ -168,6 +168,7 @@ onMounted(async () => {
     const collabList = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
     )
+    collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
     myBoard.addCollabs(collabList)
 
     if (
@@ -442,20 +443,19 @@ const confirmVisibilityChange = async () => {
       boardId.value,
       newVisibility
     )
-    
+
     if (statusCode === 200) {
       myBoard.updateVisibility(boardId.value, responseBody)
       showAlert(`The Kanban board change visibility success.`, "success")
     } else if (statusCode === 401) {
       expiredToken.value = true
       showModalVisibility.value = false
-      return 
+      return
     } else if (statusCode === 403) {
       showAlert(
         "You do not have permission to change board visibility",
         "error"
       )
-
     } else {
       showAlert("There is a problem. Please try again later.", "error")
     }
@@ -466,7 +466,6 @@ const confirmVisibilityChange = async () => {
     showModalVisibility.value = false
   }
 }
-
 
 const cancelVisibilityChange = () => {
   isPublic.value = originalIsPublic.value
