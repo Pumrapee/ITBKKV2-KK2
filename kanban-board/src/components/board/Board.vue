@@ -52,18 +52,13 @@ onMounted(async () => {
       if (!listBoard || listBoard === 401) {
         expiredToken.value = true
       } else {
-        listBoard.sort((a, b) => new Date(a.createdOn) - new Date(b.createdOn))
+        myBoard.addBoards(listBoard.owner)
 
-        const ownerBoard = listBoard.filter((boards) => {
-          return boards.role === "OWNER"
-        })
-        myBoard.addBoards(ownerBoard)
-
-        //Collabs
-        const collabBoard = listBoard.filter((boards) => {
-          return boards.role === "COLLABORATOR"
-        })
-        myBoard.addBoardsCollab(collabBoard)
+        // //Collabs
+        const listCollabSort = listBoard.collab.sort(
+          (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+        )
+        myBoard.addBoardsCollab(listCollabSort)
       }
     }
 
