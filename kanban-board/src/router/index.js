@@ -40,6 +40,7 @@ const checkBoardAccess = async (to, from, next) => {
         return boarded.owner.oid === response.owner.oid
       })
 
+      //ไม่แน่ใจว่าต้องมีมั้ย
       if (response.visibility === "PUBLIC") {
         if (
           to.name === "addTask" ||

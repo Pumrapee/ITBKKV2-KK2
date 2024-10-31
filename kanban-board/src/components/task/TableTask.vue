@@ -58,136 +58,136 @@ onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
 
-  const checkToken = await checkAndRefreshToken(
-    `${import.meta.env.VITE_API_URL}token`,
-    myUser.token,
-    refreshToken.value
-  )
+  // const checkToken = await checkAndRefreshToken(
+  //   `${import.meta.env.VITE_API_URL}token`,
+  //   myUser.token,
+  //   refreshToken.value
+  // )
 
-  if (checkToken.statusCode === 200) {
-    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
-    myUser.setNewToken(checkToken.accessNewToken)
-    expiredToken.value = false
+  // if (checkToken.statusCode === 200) {
+  //   //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+  //   myUser.setNewToken(checkToken.accessNewToken)
+  //   expiredToken.value = false
 
-    //Task
-    if (myTask.getTasks().length === 0) {
-      const listTasks = await getItems(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
-      )
+  //   //Task
+  //   if (myTask.getTasks().length === 0) {
+  //     const listTasks = await getItems(
+  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
+  //     )
 
-      if (listTasks === 401) {
-        expiredToken.value = true
-      } else if (listTasks.status === 404) {
-        router.push({ name: "TaskNotFound" })
-      } else {
-        myTask.addTasks(listTasks)
-      }
-    }
+  //     if (listTasks === 401) {
+  //       expiredToken.value = true
+  //     } else if (listTasks.status === 404) {
+  //       router.push({ name: "TaskNotFound" })
+  //     } else {
+  //       myTask.addTasks(listTasks)
+  //     }
+  //   }
 
-    //Board
-    const boardIdNumber = await getItemById(
-      `${import.meta.env.VITE_API_URL}v3/boards`,
-      boardId.value
-    )
+  //   //Board
+  //   const boardIdNumber = await getItemById(
+  //     `${import.meta.env.VITE_API_URL}v3/boards`,
+  //     boardId.value
+  //   )
 
-    nameOwnerBoard.value = boardIdNumber.owner.name
+  //   nameOwnerBoard.value = boardIdNumber.owner.name
 
-    boardName.value = boardIdNumber.name
+  //   boardName.value = boardIdNumber.name
 
-    if (boardIdNumber.visibility === "PRIVATE") {
-      isPublic.value = false // Private จะเป็นค่า false
-    } else if (boardIdNumber.visibility === "PUBLIC") {
-      isPublic.value = true // Public จะเป็นค่า true
-    }
+  //   if (boardIdNumber.visibility === "PRIVATE") {
+  //     isPublic.value = false // Private จะเป็นค่า false
+  //   } else if (boardIdNumber.visibility === "PUBLIC") {
+  //     isPublic.value = true // Public จะเป็นค่า true
+  //   }
 
-    //Status
-    if (myStatus.getStatus().length === 0) {
-      const listStatus = await getItems(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
-      )
-      if (listStatus === 401) {
-        expiredToken.value = true
-      } else if (listStatus.status === 404) {
-        router.push({ name: "TaskNotFound" })
-      } else {
-        myStatus.addStatus(listStatus)
-      }
-    }
+  //   //Status
+  //   if (myStatus.getStatus().length === 0) {
+  //     const listStatus = await getItems(
+  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
+  //     )
+  //     if (listStatus === 401) {
+  //       expiredToken.value = true
+  //     } else if (listStatus.status === 404) {
+  //       router.push({ name: "TaskNotFound" })
+  //     } else {
+  //       myStatus.addStatus(listStatus)
+  //     }
+  //   }
 
-    //Limit
-    const limitStatus = await getStatusLimits(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
-    )
-    if (limitStatus === 401) {
-      expiredToken.value = true
-    } else if (limitStatus.status === 404) {
-      router.push({ name: "TaskNotFound" })
-    } else {
-      myLimit.addLimit(limitStatus)
-    }
+  //   //Limit
+  //   const limitStatus = await getStatusLimits(
+  //     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
+  //   )
+  //   if (limitStatus === 401) {
+  //     expiredToken.value = true
+  //   } else if (limitStatus.status === 404) {
+  //     router.push({ name: "TaskNotFound" })
+  //   } else {
+  //     myLimit.addLimit(limitStatus)
+  //   }
 
-    //Collab
-    if (myBoard.getCollabs().length === 0) {
-      const collabList = await getItems(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-      )
-      if (collabList === 401) {
-        expiredToken.value = true
-      } else {
-        if (myBoard.getCollabs().length === 0) {
-          collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+  //   //Collab
+  //   if (myBoard.getCollabs().length === 0) {
+  //     const collabList = await getItems(
+  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+  //     )
+  //     if (collabList === 401) {
+  //       expiredToken.value = true
+  //     } else {
+  //       if (myBoard.getCollabs().length === 0) {
+  //         collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
 
-          myBoard.addCollabs(collabList)
-        }
-      }
-    }
+  //         myBoard.addCollabs(collabList)
+  //       }
+  //     }
+  //   }
 
-    function validateBoardAccess(isOwner, userOid) {
-      if (isOwner) {
-        return false
-      }
+  //   function validateBoardAccess(isOwner, userOid) {
+  //     if (isOwner) {
+  //       return false
+  //     }
 
-      const collab = myBoard
-        .getCollabs()
-        .find((collab) => collab.oid === userOid)
-      let accessRight
+  //     const collab = myBoard
+  //       .getCollabs()
+  //       .find((collab) => collab.oid === userOid)
+  //     let accessRight
 
-      if (collab !== undefined) {
-        accessRight = collab.accessRight
-      }
-      if (accessRight !== undefined) {
-        // If the user has WRITE access, they can manage tasks and statuses
-        if (accessRight === "WRITE") {
-          return false
-        }
-      }
-      return true
-    }
+  //     if (collab !== undefined) {
+  //       accessRight = collab.accessRight
+  //     }
+  //     if (accessRight !== undefined) {
+  //       // If the user has WRITE access, they can manage tasks and statuses
+  //       if (accessRight === "WRITE") {
+  //         return false
+  //       }
+  //     }
+  //     return true
+  //   }
 
-    myBoard.clearCollaborator()
-    const collabList = await getItems(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-    )
-    collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-    myBoard.addCollabs(collabList)
+  //   myBoard.clearCollaborator()
+  //   const collabList = await getItems(
+  //     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+  //   )
+  //   collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+  //   myBoard.addCollabs(collabList)
 
-    if (
-      validateBoardAccess(
-        nameOwnerBoard.value === userName,
-        localStorage.getItem("oid")
-      )
-    ) {
-      disabledIfnotOwner.value = true
-    }
+  //   if (
+  //     validateBoardAccess(
+  //       nameOwnerBoard.value === userName,
+  //       localStorage.getItem("oid")
+  //     )
+  //   ) {
+  //     disabledIfnotOwner.value = true
+  //   }
 
-    if (nameOwnerBoard.value !== userName) {
-      disabledVisibility.value = true
-    }
-  }
+  //   if (nameOwnerBoard.value !== userName) {
+  //     disabledVisibility.value = true
+  //   }
+  // }
 
-  if (checkToken.statusCode === 401) {
-    expiredToken.value = true
-  }
+  // if (checkToken.statusCode === 401) {
+  //   expiredToken.value = true
+  // }
 })
 
 //Alert
@@ -567,6 +567,157 @@ watch(
   },
   { immediate: true }
 )
+
+watch(
+  () => route.params.id,
+  async (newId, oldId) => {
+    if (newId !== oldId) {
+      boardId.value = newId
+      await fetchBoardData(newId) // เรียกฟังก์ชันดึงข้อมูลใหม่
+    }
+  },
+  { immediate: true }
+)
+
+// ฟังก์ชันสำหรับดึงข้อมูลใหม่เมื่อ boardId เปลี่ยน
+async function fetchBoardData(id) {
+  myTask.clearTask()
+  myStatus.clearStatus()
+  myLimit.clearLimit()
+  myBoard.clearBoardCollab()
+  myBoard.clearCollaborator()
+  
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+    expiredToken.value = false
+
+    //Task
+    if (myTask.getTasks().length === 0) {
+      const listTasks = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${id}/tasks`
+      )
+
+      if (listTasks === 401) {
+        expiredToken.value = true
+      } else if (listTasks.status === 404) {
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myTask.addTasks(listTasks)
+      }
+    }
+
+    //Board
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    nameOwnerBoard.value = boardIdNumber.owner.name
+
+    boardName.value = boardIdNumber.name
+
+    if (boardIdNumber.visibility === "PRIVATE") {
+      isPublic.value = false // Private จะเป็นค่า false
+    } else if (boardIdNumber.visibility === "PUBLIC") {
+      isPublic.value = true // Public จะเป็นค่า true
+    }
+
+    //Status
+    if (myStatus.getStatus().length === 0) {
+      const listStatus = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${id}/statuses`
+      )
+      if (listStatus === 401) {
+        expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myStatus.addStatus(listStatus)
+      }
+    }
+
+    //Limit
+    const limitStatus = await getStatusLimits(
+      `${import.meta.env.VITE_API_URL}v3/boards/${id}/statuses`
+    )
+    if (limitStatus === 401) {
+      expiredToken.value = true
+    } else if (limitStatus.status === 404) {
+      router.push({ name: "TaskNotFound" })
+    } else {
+      myLimit.addLimit(limitStatus)
+    }
+
+    //Collab
+    if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${id}/collabs`
+      )
+      if (collabList === 401) {
+        expiredToken.value = true
+      } else {
+        if (myBoard.getCollabs().length === 0) {
+          collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+
+          myBoard.addCollabs(collabList)
+        }
+      }
+    }
+
+    function validateBoardAccess(isOwner, userOid) {
+      if (isOwner) {
+        return false
+      }
+
+      const collab = myBoard
+        .getCollabs()
+        .find((collab) => collab.oid === userOid)
+      let accessRight
+
+      if (collab !== undefined) {
+        accessRight = collab.accessRight
+      }
+      if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+          return false
+        }
+      }
+      return true
+    }
+
+    myBoard.clearCollaborator()
+    const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${id}/collabs`
+    )
+    collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+    myBoard.addCollabs(collabList)
+
+    if (
+      validateBoardAccess(
+        nameOwnerBoard.value === userName,
+        localStorage.getItem("oid")
+      )
+    ) {
+      disabledIfnotOwner.value = true
+    }
+
+    if (nameOwnerBoard.value !== userName) {
+      disabledVisibility.value = true
+    }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+  }
+}
 </script>
 
 <template>
