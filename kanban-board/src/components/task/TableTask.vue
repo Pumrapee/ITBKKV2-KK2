@@ -13,6 +13,7 @@ import {
   getStatusLimits,
   Visibility,
   checkAndRefreshToken,
+  editLimitStatus,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -24,11 +25,13 @@ import AlertComponent from "../toast/Alert.vue"
 import { useRoute } from "vue-router"
 import ModalVisibility from "../toast/ModalVisibility.vue"
 
+//store
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
 const myLimit = useLimitStore()
 const myUser = useAuthStore()
 const myBoard = useBoardStore()
+
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -123,7 +126,7 @@ onMounted(async () => {
   //   } else if (limitStatus.status === 404) {
   //     router.push({ name: "TaskNotFound" })
   //   } else {
-  //     myLimit.addLimit(limitStatus)
+  //     myLimit.editLimit(limitStatus)
   //   }
 
   //   //Collab
@@ -276,6 +279,13 @@ const openDeleteModal = (id, title, index) => {
   }
 }
 
+// Limit Modal
+const showLimitModal = ref(false)
+
+const openLimitModal = () => {
+  showLimitModal.value = true
+}
+
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task) => {
@@ -395,23 +405,59 @@ const closeDeleteModal = async (id) => {
 }
 
 // Limit model
-const closeLimitModal = (maxLimit, limitBoolean, expiredToken) => {
-  if (limitBoolean === false && expiredToken === false) {
-    showAlert(
-      `The Kanban board has disabled the task limit in each status.`,
-      "success"
-    )
-  }
-  if (limitBoolean === true && expiredToken === false) {
-    showAlert(
-      `The Kanban board now limits ${maxLimit} tasks in each status.`,
-      "success"
-    )
+const closeLimitModal = async (maxLimit, limitBoolean, expiredToken) => {
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+    if (limitBoolean === true) {
+      const { editedLimit, status } = await editLimitStatus(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
+        limitBoolean,
+        maxLimit
+      )
+
+      if (status === 200) {
+        myLimit.editLimit(editedLimit)
+
+        showAlert(
+          `The Kanban board now limits ${maxLimit} tasks in each status.`,
+          "success"
+        )
+      } else if (status === 401) {
+        expiredToken.value = true
+      }
+    }
+
+    if (limitBoolean === false) {
+      const { editedLimit, status } = await editLimitStatus(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
+        limitBoolean,
+        maxLimit
+      )
+      if (status === 200) {
+        myLimit.editLimit(editedLimit)
+        showAlert(
+          `The Kanban board has disabled the task limit in each status.`,
+          "success"
+        )
+      } else if (status === 401) {
+        expiredToken.value = true
+      }
+    }
   }
 
   showLimitModal.value = false
 }
 
+//All close modal
 const closeModal = () => {
   openModal.value = false
   showDeleteModal.value = false
@@ -520,13 +566,6 @@ const removeFilter = (index) => {
   filterStatus.value.splice(index, 1)
 }
 
-// Limit
-const showLimitModal = ref(false)
-
-const openLimitModal = () => {
-  showLimitModal.value = true
-}
-
 //ตอน Edit status จะเปลี่ยนเมื่อมีการเปลี่ยนแปลง
 watch(
   () => myTask.getTasks(),
@@ -586,7 +625,7 @@ async function fetchBoardData(id) {
   myLimit.clearLimit()
   myBoard.clearBoardCollab()
   myBoard.clearCollaborator()
-  
+
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
     myUser.token,
@@ -652,7 +691,7 @@ async function fetchBoardData(id) {
     } else if (limitStatus.status === 404) {
       router.push({ name: "TaskNotFound" })
     } else {
-      myLimit.addLimit(limitStatus)
+      myLimit.editLimit(limitStatus)
     }
 
     //Collab

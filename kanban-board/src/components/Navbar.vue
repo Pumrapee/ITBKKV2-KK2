@@ -57,8 +57,9 @@ watch(
   { immediate: true }
 )
 
+//ใช้ boardList แล้วลบค่าได้เลยใน navbar แต่ refresh หน้าแล้วค่าหาย
 watch(
-  () => myBoard.getBoards(),
+  () => boardList,
   async (newBoard) => {
     if (newBoard.value === undefined) {
       const boardFetch = await getBoardItems(
@@ -70,6 +71,7 @@ watch(
       console.log(boardFetch)
 
       boardList.value = boardFetchSort
+      console.log(boardList.value)
     }
   },
   { immediate: true }

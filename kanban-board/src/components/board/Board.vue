@@ -57,7 +57,7 @@ onMounted(async () => {
         )
         myBoard.addBoards(listBoardSort)
 
-        // //Collabs
+        //Collabs
         const listCollabSort = listBoard.collab.sort(
           (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
         )

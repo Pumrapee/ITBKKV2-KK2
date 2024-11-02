@@ -21,10 +21,12 @@ import ExpireToken from '../toast/ExpireToken.vue'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 
+//store
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const myUser = useAuthStore()
 const myBoard = useBoardStore()
+
 const statusItems = ref({})
 const openModal = ref()
 const editMode = ref(false)
@@ -36,7 +38,6 @@ const boardId = ref(route.params.id)
 const expiredToken = ref(false)
 const refreshToken = ref(localStorage.getItem('refreshToken'))
 const modalAlert = ref({ message: '', type: '', modal: false })
-
 const disabledIfNotOwner = ref(false)
 const nameOwnerBoard = ref()
 
