@@ -12,6 +12,7 @@ import sit.int221.kanbanapi.databases.kanbandb.entities.Status;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.TaskRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
 import sit.int221.kanbanapi.dtos.BoardAndCollabBoardListDTO;
@@ -41,6 +42,9 @@ public class BoardService {
 
     @Autowired
     private CollabRepository collabRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private ModelMapper mapper;
@@ -111,6 +115,7 @@ public class BoardService {
     @Transactional
     public Board removeBoard(String boardId) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new BadRequestException("Board "+ boardId + " does not exist"));
+        taskRepository.deleteAll(board.getTasks());
         boardRepository.delete(board);
         return board;
     }

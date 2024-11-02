@@ -44,11 +44,11 @@ public class Board {
 
     @JsonIgnore
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
-    private List<Status> statuses;
+    private List<Task> tasks;
 
     @JsonIgnore
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
-    private List<Task> tasks;
+    private List<Status> statuses;
 
     @JsonIgnore
     @OneToMany(mappedBy = "collabBoard", cascade = CascadeType.ALL)
