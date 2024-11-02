@@ -57,11 +57,10 @@ watch(
   { immediate: true }
 )
 
-//ใช้ boardList แล้วลบค่าได้เลยใน navbar แต่ refresh หน้าแล้วค่าหาย
 watch(
   () => boardList,
   async (newBoard) => {
-    if (newBoard.value === undefined) {
+    if (newBoard.value === undefined || boardList.value.length === 0) {
       const boardFetch = await getBoardItems(
         `${import.meta.env.VITE_API_URL}v3/boards`
       )
