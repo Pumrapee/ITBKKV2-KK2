@@ -8,7 +8,7 @@ export const useLimitStore = defineStore("limitStatus", () => {
     return limitisStatus.value
   }
 
-  const addLimit = (limit) => {
+  const editLimit = (limit) => {
     return (limitisStatus.value = limit)
   }
 
@@ -16,7 +16,7 @@ export const useLimitStore = defineStore("limitStatus", () => {
     return limitisStatus.value = {}
   }
 
-  return { addLimit, getLimit , clearLimit }
+  return { editLimit, getLimit , clearLimit }
 })
 
 if (import.meta.hot) {

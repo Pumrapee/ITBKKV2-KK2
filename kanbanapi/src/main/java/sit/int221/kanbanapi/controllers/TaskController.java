@@ -43,7 +43,7 @@ public class TaskController {
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
                 .map(task -> modelMapper.map(task, SimpleTaskDTO.class))
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
+        return ResponseEntity.ok(taskDTOS);
     }
 
     @GetMapping("/{id}")
@@ -51,7 +51,7 @@ public class TaskController {
                                                @PathVariable String boardId) {
         Task task = taskService.getTaskById(boardId, id);
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        return ResponseEntity.ok(taskDTO);
     }
 
     @PostMapping("")
@@ -61,7 +61,7 @@ public class TaskController {
         newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId));
         Task createdTask = taskService.createTask(newTask, boardId);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(createdTask, TaskCreateUpdateDTO.class);
-        return new ResponseEntity<>(taskDTO, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskDTO);
     }
 
     @PutMapping("/{id}")
@@ -73,7 +73,7 @@ public class TaskController {
         newTask.setTaskStatus(statusService.getStatusByName(task.getStatus(), boardId));
         Task updatedTask = taskService.updateTask(id, newTask, boardId);
         TaskCreateUpdateDTO taskDTO = modelMapper.map(updatedTask, TaskCreateUpdateDTO.class);
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        return ResponseEntity.ok(taskDTO);
     }
 
     @DeleteMapping("/{id}")
@@ -81,7 +81,7 @@ public class TaskController {
                                                     @PathVariable String boardId) {
         Task deletedTask = taskService.removeTask(boardId, id);
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        return ResponseEntity.ok(taskDTO);
     }
 
     @GetMapping("/status/{id}")

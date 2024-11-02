@@ -5,21 +5,21 @@ import { editLimitStatus } from "../../libs/fetchUtils"
 import { useLimitStore } from "../../stores/limitStore"
 import { useAuthStore } from "@/stores/loginStore"
 import { useRoute } from "vue-router"
-import {
-  checkAndRefreshToken,
-} from "@/libs/fetchUtils"
+import { checkAndRefreshToken } from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
+
+//store
+const myTask = useTaskStore()
+const myLimit = useLimitStore()
+const myUser = useAuthStore()
 
 const props = defineProps({
   showLimitModal: Boolean,
 })
 const boardId = ref()
 const expiredToken = ref(false)
-const myLimit = useLimitStore()
-const myUser = useAuthStore()
 const isLimitEnabled = ref(myLimit.getLimit().taskLimitEnabled)
 const maxTasks = ref(myLimit.getLimit().maxTasksPerStatus || 10)
-const myTask = useTaskStore()
 const showLimitStatus = ref()
 const showWarning = ref()
 const statusShow = ref()
@@ -49,19 +49,6 @@ const closelimitModal = async (maxlimit) => {
         }, {})
       ).map(([name, count]) => ({ name, count }))
 
-      const { editedLimit, status } = await editLimitStatus(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
-        isLimitEnabled.value,
-        maxlimit
-      )
-
-      if (status === 401) {
-        expiredToken.value = true
-      }
-
-      //เอาค่า fetch update ใน store
-      myLimit.addLimit(editedLimit)
-
       // โชว์จำนวน Task ที่เกินค่า limit
       statusShow.value = statusNotStatus.filter(
         (taskStatus) => taskStatus.count > maxTasks.value
@@ -80,17 +67,6 @@ const closelimitModal = async (maxlimit) => {
     }
 
     if (isLimitEnabled.value === false) {
-      const { editedLimit, status } = await editLimitStatus(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
-        isLimitEnabled.value,
-        maxlimit
-      )
-      if (status === 401) {
-        expiredToken.value = true
-      }
-
-      //เอาค่า fetch เก็บใน store
-      myLimit.addLimit(editedLimit)
       emits(
         "closeLimitModal",
         maxlimit,

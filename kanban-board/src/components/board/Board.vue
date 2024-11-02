@@ -3,7 +3,7 @@ import router from "@/router"
 import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import DeleteBoard from "./DeleteBoard.vue"
-import RemoveCollaborator from "./RemoveCollaborator.vue"
+import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
 import Alert from "../toast/Alert.vue"
 import {
   addItem,
@@ -49,25 +49,27 @@ onMounted(async () => {
     )
     if (myBoard.getBoards().length === 0) {
       //401
-      if (listBoard === 401) {
+      if (!listBoard || listBoard === 401) {
         expiredToken.value = true
       } else {
-        listBoard.sort((a, b) => new Date(a.createdOn) - new Date(b.createdOn))
-
-        const ownerBoard = listBoard.filter((boards) => {
-          return boards.role === "OWNER"
-        })
-        myBoard.addBoards(ownerBoard)
+        const listBoardSort = listBoard.owner.sort(
+          (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+        )
+        myBoard.addBoards(listBoardSort)
 
         //Collabs
-        const collabBoard = listBoard.filter((boards) => {
-          return boards.role === "COLLABORATOR"
-        })
-        myBoard.addBoardsCollab(collabBoard)
+        const listCollabSort = listBoard.collab.sort(
+          (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+        )
+        myBoard.addBoardsCollab(listCollabSort)
       }
     }
 
-    if (
+    if (myBoard.navBarCollab && myBoard.navBoard) {
+      activeTab.value = "collab"
+      myBoard.navBarCollab = false
+      myBoard.navBoard = false
+    } else if (
       myBoard.getBoards().length === 1 &&
       !myBoard.navBoard &&
       myBoard.getBoardCollab().length === 0
@@ -328,7 +330,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 </th>
                 <th>
                   <div
-                    class="itbkk-board-visibility shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
+                    class="shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
                     :class="{
                       'bg-green-500': board.visibility === 'PUBLIC',
                       'bg-orange-300': board.visibility === 'PRIVATE',

@@ -14,6 +14,7 @@ import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.StatusRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
+import sit.int221.kanbanapi.dtos.BoardAndCollabBoardListDTO;
 import sit.int221.kanbanapi.dtos.BoardListDTO;
 import sit.int221.kanbanapi.dtos.Owner;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
@@ -42,12 +43,13 @@ public class BoardService {
     private CollabRepository collabRepository;
 
     @Autowired
-    ModelMapper mapper;
+    private ModelMapper mapper;
 
-    public List<BoardListDTO> getUserBoards(String user) {
+    public BoardAndCollabBoardListDTO getUserBoards(String user) {
         String userOid = userRepository.findByUsername(user).getOid();
+
+        // Fetch owned boards
         List<Board> ownedBoards = boardRepository.findByOwnerId(userOid);
-        List<Collab> collaborations = collabRepository.findByUserOid(userOid);
         List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
                 .map(board -> {
                     User boardUser = userRepository.findById(board.getOwnerId())
@@ -60,6 +62,8 @@ public class BoardService {
                 })
                 .collect(Collectors.toList());
 
+        // Fetch collaboration boards
+        List<Collab> collaborations = collabRepository.findByUserOid(userOid);
         List<BoardListDTO> collabBoardListDTOS = collaborations.stream()
                 .map(collab -> {
                     Board board = boardRepository.findById(collab.getBoardId())
@@ -75,9 +79,11 @@ public class BoardService {
                 })
                 .collect(Collectors.toList());
 
-        // Combine owned and collaborator boards
-        List<BoardListDTO> allBoards = new ArrayList<>(ownedBoardListDTOS);
-        allBoards.addAll(collabBoardListDTOS);
+        // Create DTO to hold both lists
+        BoardAndCollabBoardListDTO allBoards = new BoardAndCollabBoardListDTO();
+        allBoards.setOwner(ownedBoardListDTOS);
+        allBoards.setCollab(collabBoardListDTOS);
+
         return allBoards;
     }
 

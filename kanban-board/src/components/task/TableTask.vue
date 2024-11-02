@@ -13,6 +13,7 @@ import {
   getStatusLimits,
   Visibility,
   checkAndRefreshToken,
+  editLimitStatus,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -24,11 +25,13 @@ import AlertComponent from "../toast/Alert.vue"
 import { useRoute } from "vue-router"
 import ModalVisibility from "../toast/ModalVisibility.vue"
 
+//store
 const myTask = useTaskStore()
 const myStatus = useStatusStore()
 const myLimit = useLimitStore()
 const myUser = useAuthStore()
 const myBoard = useBoardStore()
+
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -58,135 +61,136 @@ onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
 
-  const checkToken = await checkAndRefreshToken(
-    `${import.meta.env.VITE_API_URL}token`,
-    myUser.token,
-    refreshToken.value
-  )
+  // const checkToken = await checkAndRefreshToken(
+  //   `${import.meta.env.VITE_API_URL}token`,
+  //   myUser.token,
+  //   refreshToken.value
+  // )
 
-  if (checkToken.statusCode === 200) {
-    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
-    myUser.setNewToken(checkToken.accessNewToken)
-    expiredToken.value = false
+  // if (checkToken.statusCode === 200) {
+  //   //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+  //   myUser.setNewToken(checkToken.accessNewToken)
+  //   expiredToken.value = false
 
-    //Task
-    if (myTask.getTasks().length === 0) {
-      const listTasks = await getItems(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
-      )
+  //   //Task
+  //   if (myTask.getTasks().length === 0) {
+  //     const listTasks = await getItems(
+  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
+  //     )
 
-      if (listTasks === 401) {
-        expiredToken.value = true
-      } else if (listTasks.status === 404) {
-        router.push({ name: "TaskNotFound" })
-      } else {
-        myTask.addTasks(listTasks)
-      }
-    }
+  //     if (listTasks === 401) {
+  //       expiredToken.value = true
+  //     } else if (listTasks.status === 404) {
+  //       router.push({ name: "TaskNotFound" })
+  //     } else {
+  //       myTask.addTasks(listTasks)
+  //     }
+  //   }
 
-    //Board
-    const boardIdNumber = await getItemById(
-      `${import.meta.env.VITE_API_URL}v3/boards`,
-      boardId.value
-    )
+  //   //Board
+  //   const boardIdNumber = await getItemById(
+  //     `${import.meta.env.VITE_API_URL}v3/boards`,
+  //     boardId.value
+  //   )
 
-    nameOwnerBoard.value = boardIdNumber.owner.name
+  //   nameOwnerBoard.value = boardIdNumber.owner.name
 
-    boardName.value = boardIdNumber.name
+  //   boardName.value = boardIdNumber.name
 
-    if (boardIdNumber.visibility === "PRIVATE") {
-      isPublic.value = false // Private จะเป็นค่า false
-    } else if (boardIdNumber.visibility === "PUBLIC") {
-      isPublic.value = true // Public จะเป็นค่า true
-    }
+  //   if (boardIdNumber.visibility === "PRIVATE") {
+  //     isPublic.value = false // Private จะเป็นค่า false
+  //   } else if (boardIdNumber.visibility === "PUBLIC") {
+  //     isPublic.value = true // Public จะเป็นค่า true
+  //   }
 
-    //Status
-    if (myStatus.getStatus().length === 0) {
-      const listStatus = await getItems(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
-      )
-      if (listStatus === 401) {
-        expiredToken.value = true
-      } else if (listStatus.status === 404) {
-        router.push({ name: "TaskNotFound" })
-      } else {
-        myStatus.addStatus(listStatus)
-      }
-    }
+  //   //Status
+  //   if (myStatus.getStatus().length === 0) {
+  //     const listStatus = await getItems(
+  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
+  //     )
+  //     if (listStatus === 401) {
+  //       expiredToken.value = true
+  //     } else if (listStatus.status === 404) {
+  //       router.push({ name: "TaskNotFound" })
+  //     } else {
+  //       myStatus.addStatus(listStatus)
+  //     }
+  //   }
 
-    //Limit
-    const limitStatus = await getStatusLimits(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
-    )
-    if (limitStatus === 401) {
-      expiredToken.value = true
-    } else if (limitStatus.status === 404) {
-      router.push({ name: "TaskNotFound" })
-    } else {
-      myLimit.addLimit(limitStatus)
-    }
+  //   //Limit
+  //   const limitStatus = await getStatusLimits(
+  //     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
+  //   )
+  //   if (limitStatus === 401) {
+  //     expiredToken.value = true
+  //   } else if (limitStatus.status === 404) {
+  //     router.push({ name: "TaskNotFound" })
+  //   } else {
+  //     myLimit.editLimit(limitStatus)
+  //   }
 
-    //Collab
-    if (myBoard.getCollabs().length === 0) {
-      const collabList = await getItems(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-      )
-      if (collabList === 401) {
-        expiredToken.value = true
-      } else {
-        if (myBoard.getCollabs().length === 0) {
-          collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+  //   //Collab
+  //   if (myBoard.getCollabs().length === 0) {
+  //     const collabList = await getItems(
+  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+  //     )
+  //     if (collabList === 401) {
+  //       expiredToken.value = true
+  //     } else {
+  //       if (myBoard.getCollabs().length === 0) {
+  //         collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
 
-          myBoard.addCollabs(collabList)
-        }
-      }
-    }
+  //         myBoard.addCollabs(collabList)
+  //       }
+  //     }
+  //   }
 
-    function validateBoardAccess(isOwner, userOid) {
-      if (isOwner) {
-        return false
-      }
+  //   function validateBoardAccess(isOwner, userOid) {
+  //     if (isOwner) {
+  //       return false
+  //     }
 
-      const collab = myBoard
-        .getCollabs()
-        .find((collab) => collab.oid === userOid)
-      let accessRight
+  //     const collab = myBoard
+  //       .getCollabs()
+  //       .find((collab) => collab.oid === userOid)
+  //     let accessRight
 
-      if (collab !== undefined) {
-        accessRight = collab.accessRight
-      }
-      if (accessRight !== undefined) {
-        // If the user has WRITE access, they can manage tasks and statuses
-        if (accessRight === "WRITE") {
-          return false
-        }
-      }
-      return true
-    }
+  //     if (collab !== undefined) {
+  //       accessRight = collab.accessRight
+  //     }
+  //     if (accessRight !== undefined) {
+  //       // If the user has WRITE access, they can manage tasks and statuses
+  //       if (accessRight === "WRITE") {
+  //         return false
+  //       }
+  //     }
+  //     return true
+  //   }
 
-    myBoard.clearCollaborator()
-    const collabList = await getItems(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-    )
-    myBoard.addCollabs(collabList)
+  //   myBoard.clearCollaborator()
+  //   const collabList = await getItems(
+  //     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+  //   )
+  //   collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+  //   myBoard.addCollabs(collabList)
 
-    if (
-      validateBoardAccess(
-        nameOwnerBoard.value === userName,
-        localStorage.getItem("oid")
-      )
-    ) {
-      disabledIfnotOwner.value = true
-    }
+  //   if (
+  //     validateBoardAccess(
+  //       nameOwnerBoard.value === userName,
+  //       localStorage.getItem("oid")
+  //     )
+  //   ) {
+  //     disabledIfnotOwner.value = true
+  //   }
 
-    if (nameOwnerBoard.value !== userName) {
-      disabledVisibility.value = true
-    }
-  }
+  //   if (nameOwnerBoard.value !== userName) {
+  //     disabledVisibility.value = true
+  //   }
+  // }
 
-  if (checkToken.statusCode === 401) {
-    expiredToken.value = true
-  }
+  // if (checkToken.statusCode === 401) {
+  //   expiredToken.value = true
+  // }
 })
 
 //Alert
@@ -273,6 +277,13 @@ const openDeleteModal = (id, title, index) => {
     title: title,
     index: index + 1,
   }
+}
+
+// Limit Modal
+const showLimitModal = ref(false)
+
+const openLimitModal = () => {
+  showLimitModal.value = true
 }
 
 //Close modal
@@ -394,23 +405,64 @@ const closeDeleteModal = async (id) => {
 }
 
 // Limit model
-const closeLimitModal = (maxLimit, limitBoolean, expiredToken) => {
-  if (limitBoolean === false && expiredToken === false) {
-    showAlert(
-      `The Kanban board has disabled the task limit in each status.`,
-      "success"
-    )
+const closeLimitModal = async (maxLimit, limitBoolean, expiredToken) => {
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+    if (limitBoolean === true) {
+      const { editedLimit, status } = await editLimitStatus(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
+        limitBoolean,
+        maxLimit
+      )
+
+      if (status === 200) {
+        myLimit.editLimit(editedLimit)
+
+        showAlert(
+          `The Kanban board now limits ${maxLimit} tasks in each status.`,
+          "success"
+        )
+      } else if (status === 401) {
+        expiredToken.value = true
+      }
+    }
+
+    if (limitBoolean === false) {
+      const { editedLimit, status } = await editLimitStatus(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`,
+        limitBoolean,
+        maxLimit
+      )
+      if (status === 200) {
+        myLimit.editLimit(editedLimit)
+        showAlert(
+          `The Kanban board has disabled the task limit in each status.`,
+          "success"
+        )
+      } else if (status === 401) {
+        expiredToken.value = true
+      }
+    }
   }
-  if (limitBoolean === true && expiredToken === false) {
-    showAlert(
-      `The Kanban board now limits ${maxLimit} tasks in each status.`,
-      "success"
-    )
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    showLimitModal.value = false
   }
 
   showLimitModal.value = false
 }
 
+//All close modal
 const closeModal = () => {
   openModal.value = false
   showDeleteModal.value = false
@@ -442,19 +494,21 @@ const confirmVisibilityChange = async () => {
       boardId.value,
       newVisibility
     )
-    myBoard.updateVisibility(boardId.value, responseBody);
 
     if (statusCode === 200) {
-      // isPublic.value = !isPublic.value
+      myBoard.updateVisibility(boardId.value, responseBody)
+      showAlert(`The Kanban board change visibility success.`, "success")
     } else if (statusCode === 401) {
-      console.error("Authentication expired. Redirecting to login.")
-      router.push({ name: "login" });
+      expiredToken.value = true
+      showModalVisibility.value = false
+      return
     } else if (statusCode === 403) {
-      console.error("You do not have permission to change board visibility.")
-    } else if (statusCode === 500) {
-      console.error("Server error occurred. Please try again later.")
+      showAlert(
+        "You do not have permission to change board visibility",
+        "error"
+      )
     } else {
-      console.error("An error occurred. Please try again later.")
+      showAlert("There is a problem. Please try again later.", "error")
     }
   }
 
@@ -463,7 +517,6 @@ const confirmVisibilityChange = async () => {
     showModalVisibility.value = false
   }
 }
-
 
 const cancelVisibilityChange = () => {
   isPublic.value = originalIsPublic.value
@@ -518,13 +571,6 @@ const removeFilter = (index) => {
   filterStatus.value.splice(index, 1)
 }
 
-// Limit
-const showLimitModal = ref(false)
-
-const openLimitModal = () => {
-  showLimitModal.value = true
-}
-
 //ตอน Edit status จะเปลี่ยนเมื่อมีการเปลี่ยนแปลง
 watch(
   () => myTask.getTasks(),
@@ -565,6 +611,157 @@ watch(
   },
   { immediate: true }
 )
+
+watch(
+  () => route.params.id,
+  async (newId, oldId) => {
+    if (newId !== oldId) {
+      boardId.value = newId
+      await fetchBoardData(newId) // เรียกฟังก์ชันดึงข้อมูลใหม่
+    }
+  },
+  { immediate: true }
+)
+
+// ฟังก์ชันสำหรับดึงข้อมูลใหม่เมื่อ boardId เปลี่ยน
+async function fetchBoardData(id) {
+  myTask.clearTask()
+  myStatus.clearStatus()
+  myLimit.clearLimit()
+  myBoard.clearBoardCollab()
+  myBoard.clearCollaborator()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
+  )
+
+  if (checkToken.statusCode === 200) {
+    //กรณีที่ token หมดอายุ ให้ต่ออายุ token
+    myUser.setNewToken(checkToken.accessNewToken)
+    expiredToken.value = false
+
+    //Task
+    if (myTask.getTasks().length === 0) {
+      const listTasks = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${id}/tasks`
+      )
+
+      if (listTasks === 401) {
+        expiredToken.value = true
+      } else if (listTasks.status === 404) {
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myTask.addTasks(listTasks)
+      }
+    }
+
+    //Board
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    nameOwnerBoard.value = boardIdNumber.owner.name
+
+    boardName.value = boardIdNumber.name
+
+    if (boardIdNumber.visibility === "PRIVATE") {
+      isPublic.value = false // Private จะเป็นค่า false
+    } else if (boardIdNumber.visibility === "PUBLIC") {
+      isPublic.value = true // Public จะเป็นค่า true
+    }
+
+    //Status
+    if (myStatus.getStatus().length === 0) {
+      const listStatus = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${id}/statuses`
+      )
+      if (listStatus === 401) {
+        expiredToken.value = true
+      } else if (listStatus.status === 404) {
+        router.push({ name: "TaskNotFound" })
+      } else {
+        myStatus.addStatus(listStatus)
+      }
+    }
+
+    //Limit
+    const limitStatus = await getStatusLimits(
+      `${import.meta.env.VITE_API_URL}v3/boards/${id}/statuses`
+    )
+    if (limitStatus === 401) {
+      expiredToken.value = true
+    } else if (limitStatus.status === 404) {
+      router.push({ name: "TaskNotFound" })
+    } else {
+      myLimit.editLimit(limitStatus)
+    }
+
+    //Collab
+    if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${id}/collabs`
+      )
+      if (collabList === 401) {
+        expiredToken.value = true
+      } else {
+        if (myBoard.getCollabs().length === 0) {
+          collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+
+          myBoard.addCollabs(collabList)
+        }
+      }
+    }
+
+    function validateBoardAccess(isOwner, userOid) {
+      if (isOwner) {
+        return false
+      }
+
+      const collab = myBoard
+        .getCollabs()
+        .find((collab) => collab.oid === userOid)
+      let accessRight
+
+      if (collab !== undefined) {
+        accessRight = collab.accessRight
+      }
+      if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+          return false
+        }
+      }
+      return true
+    }
+
+    myBoard.clearCollaborator()
+    const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${id}/collabs`
+    )
+    collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+    myBoard.addCollabs(collabList)
+
+    if (
+      validateBoardAccess(
+        nameOwnerBoard.value === userName,
+        localStorage.getItem("oid")
+      )
+    ) {
+      disabledIfnotOwner.value = true
+    }
+
+    if (nameOwnerBoard.value !== userName) {
+      disabledVisibility.value = true
+    }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+  }
+}
 </script>
 
 <template>
@@ -741,6 +938,7 @@ watch(
             <button
               @click="openModalAdd"
               :disabled="disabledIfnotOwner"
+              :class="{ disabled: disabledIfnotOwner }"
               class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
             >
               <img src="/icons/plus.png" class="w-4" />
@@ -871,7 +1069,7 @@ watch(
 
                 <ul
                   tabindex="0"
-                  class="dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
+                  class="itbkk-button-action dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
                 >
                   <router-link
                     :to="{ name: 'editTask', params: { taskId: task.id } }"

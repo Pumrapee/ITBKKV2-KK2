@@ -12,6 +12,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
         cy.wait(100)
         cy.url().should('contain','/board')
+        cy.wait(1000) //เพิ่มเองจ้า
     }) ;
 
     it('[Step 1] Open the login page at /login and open the /board page', () => {
@@ -26,7 +27,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
     it('[Step 2] Should show modal "Do you want to change board visibility to public?".',()=>{
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -37,7 +38,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
     it('[Step 3] Should click "Confirm" button and board visibility should show "public".".',()=>{
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -56,7 +57,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
         }).as('mockAPI')
 
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -81,7 +82,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
         }).as('mockAPI')
 
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -105,7 +106,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
         }).as('mockAPI')
 
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 

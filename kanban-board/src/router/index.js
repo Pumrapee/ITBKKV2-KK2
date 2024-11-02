@@ -9,7 +9,7 @@ import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import CollabView from "@/views/CollabView.vue"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken, getItems, getBoardItems } from "@/libs/fetchUtils"
+import { getToken, getItems } from "@/libs/fetchUtils"
 import ForbiddenView from "@/views/ForbiddenView.vue"
 
 const checkBoardAccess = async (to, from, next) => {
@@ -35,10 +35,12 @@ const checkBoardAccess = async (to, from, next) => {
     } else {
       const board = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
 
-      const checkIsCollab = board?.some((boarded) => {
+      //check ว่า เป็น collab มั้ย
+      const checkIsCollab = board.collab?.some((boarded) => {
         return boarded.owner.oid === response.owner.oid
       })
 
+      //ไม่แน่ใจว่าต้องมีมั้ย
       if (response.visibility === "PUBLIC") {
         if (
           to.name === "addTask" ||
@@ -53,6 +55,7 @@ const checkBoardAccess = async (to, from, next) => {
         }
       }
 
+      //ถ้าเป็น collab 
       if (checkIsCollab) {
         if (
           to.name === "addTask" ||
@@ -75,6 +78,7 @@ const checkBoardAccess = async (to, from, next) => {
       return next()
     }
   } catch (error) {
+
     next({ name: "forbidden" })
   }
 }
@@ -186,6 +190,7 @@ router.beforeEach(async (to, from, next) => {
     )
 
     if (board.status === 403) {
+
       return next({ name: "forbidden" })
     }
 

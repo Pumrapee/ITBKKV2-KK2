@@ -55,7 +55,7 @@ public class CollabController {
     @PostMapping
     public ResponseEntity<CollabAddRespondDTO> addCollaborator(@PathVariable String boardId, @Valid @RequestBody CollabAddRequestDTO collabAddRequestDTO) {
         CollabAddRespondDTO collaboratorDTO = collabService.addCollaborator(boardId, collabAddRequestDTO);
-        return new ResponseEntity<>(collaboratorDTO, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(collaboratorDTO);
     }
 
     @PatchMapping("/{collab_oid}")
