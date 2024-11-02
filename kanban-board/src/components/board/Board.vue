@@ -52,6 +52,7 @@ onMounted(async () => {
       if (!listBoard || listBoard === 401) {
         expiredToken.value = true
       } else {
+        //200
         const listBoardSort = listBoard.owner.sort(
           (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
         )
@@ -63,6 +64,12 @@ onMounted(async () => {
         )
         myBoard.addBoardsCollab(listCollabSort)
       }
+    } else {
+      //Collabs
+      const listCollabSort = listBoard.collab.sort(
+        (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+      )
+      myBoard.addBoardsCollab(listCollabSort)
     }
 
     if (myBoard.navBarCollab && myBoard.navBoard) {
