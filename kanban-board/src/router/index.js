@@ -9,7 +9,7 @@ import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import CollabView from "@/views/CollabView.vue"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken, getItems, getBoardItems } from "@/libs/fetchUtils"
+import { getToken, getItems } from "@/libs/fetchUtils"
 import ForbiddenView from "@/views/ForbiddenView.vue"
 
 const checkBoardAccess = async (to, from, next) => {

@@ -3,7 +3,7 @@ import router from "@/router"
 import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import DeleteBoard from "./DeleteBoard.vue"
-import RemoveCollaborator from "./RemoveCollaborator.vue"
+import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
 import Alert from "../toast/Alert.vue"
 import {
   addItem,

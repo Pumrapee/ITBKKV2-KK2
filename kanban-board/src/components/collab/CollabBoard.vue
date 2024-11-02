@@ -12,9 +12,9 @@ import {
   deleteItemById,
 } from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
-import AddCollabBoard from "./AddCollabBoard.vue"
+import AddCollabBoard from "../collab/AddCollabBoard.vue"
 import Alert from "../toast/Alert.vue"
-import RemoveCollaborator from "./RemoveCollaborator.vue"
+import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
 
 const route = useRoute()
 const boardId = ref(route.params.id)
@@ -130,7 +130,6 @@ const closeAddCollab = async (newCollab) => {
       email: "",
       accessRight: "READ",
     }
- 
   }
 
   if (checkToken.statusCode === 401) {
