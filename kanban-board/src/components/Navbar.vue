@@ -67,10 +67,8 @@ watch(
       const boardFetchSort = boardFetch.owner.sort(
         (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
       )
-      console.log(boardFetch)
 
       boardList.value = boardFetchSort
-      console.log(boardList.value)
     }
   },
   { immediate: true }
