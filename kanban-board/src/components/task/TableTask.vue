@@ -454,6 +454,11 @@ const closeLimitModal = async (maxLimit, limitBoolean, expiredToken) => {
     }
   }
 
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
+    showLimitModal.value = false
+  }
+
   showLimitModal.value = false
 }
 
