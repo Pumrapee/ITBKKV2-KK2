@@ -1,5 +1,5 @@
 <script setup>
-import CollabBoard from "@/components/board/CollabBoard.vue"
+import CollabBoard from "@/components/collab/CollabBoard.vue"
 import Navbar from "@/components/Navbar.vue"
 </script>
 

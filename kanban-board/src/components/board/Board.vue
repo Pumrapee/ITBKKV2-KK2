@@ -3,7 +3,7 @@ import router from "@/router"
 import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import DeleteBoard from "./DeleteBoard.vue"
-import RemoveCollaborator from "./RemoveCollaborator.vue"
+import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
 import Alert from "../toast/Alert.vue"
 import {
   addItem,
@@ -52,9 +52,12 @@ onMounted(async () => {
       if (!listBoard || listBoard === 401) {
         expiredToken.value = true
       } else {
-        myBoard.addBoards(listBoard.owner)
+        const listBoardSort = listBoard.owner.sort(
+          (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+        )
+        myBoard.addBoards(listBoardSort)
 
-        // //Collabs
+        //Collabs
         const listCollabSort = listBoard.collab.sort(
           (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
         )
@@ -62,7 +65,11 @@ onMounted(async () => {
       }
     }
 
-    if (
+    if (myBoard.navBarCollab && myBoard.navBoard) {
+      activeTab.value = "collab"
+      myBoard.navBarCollab = false
+      myBoard.navBoard = false
+    } else if (
       myBoard.getBoards().length === 1 &&
       !myBoard.navBoard &&
       myBoard.getBoardCollab().length === 0

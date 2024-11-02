@@ -7,6 +7,7 @@ export const useBoardStore = defineStore("board", () => {
   const board = ref([])
   const boardCollab = ref([])
   const navBoard = ref(false)
+  const navBarCollab = ref(false)
   const boardName = ref("")
   const boardOwnerId = ref(null) // เพิ่มฟิลด์สำหรับเก็บ ID เจ้าของบอร์ด
   const collaborator = ref([])
@@ -117,6 +118,7 @@ export const useBoardStore = defineStore("board", () => {
     removeBoards,
     clearBoard,
     navBoard,
+    navBarCollab,
     boardName,
     addCollabs,
     addCollab,
