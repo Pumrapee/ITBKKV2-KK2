@@ -12,9 +12,7 @@ import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
-import sit.int221.kanbanapi.dtos.CollabAccessEditRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRespondDTO;
+import sit.int221.kanbanapi.dtos.*;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
 import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.CollaboratorConflict;
@@ -60,6 +58,18 @@ public class CollabService {
         CollabAddRespondDTO collaboratorDTO = mapper.map(collabRepository.save(collab), CollabAddRespondDTO.class);
         mapper.map(newCollab, collaboratorDTO);
         return collaboratorDTO;
+    }
+
+    @Transactional
+    public void inviteCollaborator(String boardId, BoardInvitationRequestDTO invitation) {
+        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
+        Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, currentUser.getOid()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
+        boolean isAccept = invitation.getInvitation().equals(Invitation.ACCEPT);
+        if (isAccept) {
+            collab.setStatus(Collab.Status.MEMBER);
+            collabRepository.save(collab);
+        }
+        collabRepository.delete(collab);
     }
 
     @Transactional

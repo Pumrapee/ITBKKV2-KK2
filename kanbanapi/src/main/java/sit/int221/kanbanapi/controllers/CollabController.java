@@ -8,10 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
-import sit.int221.kanbanapi.dtos.CollabAccessEditRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRespondDTO;
-import sit.int221.kanbanapi.dtos.CollaboratorDTO;
+import sit.int221.kanbanapi.dtos.*;
 import sit.int221.kanbanapi.services.CollabService;
 import sit.int221.kanbanapi.services.UserService;
 
@@ -56,6 +53,11 @@ public class CollabController {
     public ResponseEntity<CollabAddRespondDTO> addCollaborator(@PathVariable String boardId, @Valid @RequestBody CollabAddRequestDTO collabAddRequestDTO) {
         CollabAddRespondDTO collaboratorDTO = collabService.addCollaborator(boardId, collabAddRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(collaboratorDTO);
+    }
+
+    @PostMapping("/invitations")
+    public void collabStatus(@PathVariable String boardId, @Valid @RequestBody BoardInvitationRequestDTO boardInvitationRequestDTO) {
+        collabService.inviteCollaborator(boardId, boardInvitationRequestDTO);
     }
 
     @PatchMapping("/{collab_oid}")
