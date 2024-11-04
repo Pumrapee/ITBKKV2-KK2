@@ -44,6 +44,7 @@ CREATE TABLE `collabs` (
   `boardId` varchar(10) NOT NULL,
   `userOid` varchar(36) NOT NULL,
   `accessRight` ENUM('READ', 'WRITE') NOT NULL DEFAULT 'READ',
+  `status` ENUM('PENDING', 'MEMBER') NOT NULL DEFAULT 'PENDING',
   `addedOn` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`boardId`, `userOid`),
   CONSTRAINT `collabs_ibfk_1` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`) ON DELETE CASCADE
