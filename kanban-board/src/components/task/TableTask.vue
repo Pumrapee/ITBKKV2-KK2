@@ -730,7 +730,8 @@ async function fetchBoardData(id) {
       }
       if (accessRight !== undefined) {
         // If the user has WRITE access, they can manage tasks and statuses
-        if (accessRight === "WRITE") {
+
+        if (accessRight === "WRITE" && collab.status === "MEMBER") {
           return false
         }
       }

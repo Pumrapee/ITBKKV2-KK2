@@ -68,8 +68,9 @@ public class CollabService {
         if (isAccept) {
             collab.setStatus(Collab.Status.MEMBER);
             collabRepository.save(collab);
+        }else {
+            collabRepository.delete(collab);
         }
-        collabRepository.delete(collab);
     }
 
     @Transactional
