@@ -1,12 +1,19 @@
 <script setup>
 import { ref, onMounted } from "vue"
-import { getBoardItems, invitation } from "@/libs/fetchUtils"
+import {
+  getBoardItems,
+  invitation,
+  checkAndRefreshToken,
+} from "@/libs/fetchUtils"
 import { useRoute } from "vue-router"
 import { useBoardStore } from "@/stores/boardStore.js"
+import { useAuthStore } from "@/stores/loginStore"
 import router from "@/router"
+import ExpireToken from "../toast/ExpireToken.vue"
 
 //store
 const myBoard = useBoardStore()
+const myUser = useAuthStore()
 
 const route = useRoute()
 const boardId = ref(route.params.id)
@@ -14,63 +21,110 @@ const inviter = ref({})
 const resultInvitation = ref({ invitation: "" })
 const matchCollab = ref(false)
 const loading = ref(true) // เพิ่มตัวแปร loading
+const refreshToken = ref(localStorage.getItem("refreshToken"))
+const expiredToken = ref(false)
 
 onMounted(async () => {
   myBoard.clearBoardCollab()
+  myUser.setToken()
 
-  const listBoard = await getBoardItems(
-    `${import.meta.env.VITE_API_URL}v3/boards`
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
   )
 
-  const collab = listBoard.collab.find((boards) => {
-    return boards.id === boardId.value
-  })
+  if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
 
-  console.log(collab)
+    const listBoard = await getBoardItems(
+      `${import.meta.env.VITE_API_URL}v3/boards`
+    )
 
-  if (collab && collab.status === "PENDING") {
-    inviter.value = {
-      name: collab?.owner.name,
-      accessRight: collab?.accessRight,
-      boardName: collab?.name,
+    const collab = listBoard.collab.find((boards) => {
+      return boards.id === boardId.value
+    })
+
+    if (collab && collab.status === "PENDING") {
+      inviter.value = {
+        name: collab?.owner.name,
+        accessRight: collab?.accessRight,
+        boardName: collab?.name,
+      }
+      matchCollab.value = true
+    } else {
+      matchCollab.value = false
+      setTimeout(() => {
+        router.go(-1)
+      }, 3000)
     }
-    matchCollab.value = true
-  } else {
-    matchCollab.value = false
-    setTimeout(() => {
-      router.go(-1)
-    }, 3000)
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
 
   loading.value = false // เสร็จสิ้นการโหลดข้อมูล
 })
 
 const acceptInvitation = async () => {
-  resultInvitation.value.invitation = "ACCEPT"
-  const statusCode = await invitation(
-    `${import.meta.env.VITE_API_URL}v3/boards/${
-      boardId.value
-    }/collabs/invitations`,
-    resultInvitation.value
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
   )
 
-  if (statusCode === 200) {
-    router.push({ name: "task", params: { id: boardId.value } })
+  if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
+
+    resultInvitation.value.invitation = "ACCEPT"
+    const statusCode = await invitation(
+      `${import.meta.env.VITE_API_URL}v3/boards/${
+        boardId.value
+      }/collabs/invitations`,
+      resultInvitation.value
+    )
+
+    if (statusCode === 200) {
+      router.push({ name: "task", params: { id: boardId.value } })
+    }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
 }
 
 const declineInvitation = async () => {
-  resultInvitation.value.invitation = "DECLINE"
-  const statusCode = await invitation(
-    `${import.meta.env.VITE_API_URL}v3/boards/${
-      boardId.value
-    }/collabs/invitations`,
-    resultInvitation.value
+  myUser.setToken()
+
+  const checkToken = await checkAndRefreshToken(
+    `${import.meta.env.VITE_API_URL}token`,
+    myUser.token,
+    refreshToken.value
   )
 
-  if (statusCode === 200) {
-    router.go(-1)
-    myBoard.clearBoardCollab()
+  if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
+
+    resultInvitation.value.invitation = "DECLINE"
+    const statusCode = await invitation(
+      `${import.meta.env.VITE_API_URL}v3/boards/${
+        boardId.value
+      }/collabs/invitations`,
+      resultInvitation.value
+    )
+
+    if (statusCode === 200) {
+      router.go(-1)
+      myBoard.clearBoardCollab()
+    }
+  }
+
+  if (checkToken.statusCode === 401) {
+    expiredToken.value = true
   }
 }
 </script>
@@ -133,6 +187,8 @@ const declineInvitation = async () => {
       </div>
     </div>
   </div>
+
+  <ExpireToken v-if="expiredToken" />
 </template>
 
 <style scoped></style>

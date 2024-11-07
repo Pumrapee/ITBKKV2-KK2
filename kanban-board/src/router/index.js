@@ -199,6 +199,7 @@ router.beforeEach(async (to, from, next) => {
     (to.name === "task" && to.params.id) ||
     (to.name === "tableStatus" && to.params.id)
   ) {
+    // localStorage.setItem("user", "Guest")
     console.log("beforeEach")
     // เรียก API เพื่อเช็คว่า board เป็น public หรือ private
     const board = await getItems(

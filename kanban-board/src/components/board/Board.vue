@@ -45,7 +45,6 @@ onMounted(async () => {
     const listBoard = await getBoardItems(
       `${import.meta.env.VITE_API_URL}v3/boards`
     )
-    console.log(listBoard)
     if (myBoard.getBoards().length === 0) {
       //401
       if (!listBoard || listBoard === 401) {
@@ -61,7 +60,6 @@ onMounted(async () => {
         const listCollabSort = listBoard.collab.sort(
           (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
         )
-        console.log(listCollabSort)
 
         myBoard.addBoardsCollab(listCollabSort)
       }

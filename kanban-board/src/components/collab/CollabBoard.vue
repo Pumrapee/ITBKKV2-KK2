@@ -50,6 +50,8 @@ onMounted(async () => {
   )
 
   if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
+
     if (myBoard.getCollabs().length === 0) {
       const collabList = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
@@ -103,7 +105,10 @@ const closeAddCollab = async (newCollab) => {
     refreshToken.value
   )
 
+
   if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const { newTask, statusCode } = await addItem(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`,
       newCollab.value
@@ -184,6 +189,8 @@ const confirmRemoveCollaborator = async () => {
   )
 
   if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const statusCode = await deleteItemById(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`,
       collaboratorToRemove.value.id
@@ -235,6 +242,8 @@ const changeAccessRight = async (collab, newRight) => {
   )
 
   if (checkToken.statusCode === 200) {
+    myUser.setNewToken(checkToken.accessNewToken)
+
     const { statusCode } = await patchItem(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs/${
         collab.oid
