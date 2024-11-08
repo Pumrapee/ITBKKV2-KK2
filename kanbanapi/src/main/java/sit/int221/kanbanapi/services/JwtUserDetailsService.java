@@ -33,15 +33,14 @@ public class JwtUserDetailsService implements UserDetailsService {
         List<GrantedAuthority> roles = new ArrayList<>();
         GrantedAuthority grantedAuthority = () -> user.getRole().toString();
         roles.add(grantedAuthority);
-        UserDetails userDetails = new AuthUser(userName, user.getPassword(), roles);
-        return userDetails;
+        return new AuthUser(userName, user.getPassword(), roles, user.getOid(), user.getName(), user.getEmail());
     }
 
-    public UserDetails getCurrentUser() {
+    public AuthUser getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return (UserDetails) authentication.getPrincipal();
+            return (AuthUser) authentication.getPrincipal();
         }
 
         return null;

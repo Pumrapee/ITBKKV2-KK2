@@ -132,6 +132,13 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.CONFLICT, request);
     }
 
+    @ExceptionHandler(EmailSendFailed.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ResponseEntity<ErrorResponse> handleEmailException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, HttpStatus.SERVICE_UNAVAILABLE, request);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleAllUncaughtException
