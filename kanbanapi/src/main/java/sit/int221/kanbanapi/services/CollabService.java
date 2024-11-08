@@ -67,6 +67,7 @@ public class CollabService {
             collab.setStatus(Collab.Status.MEMBER);
             collabRepository.save(collab);
         } else {
+
             collabRepository.delete(collab);
         }
     }

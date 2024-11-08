@@ -1,11 +1,11 @@
 <script setup>
-import CollabBoard from "@/components/collab/CollabBoard.vue"
+import InvitationsBoard from "@/components/collab/InvitationsBoard.vue";
 import Navbar from "@/components/Navbar.vue"
 </script>
 
 <template>
   <Navbar />
-  <CollabBoard />
+  <InvitationsBoard />
 </template>
 
 <style scoped></style>

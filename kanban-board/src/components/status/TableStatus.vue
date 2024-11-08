@@ -1,8 +1,8 @@
 <script setup>
-import { useStatusStore } from '@/stores/statusStore'
-import { useTaskStore } from '@/stores/taskStore'
-import { useAuthStore } from '@/stores/loginStore'
-import { useBoardStore } from '@/stores/boardStore'
+import { useStatusStore } from "@/stores/statusStore"
+import { useTaskStore } from "@/stores/taskStore"
+import { useAuthStore } from "@/stores/loginStore"
+import { useBoardStore } from "@/stores/boardStore"
 import {
   getItemById,
   findStatus,
@@ -11,20 +11,22 @@ import {
   addItem,
   deleteItemById,
   deleteItemByIdToNewId,
-  checkAndRefreshToken
-} from '@/libs/fetchUtils'
-import { ref, onMounted, watch } from 'vue'
-import AddEditStatus from '@/components/status/AddEditStatus.vue'
-import DeleteStatus from '@/components/status/DeleteStatus.vue'
-import AlertComponent from '@/components/toast/Alert.vue'
-import ExpireToken from '../toast/ExpireToken.vue'
-import router from '@/router'
-import { useRoute } from 'vue-router'
+  checkAndRefreshToken,
+} from "@/libs/fetchUtils"
+import { showAlert } from "../../libs/alertUtils"
+import { ref, onMounted, watch } from "vue"
+import AddEditStatus from "@/components/status/AddEditStatus.vue"
+import DeleteStatus from "@/components/status/DeleteStatus.vue"
+import ExpireToken from "../toast/ExpireToken.vue"
+import router from "@/router"
+import { useRoute } from "vue-router"
 
+//store
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const myUser = useAuthStore()
 const myBoard = useBoardStore()
+
 const statusItems = ref({})
 const openModal = ref()
 const editMode = ref(false)
@@ -34,14 +36,12 @@ const showDeleteModal = ref(false)
 const route = useRoute()
 const boardId = ref(route.params.id)
 const expiredToken = ref(false)
-const refreshToken = ref(localStorage.getItem('refreshToken'))
-const modalAlert = ref({ message: '', type: '', modal: false })
-
+const refreshToken = ref(localStorage.getItem("refreshToken"))
 const disabledIfNotOwner = ref(false)
 const nameOwnerBoard = ref()
 
 // user name login
-const userName = localStorage.getItem('user')
+const userName = localStorage.getItem("user")
 
 onMounted(async () => {
   myUser.setToken()
@@ -53,7 +53,7 @@ onMounted(async () => {
 
   //Collab
   if (myBoard.getCollabs().length === 0) {
-      const collabList = await getItems(
+    const collabList = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
     )
     if (collabList === 401) {
@@ -69,25 +69,30 @@ onMounted(async () => {
 
   nameOwnerBoard.value = boardIdNumber.owner.name
   function validateBoardAccess(isOwner, userOid) {
-      if (isOwner) {
-          return false;
-      }
-      const collab = myBoard.getCollabs().find(collab => collab.oid === userOid)
-      let accessRight;
-      if (collab !== undefined) { 
-        accessRight = collab.accessRight
-      }
-        if (accessRight !== undefined) {
-        // If the user has WRITE access, they can manage tasks and statuses
-        if (accessRight === "WRITE") {
-            return false;
-        }
-      }
-      return true;
-    } 
-    if (validateBoardAccess(nameOwnerBoard.value === userName ,localStorage.getItem('oid'))) {
-      disabledIfNotOwner.value = true
+    if (isOwner) {
+      return false
     }
+    const collab = myBoard.getCollabs().find((collab) => collab.oid === userOid)
+    let accessRight
+    if (collab !== undefined) {
+      accessRight = collab.accessRight
+    }
+    if (accessRight !== undefined) {
+      // If the user has WRITE access, they can manage tasks and statuses
+      if (accessRight === "WRITE" && collab.status === "MEMBER") {
+        return false
+      }
+    }
+    return true
+  }
+  if (
+    validateBoardAccess(
+      nameOwnerBoard.value === userName,
+      localStorage.getItem("oid")
+    )
+  ) {
+    disabledIfNotOwner.value = true
+  }
 
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -107,7 +112,7 @@ onMounted(async () => {
       if (listStatus === 401) {
         expiredToken.value = true
       } else if (listStatus.status === 404) {
-        router.push({ name: 'TaskNotFound' })
+        router.push({ name: "TaskNotFound" })
       } else {
         myStatus.addStatus(listStatus)
       }
@@ -118,18 +123,6 @@ onMounted(async () => {
     expiredToken.value = true
   }
 })
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
-}
 
 //เปิด Modal
 const openEditStatus = async (idStatus) => {
@@ -151,7 +144,7 @@ const openEditStatus = async (idStatus) => {
     )
 
     if (statusItem.status === 404) {
-      showAlert('An error has occurred, the status does not exist.', 'error')
+      showAlert("An error has occurred, the status does not exist.", "error")
       myStatus.removeStatus(idStatus)
       router.go(-1)
     } else {
@@ -176,9 +169,9 @@ const openModalAdd = () => {
   openModal.value = true
   statusItems.value = {
     id: undefined,
-    name: '',
-    description: '',
-    color: '#FFFFFF'
+    name: "",
+    description: "",
+    color: "#FFFFFF",
   }
 }
 
@@ -221,7 +214,7 @@ const openDeleteModal = async (id, name) => {
     statusDetail.value = {
       id: id,
       name: name,
-      countTask: countTask.length
+      countTask: countTask.length,
     }
   }
 
@@ -253,7 +246,7 @@ const closeAddEdit = async (status) => {
         {
           name: status.name,
           description: status.description,
-          color: status.color
+          color: status.color,
         }
       )
 
@@ -264,11 +257,11 @@ const closeAddEdit = async (status) => {
         )
         myTask.clearTask()
         myTask.addTasks(listTasks)
-        showAlert('The status has been updated', 'success')
+        showAlert("The status has been updated", "success")
       } else {
         // 400 , 404
         myStatus.removeStatus(editedItem.id)
-        showAlert('An error has occurred, the status does not exist.', 'error')
+        showAlert("An error has occurred, the status does not exist.", "error")
       }
 
       if (statusCode === 401) {
@@ -286,11 +279,11 @@ const closeAddEdit = async (status) => {
 
       if (statusCode === 201) {
         myStatus.addOneStatus(newTask)
-        showAlert('The status has been added', 'success')
+        showAlert("The status has been added", "success")
         myStatus.getStatus()
       } else {
         // 400 , 500
-        showAlert('An error has occurred, the status does not exist.', 'error')
+        showAlert("An error has occurred, the status does not exist.", "error")
       }
 
       if (statusCode === 401) {
@@ -332,12 +325,12 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
 
       if (deleteItem === 200) {
         myStatus.removeStatus(statusDetail.value.id)
-        showAlert('The status has been deleted', 'success')
+        showAlert("The status has been deleted", "success")
       }
 
       if (deleteItem === 400) {
         myStatus.removeStatus(statusDetail.value.id)
-        showAlert('An error has occurred, the status does not exist.', 'error')
+        showAlert("An error has occurred, the status does not exist.", "error")
       }
 
       if (deleteItem === 401) {
@@ -368,12 +361,12 @@ const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
         myStatus.addStatus(listStatus)
         showAlert(
           `${statusDetail.value.countTask} task(s) have been transferred and the status has been deleted`,
-          'success'
+          "success"
         )
       }
       if (newStatus === 400) {
         myStatus.removeStatus(filteredStatus)
-        showAlert('An error has occurred, the status does not exist.', 'error')
+        showAlert("An error has occurred, the status does not exist.", "error")
       }
 
       if (newStatus === 401) {
@@ -395,7 +388,7 @@ const closeModal = () => {
   openModal.value = false
   showTransferModal.value = false
   showDeleteModal.value = false
-  router.push({ name: 'tableStatus' })
+  router.push({ name: "tableStatus" })
 }
 
 // route path ถ้าไม่มี id นั้น
@@ -420,7 +413,7 @@ watch(
           newId
         )
         if (res.status === 404) {
-          router.push({ name: 'TaskNotFound' })
+          router.push({ name: "TaskNotFound" })
         }
       }
     }
@@ -436,7 +429,7 @@ watch(
 <template>
   <div class="flex flex-col items-center mt-32 mb-20 ml-30">
     <!-- Navigation -->
-    <div class=" flex justify-between w-3/5 ml-52">
+    <div class="flex justify-between w-3/5 ml-52">
       <div class="flex text-sm breadcrumbs text-black">
         <ul>
           <li class="itbkk-button-home">
@@ -479,7 +472,7 @@ watch(
 
     <!-- Status Table -->
     <div
-      class=" overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
+      class="overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
     >
       <table class="table">
         <thead class="bg-black">
@@ -583,13 +576,6 @@ watch(
     :detailStatus="statusDetail"
     @closeModal="closeModal"
     @closeDeleteStatus="closeDeleteStatus"
-  />
-
-  <!-- Toast -->
-  <AlertComponent
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
   />
 
   <ExpireToken v-if="expiredToken" />
