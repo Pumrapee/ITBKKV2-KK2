@@ -2,7 +2,9 @@ package sit.int221.kanbanapi.databases.userdb.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
@@ -15,6 +17,8 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "users")
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id

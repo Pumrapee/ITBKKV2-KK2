@@ -3,7 +3,6 @@ package sit.int221.kanbanapi.services;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
@@ -14,7 +13,6 @@ import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
 import sit.int221.kanbanapi.dtos.*;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
-import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.CollaboratorConflict;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 
@@ -29,7 +27,7 @@ public class CollabService {
     @Autowired
     private BoardRepository boardRepository;
     @Autowired
-    ModelMapper mapper;
+    private ModelMapper mapper;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 

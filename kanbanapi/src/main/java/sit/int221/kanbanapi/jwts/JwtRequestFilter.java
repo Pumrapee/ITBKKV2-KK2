@@ -175,6 +175,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs/invitations");
     }
 
+    private String extractBoardIdFromURI(String requestURI) {
+        String[] parts = requestURI.split("/");
+        if (parts.length >= 4 && parts[2].equals("boards")) {
+            return parts[3];
+        }
+        return null;
+    }
+
 
     private void setAuthenticationIfValid(HttpServletRequest request, String username, String jwtToken) {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -218,14 +226,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         throw new AuthenticationFailed(ex.getMessage());
-    }
-
-    private String extractBoardIdFromURI(String requestURI) {
-        String[] parts = requestURI.split("/");
-        if (parts.length >= 4 && parts[2].equals("boards")) {
-            return parts[3];
-        }
-        return null;
     }
 
     private void buildErrorResponse(HttpServletResponse response, Exception exception,

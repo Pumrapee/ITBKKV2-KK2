@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.dtos;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import sit.int221.kanbanapi.validators.ValidEnum;
 @Setter
 public class CollabAddRequestDTO {
     @NotNull
+    @Email(message = "Please provide a valid email address.")
     private String email;
     @ValidEnum(enumClass = Collab.AccessRight.class, message = "access_right must be either 'READ' or 'WRITE'.")
     private String accessRight;
