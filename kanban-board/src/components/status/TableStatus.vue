@@ -13,10 +13,10 @@ import {
   deleteItemByIdToNewId,
   checkAndRefreshToken,
 } from "@/libs/fetchUtils"
+import { showAlert } from "../../libs/alertUtils"
 import { ref, onMounted, watch } from "vue"
 import AddEditStatus from "@/components/status/AddEditStatus.vue"
 import DeleteStatus from "@/components/status/DeleteStatus.vue"
-import AlertComponent from "@/components/toast/Alert.vue"
 import ExpireToken from "../toast/ExpireToken.vue"
 import router from "@/router"
 import { useRoute } from "vue-router"
@@ -37,7 +37,6 @@ const route = useRoute()
 const boardId = ref(route.params.id)
 const expiredToken = ref(false)
 const refreshToken = ref(localStorage.getItem("refreshToken"))
-const modalAlert = ref({ message: "", type: "", modal: false })
 const disabledIfNotOwner = ref(false)
 const nameOwnerBoard = ref()
 
@@ -124,18 +123,6 @@ onMounted(async () => {
     expiredToken.value = true
   }
 })
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
-}
 
 //เปิด Modal
 const openEditStatus = async (idStatus) => {
@@ -589,13 +576,6 @@ watch(
     :detailStatus="statusDetail"
     @closeModal="closeModal"
     @closeDeleteStatus="closeDeleteStatus"
-  />
-
-  <!-- Toast -->
-  <AlertComponent
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
   />
 
   <ExpireToken v-if="expiredToken" />

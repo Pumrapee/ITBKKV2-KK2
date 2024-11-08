@@ -4,7 +4,7 @@ import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import DeleteBoard from "./DeleteBoard.vue"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
-import Alert from "../toast/Alert.vue"
+import { showAlert } from "../../libs/alertUtils"
 import {
   addItem,
   deleteItemById,
@@ -25,7 +25,6 @@ const boardIdDelete = ref("")
 const collabsName = ref("")
 const ownerIdBoard = ref(localStorage.getItem("oid"))
 const refreshToken = ref(localStorage.getItem("refreshToken"))
-const modalAlert = ref({ message: "", type: "", modal: false })
 
 onMounted(async () => {
   myUser.setToken()
@@ -240,18 +239,6 @@ const closeLeaveModal = async () => {
     expiredToken.value = true
     showLeaveModal.value = false
   }
-}
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
 }
 
 const activeTab = ref("personal") // ค่าเริ่มต้นเป็น 'profile'
@@ -496,12 +483,6 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
     :boardId="boardIdDelete"
     @closeDeleteBoard="closeDeleteModal"
     @cancelDelete="closeModal"
-  />
-
-  <Alert
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
   />
 
   <ExpireToken v-if="expiredToken" />

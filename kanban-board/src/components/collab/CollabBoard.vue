@@ -13,7 +13,7 @@ import {
 } from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "../collab/AddCollabBoard.vue"
-import Alert from "../toast/Alert.vue"
+import { showAlert } from "../../libs/alertUtils"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
 
 //store
@@ -25,7 +25,6 @@ const boardId = ref(route.params.id)
 const boardName = ref()
 const expiredToken = ref(false)
 const openModal = ref(false)
-const modalAlert = ref({ message: "", type: "", modal: false })
 const collab = ref()
 const refreshToken = ref(localStorage.getItem("refreshToken"))
 const showDeleteModal = ref(false)
@@ -105,7 +104,6 @@ const closeAddCollab = async (newCollab) => {
     refreshToken.value
   )
 
-
   if (checkToken.statusCode === 200) {
     myUser.setNewToken(checkToken.accessNewToken)
 
@@ -135,7 +133,10 @@ const closeAddCollab = async (newCollab) => {
     } else if (statusCode === 404) {
       showAlert("The user does not exist.", "error")
     } else if (statusCode === 409) {
-      showAlert("The user is already the collaborator of this board.", "error")
+      showAlert(
+        "The user is already the collaborator or pending collaborator of this board.",
+        "error"
+      )
     } else {
       showAlert("There is a problem. Please try again later.", "error")
     }
@@ -155,18 +156,6 @@ const closeModal = () => {
   openModal.value = false
   showCancelModal.value = false
   showDeleteModal.value = false
-}
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
 }
 
 const openDeleteModal = (id, name) => {
@@ -465,12 +454,6 @@ const confirmAccessRightChange = async () => {
     :selectedCollabName="collaboratorToRemove.name"
     @confirmRemove="confirmRemoveCollaborator"
     @cancelDelete="closeModal"
-  />
-
-  <Alert
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
   />
 
   <ExpireToken v-if="expiredToken" />

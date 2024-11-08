@@ -1,5 +1,6 @@
 <script setup>
 import { RouterView } from "vue-router"
+import Alert from "./components/toast/Alert.vue"
 </script>
 
 <template>
@@ -15,6 +16,7 @@ import { RouterView } from "vue-router"
     Your browser does not support the video tag.
   </video>
   <RouterView />
+  <Alert />
 </template>
 
 <style scoped>
