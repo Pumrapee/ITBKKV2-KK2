@@ -11,6 +11,8 @@ import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
+import sit.int221.kanbanapi.exceptions.BadRequestException;
+import sit.int221.kanbanapi.exceptions.EmailSendFailed;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class EmailService {
 
     public void sendInvitationEmail(String recipientEmail, String accessRight, String boardId) {
         if (recipientEmail == null || recipientEmail.trim().isEmpty()) {
-            throw new IllegalArgumentException("Recipient email is invalid or missing");
+            throw new BadRequestException("Recipient email is invalid or missing");
         }
         String inviterName = jwtUserDetailsService.getCurrentUser().getName();
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board "+ boardId + " does not exist"));
@@ -69,7 +71,7 @@ public class EmailService {
 
             mailSender.send(mimeMessage);
         } catch (MessagingException | IOException e) {
-            throw new ItemNotFoundException("Mail not send");
+            throw new EmailSendFailed("Mail send Failed");
         }
 
     }

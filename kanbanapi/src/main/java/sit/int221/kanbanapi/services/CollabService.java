@@ -42,7 +42,7 @@ public class CollabService {
     @Transactional
     public CollabAddRespondDTO addCollaborator(String boardId, CollabAddRequestDTO collabAddRequestDTO) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
-        User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
+        User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("User not found"));
         if (collabRepository.existsById(new CollabId(boardId, newCollab.getOid()))) {
             throw new CollaboratorConflict("Collaborator already exist!!!");
         }
