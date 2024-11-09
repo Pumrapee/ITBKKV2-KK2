@@ -15,6 +15,7 @@ import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "../collab/AddCollabBoard.vue"
 import { showAlert } from "../../libs/alertUtils"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
+import router from "@/router"
 
 //store
 const myBoard = useBoardStore()
@@ -32,6 +33,9 @@ const showCancelModal = ref(false)
 const collaboratorToRemove = ref({ id: "", name: "" })
 const nameOwnerBoard = ref()
 const disabledIfNotOwner = ref()
+const loadingEmail = ref(false)
+const NotSendEmail = ref(false)
+const collabIsNotSentEmail = ref()
 
 const showAccessModal = ref(false)
 const selectedCollab = ref(null) // เก็บ collaborator ที่เลือก
@@ -112,15 +116,23 @@ const closeAddCollab = async (newCollab) => {
       newCollab.value
     )
 
+    console.log(newCollab.value)
     if (statusCode === 201) {
-      myBoard.clearCollaborator()
+      openModal.value = false
+      loadingEmail.value = true
+
       const collabList = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
       )
       collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-      myBoard.addCollabs(collabList)
-      openModal.value = false
-      showAlert("The collaborator has been successfully added.", "success")
+      console.log(collabList)
+
+      setTimeout(() => {
+        loadingEmail.value = false
+        myBoard.clearCollaborator()
+        myBoard.addCollabs(collabList)
+        showAlert("The collaborator has been successfully added.", "success")
+      }, 6000)
     } else if (statusCode === 401) {
       openModal.value = false
       expiredToken.value = true
@@ -129,7 +141,6 @@ const closeAddCollab = async (newCollab) => {
         "You do not have permission to add board collaborator.",
         "error"
       )
-      openModal.value = false
     } else if (statusCode === 404) {
       showAlert("The user does not exist.", "error")
     } else if (statusCode === 409) {
@@ -137,6 +148,28 @@ const closeAddCollab = async (newCollab) => {
         "The user is already the collaborator or pending collaborator of this board.",
         "error"
       )
+    } else if (statusCode === 503) {
+      openModal.value = false
+      loadingEmail.value = true
+
+      const collabList = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+      )
+      setTimeout(() => {
+        loadingEmail.value = false
+        myBoard.clearCollaborator()
+        myBoard.addCollabs(collabList)
+        NotSendEmail.value = true
+        showAlert("The collaborator has been successfully added.", "success")
+      }, 6000)
+
+      const collabName = collabList.find((collab) => {
+        return (collab.email = newCollab.value.email)
+      })
+
+      collabIsNotSentEmail.value = collabName
+
+      console.log(collabName)
     } else {
       showAlert("There is a problem. Please try again later.", "error")
     }
@@ -150,6 +183,13 @@ const closeAddCollab = async (newCollab) => {
     expiredToken.value = true
     openModal.value = false
   }
+}
+
+const sentInvitation = () => {
+  myUser.accessDenied()
+  localStorage.clear()
+  localStorage.setItem("user", "Guest")
+  router.push({ name: "invitations", params: { id: boardId.value } })
 }
 
 const closeModal = () => {
@@ -441,6 +481,41 @@ const confirmAccessRightChange = async () => {
     </div>
   </div>
 
+  <!-- Modal Sending Email -->
+  <div
+    v-if="loadingEmail"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md text-center">
+      <div class="flex justify-center mb-4">
+        <span class="loading loading-dots loading-lg"></span>
+      </div>
+      <p class="text-gray-700 mb-6">Sending email, please wait...</p>
+    </div>
+  </div>
+
+  <!-- Modal To Invitations -->
+  <div
+  v-if="NotSendEmail"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+>
+  <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md text-center space-y-6 transform transition-all duration-300">
+    <!-- Icon Placeholder (optional) -->
+    <div class="flex justify-center mb-4">
+      <span class="text-blue-500 text-4xl">📧</span> <!-- Icon can be customized or replaced -->
+    </div>
+    <!-- Message Text -->
+    <p class="text-gray-800 font-semibold text-lg leading-relaxed">
+      We could not send the email to <span class="font-bold">{{ collabIsNotSentEmail?.name }}</span>.  he/she can accept the invitation at 
+    </p>
+    <button
+      class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+      @click="sentInvitation"
+    >
+      Invitation
+    </button>
+  </div>
+</div>
   <AddCollabBoard
     :showModal="openModal"
     :collabs="collab"

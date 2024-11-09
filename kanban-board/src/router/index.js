@@ -229,9 +229,10 @@ router.beforeEach(async (to, from, next) => {
 
   if (
     (to.name === "board" && !token) ||
-    (to.name === "board" && token === "null") ||
-    (to.name === "invitations" && !token) ||
-    (to.name === "invitations" && token === "null")
+    (to.name === "board" && token === "null")
+    // ||
+    // (to.name === "invitations" && !token) ||
+    // (to.name === "invitations" && token === "null")
   ) {
     return next({ name: "login" })
   }

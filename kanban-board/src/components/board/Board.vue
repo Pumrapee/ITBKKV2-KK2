@@ -329,8 +329,8 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                   <div
                     class="shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
                     :class="{
-                      'bg-green-500': board.visibility === 'PUBLIC',
-                      'bg-orange-300': board.visibility === 'PRIVATE',
+                      'bg-green-400': board.visibility === 'PUBLIC',
+                      'bg-red-300': board.visibility === 'PRIVATE',
                     }"
                   >
                     {{ board.visibility }}

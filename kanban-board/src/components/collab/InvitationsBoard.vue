@@ -20,6 +20,7 @@ const boardId = ref(route.params.id)
 const inviter = ref({})
 const resultInvitation = ref({ invitation: "" })
 const matchCollab = ref(false)
+const nonUserLogin = ref(false)
 const loading = ref(true) // เพิ่มตัวแปร loading
 const refreshToken = ref(localStorage.getItem("refreshToken"))
 const expiredToken = ref(false)
@@ -28,43 +29,58 @@ onMounted(async () => {
   myBoard.clearBoardCollab()
   myUser.setToken()
 
-  const checkToken = await checkAndRefreshToken(
-    `${import.meta.env.VITE_API_URL}token`,
-    myUser.token,
-    refreshToken.value
-  )
+  if (
+    localStorage.getItem("token") === "null" ||
+    !localStorage.getItem("token")
+  ) {
+    nonUserLogin.value = true
+    loading.value = false
 
-  if (checkToken.statusCode === 200) {
-    myUser.setNewToken(checkToken.accessNewToken)
+    setTimeout(() => {
+      router.push({ name: "login" })
+      nonUserLogin.value = false
+    }, 5000)
+  }
 
-    const listBoard = await getBoardItems(
-      `${import.meta.env.VITE_API_URL}v3/boards`
+  if (!nonUserLogin.value) {
+    const checkToken = await checkAndRefreshToken(
+      `${import.meta.env.VITE_API_URL}token`,
+      myUser.token,
+      refreshToken.value
     )
 
-    const collab = listBoard.collab.find((boards) => {
-      return boards.id === boardId.value
-    })
+    if (checkToken.statusCode === 200) {
+      myUser.setNewToken(checkToken.accessNewToken)
 
-    if (collab && collab.status === "PENDING") {
-      inviter.value = {
-        name: collab?.owner.name,
-        accessRight: collab?.accessRight,
-        boardName: collab?.name,
+      const listBoard = await getBoardItems(
+        `${import.meta.env.VITE_API_URL}v3/boards`
+      )
+
+      const collab = listBoard.collab?.find((boards) => {
+        return boards.id === boardId.value
+      })
+
+      if (collab && collab.status === "PENDING") {
+        inviter.value = {
+          name: collab?.owner.name,
+          accessRight: collab?.accessRight,
+          boardName: collab?.name,
+        }
+        matchCollab.value = true
+      } else {
+        matchCollab.value = false
+        setTimeout(() => {
+          router.go(-1)
+        }, 3000)
       }
-      matchCollab.value = true
-    } else {
-      matchCollab.value = false
-      setTimeout(() => {
-        router.go(-1)
-      }, 3000)
     }
-  }
 
-  if (checkToken.statusCode === 401) {
-    expiredToken.value = true
-  }
+    if (checkToken.statusCode === 401) {
+      expiredToken.value = true
+    }
 
-  loading.value = false // เสร็จสิ้นการโหลดข้อมูล
+    loading.value = false // เสร็จสิ้นการโหลดข้อมูล
+  }
 })
 
 const acceptInvitation = async () => {
@@ -145,7 +161,7 @@ const declineInvitation = async () => {
 
       <!-- Invitation -->
       <div
-        v-if="!loading && matchCollab"
+        v-if="!loading && matchCollab && !nonUserLogin"
         class="bg-white p-8 rounded-lg shadow-lg max-w-md text-center mt-32"
       >
         <div class="flex justify-center mb-4">
@@ -175,7 +191,7 @@ const declineInvitation = async () => {
 
       <!--Non Invitation -->
       <div
-        v-if="!loading && !matchCollab"
+        v-if="!loading && !matchCollab && !nonUserLogin"
         class="bg-white p-8 rounded-lg shadow-lg max-w-md text-center mt-32"
       >
         <div class="flex justify-center mb-4">
@@ -184,6 +200,25 @@ const declineInvitation = async () => {
         <p class="text-gray-700 mb-6">
           Sorry, we couldn't find your active invitation to this board.
         </p>
+      </div>
+
+      <!--Non Login-->
+      <div
+        v-if="!loading && nonUserLogin"
+        class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto text-center mt-32"
+      >
+        <div class="flex justify-center mb-4">
+          <img src="/icons/invitation.png" class="w-20" />
+        </div>
+        <p class="text-gray-700 mb-6 text-lg font-semibold">
+          Please sign in to continue.
+        </p>
+        <router-link
+          :to="{ name: 'login' }"
+          class="text-blue-500 hover:text-blue-600 font-medium"
+        >
+          Login
+        </router-link>
       </div>
     </div>
   </div>
