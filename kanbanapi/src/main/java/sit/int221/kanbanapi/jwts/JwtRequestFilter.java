@@ -131,12 +131,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         } else if (isInviteRequest(requestURI)) {
             return;
         } else {
-            if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
-                return;
-            }
             Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
                     .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
             String accessRight = collab.getAccessRight().toString();
+
+            if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
+                return;
+            }
 
             if (collab.getStatus().equals(Collab.Status.PENDING)) {
                 throw new NoPermission("You do not have permission to perform this action");
