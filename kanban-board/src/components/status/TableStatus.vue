@@ -463,8 +463,8 @@ watch(
               v-if="disabledIfNotOwner"
               class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
             >
-              You need to be board owner to perform this action.
-            </div>
+            You need to be board owner or has write access to perform this
+          </div>
           </div>
         </RouterLink>
       </div>
@@ -532,8 +532,8 @@ watch(
                       v-if="disabledIfNotOwner"
                       class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                     >
-                      You need to be board owner to perform this action.
-                    </div>
+                    You need to be board owner or has write access to perform this
+                  </div>
                   </div>
                 </router-link>
               </div>
@@ -551,8 +551,8 @@ watch(
                   v-if="disabledIfNotOwner"
                   class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                 >
-                  You need to be board owner to perform this action.
-                </div>
+                You need to be board owner or has write access to perform this
+              </div>
               </div>
             </td>
             <td v-else="task.name !== 'No Status' && task.name !== 'Done'"></td>

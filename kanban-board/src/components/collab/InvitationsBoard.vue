@@ -37,7 +37,10 @@ onMounted(async () => {
     loading.value = false
 
     setTimeout(() => {
-      router.push({ name: "login" })
+      router.push({
+        name: "login",
+        query: { redirect: "invitations", boardId: boardId.value },
+      })
       nonUserLogin.value = false
     }, 5000)
   }

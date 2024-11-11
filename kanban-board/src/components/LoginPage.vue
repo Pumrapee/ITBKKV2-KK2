@@ -3,12 +3,13 @@ import { ref, computed, onMounted } from "vue"
 import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
 import { getToken } from "@/libs/fetchUtils"
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
 
 const username = ref("")
 const password = ref("")
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const isButtonDisabled = computed(() => {
   return (
@@ -32,7 +33,23 @@ const loginHandler = async () => {
   if (res.status === 200) {
     authStore.login(token)
     getToken()
-    router.push({ name: "board" })
+    // ตรวจสอบ query parameter "redirect"
+    const redirect = route.query.redirect
+    const boardId = route.query.boardId // สมมติว่าเรามี query parameter boardId เพื่อใช้เป็น id
+
+    if (redirect) {
+      // ตรวจสอบว่าต้องการพารามิเตอร์ `id` หรือไม่
+      if (redirect === "invitations" && boardId) {
+        // เปลี่ยนเส้นทางไปยัง `invitations` พร้อม `id`
+        router.push({ name: redirect, params: { id: boardId } })
+      } else {
+        // ไปยังเส้นทางที่ไม่ต้องการ `id`
+        router.push({ name: redirect })
+      }
+    } else {
+      // หากไม่มี redirect ให้ไปที่หน้า board เป็นค่าเริ่มต้น
+      router.push({ name: "board" })
+    }
   } else if (res.status === 400 || res.status === 401) {
     alertMessage.value = "Username or Password is incorrect."
     showAlert.value = true

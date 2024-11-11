@@ -219,8 +219,10 @@ const closeLeaveModal = async () => {
       showLeaveModal.value = false
       showAlert("Collaborator removed successfully.", "success")
     } else if (statusCode === 403) {
+      myBoard.removeBoardCollab(ownerIdBoard.value)
+      showLeaveModal.value = false
       showAlert(
-        "You do not have permission to add board collaborator.",
+        "You do not have permission to leave board collaborator.",
         "error"
       )
     } else if (statusCode === 404) {
@@ -231,7 +233,7 @@ const closeLeaveModal = async () => {
       expiredToken.value = true
       showLeaveModal.value = false
     } else {
-      showAlert("Failed to remove collaborator. Please try again.", "error")
+      showAlert("There is a problem. Please try again later.", "error")
     }
   }
 
