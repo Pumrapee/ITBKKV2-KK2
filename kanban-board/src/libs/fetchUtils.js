@@ -1,5 +1,3 @@
-import router from "@/router"
-
 //function ที่ติดต่อ back-end.
 let tokenStorage = undefined
 let refresh_token = localStorage.getItem("refreshToken")
@@ -323,6 +321,25 @@ async function Visibility(url, boardId, newVisibility) {
   }
 }
 
+async function invitation(url, statusInv) {
+  getToken()
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${tokenStorage}`,
+      },
+      body: JSON.stringify({
+        //destrucuring
+        ...statusInv,
+      }),
+    })
+    return res.status
+
+  } catch (error) {}
+}
+
 async function getBoardItems(url) {
   getToken()
 
@@ -379,4 +396,5 @@ export {
   checkAndRefreshToken,
   getBoardItems,
   patchItem,
+  invitation,
 }

@@ -24,6 +24,9 @@ public class Collab {
     @Enumerated(EnumType.STRING)
     private AccessRight accessRight = AccessRight.READ;
 
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.PENDING;
+
     @Column(name = "addedOn", insertable = false, updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX", timezone="UTC")
     private OffsetDateTime addedOn;
@@ -35,5 +38,9 @@ public class Collab {
 
     public enum AccessRight {
         READ, WRITE
+    }
+
+    public enum Status {
+        PENDING, MEMBER
     }
 }

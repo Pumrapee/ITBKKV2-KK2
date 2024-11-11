@@ -1,14 +1,14 @@
 package sit.int221.kanbanapi.controllers;
 
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.validation.ConstraintViolationException;
+import jakarta.mail.AuthenticationFailedException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterValidationResult;
@@ -130,6 +130,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCollaboratorConflict
             (Exception exception, WebRequest request) {
         return buildErrorResponse(exception, HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler({EmailSendFailed.class, AuthenticationFailedException.class, MailAuthenticationException.class})
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ResponseEntity<ErrorResponse> handleEmailException
+            (Exception exception, WebRequest request) {
+        return buildErrorResponse(exception, "Email sending service unavailable", HttpStatus.SERVICE_UNAVAILABLE, request);
     }
 
     @ExceptionHandler(Exception.class)

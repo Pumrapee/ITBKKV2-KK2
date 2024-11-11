@@ -60,15 +60,17 @@ watch(
 watch(
   () => boardList,
   async (newBoard) => {
-    if (newBoard.value === undefined || boardList.value.length === 0) {
-      const boardFetch = await getBoardItems(
-        `${import.meta.env.VITE_API_URL}v3/boards`
-      )
-      const boardFetchSort = boardFetch.owner.sort(
-        (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
-      )
+    if (!localStorage.getItem("user") === "Guest") {
+      if (newBoard.value === undefined || boardList.value.length === 0) {
+        const boardFetch = await getBoardItems(
+          `${import.meta.env.VITE_API_URL}v3/boards`
+        )
+        const boardFetchSort = boardFetch.owner.sort(
+          (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+        )
 
-      boardList.value = boardFetchSort
+        boardList.value = boardFetchSort
+      }
     }
   },
   { immediate: true }

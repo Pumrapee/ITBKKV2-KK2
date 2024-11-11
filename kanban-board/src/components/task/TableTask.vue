@@ -21,7 +21,7 @@ import DeleteTask from "./DeleteTask.vue"
 import LimitTask from "./LimitTask.vue"
 import ExpireToken from "../toast/ExpireToken.vue"
 import router from "@/router"
-import AlertComponent from "../toast/Alert.vue"
+import { showAlert } from "../../libs/alertUtils"
 import { useRoute } from "vue-router"
 import ModalVisibility from "../toast/ModalVisibility.vue"
 
@@ -40,7 +40,6 @@ const route = useRoute()
 const listDelete = ref()
 const editDrop = ref(false)
 const boardId = ref(route.params.id)
-const modalAlert = ref({ message: "", type: "", modal: false })
 const expiredToken = ref(false)
 const boardName = ref()
 const refreshToken = ref(localStorage.getItem("refreshToken"))
@@ -60,150 +59,7 @@ const originalIsPublic = ref(isPublic.value)
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
-
-  // const checkToken = await checkAndRefreshToken(
-  //   `${import.meta.env.VITE_API_URL}token`,
-  //   myUser.token,
-  //   refreshToken.value
-  // )
-
-  // if (checkToken.statusCode === 200) {
-  //   //กรณีที่ token หมดอายุ ให้ต่ออายุ token
-  //   myUser.setNewToken(checkToken.accessNewToken)
-  //   expiredToken.value = false
-
-  //   //Task
-  //   if (myTask.getTasks().length === 0) {
-  //     const listTasks = await getItems(
-  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`
-  //     )
-
-  //     if (listTasks === 401) {
-  //       expiredToken.value = true
-  //     } else if (listTasks.status === 404) {
-  //       router.push({ name: "TaskNotFound" })
-  //     } else {
-  //       myTask.addTasks(listTasks)
-  //     }
-  //   }
-
-  //   //Board
-  //   const boardIdNumber = await getItemById(
-  //     `${import.meta.env.VITE_API_URL}v3/boards`,
-  //     boardId.value
-  //   )
-
-  //   nameOwnerBoard.value = boardIdNumber.owner.name
-
-  //   boardName.value = boardIdNumber.name
-
-  //   if (boardIdNumber.visibility === "PRIVATE") {
-  //     isPublic.value = false // Private จะเป็นค่า false
-  //   } else if (boardIdNumber.visibility === "PUBLIC") {
-  //     isPublic.value = true // Public จะเป็นค่า true
-  //   }
-
-  //   //Status
-  //   if (myStatus.getStatus().length === 0) {
-  //     const listStatus = await getItems(
-  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
-  //     )
-  //     if (listStatus === 401) {
-  //       expiredToken.value = true
-  //     } else if (listStatus.status === 404) {
-  //       router.push({ name: "TaskNotFound" })
-  //     } else {
-  //       myStatus.addStatus(listStatus)
-  //     }
-  //   }
-
-  //   //Limit
-  //   const limitStatus = await getStatusLimits(
-  //     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/statuses`
-  //   )
-  //   if (limitStatus === 401) {
-  //     expiredToken.value = true
-  //   } else if (limitStatus.status === 404) {
-  //     router.push({ name: "TaskNotFound" })
-  //   } else {
-  //     myLimit.editLimit(limitStatus)
-  //   }
-
-  //   //Collab
-  //   if (myBoard.getCollabs().length === 0) {
-  //     const collabList = await getItems(
-  //       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-  //     )
-  //     if (collabList === 401) {
-  //       expiredToken.value = true
-  //     } else {
-  //       if (myBoard.getCollabs().length === 0) {
-  //         collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-
-  //         myBoard.addCollabs(collabList)
-  //       }
-  //     }
-  //   }
-
-  //   function validateBoardAccess(isOwner, userOid) {
-  //     if (isOwner) {
-  //       return false
-  //     }
-
-  //     const collab = myBoard
-  //       .getCollabs()
-  //       .find((collab) => collab.oid === userOid)
-  //     let accessRight
-
-  //     if (collab !== undefined) {
-  //       accessRight = collab.accessRight
-  //     }
-  //     if (accessRight !== undefined) {
-  //       // If the user has WRITE access, they can manage tasks and statuses
-  //       if (accessRight === "WRITE") {
-  //         return false
-  //       }
-  //     }
-  //     return true
-  //   }
-
-  //   myBoard.clearCollaborator()
-  //   const collabList = await getItems(
-  //     `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-  //   )
-  //   collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-  //   myBoard.addCollabs(collabList)
-
-  //   if (
-  //     validateBoardAccess(
-  //       nameOwnerBoard.value === userName,
-  //       localStorage.getItem("oid")
-  //     )
-  //   ) {
-  //     disabledIfnotOwner.value = true
-  //   }
-
-  //   if (nameOwnerBoard.value !== userName) {
-  //     disabledVisibility.value = true
-  //   }
-  // }
-
-  // if (checkToken.statusCode === 401) {
-  //   expiredToken.value = true
-  // }
 })
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
-}
 
 //Open Modal
 // Edit Modal
@@ -388,6 +244,11 @@ const closeDeleteModal = async (id) => {
     }
 
     if (deleteItem === 400) {
+      myTask.removeTasks(id)
+      showAlert("An error has occurred, the task does not exist.", "error")
+    }
+
+    if (deleteItem === 404) {
       myTask.removeTasks(id)
       showAlert("An error has occurred, the task does not exist.", "error")
     }
@@ -730,7 +591,8 @@ async function fetchBoardData(id) {
       }
       if (accessRight !== undefined) {
         // If the user has WRITE access, they can manage tasks and statuses
-        if (accessRight === "WRITE") {
+
+        if (accessRight === "WRITE" && collab.status === "MEMBER") {
           return false
         }
       }
@@ -1128,14 +990,6 @@ async function fetchBoardData(id) {
     :showLimitModal="showLimitModal"
   />
 
-  <!-- Toast -->
-  <AlertComponent
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
-  />
-
-  <!-- <ExpireToken :showExpiredModal="expiredToken" /> -->
   <ExpireToken v-if="expiredToken" />
 
   <!-- Use VisibilityModal -->

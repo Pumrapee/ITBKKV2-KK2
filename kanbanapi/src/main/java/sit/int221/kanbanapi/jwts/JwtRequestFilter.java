@@ -128,13 +128,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         } else if (board.getVisibility().equals("PUBLIC") && requestMethod.equals("GET")) {
             return;
+        } else if (isInviteRequest(requestURI)) {
+            return;
         } else {
+            if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
+                return;
+            }
             Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid)
                     .orElseThrow(() -> new NoPermission("You do not have permission to perform this action"));
             String accessRight = collab.getAccessRight().toString();
 
-            if (isSelfCollabRemovalRequest(requestMethod, requestURI, userOid)) {
-                return;
+            if (collab.getStatus().equals(Collab.Status.PENDING)) {
+                throw new NoPermission("You do not have permission to perform this action");
             }
 
             if (isTaskOrStatusOrCollabRequest(requestURI)) {
@@ -164,6 +169,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private boolean isCollabRequest(String requestURI) {
         return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs(/.*)?");
+    }
+
+    private boolean isInviteRequest(String requestURI) {
+        return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs/invitations");
+    }
+
+    private String extractBoardIdFromURI(String requestURI) {
+        String[] parts = requestURI.split("/");
+        if (parts.length >= 4 && parts[2].equals("boards")) {
+            return parts[3];
+        }
+        return null;
     }
 
 
@@ -209,14 +226,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         throw new AuthenticationFailed(ex.getMessage());
-    }
-
-    private String extractBoardIdFromURI(String requestURI) {
-        String[] parts = requestURI.split("/");
-        if (parts.length >= 4 && parts[2].equals("boards")) {
-            return parts[3];
-        }
-        return null;
     }
 
     private void buildErrorResponse(HttpServletResponse response, Exception exception,

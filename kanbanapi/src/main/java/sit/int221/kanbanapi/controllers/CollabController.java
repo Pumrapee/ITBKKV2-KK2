@@ -8,11 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
-import sit.int221.kanbanapi.dtos.CollabAccessEditRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRespondDTO;
-import sit.int221.kanbanapi.dtos.CollaboratorDTO;
+import sit.int221.kanbanapi.dtos.*;
 import sit.int221.kanbanapi.services.CollabService;
+import sit.int221.kanbanapi.services.EmailService;
+import sit.int221.kanbanapi.services.JwtUserDetailsService;
 import sit.int221.kanbanapi.services.UserService;
 
 import java.util.List;
@@ -23,13 +22,18 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th", "http://localhost:5173", "http://intproj23.sit.kmutt.ac.th", "https://intproj23.sit.kmutt.ac.th"})
 public class CollabController {
     @Autowired
-    CollabService collabService;
+    private CollabService collabService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    ModelMapper mapper;
+    private ModelMapper mapper;
+
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
 
     @GetMapping
     public ResponseEntity<List<CollaboratorDTO>> getCollaborators(@PathVariable String boardId) {
@@ -55,7 +59,13 @@ public class CollabController {
     @PostMapping
     public ResponseEntity<CollabAddRespondDTO> addCollaborator(@PathVariable String boardId, @Valid @RequestBody CollabAddRequestDTO collabAddRequestDTO) {
         CollabAddRespondDTO collaboratorDTO = collabService.addCollaborator(boardId, collabAddRequestDTO);
+        emailService.sendInvitationEmail(collaboratorDTO.getCollaboratorEmail(), collaboratorDTO.getAccessRight(), boardId);
         return ResponseEntity.status(HttpStatus.CREATED).body(collaboratorDTO);
+    }
+
+    @PostMapping("/invitations")
+    public void collabStatus(@PathVariable String boardId, @Valid @RequestBody BoardInvitationRequestDTO boardInvitationRequestDTO) {
+        collabService.inviteCollaborator(boardId, boardInvitationRequestDTO);
     }
 
     @PatchMapping("/{collab_oid}")

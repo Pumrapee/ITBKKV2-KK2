@@ -78,6 +78,7 @@ public class BoardService {
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
                     boardListDTO.setRole("COLLABORATOR");
                     boardListDTO.setAccessRight(collab.getAccessRight().toString());
+                    boardListDTO.setStatus(collab.getStatus());
                     boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
                     return boardListDTO;
                 })

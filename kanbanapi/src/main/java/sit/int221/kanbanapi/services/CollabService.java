@@ -3,7 +3,6 @@ package sit.int221.kanbanapi.services;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
@@ -12,11 +11,8 @@ import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
-import sit.int221.kanbanapi.dtos.CollabAccessEditRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRequestDTO;
-import sit.int221.kanbanapi.dtos.CollabAddRespondDTO;
+import sit.int221.kanbanapi.dtos.*;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
-import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.CollaboratorConflict;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 
@@ -31,7 +27,7 @@ public class CollabService {
     @Autowired
     private BoardRepository boardRepository;
     @Autowired
-    ModelMapper mapper;
+    private ModelMapper mapper;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
 
@@ -46,7 +42,7 @@ public class CollabService {
     @Transactional
     public CollabAddRespondDTO addCollaborator(String boardId, CollabAddRequestDTO collabAddRequestDTO) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
-        User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
+        User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("User not found"));
         if (collabRepository.existsById(new CollabId(boardId, newCollab.getOid()))) {
             throw new CollaboratorConflict("Collaborator already exist!!!");
         }
@@ -60,6 +56,20 @@ public class CollabService {
         CollabAddRespondDTO collaboratorDTO = mapper.map(collabRepository.save(collab), CollabAddRespondDTO.class);
         mapper.map(newCollab, collaboratorDTO);
         return collaboratorDTO;
+    }
+
+    @Transactional
+    public void inviteCollaborator(String boardId, BoardInvitationRequestDTO invitation) {
+        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
+        Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, currentUser.getOid()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
+        boolean isAccept = invitation.getInvitation().equals(Invitation.ACCEPT);
+        if (isAccept) {
+            collab.setStatus(Collab.Status.MEMBER);
+            collabRepository.save(collab);
+        } else {
+
+            collabRepository.delete(collab);
+        }
     }
 
     @Transactional

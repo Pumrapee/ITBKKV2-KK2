@@ -13,23 +13,30 @@ import {
 } from "@/libs/fetchUtils"
 import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "../collab/AddCollabBoard.vue"
-import Alert from "../toast/Alert.vue"
+import { showAlert } from "../../libs/alertUtils"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
+
+//store
+const myBoard = useBoardStore()
+const myUser = useAuthStore()
 
 const route = useRoute()
 const boardId = ref(route.params.id)
-const myBoard = useBoardStore()
-const myUser = useAuthStore()
 const boardName = ref()
 const expiredToken = ref(false)
 const openModal = ref(false)
-const modalAlert = ref({ message: "", type: "", modal: false })
 const collab = ref()
 const refreshToken = ref(localStorage.getItem("refreshToken"))
 const showDeleteModal = ref(false)
+const showCancelModal = ref(false)
 const collaboratorToRemove = ref({ id: "", name: "" })
 const nameOwnerBoard = ref()
 const disabledIfNotOwner = ref()
+
+const showAccessModal = ref(false)
+const selectedCollab = ref(null) // เก็บ collaborator ที่เลือก
+const newAccessRight = ref("") // เก็บสิทธิ์ใหม่
+const selectedCollabName = ref("")
 
 onMounted(async () => {
   myUser.setToken()
@@ -126,7 +133,10 @@ const closeAddCollab = async (newCollab) => {
     } else if (statusCode === 404) {
       showAlert("The user does not exist.", "error")
     } else if (statusCode === 409) {
-      showAlert("The user is already the collaborator of this board.", "error")
+      showAlert(
+        "The user is already the collaborator or pending collaborator of this board.",
+        "error"
+      )
     } else {
       showAlert("There is a problem. Please try again later.", "error")
     }
@@ -144,23 +154,18 @@ const closeAddCollab = async (newCollab) => {
 
 const closeModal = () => {
   openModal.value = false
-}
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
+  showCancelModal.value = false
+  showDeleteModal.value = false
 }
 
 const openDeleteModal = (id, name) => {
   collaboratorToRemove.value = { id, name }
   showDeleteModal.value = true
+}
+
+const openCancelModal = (id, name) => {
+  collaboratorToRemove.value = { id, name }
+  showCancelModal.value = true
 }
 
 const confirmRemoveCollaborator = async () => {
@@ -184,6 +189,7 @@ const confirmRemoveCollaborator = async () => {
       showAlert("Collaborator removed successfully.", "success")
       myBoard.removeCollab(collaboratorToRemove.value.id) // ลบ collaborator ออกจาก list
       showDeleteModal.value = false // ปิด modal
+      showCancelModal.value = false
     } else if (statusCode === 403) {
       showAlert(
         "You do not have permission to add board collaborator.",
@@ -192,6 +198,7 @@ const confirmRemoveCollaborator = async () => {
     } else if (statusCode === 404) {
       myBoard.removeCollab(collaboratorToRemove.value.id)
       showDeleteModal.value = false
+      showCancelModal.value = false
       showAlert(
         `${collaboratorToRemove.value.name} is not a collaborator.`,
         "error"
@@ -199,7 +206,9 @@ const confirmRemoveCollaborator = async () => {
     } else if (statusCode === 401) {
       expiredToken.value = true
       showDeleteModal.value = false
+      showCancelModal.value = false
     } else {
+      // 500
       showAlert("There is a problem. Please try again later.", "error")
     }
   }
@@ -207,6 +216,7 @@ const confirmRemoveCollaborator = async () => {
   if (checkToken.statusCode === 401) {
     expiredToken.value = true
     showDeleteModal.value = false
+    showCancelModal.value = false
   }
 }
 
@@ -246,11 +256,6 @@ const changeAccessRight = async (collab, newRight) => {
     expiredToken.value = true
   }
 }
-
-const showAccessModal = ref(false)
-const selectedCollab = ref(null) // เก็บ collaborator ที่เลือก
-const newAccessRight = ref("") // เก็บสิทธิ์ใหม่
-const selectedCollabName = ref("")
 
 const openAccessModal = (collab, accessRight) => {
   if (collab.accessRight === accessRight) {
@@ -322,7 +327,12 @@ const confirmAccessRightChange = async () => {
             class="itbkk-item"
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
-            <td class="itbkk-name pl-10">{{ collab.name }}</td>
+            <td class="itbkk-name pl-10">
+              {{ collab.name }}
+              <p v-if="collab.status === `PENDING`" class="text-slate-400">
+                (Pending Invite)
+              </p>
+            </td>
             <td class="itbkk-email pl-10">{{ collab.email }}</td>
             <td class="itbkk-access-right pl-10">
               <div class="dropdown">
@@ -364,7 +374,7 @@ const confirmAccessRightChange = async () => {
               </div>
             </td>
 
-            <td class="itbkk-collab-remove">
+            <td v-if="collab.status === `MEMBER`" class="itbkk-collab-remove">
               <div class="ml-16 relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
@@ -372,6 +382,18 @@ const confirmAccessRightChange = async () => {
                   @click="openDeleteModal(collab.oid, collab.name)"
                 >
                   <img src="/icons/delete.png" class="w-4" />
+                </button>
+              </div>
+            </td>
+
+            <td v-if="collab.status === `PENDING`" class="itbkk-collab-remove">
+              <div class="ml-16 relative group inline-block">
+                <button
+                  :disabled="disabledIfNotOwner"
+                  class="btn"
+                  @click="openCancelModal(collab.oid, collab.name)"
+                >
+                  Cancel
                 </button>
               </div>
             </td>
@@ -428,15 +450,10 @@ const confirmAccessRightChange = async () => {
 
   <RemoveCollaborator
     :showDelete="showDeleteModal"
+    :showCancel="showCancelModal"
     :selectedCollabName="collaboratorToRemove.name"
     @confirmRemove="confirmRemoveCollaborator"
-    @cancelDelete="showDeleteModal = false"
-  />
-
-  <Alert
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
+    @cancelDelete="closeModal"
   />
 
   <ExpireToken v-if="expiredToken" />

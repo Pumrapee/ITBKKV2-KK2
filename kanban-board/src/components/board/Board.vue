@@ -4,14 +4,12 @@ import { ref, onMounted } from "vue"
 import AddBoard from "./AddBoard.vue"
 import DeleteBoard from "./DeleteBoard.vue"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
-import Alert from "../toast/Alert.vue"
+import { showAlert } from "../../libs/alertUtils"
 import {
   addItem,
-  getItems,
   deleteItemById,
   checkAndRefreshToken,
   getBoardItems,
-  getItemById,
 } from "@/libs/fetchUtils"
 import { useBoardStore } from "@/stores/boardStore.js"
 import { useAuthStore } from "@/stores/loginStore"
@@ -27,7 +25,6 @@ const boardIdDelete = ref("")
 const collabsName = ref("")
 const ownerIdBoard = ref(localStorage.getItem("oid"))
 const refreshToken = ref(localStorage.getItem("refreshToken"))
-const modalAlert = ref({ message: "", type: "", modal: false })
 
 onMounted(async () => {
   myUser.setToken()
@@ -62,6 +59,7 @@ onMounted(async () => {
         const listCollabSort = listBoard.collab.sort(
           (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
         )
+
         myBoard.addBoardsCollab(listCollabSort)
       }
     } else {
@@ -112,6 +110,10 @@ const openLeaveModal = async (boardId, collabName) => {
 const openDeleteModal = (id) => {
   showDeleteModal.value = true
   boardIdDelete.value = id
+}
+
+const openInvitations = (collabId) => {
+  router.push({ name: "invitations", params: { id: collabId } })
 }
 
 const closeAdd = async (nameBoard) => {
@@ -237,18 +239,6 @@ const closeLeaveModal = async () => {
     expiredToken.value = true
     showLeaveModal.value = false
   }
-}
-
-//Alert
-const showAlert = (message, type) => {
-  modalAlert.value = {
-    message,
-    type,
-    modal: true,
-  }
-  setTimeout(() => {
-    modalAlert.value.modal = false
-  }, 4000)
 }
 
 const activeTab = ref("personal") // ค่าเริ่มต้นเป็น 'profile'
@@ -386,8 +376,8 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
             <thead class="bg-black">
               <tr class="text-white text-sm">
                 <th class="pl-16">No.</th>
-                <th class="pl-16">Name</th>
-                <th class="pl-16">Owner</th>
+                <th class="pl-24">Name</th>
+                <th class="pl-14">Owner</th>
                 <th class="pl-10">Access Right</th>
                 <th>Action</th>
               </tr>
@@ -405,11 +395,17 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                   >
                     <button class="itbkk-board-name btn btn-ghost h-2">
                       {{ boardCollab.name }}
+                      <p
+                        v-if="boardCollab.status === `PENDING`"
+                        class="text-slate-400"
+                      >
+                        (Pending Invite)
+                      </p>
                     </button>
                   </router-link>
                 </th>
                 <th>
-                  <p class="itbkk-owner-name h-2 mb-3 ml-5">
+                  <p class="itbkk-owner-name h-2 mb-3 ml-5 w-20">
                     {{ boardCollab.owner.name }}
                   </p>
                 </th>
@@ -421,7 +417,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                   </p>
                 </th>
 
-                <th>
+                <th v-if="boardCollab.status === `MEMBER`">
                   <div>
                     <button
                       class="itbkk-leave-board"
@@ -444,6 +440,16 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                           d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
                         />
                       </svg>
+                    </button>
+                  </div>
+                </th>
+                <th v-if="boardCollab.status === `PENDING`">
+                  <div>
+                    <button
+                      class="itbkk-leave-board btn w-24"
+                      @click="openInvitations(boardCollab.id)"
+                    >
+                      <p class="text-xs">Accept/Decline</p>
                     </button>
                   </div>
                 </th>
@@ -477,12 +483,6 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
     :boardId="boardIdDelete"
     @closeDeleteBoard="closeDeleteModal"
     @cancelDelete="closeModal"
-  />
-
-  <Alert
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
   />
 
   <ExpireToken v-if="expiredToken" />
