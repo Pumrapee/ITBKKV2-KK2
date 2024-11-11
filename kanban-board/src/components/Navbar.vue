@@ -60,17 +60,15 @@ watch(
 watch(
   () => boardList,
   async (newBoard) => {
-    if (!localStorage.getItem("user") === "Guest") {
-      if (newBoard.value === undefined || boardList.value.length === 0) {
-        const boardFetch = await getBoardItems(
-          `${import.meta.env.VITE_API_URL}v3/boards`
-        )
-        const boardFetchSort = boardFetch.owner.sort(
-          (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
-        )
+    if (newBoard.value === undefined || boardList.value.length === 0) {
+      const boardFetch = await getBoardItems(
+        `${import.meta.env.VITE_API_URL}v3/boards`
+      )
+      const boardFetchSort = boardFetch?.owner?.sort(
+        (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
+      )
 
-        boardList.value = boardFetchSort
-      }
+      boardList.value = boardFetchSort
     }
   },
   { immediate: true }
@@ -103,8 +101,11 @@ watch(
         tabindex="0"
         class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-4 w-40 p-2 shadow"
       >
-        <li><a>Profile</a></li>
-        <li @click="logout"><a>Logout</a></li>
+        <li v-if="userName !== `Guest`"><a>Profile</a></li>
+        <li v-if="userName !== `Guest`" @click="logout"><a>Logout</a></li>
+        <RouterLink :to="{ name: 'login' }">
+          <li v-if="userName === `Guest`"><a>Login</a></li>
+        </RouterLink>
       </ul>
     </div>
   </div>
@@ -144,7 +145,7 @@ watch(
               <div
                 class="bg-slate-300 text-white rounded-full w-5 h-5 flex items-center justify-center ml-2 text-sm"
               >
-                {{ boardList.length }}
+                {{ boardList?.length }}
               </div>
             </span>
             <!-- Dropdown arrow icon -->

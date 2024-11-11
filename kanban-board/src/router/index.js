@@ -22,7 +22,6 @@ const checkBoardAccess = async (to, from, next) => {
     )
 
     if (token === "null" || (!token && response.visibility === "PUBLIC")) {
-      console.log("2")
       if (
         (to.name === "addTask" ||
           to.name === "editTask" ||
@@ -30,7 +29,6 @@ const checkBoardAccess = async (to, from, next) => {
           to.name === "EditStatus") &&
         (!token || token === "null")
       ) {
-        console.log("403 3")
         return next({ name: "forbidden" })
       } else {
         return next()
@@ -45,7 +43,6 @@ const checkBoardAccess = async (to, from, next) => {
 
       //ไม่แน่ใจว่าต้องมีมั้ย
       if (response.visibility === "PUBLIC") {
-        console.log("1")
         if (
           to.name === "addTask" ||
           to.name === "editTask" ||
@@ -53,7 +50,6 @@ const checkBoardAccess = async (to, from, next) => {
           to.name === "EditStatus"
           // (!token || token === "null")
         ) {
-          console.log("403 2")
           return next({ name: "forbidden" })
         } else {
           return next() // ถ้าเป็น PUBLIC และไม่ใช่ action ที่ต้องการ token ก็ให้เข้าถึง board ได้ตามปกติ
@@ -62,33 +58,27 @@ const checkBoardAccess = async (to, from, next) => {
 
       //ถ้าเป็น collab
       if (checkIsCollab) {
-        console.log("collab")
         if (
           to.name === "addTask" ||
           to.name === "editTask" ||
           to.name === "AddStatus" ||
           to.name === "EditStatus"
         ) {
-          console.log("collab 403")
           return next({ name: "forbidden" })
         }
       }
 
       if (response.status === 403) {
-        console.log("collab 403 1")
         return next({ name: "forbidden" })
       }
 
       if (response.status === 404) {
-        console.log("collab 404 ")
         return next({ name: "notFound" })
       }
 
       return next()
     }
   } catch (error) {
-    console.log("catch checkBoardAccess 403")
-
     next({ name: "forbidden" })
   }
 }
@@ -202,21 +192,16 @@ router.beforeEach(async (to, from, next) => {
     (to.name === "task" && to.params.id) ||
     (to.name === "tableStatus" && to.params.id)
   ) {
-    console.log("beforeEach")
     // เรียก API เพื่อเช็คว่า board เป็น public หรือ private
     const board = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
     )
 
     if (board.status === 403) {
-      console.log("beforeEach 403")
-
       return next({ name: "forbidden" })
     }
 
     if (board) {
-      console.log("beforeEach board")
-
       // ถ้าเป็น public สามารถเข้าถึงได้โดยไม่ต้องมี token
       if (board.visibility === "PUBLIC") {
         return next()

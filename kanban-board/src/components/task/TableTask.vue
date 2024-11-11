@@ -790,7 +790,7 @@ async function fetchBoardData(id) {
             v-if="disabledIfnotOwner"
             class="absolute bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
           >
-            You need to be board owner to perform this action.
+            You need to be board owner or has write access to perform this
           </div>
         </div>
 
@@ -812,7 +812,7 @@ async function fetchBoardData(id) {
             v-if="disabledIfnotOwner"
             class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
           >
-            You need to be board owner to perform this action.
+            You need to be board owner or has write access to perform this
           </div>
         </div>
       </div>
