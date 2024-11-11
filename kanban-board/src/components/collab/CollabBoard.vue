@@ -186,7 +186,7 @@ const confirmRemoveCollaborator = async () => {
       showDeleteModal.value = false // ปิด modal
     } else if (statusCode === 403) {
       showAlert(
-        "You do not have permission to add board collaborator.",
+        "You do not have permission to remove board collaborator.",
         "error"
       )
     } else if (statusCode === 404) {
@@ -234,7 +234,7 @@ const changeAccessRight = async (collab, newRight) => {
       showAlert("Access right updated successfully.", "success")
     } else if (statusCode === 403) {
       showAlert(
-        "You do not have permission to add board collaborator.",
+        "You do not have permission to change collaborator access right.",
         "error"
       )
     } else {
