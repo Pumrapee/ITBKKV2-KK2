@@ -137,7 +137,8 @@ const declineInvitation = async () => {
     )
 
     if (statusCode === 200) {
-      router.go(-1)
+      // router.go(-1)
+      router.push({ name: "board" })
       myBoard.clearBoardCollab()
     }
   }
