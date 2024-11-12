@@ -328,14 +328,25 @@ const confirmAccessRightChange = async () => {
           <li>Collaborator</li>
         </ul>
       </div>
-      <div class="flex items-center">
-        <button
-          @click="openModalAdd"
-          class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
-          :disabled="disabledIfNotOwner"
+
+      <div class="relative group">
+        <div class="flex items-center">
+          <button
+            @click="openModalAdd"
+            class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
+            :disabled="disabledIfNotOwner"
+          >
+            <img src="/icons/plus.png" class="w-4" />
+          </button>
+        </div>
+
+        <!-- Tooltip -->
+        <div
+          v-if="disabledIfNotOwner"
+          class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
         >
-          <img src="/icons/plus.png" class="w-4" />
-        </button>
+          You need to be board owner to perform this action.
+        </div>
       </div>
     </div>
 
@@ -361,6 +372,7 @@ const confirmAccessRightChange = async () => {
             class="itbkk-item"
           >
             <th class="text-black pl-20">{{ index + 1 }}</th>
+
             <td class="itbkk-name pl-10">
               {{ collab.name }}
               <p v-if="collab.status === `PENDING`" class="text-slate-400">
@@ -369,7 +381,7 @@ const confirmAccessRightChange = async () => {
             </td>
             <td class="itbkk-email pl-10">{{ collab.email }}</td>
             <td class="itbkk-access-right pl-10">
-              <div class="dropdown">
+              <div class="dropdown relative group">
                 <label
                   tabindex="0"
                   class="btn btn-ghost shadow-md rounded-full h-auto w-28 font-medium text-center p-3 break-all bg-white"
@@ -394,6 +406,14 @@ const confirmAccessRightChange = async () => {
                     />
                   </svg>
                 </label>
+                <!-- Tooltip -->
+                <div
+                  v-if="disabledIfNotOwner"
+                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                >
+                  You need to be board owner to perform this action.
+                </div>
+
                 <ul
                   tabindex="0"
                   class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
@@ -417,6 +437,13 @@ const confirmAccessRightChange = async () => {
                 >
                   <img src="/icons/delete.png" class="w-4" />
                 </button>
+                <!-- Tooltip -->
+                <div
+                  v-if="disabledIfNotOwner"
+                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                >
+                  You need to be board owner to perform this action.
+                </div>
               </div>
             </td>
 
@@ -429,6 +456,13 @@ const confirmAccessRightChange = async () => {
                 >
                   Cancel
                 </button>
+                <!-- Tooltip -->
+                <div
+                  v-if="disabledIfNotOwner"
+                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                >
+                  You need to be board owner to perform this action.
+                </div>
               </div>
             </td>
           </tr>

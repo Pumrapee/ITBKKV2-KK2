@@ -181,7 +181,7 @@ const declineInvitation = async () => {
             class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none"
             @click="acceptInvitation"
           >
-            Accept
+            Accept invitation
           </button>
           <button
             class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none"
