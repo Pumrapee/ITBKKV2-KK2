@@ -21,9 +21,9 @@ const cancelVisibilityChange = () => {
 <template>
   <div
     v-if="showModalVisibility"
-    class="itbkk-modal-alert fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+    class="itbkk-modal-alert fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4 md:p-0"
   >
-    <div class="card bg-base-100 w-96 shadow-xl">
+    <div class="card bg-base-100 w-full max-w-sm md:w-96 shadow-xl">
       <div class="itbkk-message card-body font-medium">
         <p>
           Do you want to change board visibility to

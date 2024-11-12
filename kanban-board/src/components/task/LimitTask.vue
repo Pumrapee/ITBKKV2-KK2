@@ -126,8 +126,8 @@ watch(
 <template>
   <!-- Modal limit -->
   <div v-if="showLimitModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="itbkk-modal-setting modal-box">
+    <div class="flex items-center justify-center min-h-screen bg-black/[.15] px-4">
+      <div class="itbkk-modal-setting modal-box w-full max-w-lg sm:w-3/4 md:w-2/3 lg:w-1/3 p-6">
         <h3 class="font-bold text-lg text-slate-700">Status Settings</h3>
         <p class="py-4">
           Users can limit the number of tasks in a status by setting the Maximum
@@ -138,7 +138,7 @@ watch(
         </p>
         <div class="form-control">
           <label class="cursor-pointer label">
-            <span class="label-text text-blue-400">Enable Limit</span>
+            <span class="label-text text-black font-bold">Enable Limit</span>
             <input
               type="checkbox"
               v-model="isLimitEnabled"
@@ -149,27 +149,27 @@ watch(
 
         <div v-if="isLimitEnabled === true" class="form-control mt-4">
           <label class="label">
-            <span class="label-text text-blue-400">Maximum Tasks</span>
+            <span class="label-text text-black font-bold">Maximum Tasks</span>
           </label>
           <input
             type="number"
             v-model="maxTasks"
-            class="itbkk-max-task input input-bordered"
+            class="itbkk-max-task input input-bordered w-full"
             placeholder="Enter max tasks"
             min="0"
             max="30"
           />
         </div>
 
-        <div class="modal-action">
+        <div class="modal-action mt-6 flex flex-col md:flex-row md:justify-end space-y-4 md:space-y-0 md:space-x-4">
           <button
             @click="closelimitModal(maxTasks)"
-            class="itbkk-button-confirm btn bg-green-400 text-white disabled:bg-green-200 disabled:text-white"
+            class="itbkk-button-confirm btn bg-green-400 text-white disabled:bg-green-200 disabled:text-white px-4 py-2 rounded-md hover:bg-green-500 w-full md:w-auto"
             :disabled="changeLimit"
           >
             Save
           </button>
-          <button @click="closeCancel()" class="itbkk-button-cancel btn">
+          <button @click="closeCancel()" class="itbkk-button-cancel btn bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 w-full md:w-auto">
             Cancel
           </button>
         </div>
@@ -179,22 +179,22 @@ watch(
 
   <!-- Modal warning -->
   <div v-if="showWarning" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="itbkk-modal-setting modal-box">
+    <div class="flex items-center justify-center min-h-screen bg-black/[.15] px-4">
+      <div class="itbkk-modal-setting modal-box w-full max-w-lg sm:w-3/4 md:w-2/3 lg:w-1/3 p-6">
         <div class="flex justify-center">
           <img src="/icons/caution.png" alt="caution" class="h-28" />
         </div>
 
-        <div class="pt-5 text-red-500">
+        <div class="pt-5 text-red-500 text-center">
           These statuses that have reached the task limit. No additional tasks
           can be added to these statuses.
         </div>
 
-        <table class="table mt-5">
+        <table class="table mt-5 w-full text-xs md:text-sm">
           <thead class="bg-blue-400">
-            <tr class="text-white text-sm">
+            <tr class="text-white">
               <th>Status Name</th>
-              <th>number of tasks</th>
+              <th>Number of Tasks</th>
             </tr>
           </thead>
           <tbody>
@@ -209,6 +209,7 @@ watch(
           </tbody>
         </table>
 
+        <div class="">
         <div class="pt-5" v-if="isLimitEnabled">
           <p v-for="(status, index) in showLimitStatus" :key="index">
             <template v-if="status.excessCount > 0">
@@ -217,11 +218,12 @@ watch(
           </p>
         </div>
 
-        <div class="modal-action">
-          <button @click="closeCancel()" class="itbkk-button-cancel btn">
+        <div class="modal-action mt-6 flex flex-col md:flex-row md:justify-end space-y-4 md:space-y-0 md:space-x-4">
+          <button @click="closeCancel()" class="itbkk-button-cancel btn bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 w-full md:w-auto">
             Cancel
           </button>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -251,8 +253,21 @@ watch(
   max-width: 100%;
 }
 
-.toggle-pink:checked {
-  background-color: #f472b6; /* สีชมพู 400 ใน Tailwind CSS */
-  border-color: #f472b6;
+@media (max-width: 768px) {
+  /* ปรับแต่งให้เหมาะกับมือถือ */
+  .modal-box {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  .modal-action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
 }
 </style>
