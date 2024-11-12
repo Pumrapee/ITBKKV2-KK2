@@ -288,15 +288,22 @@ const confirmAccessRightChange = async () => {
         </ul>
       </div>
       <div class="flex items-center">
-        <!-- <RouterLink :to="{ name: 'AddStatus' }"> -->
-        <button
-          @click="openModalAdd"
-          class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
-          :disabled="disabledIfNotOwner"
-        >
-          <img src="/icons/plus.png" class="w-4" />
-        </button>
-        <!-- </RouterLink> -->
+        <div class="relative group">
+          <button
+            @click="openModalAdd"
+            class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
+            :disabled="disabledIfNotOwner"
+          >
+            <img src="/icons/plus.png" class="w-4" />
+          </button>
+          <!-- Tooltip -->
+          <div
+            v-if="disabledIfNotOwner"
+            class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+          >
+          You need to be board owner to perform this action.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -325,7 +332,7 @@ const confirmAccessRightChange = async () => {
             <td class="itbkk-name pl-10">{{ collab.name }}</td>
             <td class="itbkk-email pl-10">{{ collab.email }}</td>
             <td class="itbkk-access-right pl-10">
-              <div class="dropdown">
+              <div class="dropdown relative group">
                 <label
                   tabindex="0"
                   class="btn btn-ghost shadow-md rounded-full h-auto w-28 font-medium text-center p-3 break-all bg-white"
@@ -350,6 +357,13 @@ const confirmAccessRightChange = async () => {
                     />
                   </svg>
                 </label>
+                <!-- Tooltip -->
+                <div
+                  v-if="disabledIfNotOwner"
+                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                >
+                You need to be board owner to perform this action.
+                </div>
                 <ul
                   tabindex="0"
                   class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
@@ -373,6 +387,13 @@ const confirmAccessRightChange = async () => {
                 >
                   <img src="/icons/delete.png" class="w-4" />
                 </button>
+                <!-- Tooltip -->
+                <div
+                  v-if="disabledIfNotOwner"
+                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                >
+                You need to be board owner to perform this action.
+                </div>
               </div>
             </td>
           </tr>
@@ -388,58 +409,7 @@ const confirmAccessRightChange = async () => {
       </table>
     </div>
   </div>
-
-  <!-- Modal for changing access right -->
-  <div
-    v-if="showAccessModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-      <h2 class="text-xl font-semibold mb-4">Change Access Right</h2>
-      <p class="mb-6">
-        Do you want to change access right of
-        <span class="font-bold text-blue-400">{{ selectedCollabName }}</span>
-        to <span class="font-bold text-blue-400">{{ newAccessRight }}</span
-        >?
-      </p>
-      <div class="flex justify-end space-x-4">
-        <button
-          @click="showAccessModal = false"
-          class="px-4 py-2 bg-gray-300 text-white rounded-md hover:bg-gray-400"
-        >
-          Cancel
-        </button>
-        <button
-          @click="confirmAccessRightChange"
-          class="px-4 py-2 bg-black text-white rounded-md hover:bg-blue-600"
-        >
-          Confirm
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <AddCollabBoard
-    :showModal="openModal"
-    :collabs="collab"
-    @closeModal="closeModal"
-    @addCollab="closeAddCollab"
-  />
-
-  <RemoveCollaborator
-    :showDelete="showDeleteModal"
-    :selectedCollabName="collaboratorToRemove.name"
-    @confirmRemove="confirmRemoveCollaborator"
-    @cancelDelete="showDeleteModal = false"
-  />
-
-  <Alert
-    :message="modalAlert.message"
-    :type="modalAlert.type"
-    :showAlert="modalAlert.modal"
-  />
-
-  <ExpireToken v-if="expiredToken" />
 </template>
+
 
 <style scoped></style>
