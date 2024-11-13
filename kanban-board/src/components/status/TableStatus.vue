@@ -2,6 +2,7 @@
 import { useStatusStore } from '@/stores/statusStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useAuthStore } from '@/stores/loginStore'
+import { useBoardStore } from '@/stores/boardStore'
 import {
   getItemById,
   findStatus,
@@ -20,9 +21,12 @@ import ExpireToken from '../toast/ExpireToken.vue'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 
+//store
 const myStatus = useStatusStore()
 const myTask = useTaskStore()
 const myUser = useAuthStore()
+const myBoard = useBoardStore()
+
 const statusItems = ref({})
 const openModal = ref()
 const editMode = ref(false)
@@ -34,7 +38,6 @@ const boardId = ref(route.params.id)
 const expiredToken = ref(false)
 const refreshToken = ref(localStorage.getItem('refreshToken'))
 const modalAlert = ref({ message: '', type: '', modal: false })
-
 const disabledIfNotOwner = ref(false)
 const nameOwnerBoard = ref()
 
@@ -49,11 +52,43 @@ onMounted(async () => {
     boardId.value
   )
 
-  nameOwnerBoard.value = boardIdNumber.owner.name
+  //Collab
+  if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+    )
+    if (collabList === 401) {
+      expiredToken.value = true
+    } else {
+      if (myBoard.getCollabs().length === 0) {
+        collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
 
-  if (nameOwnerBoard.value !== userName) {
-    disabledIfNotOwner.value = true
+        myBoard.addCollabs(collabList)
+      }
+    }
   }
+
+  nameOwnerBoard.value = boardIdNumber.owner.name
+  function validateBoardAccess(isOwner, userOid) {
+      if (isOwner) {
+          return false;
+      }
+      const collab = myBoard.getCollabs().find(collab => collab.oid === userOid)
+      let accessRight;
+      if (collab !== undefined) { 
+        accessRight = collab.accessRight
+      }
+        if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE") {
+            return false;
+        }
+      }
+      return true;
+    } 
+    if (validateBoardAccess(nameOwnerBoard.value === userName ,localStorage.getItem('oid'))) {
+      disabledIfNotOwner.value = true
+    }
 
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -400,25 +435,24 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-32 mb-20 ml-30">
+  <div class="flex flex-col items-center mt-32 md:ml-40 mb-10 px-10 md:px-12">
     <!-- Navigation -->
-    <div class="bounce-in-top flex justify-between w-3/5 ml-52">
-      <div class="flex text-sm breadcrumbs text-black">
-        <ul>
+    <div class="flex flex-wrap justify-between items-center w-full md:w-3/5 mb-4">
+      <div class="text-sm breadcrumbs text-black">
+        <ul class="flex flex-wrap">
           <li class="itbkk-button-home">
-            <RouterLink :to="{ name: 'task' }"> Home</RouterLink>
+            <RouterLink :to="{ name: 'task' }">Home</RouterLink>
           </li>
           <li>Task Status</li>
         </ul>
       </div>
-      <div class="flex items-center">
+      <div class="flex items-center mt-4 md:mt-0">
         <RouterLink :to="{ name: 'task' }">
           <button
             @click="openAddStatus"
-            class="itbkk-button-home btn mr-1 bg-black text-white"
+            class="itbkk-button-home btn mr-2 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
           >
-            <img src="/icons/home.png" class="w-4" />
-            Home
+            <img src="/icons/home.png" class="w-4 mr-1" /> Home
           </button>
         </RouterLink>
         <RouterLink :to="{ name: 'AddStatus' }">
@@ -426,7 +460,7 @@ watch(
             <button
               :disabled="disabledIfNotOwner"
               @click="openModalAdd"
-              class="itbkk-button-add btn btn-circle border-black0 bg-black text-white ml-2"
+              class="itbkk-button-add btn bg-black text-white ml-2 w-full md:w-auto itbkk-button-add-desktop"
             >
               <img src="/icons/plus.png" class="w-4" />
             </button>
@@ -444,16 +478,14 @@ watch(
     </div>
 
     <!-- Status Table -->
-    <div
-      class="bounce-in-top overflow-x-auto border border-black rounded-md w-3/5 mt-4 ml-52"
-    >
-      <table class="table">
+    <div class="overflow-x-auto border border-black rounded-md w-full md:w-3/5 mt-4">
+      <table class="table w-full text-xs md:text-sm">
         <thead class="bg-black">
-          <tr class="text-white text-sm">
-            <th class="pl-20">No.</th>
-            <th class="pl-20">Name</th>
-            <th class="pl-20">Description</th>
-            <th class="pl-20">Action</th>
+          <tr class="text-white">
+            <th class="px-4 py-2">No.</th>
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Description</th>
+            <th class="px-4 py-2">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -462,18 +494,18 @@ watch(
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-black pl-20">{{ index + 1 }}</th>
+            <th class="text-black px-4 py-2">{{ index + 1 }}</th>
 
-            <td class="itbkk-status-name pl-20 w-1/3">
+            <td class="itbkk-status-name px-4 py-2 w-1/3">
               <p
-                class="shadow-md rounded-full h-auto max-w-40 font-medium text-center p-3 break-all"
+                class="shadow-md rounded-full h-auto max-w-full font-medium text-center p-3 break-words"
                 :style="{ 'background-color': task.color }"
               >
                 {{ task.name }}
               </p>
             </td>
 
-            <td class="itbkk-status-description pl-20">
+            <td class="itbkk-status-description px-4 py-2">
               <p v-if="task.description">
                 {{ task.description }}
               </p>
@@ -482,15 +514,13 @@ watch(
               </p>
             </td>
 
-            <!-- ใส่ v-if เพื่อตรวจสอบและแสดงปุ่มแก้ไขและลบเมื่อ task.name ไม่เท่ากับ 'No Status' หรือ 'Done' -->
+            <!-- Check if the task name is not 'No Status' or 'Done' before showing edit/delete buttons -->
             <td
               v-if="task.name !== 'No Status' && task.name !== 'Done'"
-              class="ml-10 flex"
+              class="flex items-center px-4 py-2"
             >
               <div class="mr-2 itbkk-button-edit">
-                <router-link
-                  :to="{ name: 'EditStatus', params: { statusId: task.id } }"
-                >
+                <router-link :to="{ name: 'EditStatus', params: { statusId: task.id } }">
                   <div class="relative group inline-block">
                     <button
                       :disabled="disabledIfNotOwner"
@@ -528,7 +558,7 @@ watch(
                 </div>
               </div>
             </td>
-            <td v-else="task.name !== 'No Status' && task.name !== 'Done'"></td>
+            <td v-else class="px-4 py-2"></td>
           </tr>
         </tbody>
       </table>
@@ -563,116 +593,33 @@ watch(
 
 <style scoped>
 .itbkk-status-description {
-  /* กำหนดความกว้างสูงสุดของ column title */
-  max-width: 350px; /* ปรับค่าตามต้องการ */
-  word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
+  max-width: 350px;
+  word-break: break-all;
 }
-.bounce-in-top {
-  -webkit-animation: bounce-in-top 1.1s both;
-  animation: bounce-in-top 1.1s both;
-}
-@-webkit-keyframes bounce-in-top {
-  0% {
-    -webkit-transform: translateY(-500px);
-    transform: translateY(-500px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-    opacity: 0;
+
+@media (max-width: 768px) {
+  .breadcrumbs ul {
+    flex-direction: column;
   }
-  38% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-    opacity: 1;
+  .itbkk-button-home {
+    width: 100%;
+    margin-bottom: 5px;
   }
-  55% {
-    -webkit-transform: translateY(-65px);
-    transform: translateY(-65px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
+  .itbkk-button-add {
+    width: 100%;
+    margin-bottom: 5px;
   }
-  72% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  81% {
-    -webkit-transform: translateY(-28px);
-    transform: translateY(-28px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  90% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  95% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
+  .table {
+    font-size: 0.875rem;
   }
 }
-@keyframes bounce-in-top {
-  0% {
-    -webkit-transform: translateY(-500px);
-    transform: translateY(-500px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-    opacity: 0;
-  }
-  38% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-    opacity: 1;
-  }
-  55% {
-    -webkit-transform: translateY(-65px);
-    transform: translateY(-65px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  72% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  81% {
-    -webkit-transform: translateY(-28px);
-    transform: translateY(-28px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  90% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  95% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
+
+@media (min-width: 768px) {
+  /* ปรับแต่งปุ่ม add สำหรับหน้า desktop ให้เป็นวงกลม */
+  .itbkk-button-add-desktop {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
   }
 }
 </style>

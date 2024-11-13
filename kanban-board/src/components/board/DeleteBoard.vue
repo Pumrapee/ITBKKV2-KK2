@@ -18,17 +18,17 @@ const cancelDelete = () => {
 <template>
   <!-- Modal Delete -->
   <div v-if="showDelete" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="bg-white p-10 rounded-lg w-1/5">
+    <div class="flex items-center justify-center min-h-screen bg-black/[.15] p-4 sm:p-8">
+      <div class="bg-white p-4 sm:p-10 rounded-lg w-full sm:w-1/5">
         <div class="itbkk-message text-lg font-semibold text-center">
-          <p style="word-wrap: break-word">
+          <p class="break-words">
             Do you want to delete the Board
           </p>
         </div>
 
-        <div class="mt-4 flex justify-end">
+        <div class="mt-4 flex flex-col sm:flex-row justify-end gap-2">
           <button
-            class="itbkk-button-confirm btn mr-4 bg-red-500 text-white"
+            class="itbkk-button-confirm btn bg-red-500 text-white"
             @click="confirmDelete()"
           >
             Confirm
@@ -42,4 +42,11 @@ const cancelDelete = () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+  /* Mobile adjustments */
+  @media (max-width: 640px) {
+    .bg-white {
+      width: 100%;
+    }
+  }
+</style>

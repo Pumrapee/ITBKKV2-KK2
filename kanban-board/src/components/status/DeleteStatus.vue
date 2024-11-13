@@ -61,64 +61,73 @@ const deleteButton = computed(() => {
 </script>
 
 <template>
-    <!-- Modal Delete -->
-    <div v-if="showDeleteStatus" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="bg-white p-10 rounded-lg w-1/3">
-        <div class=" text-lg font-semibold text-center break-words">
-          <p class="itbkk-message">
-            Do you want to delete the task number 
-            <br />
-            <span class="text-blue-400">{{ detailStatus.name }}</span>
-            <span> status?</span>
-          </p>
-        </div>
+  <!-- Modal Delete -->
+  <div v-if="showDeleteStatus" class="fixed z-10 inset-0 overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
+    <div class="bg-white p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
+      <div class="text-lg font-semibold text-center break-words">
+        <p class="itbkk-message">
+          Do you want to delete the
+          <br />
+          <span class="text-blue-400">{{ detailStatus.name }}</span>
+          <span> status</span>
+        </p>
+      </div>
 
-        <div class="mt-4 flex justify-end">
-          <button
-            class="itbkk-button-confirm btn mr-4 bg-red-500 text-white"
-            @click="confirmDelete()"
-          >
-            Confirm
-          </button>
-          <button class="itbkk-button-cancel btn" @click="closeModals">
-            Cancel
-          </button>
-        </div>
+      <div class="mt-4 flex flex-col sm:flex-row justify-end">
+        <button
+          class="itbkk-button-confirm btn mb-2 sm:mb-0 sm:mr-4 bg-red-500 text-white w-full sm:w-auto"
+          @click="confirmDelete()"
+        >
+          Confirm
+        </button>
+        <button class="itbkk-button-cancel btn w-full sm:w-auto" @click="closeModals">
+          Cancel
+        </button>
       </div>
     </div>
   </div>
+</div>
 
-    <!-- Modal Transfer -->
-    <div v-if="showTransferModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/50">
-      <div class="bg-white p-10 rounded-lg w-2/5">
-        <div class="itbkk-message text-lg font-semibold text-center">
-          <p style="word-wrap: break-word">
-            There are <span class="text-blue-400">{{ detailStatus.countTask }}</span> tasks in <span class="text-blue-400">"{{ detailStatus.name }}"</span> status.</br>  In order to delete this status, the system must transfer tasks in this status to existing status. Transfer tasks to 
-            [<span class="text-blue-400" v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }} ,  </span> ]
-          </p>
-        </div>
-        <div class="mt-4">
-          <label for="transferTo" class="block text-sm font-medium text-gray-700">Transfer to:</label>
-          <select v-model="selectedStatus" id="transferTo" name="transferTo" class="itbkk-status mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            <option v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }}</option>
-          </select>
-        </div>
+  <!-- Modal Transfer -->
+  <div v-if="showTransferModal" class="fixed z-10 inset-0 overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen bg-black/50">
+    <div class="bg-white p-6 sm:p-10 rounded-lg w-full sm:w-3/4 md:w-1/2 lg:w-2/5">
+      <div class="itbkk-message text-lg font-semibold text-center">
+        <p class="break-words">
+          There are <span class="text-blue-400">{{ detailStatus.countTask }}</span> tasks in <span class="text-blue-400">"{{ detailStatus.name }}"</span> status.</br>  In order to delete this status, the system must transfer tasks in this status to existing status. Transfer tasks to 
+          [<span class="text-blue-400" v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }} ,  </span> ]
+        </p>
+      </div>
+      <div class="mt-4">
+        <label for="transferTo" class="block text-sm font-medium text-gray-700">Transfer to:</label>
+        <select v-model="selectedStatus" id="transferTo" name="transferTo" class="itbkk-status mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <option v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }}</option>
+        </select>
+      </div>
 
-        <div>
-          <p class="text-red-400" v-if="errorAlert.status">
-         {{ errorAlert.status }}
-          </p>
-        </div>
+      <div>
+        <p class="text-red-400 mt-2" v-if="errorAlert.status">
+       {{ errorAlert.status }}
+        </p>
+      </div>
 
-        <div class="mt-4 flex justify-end">
-          <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()" :disabled="deleteButton">Transfer</button>
-          <button class="itbkk-button-cancel btn" @click="closeModals">Cancel</button>
-        </div>
+      <div class="mt-4 flex flex-col sm:flex-row justify-end">
+        <button class="itbkk-button-confirm btn mb-2 sm:mb-0 sm:mr-4 bg-blue-500 text-white w-full sm:w-auto" @click="transferTasks()" :disabled="deleteButton">Transfer</button>
+        <button class="itbkk-button-cancel btn w-full sm:w-auto" @click="closeModals">Cancel</button>
       </div>
     </div>
   </div>
+</div>
 </template>
 
-<style scoped></style>
+<style scoped>
+@media (max-width: 640px) {
+  .itbkk-message {
+    font-size: 1rem;
+  }
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+}
+</style>

@@ -7,6 +7,7 @@ export const useBoardStore = defineStore("board", () => {
   const board = ref([])
   const boardCollab = ref([])
   const navBoard = ref(false)
+  const navBarCollab = ref(false)
   const boardName = ref("")
   const boardOwnerId = ref(null) // เพิ่มฟิลด์สำหรับเก็บ ID เจ้าของบอร์ด
   const collaborator = ref([])
@@ -69,6 +70,20 @@ export const useBoardStore = defineStore("board", () => {
     )
   }
 
+  const removeCollab = (removeId) => {
+    collaborator.value.splice(
+      collaborator.value.findIndex((todo) => todo.oid === removeId),
+      1
+    )
+  }
+
+  const removeBoardCollab = (removeId) => {
+    boardCollab.value.splice(
+      boardCollab.value.findIndex((todo) => todo.owner.oid === removeId),
+      1
+    )
+  }
+
   const clearBoard = () => {
     return (board.value = [])
   }
@@ -103,10 +118,13 @@ export const useBoardStore = defineStore("board", () => {
     removeBoards,
     clearBoard,
     navBoard,
+    navBarCollab,
     boardName,
     addCollabs,
     addCollab,
     getCollabs,
+    removeCollab,
+    removeBoardCollab,
     getBoardOwnerId, // เพิ่มการคืนค่า getBoardOwnerId
     setBoardOwner, // เพิ่มฟังก์ชันสำหรับตั้งค่าเจ้าของบอร์ด
     updateVisibility,

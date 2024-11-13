@@ -1,5 +1,6 @@
 package sit.int221.kanbanapi.services;
 
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,16 +43,12 @@ public class CollabService {
         return collabRepository.findByBoardIdAndUserOid(boardId, userOid).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
     }
 
+    @Transactional
     public CollabAddRespondDTO addCollaborator(String boardId, CollabAddRequestDTO collabAddRequestDTO) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
         User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
         if (collabRepository.existsById(new CollabId(boardId, newCollab.getOid()))) {
             throw new CollaboratorConflict("Collaborator already exist!!!");
-        }
-        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        Boolean isOwner = currentUser.getOid().equals(board.getOwnerId());
-        if (!isOwner) {
-            throw new AuthenticationFailed("You do not have permission to perform this action.");
         }
         if (board.getOwnerId().equals(newCollab.getOid())) {
             throw new CollaboratorConflict("You are a board owner.");
@@ -65,22 +62,19 @@ public class CollabService {
         return collaboratorDTO;
     }
 
+    @Transactional
     public Collab collabAccess(String boardId, String userOid, CollabAccessEditRequestDTO collabAccessEditRequestDTO) {
         Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
-        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        if (!currentUser.getOid().equals(board.getOwnerId())) {
-            throw new AuthenticationFailed("You do not have permission to perform this action.");
-        }
         collab.setAccessRight(collabAccessEditRequestDTO.getAccess_right());
         return collabRepository.save(collab);
     }
 
+    @Transactional
     public Collab deleteCollaborator(String boardId, String userOid) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
         Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
         User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        if (currentUser.getOid().equals(board.getOwnerId()) || !currentUser.getOid().equals(userOid)) {
+        if (!currentUser.getOid().equals(board.getOwnerId()) && !currentUser.getOid().equals(userOid)) {
             throw new AuthenticationFailed("You do not have permission to perform this action.");
         }
         collabRepository.delete(collab);

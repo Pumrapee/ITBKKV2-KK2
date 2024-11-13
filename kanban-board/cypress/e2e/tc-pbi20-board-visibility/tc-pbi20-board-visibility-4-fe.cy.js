@@ -12,6 +12,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
         cy.wait(100)
         cy.url().should('contain','/board')
+        cy.wait(1000) //เพิ่มเองจ้า
     }) ;
 
     it('[Step 1] Open the login page at /login and open the /board page', () => {
@@ -26,7 +27,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
     it('[Step 2] Should show modal "Do you want to change board visibility to public?".',()=>{
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -37,7 +38,7 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
     it('[Step 3] Should click "Confirm" button and board visibility should show "public".".',()=>{
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -51,12 +52,12 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
     it(`[Step 4 and 5] Should click "Confirm" button. The mocAPI return 403 
                         and the web shows "You do not have permission...".`,()=>{
-        cy.intercept('PATCH','http://localhost:8080/v3/**',{
+        cy.intercept('PATCH','https://intproj23.sit.kmutt.ac.th/kk2/api/**',{
             statusCode: 403
         }).as('mockAPI')
 
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -76,12 +77,12 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
 
     it(`[Step 6] Should click "Confirm" button. The mocAPI return 500 
                         and the web shows "There is a problem. Please try again later.".`,()=>{
-        cy.intercept('PATCH','http://localhost:8080/v3/**',{
+        cy.intercept('PATCH','https://intproj23.sit.kmutt.ac.th/kk2/api/**',{
             statusCode: 500
         }).as('mockAPI')
 
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 
@@ -100,12 +101,12 @@ describe(`TC-PBI20-BOARD-VISIBILITY-1-FE\n
     })
 
     it('[Step 7] Should click "Confirm" button. mocAPI should return 401',()=>{
-        cy.intercept('PATCH','http://localhost:8080/v3/**',{
+        cy.intercept('PATCH','https://intproj23.sit.kmutt.ac.th/kk2/api/**',{
             statusCode: 401
         }).as('mockAPI')
 
         cy.get('.itbkk-board-visibility').should('exist').as('visibility')
-        cy.wait(100) 
+        cy.wait(300) 
 
         cy.get('@visibility').click()
 

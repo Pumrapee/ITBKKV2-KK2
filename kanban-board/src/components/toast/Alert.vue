@@ -10,10 +10,10 @@ const props = defineProps({
 <template>
   <div
     v-if="showAlert"
-    class="fixed bottom-6 right-4 mb-0 mr-1"
+    class="fixed bottom-6 right-4 mb-0 mr-1 md:bottom-6 md:right-6 md:mr-1 md:mb-0 w-full md:w-auto"
     style="z-index: 100"
   >
-    <div role="alert" :class="'alert alert-' + type + ' w-auto'">
+    <div role="alert" :class="'alert alert-' + type + ' w-full md:w-auto'">
       <svg
         v-if="type === 'success'"
         xmlns="http://www.w3.org/2000/svg"

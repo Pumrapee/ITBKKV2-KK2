@@ -9,26 +9,18 @@ import BoardView from "@/views/BoardView.vue"
 import AddBoard from "@/components/board/AddBoard.vue"
 import CollabView from "@/views/CollabView.vue"
 import { useAuthStore } from "@/stores/loginStore"
-import { getToken, getItems, getBoardItems } from "@/libs/fetchUtils"
+import { getToken, getItems } from "@/libs/fetchUtils"
 import ForbiddenView from "@/views/ForbiddenView.vue"
 
 const checkBoardAccess = async (to, from, next) => {
   const { id: boardId } = to.params
+  const token = localStorage.getItem("token")
   try {
     const response = await getItems(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId}`
     )
 
-    if (response.status === 403) {
-      return next({ name: "forbidden" })
-    }
-
-    if (response.status === 404) {
-      return next({ name: "notFound" })
-    }
-
-    if (response.visibility === "PUBLIC") {
-      // Restrict access to 'add' and 'edit' paths if no token is present
+    if (token === "null" || (!token && response.visibility === "PUBLIC")) {
       if (
         (to.name === "addTask" ||
           to.name === "editTask" ||
@@ -37,18 +29,56 @@ const checkBoardAccess = async (to, from, next) => {
         (!token || token === "null")
       ) {
         return next({ name: "forbidden" })
+      } else {
+        return next()
       }
-    }
-    return next()
+    } else {
+      const board = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
 
-    // // If the board is private, check for a token
-    // if (response.visibility === "PRIVATE") {
-    //   if (!token) {
-    //     return next({ name: "login" })
-    //   }
-    //   return next()
-    // }
+      //check ว่า เป็น collab มั้ย
+      const checkIsCollab = board.collab?.some((boarded) => {
+        return boarded.owner.oid === response.owner.oid
+      })
+
+      //ไม่แน่ใจว่าต้องมีมั้ย
+      if (response.visibility === "PUBLIC") {
+        if (
+          to.name === "addTask" ||
+          to.name === "editTask" ||
+          to.name === "AddStatus" ||
+          to.name === "EditStatus"
+          // (!token || token === "null")
+        ) {
+          return next({ name: "forbidden" })
+        } else {
+          return next() // ถ้าเป็น PUBLIC และไม่ใช่ action ที่ต้องการ token ก็ให้เข้าถึง board ได้ตามปกติ
+        }
+      }
+
+      //ถ้าเป็น collab 
+      if (checkIsCollab) {
+        if (
+          to.name === "addTask" ||
+          to.name === "editTask" ||
+          to.name === "AddStatus" ||
+          to.name === "EditStatus"
+        ) {
+          return next({ name: "forbidden" })
+        }
+      }
+
+      if (response.status === 403) {
+        return next({ name: "forbidden" })
+      }
+
+      if (response.status === 404) {
+        return next({ name: "notFound" })
+      }
+
+      return next()
+    }
   } catch (error) {
+
     next({ name: "forbidden" })
   }
 }
@@ -100,6 +130,7 @@ const router = createRouter({
     {
       path: "/board/:id/collab",
       name: "collabBoard",
+      beforeEnter: checkBoardAccess,
       component: CollabView,
     },
 
@@ -159,6 +190,7 @@ router.beforeEach(async (to, from, next) => {
     )
 
     if (board.status === 403) {
+
       return next({ name: "forbidden" })
     }
 
@@ -181,13 +213,6 @@ router.beforeEach(async (to, from, next) => {
   ) {
     return next({ name: "login" })
   }
-
-  // if (
-  //   (to.name === "forbidden" && !token) ||
-  //   (to.name === "forbidden" && token === "null")
-  // ) {
-  //   return next({ name: "task", params: { id: boardId } })
-  // }
 
   // ถ้ามี token ให้ทำการ authenticate
   if (token) {

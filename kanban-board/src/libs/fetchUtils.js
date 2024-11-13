@@ -215,8 +215,6 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
 }
 
 async function addItem(url, newItem) {
-  console.log(url)
-  console.log(newItem)
   getToken()
   try {
     const res = await fetch(url, {
@@ -313,7 +311,11 @@ async function Visibility(url, boardId, newVisibility) {
       }),
     })
     const statusCode = res.status
-    const responseBody = await res.json()
+    let responseBody
+
+    if (res.status === 200) {
+      responseBody = await res.json()
+    }
 
     return { responseBody, statusCode }
   } catch (error) {
@@ -337,6 +339,29 @@ async function getBoardItems(url) {
   } catch (error) {}
 }
 
+async function patchItem(url, newItem) {
+  getToken()
+  try {
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${tokenStorage}`,
+      },
+      body: JSON.stringify({
+        //destrucuring
+        ...newItem,
+      }),
+    })
+    // Get the HTTP status code
+    const statusCode = res.status
+    const newTask = await res.json()
+
+    // Return both the added item and the status code
+    return { newTask, statusCode }
+  } catch (error) {}
+}
+
 export {
   getItems,
   getItemById,
@@ -353,4 +378,5 @@ export {
   Visibility,
   checkAndRefreshToken,
   getBoardItems,
+  patchItem,
 }
