@@ -1,11 +1,9 @@
 <script setup>
 import { defineProps, defineEmits, ref, computed } from "vue"
-import { useAuthStore } from "@/stores/loginStore"
 
 const props = defineProps({
   showModal: Boolean,
 })
-const myUser = useAuthStore()
 const userName = localStorage.getItem("user")
 
 const boardName = ref({ name: `${userName} personal board` })
@@ -31,12 +29,12 @@ const isButtonDisabled = computed(() => {
   <!-- Modal -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div
-      class="itbkk-modal-new flex items-center justify-center min-h-screen bg-black/[.15]"
+      class="itbkk-modal-new flex items-center justify-center min-h-screen bg-black/[.15] p-4 sm:p-8"
     >
-      <div class="bg-white p-10 rounded-lg w-1/3">
+      <div class="bg-white p-4 sm:p-10 rounded-lg w-full sm:w-1/3">
         <div class="itbkk-message text-lg font-semibold text-center">
           <div class="flex justify-between items-center mb-4 border-b-2">
-            <h2 class="text-2xl font-bold mb-2">New Board</h2>
+            <h2 class="text-xl sm:text-2xl font-bold mb-2">New Board</h2>
           </div>
 
           <div class="flex flex-col">
@@ -52,7 +50,7 @@ const isButtonDisabled = computed(() => {
           </div>
         </div>
 
-        <div class="mt-4 flex justify-end">
+        <div class="mt-4 flex flex-col sm:flex-row justify-end gap-2">
           <button
             class="itbkk-button-ok btn mr-2 bg-green-500 text-white disabled:bg-gray-300"
             @click="saveAdd"
@@ -70,4 +68,17 @@ const isButtonDisabled = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .itbkk-modal-new {
+    padding: 1rem;
+  }
+  .bg-white {
+    width: 100%;
+  }
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+}
+</style>

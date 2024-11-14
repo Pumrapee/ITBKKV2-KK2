@@ -247,140 +247,170 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
 </script>
 
 <template>
-  <div class="mb-4 border-b border-gray-200 dark:border-gray-700 ml-96 mt-16">
-    <ul
-      class="flex flex-wrap text-sm font-medium text-center ml-80"
-      role="tablist"
-    >
-      <li class="me-2" role="presentation">
-        <button
-          @click="activeTab = 'personal'"
-          :class="activeTab === 'personal' ? 'border-b-2 border-blue-500' : ''"
-          class="itbkk-personal-board inline-block p-4 border-b-2 rounded-t-lg text-lg"
-          id="personal-tab"
-          type="button"
-          role="tab"
-          aria-controls="personal"
-          :aria-selected="activeTab === 'personal'"
+  <div class="m-4 mr-24 mt-24">
+    <div class="mb-4 border-b border-gray-200 dark:border-gray-700 ml-96 mt-16">
+      <!-- Dropdown menu for small screens -->
+      <div class="sm:hidden">
+        <label for="tabs" class="sr-only">Select tab</label>
+        <select
+          id="tabs"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          @change="activeTab = $event.target.value"
         >
-          Personal Boards
-        </button>
-      </li>
-      <li class="me-2" role="presentation">
-        <button
-          @click="activeTab = 'collab'"
-          :class="activeTab === 'collab' ? 'border-b-2 border-blue-500' : ''"
-          class="itbkk-collab-board inline-block p-4 border-b-2 rounded-t-lg text-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-          id="collab-tab"
-          type="button"
-          role="tab"
-          aria-controls="collab"
-          :aria-selected="activeTab === 'collab'"
-        >
-          Collab Boards
-        </button>
-      </li>
-    </ul>
-  </div>
+          <option value="personal" :selected="activeTab === 'personal'">
+            Personal Boards
+          </option>
+          <option value="collab" :selected="activeTab === 'collab'">
+            Collab Boards
+          </option>
+        </select>
+      </div>
 
-  <div id="default-tab-content">
-    <div v-if="activeTab === 'personal'" id="personal" role="tabpanel">
-      <!-- Add board -->
-      <div class="flex flex-col items-center mt-16 mb-20 ml-60">
-        <div class="bounce-in-top flex justify-between w-3/5">
-          <div class="font-bold text-4xl m-2">Board list</div>
-          <div>
-            <router-link :to="{ name: 'addBoard' }">
-              <button
-                @click="openModalAdd"
-                class="itbkk-button-create btn btn-circle border-black0 bg-black text-white ml-2"
-              >
-                <img src="/icons/plus.png" class="w-4" />
-              </button>
-            </router-link>
-          </div>
-        </div>
+      <!-- Tabs for larger screens -->
+      <ul
+        class="hidden sm:flex flex-wrap text-sm font-medium text-center text-gray-500 rounded-lg shadow dark:divide-gray-700 dark:text-gray-400"
+        role="tablist"
+      >
+        <li class="flex-1" role="presentation">
+          <button
+            @click="activeTab = 'personal'"
+            :class="
+              activeTab === 'personal'
+                ? 'border-b-2 border-black text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white'
+                : 'bg-white dark:bg-gray-800 dark:hover:bg-gray-700'
+            "
+            class="itbkk-personal-board inline-block w-full p-4 rounded-s-lg"
+            id="personal-tab"
+            type="button"
+            role="tab"
+            aria-controls="personal"
+            :aria-selected="activeTab === 'personal'"
+          >
+            Personal Boards
+          </button>
+        </li>
+        <li class="flex-1" role="presentation">
+          <button
+            @click="activeTab = 'collab'"
+            :class="
+              activeTab === 'collab'
+                ? 'border-b-2 border-black text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white'
+                : 'bg-white dark:bg-gray-800 dark:hover:bg-gray-700'
+            "
+            class="itbkk-collab-board inline-block w-full p-4 rounded-e-lg"
+            id="collab-tab"
+            type="button"
+            role="tab"
+            aria-controls="collab"
+            :aria-selected="activeTab === 'collab'"
+          >
+            Collab Boards
+          </button>
+        </li>
+      </ul>
+    </div>
 
-        <!-- Table -->
-        <div class="bounce-in-top border border-black rounded-md w-3/5 mt-4">
-          <table class="table">
-            <!-- head -->
-            <thead class="bg-black">
-              <tr class="text-white text-sm">
-                <th class="pl-16">No.</th>
-                <th class="pl-36">Name</th>
-                <th class="pl-4">Visibility</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody
-              class="itbkk-personal-item"
-              v-if="myBoard.getBoards().length > 0"
-            >
-              <tr v-for="(board, index) in myBoard.getBoards()">
-                <th class="text-black pl-20">{{ index + 1 }}</th>
-
-                <th>
-                  <router-link :to="{ name: 'task', params: { id: board.id } }">
-                    <button class="itbkk-board-name btn btn-ghost h-2">
-                      {{ board.name }}
-                    </button>
-                  </router-link>
-                </th>
-                <th>
-                  <div
-                    class="shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
-                    :class="{
-                      'bg-green-400': board.visibility === 'PUBLIC',
-                      'bg-red-300': board.visibility === 'PRIVATE',
-                    }"
-                  >
-                    {{ board.visibility }}
-                  </div>
-                </th>
-
-                <th>
-                  <div>
-                    <button
-                      class="itbkk-button-delete btn bg-red-500"
-                      @click="openDeleteModal(board.id)"
-                    >
-                      <img src="/icons/delete.png" class="w-4" />
-                    </button>
-                  </div>
-                </th>
-              </tr>
-            </tbody>
-
-            <tbody v-else>
-              <tr>
-                <td
-                  colspan="5"
-                  class="text-center py-4 text-gray-500 font-medium"
+    <div id="default-tab-content">
+      <div v-if="activeTab === 'personal'" id="personal" role="tabpanel">
+        <!-- Add board -->
+        <div class="flex flex-col items-center mt-16 mb-20 ml-60">
+          <div class="flex justify-between w-full sm:w-3/5">
+            <div class="font-bold text-4xl m-2">Board list</div>
+            <div>
+              <router-link :to="{ name: 'addBoard' }">
+                <button
+                  @click="openModalAdd"
+                  class="itbkk-button-create btn btn-circle border-black0 bg-black text-white ml-2"
                 >
-                  No board
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <img src="/icons/plus.png" class="w-4" />
+                </button>
+              </router-link>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div
+            class="border border-black rounded-md w-full sm:w-3/5 mt-4 overflow-x-auto"
+          >
+            <table class="table w-full">
+              <thead class="bg-black">
+                <tr class="text-white text-sm">
+                  <th class="pl-4 sm:pl-16">No.</th>
+                  <th class="pl-4 sm:pl-16">Name</th>
+                  <th class="pl-4">Visibility</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody
+                class="itbkk-personal-item"
+                v-if="myBoard.getBoards().length > 0"
+              >
+                <tr v-for="(board, index) in myBoard.getBoards()">
+                  <th class="text-black pl-4 sm:pl-20">{{ index + 1 }}</th>
+                  <th>
+                    <router-link
+                      :to="{ name: 'task', params: { id: board.id } }"
+                    >
+                      <button class="itbkk-board-name btn btn-ghost h-2">
+                        {{ board.name }}
+                      </button>
+                    </router-link>
+                  </th>
+                  <th>
+                    <div
+                      class="shadow-md rounded-full p-2 text-black w-20 text-center font-medium"
+                      :class="{
+                        'bg-green-400': board.visibility === 'PUBLIC',
+                        'bg-red-300': board.visibility === 'PRIVATE',
+                      }"
+                    >
+                      {{ board.visibility }}
+                    </div>
+                  </th>
+                  <th>
+                    <div>
+                      <button
+                        class="itbkk-button-delete btn bg-red-500"
+                        @click="openDeleteModal(board.id)"
+                      >
+                        <img src="/icons/delete.png" class="w-4" />
+                      </button>
+                    </div>
+                  </th>
+                </tr>
+              </tbody>
+              <tbody v-else>
+                <tr>
+                  <td
+                    colspan="5"
+                    class="text-center py-4 text-gray-500 font-medium"
+                  >
+                    No board
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
+
     <div v-if="activeTab === 'collab'" id="collab" role="tabpanel">
       <div class="flex flex-col items-center mt-16 mb-20 ml-60">
-        <div class="bounce-in-top flex justify-between w-3/5">
+        <div class="flex justify-between w-full sm:w-3/5">
           <div class="font-bold text-4xl m-2">Collab list</div>
         </div>
         <!-- Table -->
-        <div class="bounce-in-top border border-black rounded-md w-3/5 mt-4">
-          <table class="table">
-            <!-- head -->
+        <div
+          class="border border-black rounded-md w-full sm:w-3/5 mt-4 overflow-x-auto"
+        >
+          <table class="table w-full">
             <thead class="bg-black">
               <tr class="text-white text-sm">
-                <th class="pl-16">No.</th>
-                <th class="pl-24">Name</th>
-                <th class="pl-14">Owner</th>
-                <th class="pl-10">Access Right</th>
+                <th class="pl-4 sm:pl-16">No.</th>
+                <th class="pl-4 sm:pl-16">Name</th>
+                <th class="pl-4 sm:pl-16">Owner</th>
+                <th class="pl-4 sm:pl-10">Access Right</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -389,7 +419,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
               v-if="myBoard.getBoardCollab().length > 0"
             >
               <tr v-for="(boardCollab, index) in myBoard.getBoardCollab()">
-                <th class="text-black pl-20">{{ index + 1 }}</th>
+                <th class="text-black pl-4 sm:pl-20">{{ index + 1 }}</th>
 
                 <th>
                   <router-link
@@ -407,13 +437,13 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                   </router-link>
                 </th>
                 <th>
-                  <p class="itbkk-owner-name h-2 mb-3 ml-5 w-20">
+                  <p class="itbkk-owner-name h-2 mb-8 ml-2 sm:ml-12">
                     {{ boardCollab.owner.name }}
                   </p>
                 </th>
                 <th>
                   <p
-                    class="itbkk-access-right shadow-md rounded-full h-auto max-w-20 font-medium text-center p-3 break-all bg-white ml-6"
+                    class="itbkk-access-right shadow-md rounded-full h-auto max-w-20 font-medium text-center p-3 break-all bg-white ml-2 sm:ml-6"
                   >
                     {{ boardCollab.accessRight }}
                   </p>
@@ -457,14 +487,13 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 </th>
               </tr>
             </tbody>
-
             <tbody v-else>
               <tr>
                 <td
                   colspan="5"
                   class="text-center py-4 text-gray-500 font-medium"
                 >
-                  No board
+                  No collaborators
                 </td>
               </tr>
             </tbody>
@@ -498,112 +527,17 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
 </template>
 
 <style scoped>
-.bounce-in-top {
-  -webkit-animation: bounce-in-top 1.1s both;
-  animation: bounce-in-top 1.1s both;
-}
-@-webkit-keyframes bounce-in-top {
-  0% {
-    -webkit-transform: translateY(-500px);
-    transform: translateY(-500px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-    opacity: 0;
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .m-4 {
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
-  38% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-    opacity: 1;
+  .ml-60 {
+    margin-left: 1rem;
   }
-  55% {
-    -webkit-transform: translateY(-65px);
-    transform: translateY(-65px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  72% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  81% {
-    -webkit-transform: translateY(-28px);
-    transform: translateY(-28px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  90% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  95% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-}
-@keyframes bounce-in-top {
-  0% {
-    -webkit-transform: translateY(-500px);
-    transform: translateY(-500px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-    opacity: 0;
-  }
-  38% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-    opacity: 1;
-  }
-  55% {
-    -webkit-transform: translateY(-65px);
-    transform: translateY(-65px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  72% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  81% {
-    -webkit-transform: translateY(-28px);
-    transform: translateY(-28px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  90% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  95% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
+  .ml-96 {
+    margin-left: 0;
   }
 }
 </style>
