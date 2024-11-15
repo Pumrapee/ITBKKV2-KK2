@@ -1,26 +1,26 @@
 <script setup>
-import { ref, computed, onMounted } from "vue"
-import { login } from "../libs/fetchUtils"
-import { useAuthStore } from "@/stores/loginStore"
-import { getToken } from "@/libs/fetchUtils"
-import { useRouter, useRoute } from "vue-router"
+import { ref, computed, onMounted } from 'vue'
+import { login } from '../libs/fetchUtils'
+import { useAuthStore } from '@/stores/loginStore'
+import { getToken } from '@/libs/fetchUtils'
+import { useRouter, useRoute } from 'vue-router'
 
-const username = ref("")
-const password = ref("")
+const username = ref('')
+const password = ref('')
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
 const isButtonDisabled = computed(() => {
   return (
-    username.value.trim() === "" ||
+    username.value.trim() === '' ||
     username.value.length > 50 ||
-    password.value.trim() === "" ||
+    password.value.trim() === '' ||
     password.value.length > 14
   )
 })
 
-const alertMessage = ref("")
+const alertMessage = ref('')
 const showAlert = ref(false)
 
 const loginHandler = async () => {
@@ -39,7 +39,7 @@ const loginHandler = async () => {
 
     if (redirect) {
       // ตรวจสอบว่าต้องการพารามิเตอร์ `id` หรือไม่
-      if (redirect === "invitations" && boardId) {
+      if (redirect === 'invitations' && boardId) {
         // เปลี่ยนเส้นทางไปยัง `invitations` พร้อม `id`
         router.push({ name: redirect, params: { id: boardId } })
       } else {
@@ -48,10 +48,10 @@ const loginHandler = async () => {
       }
     } else {
       // หากไม่มี redirect ให้ไปที่หน้า board เป็นค่าเริ่มต้น
-      router.push({ name: "board" })
+      router.push({ name: 'board' })
     }
   } else if (res.status === 400 || res.status === 401) {
-    alertMessage.value = "Username or Password is incorrect."
+    alertMessage.value = 'Username or Password is incorrect.'
     showAlert.value = true
   }
 }
@@ -153,11 +153,32 @@ const loginHandler = async () => {
           type="submit"
           :disabled="isButtonDisabled"
           :class="{ disabled: isButtonDisabled }"
-          class="itbkk-button-signin w-full bg-gray-800 text-white font-semibold py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 disabled:bg-gray-300"
+          class="itbkk-button-signin w-full bg-black text-white font-semibold py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 disabled:bg-gray-300"
         >
           Login
         </button>
       </form>
+
+      <!-- Microsoft Login Button -->
+      <button
+  @click="microsoftLoginHandler"
+  class="w-full bg-black text-white font-semibold py-2 px-4 mt-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+  <!-- Microsoft SVG Icon -->
+  <div class="flex items-center justify-start">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" width="40" height="40" class="mr-2">
+      <g>
+        <rect width="240" height="240" fill="#F25022"/>
+        <rect x="240" width="240" height="240" fill="#7FBA00"/>
+        <rect y="240" width="240" height="240" fill="#00A4EF"/>
+        <rect x="240" y="240" width="240" height="240" fill="#FFB900"/>
+      </g>
+    </svg>
+    <span>Sign in with Microsoft</span>
+  </div>
+</button>
+
+
     </div>
   </div>
   <!-- footer -->

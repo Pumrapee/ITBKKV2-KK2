@@ -20,9 +20,9 @@ const goToLogin = () => {
 
 <template>
   <div
-    class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+     class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4 md:p-0"
   >
-    <div class="card bg-base-100 w-96 shadow-xl">
+    <div class="card bg-base-100 w-full max-w-sm md:w-96 shadow-xl">
       <div class="card-body font-medium">
         <p>Your session has expired. Please log in again to continue.</p>
         <div class="card-actions justify-end">
