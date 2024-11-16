@@ -65,9 +65,7 @@ public class JwtTokenUtil {
                 .setSubject(subject)
                 .setIssuer("https://intproj23.sit.kmutt.ac.th/kk2/")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-//                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
-                .setExpiration(new Date(System.currentTimeMillis() + 30 * 2000))
-
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
     }

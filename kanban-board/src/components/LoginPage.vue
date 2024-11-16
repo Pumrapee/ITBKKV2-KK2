@@ -153,11 +153,37 @@ const loginHandler = async () => {
           type="submit"
           :disabled="isButtonDisabled"
           :class="{ disabled: isButtonDisabled }"
-          class="itbkk-button-signin w-full bg-gray-800 text-white font-semibold py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 disabled:bg-gray-300"
+          class="itbkk-button-signin w-full bg-black text-white font-semibold py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-opacity-50 disabled:bg-gray-300"
         >
           Login
         </button>
       </form>
+
+      <!-- Microsoft Login Button -->
+      <button
+        @click="microsoftLoginHandler"
+        class="w-full bg-black text-white font-semibold mt-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <!-- Microsoft SVG Icon -->
+        <div class="flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1024 1024"
+            fill="none"
+            width="40"
+            height="40"
+            class="mt-6 "
+          >
+            <g>
+              <rect width="240" height="240" fill="#F25022" />
+              <rect x="240" width="240" height="240" fill="#7FBA00" />
+              <rect y="240" width="240" height="240" fill="#00A4EF" />
+              <rect x="240" y="240" width="240" height="240" fill="#FFB900" />
+            </g>
+          </svg>
+          <span>Sign in with Microsoft</span>
+        </div>
+      </button>
     </div>
   </div>
   <!-- footer -->

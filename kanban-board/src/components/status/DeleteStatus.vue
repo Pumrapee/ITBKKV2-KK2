@@ -64,7 +64,7 @@ const deleteButton = computed(() => {
     <!-- Modal Delete -->
     <div v-if="showDeleteStatus" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="bg-white p-10 rounded-lg w-1/3">
+      <div class="bg-white p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
         <div class=" text-lg font-semibold text-center break-words">
           <p class="itbkk-message">
             Do you want to delete the
@@ -74,14 +74,14 @@ const deleteButton = computed(() => {
           </p>
         </div>
 
-        <div class="mt-4 flex justify-end">
+        <div class="mt-4 flex flex-col sm:flex-row justify-end">
           <button
-            class="itbkk-button-confirm btn mr-4 bg-red-500 text-white"
+            class="itbkk-button-confirm btn mb-2 sm:mb-0 sm:mr-4 bg-red-500 text-white w-full sm:w-auto"
             @click="confirmDelete()"
           >
             Confirm
           </button>
-          <button class="itbkk-button-cancel btn" @click="closeModals">
+          <button class="itbkk-button-cancel btn w-full sm:w-auto" @click="closeModals">
             Cancel
           </button>
         </div>
@@ -92,9 +92,9 @@ const deleteButton = computed(() => {
     <!-- Modal Transfer -->
     <div v-if="showTransferModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/50">
-      <div class="bg-white p-10 rounded-lg w-2/5">
+      <div class="bg-white p-6 sm:p-10 rounded-lg w-full sm:w-3/4 md:w-1/2 lg:w-2/5">
         <div class="itbkk-message text-lg font-semibold text-center">
-          <p style="word-wrap: break-word">
+          <p class="break-words">
             There are <span class="text-blue-400">{{ detailStatus.countTask }}</span> tasks in <span class="text-blue-400">"{{ detailStatus.name }}"</span> status.</br>  In order to delete this status, the system must transfer tasks in this status to existing status. Transfer tasks to 
             [<span class="text-blue-400" v-for="status in filteredStatus" :key="status.id" :value="status.id">{{ status.name }} ,  </span> ]
           </p>
@@ -107,18 +107,27 @@ const deleteButton = computed(() => {
         </div>
 
         <div>
-          <p class="text-red-400" v-if="errorAlert.status">
+          <p class="text-red-400 mt-2" v-if="errorAlert.status">
          {{ errorAlert.status }}
           </p>
         </div>
 
-        <div class="mt-4 flex justify-end">
-          <button class="itbkk-button-confirm btn mr-4 bg-blue-500 text-white" @click="transferTasks()" :disabled="deleteButton">Transfer</button>
-          <button class="itbkk-button-cancel btn" @click="closeModals">Cancel</button>
+        <div class="mt-4 flex flex-col sm:flex-row justify-end">
+          <button class="itbkk-button-confirm btn mb-2 sm:mb-0 sm:mr-4 bg-blue-500 text-white w-full sm:w-auto" @click="transferTasks()" :disabled="deleteButton">Transfer</button>
+          <button class="itbkk-button-cancel btn w-full sm:w-auto" @click="closeModals">Cancel</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+@media (max-width: 640px) {
+  .itbkk-message {
+    font-size: 1rem;
+  }
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+}
+</style>

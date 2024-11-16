@@ -628,20 +628,20 @@ async function fetchBoardData(id) {
 
 <template>
   <!-- Head -->
-  <div class="flex flex-col items-center mt-28 ml-60">
+  <div class="flex flex-col items-center mt-28 ml-4 md:mt-28 md:ml-60">
     <div
-      class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between ml-20"
+      class="font-bold text-2xl md:text-4xl text-black self-center pb-3 md:pb-5 flex items-center justify-between md:ml-20"
     >
       <span>{{ boardName }}</span>
     </div>
 
     <!-- Filter Search-->
-    <div class="flex justify-between w-4/5">
-      <div class="flex justify-start items-center mt-4">
-        <div class="relative">
+    <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 px-2">
+      <div class="flex justify-center items-center mt-4 w-full md:w-auto">
+        <div class="relative w-full md:w-auto max-w-2xl">
           <div class="dropdown">
             <div
-              class="flex items-center border p-1 mb-4 bg-white rounded-xl max-h-40 flex-nowrap overflow-x-auto w-80 scrollbar-hidden"
+              class="flex items-center border p-1 mb-4 bg-white rounded-xl max-h-40 flex-nowrap overflow-x-auto w-64 md:w-60 scrollbar-hidden"
             >
               <!-- Filter Chips -->
               <span
@@ -665,7 +665,7 @@ async function fetchBoardData(id) {
             </div>
             <ul
               tabindex="0"
-              class="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-30"
+              class="overflow-y-auto h-64 dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-full md:w-30"
             >
               <li
                 v-for="status in myStatus.getStatus()"
@@ -681,7 +681,7 @@ async function fetchBoardData(id) {
                       v-model="filterStatus"
                     />
                     <div
-                      class="shadow-md rounded-full font-medium p-2 text-black w-36 h-10 text-center mb-2 break-all"
+                      class="shadow-md rounded-full font-medium p-2 text-black w-full md:w-full h-10 text-center mb-2 break-all"
                       :style="{
                         backgroundColor: myStatus.getStatusColor(status.name),
                       }"
@@ -716,14 +716,90 @@ async function fetchBoardData(id) {
         </div>
       </div>
 
-      <div class="flex justify-end items-center">
-        <!-- Toggle Visibility -->
-        <div class="itbkk-board-visibility form-control relative group">
+      <!-- Mobile -->
+      <!-- Navigation Buttons Dropdown for Mobile -->
+      <div
+        class="dropdown dropdown-bottom dropdown-end relative group mb-3 md:hidden w-full flex justify-center"
+      >
+        <button
+          tabindex="0"
+          role="button"
+          class="btn bg-black text-white w-full flex justify-between items-center"
+        >
+          Options
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="ml-2 h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 15l7-7 7 7"
+            />
+          </svg>
+        </button>
+        <ul
+          tabindex="0"
+          class="dropdown-content menu bg-base-100 rounded-box w-full mt-1 z-[1] shadow"
+        >
+          <!-- Collaborator -->
+          <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
+            <li>
+              <a class="block px-4 py-2 hover:bg-gray-200 transition-colors"
+                >Manage Collaborator</a
+              >
+            </li>
+          </router-link>
+          <!-- Status -->
+          <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
+            <li>
+              <a class="block px-4 py-2 hover:bg-gray-200 transition-colors"
+                >Status</a
+              >
+            </li>
+          </router-link>
+          <!-- Limit Button -->
+          <li>
+            <button
+              @click="openLimitModal"
+              :disabled="disabledIfnotOwner"
+              class="block w-full text-left px-4 py-2 hover:bg-gray-200 transition-colors disabled:bg-gray-300"
+            >
+              Limit
+            </button>
+          </li>
+          <!-- Add Task Button -->
+          <router-link :to="{ name: 'addTask' }">
+            <li>
+              <button
+                @click="openModalAdd"
+                :disabled="disabledIfnotOwner"
+                :class="{ disabled: disabledIfnotOwner }"
+                class="block w-full text-left px-4 py-2 hover:bg-gray-200 transition-colors"
+              >
+                Add Task
+              </button>
+            </li>
+          </router-link>
+        </ul>
+      </div>
+
+      <!-- Navigation Buttons for Desktop -->
+      <!-- Toggle Visibility -->
+      <div
+        class="flex flex-col md:flex-row justify-center md:justify-end items-center"
+      >
+        <div
+          class="itbkk-board-visibility form-control relative group mb-3 md:mb-0 md:ml-3"
+        >
           <label class="label cursor-pointer flex flex-col items-center">
             <span class="label-text font-bold">{{
               isPublic ? "Public" : "Private"
             }}</span>
-
             <input
               :disabled="disabledVisibility"
               type="checkbox"
@@ -735,99 +811,105 @@ async function fetchBoardData(id) {
           <!-- Tooltip -->
           <div
             v-if="disabledVisibility"
-            class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+            class="absolute bottom-full mb-2 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
           >
             You need to be board owner to perform this action.
           </div>
         </div>
 
-        <!-- Collaborator -->
-        <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
-          <button
-            class="itbkk-manage-collaborator btn text-l bg-black text-white ml-1"
-          >
-            Manage Collaborator
-          </button>
-        </router-link>
-        <!-- Status -->
-        <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
-          <button
-            class="itbkk-manage-status btn text-l bg-black text-white ml-1"
-          >
-            <svg
-              class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
-              />
-              <path
-                d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
-              />
-              <path
-                d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
-              />
-            </svg>
-            Status
-          </button>
-        </router-link>
-
-        <!-- Limit Button -->
-        <div class="relative group">
-          <button
-            @click="openLimitModal"
-            :disabled="disabledIfnotOwner"
-            class="flex btn text-l ml-1 bg-black text-white"
-          >
-            <img src="/icons/limit.png" class="w-6" />
-            Limit
-          </button>
-          <!-- Tooltip -->
-          <div
-            v-if="disabledIfnotOwner"
-            class="absolute bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
-          >
-            You need to be board owner or has write access to perform this
-          </div>
-        </div>
-
-        <!-- Add Button -->
-        <div class="relative group">
-          <router-link :to="{ name: 'addTask' }">
+        <div
+          class="hidden md:flex flex-wrap justify-end items-center mt-4 w-full md:w-auto"
+        >
+          <!-- Collaborator -->
+          <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
             <button
-              @click="openModalAdd"
-              :disabled="disabledIfnotOwner"
-              :class="{ disabled: disabledIfnotOwner }"
-              class="itbkk-button-add btn btn-circle border-black0 ml-2 bg-black text-white"
+              class="itbkk-manage-collaborator btn text-sm md:text-l bg-black text-white mb-3 md:mb-0 md:ml-1"
             >
-              <img src="/icons/plus.png" class="w-4" />
+              Manage Collaborator
+            </button>
+          </router-link>
+          <!-- Status -->
+          <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
+            <button
+              class="itbkk-manage-status btn text-sm md:text-l bg-black text-white mb-3 md:mb-0 md:ml-1"
+            >
+              <svg
+                class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
+                />
+                <path
+                  d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
+                />
+                <path
+                  d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
+                />
+              </svg>
+              Status
             </button>
           </router-link>
 
-          <!-- Tooltip -->
-          <div
-            v-if="disabledIfnotOwner"
-            class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
-          >
-            You need to be board owner or has write access to perform this
+          <!-- Limit Button -->
+          <div class="relative group mb-3 md:mb-0 md:ml-1">
+            <button
+              @click="openLimitModal"
+              :disabled="disabledIfnotOwner"
+              class="flex btn text-sm md:text-l bg-black text-white"
+            >
+              <img src="/icons/limit.png" class="w-6" />
+              Limit
+            </button>
+            <!-- Tooltip -->
+            <div
+              v-if="disabledIfnotOwner"
+              class="absolute bottom-full w-32 mb-2 hidden px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
+            >
+              You need to be board owner or has write access to perform this
+            </div>
+          </div>
+
+          <!-- Add Button -->
+          <div class="relative group mb-3 md:mb-0 md:ml-1">
+            <router-link :to="{ name: 'addTask' }">
+              <button
+                @click="openModalAdd"
+                :disabled="disabledIfnotOwner"
+                :class="{ disabled: disabledIfnotOwner }"
+                class="itbkk-button-add btn btn-circle border-black0 bg-black text-white"
+              >
+                <img src="/icons/plus.png" class="w-4" />
+              </button>
+            </router-link>
+
+            <!-- Tooltip -->
+            <div
+              v-if="disabledIfnotOwner"
+              class="absolute bottom-full w-32 mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+            >
+              You need to be board owner or has write access to perform this
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="border border-black rounded-md w-4/5 mt-4">
-      <table class="table">
+    <div
+      class="border border-black rounded-md w-30 md:w-4/5 mt-4 lg:overflow-x-visible"
+    >
+      <table class="table w-full">
         <!-- head -->
         <thead class="bg-black">
           <tr class="text-white text-sm">
-            <th class="pl-20">No.</th>
-            <th class="pl-15">Title</th>
-            <th class="pl-20">Assignees</th>
-            <th class="pl-20">
+            <th class="pl-4 md:pl-20 hidden md:table-cell">No.</th>
+            <th class="pl-4 md:pl-15">Title</th>
+            <th class="pl-4 md:pl-20">Assignees</th>
+            <th class="pl-4 md:pl-20">
               <button
                 @click="handleSortChange(sortStatus)"
                 class="btn btn-ghost itbkk-status-sort"
@@ -874,8 +956,10 @@ async function fetchBoardData(id) {
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-black pl-20">{{ index + 1 }}</th>
-            <td class="itbkk-title itbkk-button-edit pl-15">
+            <th class="text-black pl-4 md:pl-20 hidden md:table-cell">
+              {{ index + 1 }}
+            </th>
+            <td class="itbkk-title itbkk-button-edit pl-4 md:pl-15">
               <router-link
                 :to="{ name: 'detailTask', params: { taskId: task.id } }"
               >
@@ -887,15 +971,15 @@ async function fetchBoardData(id) {
                 </button>
               </router-link>
             </td>
-            <td class="itbkk-assignees pl-20">
+            <td class="itbkk-assignees pl-4">
               <p v-if="task.assignees">
                 {{ task.assignees }}
               </p>
               <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
             </td>
-            <td class="itbkk-status pl-20">
+            <td class="itbkk-status pl-4 md:pl-20">
               <div
-                class="shadow-md rounded-full p-2 text-black w-36 text-center font-medium"
+                class="shadow-md rounded-full p-2 text-black w-full md:w-36 text-center font-medium"
                 :style="{
                   'background-color': myStatus.getStatusColor(task.status),
                 }"
@@ -906,7 +990,7 @@ async function fetchBoardData(id) {
             <td>
               <div
                 v-if="!disabledIfnotOwner"
-                class="dropdown dropdown-right mr-10 itbkk-button-action"
+                class="dropdown sm:dropdown-right dropdown-end mr-4 md:mr-10 itbkk-button-action"
               >
                 <div tabindex="0" role="button" class="m-1">
                   <svg
@@ -931,7 +1015,7 @@ async function fetchBoardData(id) {
 
                 <ul
                   tabindex="0"
-                  class="itbkk-button-action dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-2 shadow"
+                  class="itbkk-button-action z-[100] dropdown-content menu bg-base-100 rounded-box w-36 p-2 shadow"
                 >
                   <router-link
                     :to="{ name: 'editTask', params: { taskId: task.id } }"
@@ -1025,113 +1109,5 @@ async function fetchBoardData(id) {
 .button-container {
   position: relative;
   display: inline-block;
-}
-.bounce-in-top {
-  -webkit-animation: bounce-in-top 1.1s both;
-  animation: bounce-in-top 1.1s both;
-}
-@-webkit-keyframes bounce-in-top {
-  0% {
-    -webkit-transform: translateY(-500px);
-    transform: translateY(-500px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-    opacity: 0;
-  }
-  38% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-    opacity: 1;
-  }
-  55% {
-    -webkit-transform: translateY(-65px);
-    transform: translateY(-65px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  72% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  81% {
-    -webkit-transform: translateY(-28px);
-    transform: translateY(-28px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  90% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  95% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-}
-@keyframes bounce-in-top {
-  0% {
-    -webkit-transform: translateY(-500px);
-    transform: translateY(-500px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-    opacity: 0;
-  }
-  38% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-    opacity: 1;
-  }
-  55% {
-    -webkit-transform: translateY(-65px);
-    transform: translateY(-65px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  72% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  81% {
-    -webkit-transform: translateY(-28px);
-    transform: translateY(-28px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  90% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
-  95% {
-    -webkit-transform: translateY(-8px);
-    transform: translateY(-8px);
-    -webkit-animation-timing-function: ease-in;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    -webkit-animation-timing-function: ease-out;
-    animation-timing-function: ease-out;
-  }
 }
 </style>

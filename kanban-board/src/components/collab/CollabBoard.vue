@@ -311,26 +311,44 @@ const confirmAccessRightChange = async () => {
 </script>
 
 <template>
-  <div class="bounce-in-top flex flex-col items-center mt-28 ml-60">
+  <div
+    class="bounce-in-top flex flex-col items-center mt-28 lg:ml-36 lg:mt-32 md:mt-12 sm:mt-8 px-4 md:px-10"
+  >
     <div
-      class="font-bold text-4xl text-black self-center pb-5 flex items-center justify-between ml-20"
+      class="font-bold text-4xl lg:text-3xl md:text-2xl sm:text-xl text-black self-center pb-5 flex items-center justify-center ml-8 lg:ml-12 md:ml-8 sm:ml-2"
     >
       Collaborator Management
     </div>
 
     <!-- Navigation -->
-    <div class="bounce-in-top flex justify-between w-4/5">
-      <div class="flex text-sm breadcrumbs text-black">
-        <ul>
-          <li class="itbkk-board-name font-bold text-base">
+    <div
+      class="bounce-in-top flex flex-col lg:flex-row justify-center lg:justify-between w-full lg:w-4/5 flex-wrap mb-4"
+    >
+      <div
+        class="flex text-sm breadcrumbs text-black mb-4  md:mb-0 justify-center lg:justify-start"
+      >
+        <ul class="flex flex-wrap">
+          <li class="itbkk-board-name font-bold text-base md:text-sm">
             <RouterLink :to="{ name: 'task' }">{{ boardName }}</RouterLink>
           </li>
           <li>Collaborator</li>
         </ul>
       </div>
 
-      <div class="relative group">
-        <div class="flex items-center">
+      <div
+        class="flex items-center justify-center w-full md:w-auto lg:justify-end"
+      >
+        <RouterLink :to="{ name: 'task' }">
+          <button
+          class="itbkk-button-home btn mr-2 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
+          >
+            <img src="/icons/home.png" class="w-4 mr-1" /> Home
+          </button>
+        </RouterLink>
+
+        <div
+          class="items-center justify-center w-full md:w-auto lg:justify-end relative group"
+        >
           <button
             @click="openModalAdd"
             class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
@@ -338,25 +356,27 @@ const confirmAccessRightChange = async () => {
           >
             <img src="/icons/plus.png" class="w-4" />
           </button>
-        </div>
 
-        <!-- Tooltip -->
-        <div
-          v-if="disabledIfNotOwner"
-          class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
-        >
-          You need to be board owner to perform this action.
+          <!-- Tooltip -->
+          <div
+            v-if="disabledIfNotOwner"
+            class="absolute bottom-full mb-2 hidden w-32 group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+          >
+            You need to be board owner to perform this action.
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="border border-black rounded-md w-4/5 mt-4">
-      <table class="table">
+    <div
+      class="border border-black rounded-md w-full lg:w-4/5 mt-4 overflow-x-auto lg:overflow-x-visible"
+    >
+      <table class="table w-full text-xs md:text-sm">
         <!-- head -->
         <thead class="bg-black">
           <tr class="text-white text-sm">
-            <th class="pl-20">No.</th>
+            <th class="pl-20 hidden md:table-cell">No.</th>
             <th class="pl-20">Name</th>
             <th class="pl-32">Email</th>
             <th class="pl-16">Access Right</th>
@@ -371,7 +391,7 @@ const confirmAccessRightChange = async () => {
             :key="collab.oid"
             class="itbkk-item"
           >
-            <th class="text-black pl-20">{{ index + 1 }}</th>
+            <th class="text-black pl-20 hidden md:table-cell">{{ index + 1 }}</th>
 
             <td class="itbkk-name pl-10">
               {{ collab.name }}
@@ -384,7 +404,7 @@ const confirmAccessRightChange = async () => {
               <div class="dropdown relative group">
                 <label
                   tabindex="0"
-                  class="btn btn-ghost shadow-md rounded-full h-auto w-28 font-medium text-center p-3 break-all bg-white"
+                  class="btn btn-ghost shadow-md rounded-full h-auto w-28 font-medium text-center p-2 break-words bg-white"
                   :disabled="disabledIfNotOwner"
                 >
                   {{ collab.accessRight }}
@@ -416,7 +436,7 @@ const confirmAccessRightChange = async () => {
 
                 <ul
                   tabindex="0"
-                  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
+                  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full sm:w-52 z-[1]"
                 >
                   <li>
                     <a @click="openAccessModal(collab, 'READ')">READ</a>
@@ -432,7 +452,7 @@ const confirmAccessRightChange = async () => {
               <div class="ml-16 relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
-                  class="itbkk-button-delete btn bg-red-500"
+                  class="itbkk-button-delete btn bg-red-500 rounded-full w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
                   @click="openDeleteModal(collab.oid, collab.name)"
                 >
                   <img src="/icons/delete.png" class="w-4" />
@@ -440,7 +460,7 @@ const confirmAccessRightChange = async () => {
                 <!-- Tooltip -->
                 <div
                   v-if="disabledIfNotOwner"
-                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                  class="absolute bottom-full mb-2 hidden w-32 group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                 >
                   You need to be board owner to perform this action.
                 </div>
@@ -451,7 +471,7 @@ const confirmAccessRightChange = async () => {
               <div class="ml-16 relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
-                  class="btn"
+                  class="btn rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
                   @click="openCancelModal(collab.oid, collab.name)"
                 >
                   Cancel
@@ -459,7 +479,7 @@ const confirmAccessRightChange = async () => {
                 <!-- Tooltip -->
                 <div
                   v-if="disabledIfNotOwner"
-                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                  class="absolute bottom-full mb-2 hidden w-32 group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                 >
                   You need to be board owner to perform this action.
                 </div>
@@ -482,11 +502,13 @@ const confirmAccessRightChange = async () => {
   <!-- Modal for changing access right -->
   <div
     v-if="showAccessModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4"
   >
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-      <h2 class="text-xl font-semibold mb-4">Change Access Right</h2>
-      <p class="mb-6">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full sm:max-w-lg">
+      <h2 class="text-xl font-semibold mb-4 text-center">
+        Change Access Right
+      </h2>
+      <p class="mb-6 text-center">
         Do you want to change access right of
         <span class="font-bold text-blue-400">{{ selectedCollabName }}</span>
         to <span class="font-bold text-blue-400">{{ newAccessRight }}</span
@@ -576,4 +598,25 @@ const confirmAccessRightChange = async () => {
   <ExpireToken v-if="expiredToken" />
 </template>
 
-<style scoped></style>
+<style scoped>
+@media (max-width: 768px) {
+  .breadcrumbs ul {
+    flex-direction: column;
+    align-items: center;
+  }
+  .itbkk-button-home {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  .itbkk-collaborator-add {
+    width: 30%;
+    margin-bottom: 5px;
+  }
+  .table {
+    font-size: 0.875rem;
+  }
+  .itbkk-collab-remove {
+    text-align: center;
+  }
+}
+</style>

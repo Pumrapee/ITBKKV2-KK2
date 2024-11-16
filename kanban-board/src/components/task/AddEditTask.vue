@@ -159,10 +159,16 @@ const canEdit = computed(() => {
 <template>
   <!-- Modal window -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
-      <div class="itbkk-modal-task bg-white p-6 rounded-lg w-11/12 max-w-3xl">
-        <div class="flex justify-between items-center mb-4 border-b-2">
-          <h2 class="text-2xl font-bold text-black mb-2">
+    <div
+      class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
+    >
+      <div
+        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl"
+      >
+        <div
+          class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b-2 pb-2"
+        >
+          <h2 class="text-xl sm:text-2xl font-bold text-black mb-2 sm:mb-0">
             {{
               task?.id === undefined
                 ? "Add Task"
@@ -197,12 +203,10 @@ const canEdit = computed(() => {
             placeholder="Enter Title here..."
             class="itbkk-title w-full border border-black rounded-lg py-2 px-3 input input-ghost"
           />
-          <div v-if="editMode" class="flex justify-between">
-            <p class="text-red-400">
-              {{ errorTask.title }}
-            </p>
+          <div v-if="editMode" class="flex justify-between mt-1">
+            <p class="text-red-400">{{ errorTask.title }}</p>
             <p
-              class="text-gray-300 whitespace-nowrap text-sm text-end mt-1"
+              class="text-gray-300 whitespace-nowrap text-sm text-end"
               :class="{
                 'text-red-400':
                   newTask.title?.trim()?.length > 100 ||
@@ -214,8 +218,8 @@ const canEdit = computed(() => {
           </div>
         </div>
 
-        <div class="flex">
-          <div class="w-2/3 mr-2">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="w-full sm:w-2/3">
             <label for="description" class="block text-black font-bold mb-2"
               >Description</label
             >
@@ -223,7 +227,7 @@ const canEdit = computed(() => {
               id="description"
               :readonly="!editMode"
               v-model="newTask.description"
-              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-72 textarea textarea-ghost"
+              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-72 textarea textarea-ghost"
               :class="
                 newTask.description
                   ? 'bg-white text-black'
@@ -238,10 +242,8 @@ const canEdit = computed(() => {
               }}
           </textarea
             >
-            <div v-if="editMode" class="flex justify-between">
-              <p class="text-red-400">
-                {{ errorTask.description }}
-              </p>
+            <div v-if="editMode" class="flex justify-between mt-1">
+              <p class="text-red-400">{{ errorTask.description }}</p>
               <p
                 class="text-gray-300 text-sm text-end"
                 :class="{
@@ -253,8 +255,8 @@ const canEdit = computed(() => {
             </div>
           </div>
 
-          <div class="w-1/3">
-            <div>
+          <div class="w-full sm:w-1/3">
+            <div class="mb-4">
               <label for="assignees" class="block text-black font-bold mb-2"
                 >Assignees</label
               >
@@ -262,7 +264,7 @@ const canEdit = computed(() => {
                 id="assignees"
                 :readonly="!editMode"
                 v-model="newTask.assignees"
-                class="itbkk-assignees w-full border border-black rounded-lg py-3 px-3 h-42 textarea textarea-ghost"
+                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-32 textarea textarea-ghost"
                 :class="
                   newTask.assignees
                     ? 'bg-white text-black'
@@ -270,7 +272,7 @@ const canEdit = computed(() => {
                 "
                 placeholder="Unassigned"
               ></textarea>
-              <div v-if="editMode" class="flex justify-between">
+              <div v-if="editMode" class="flex justify-between mt-1">
                 <p class="text-red-400 text-sm w-40">
                   {{ errorTask.assignees }}
                 </p>
@@ -285,7 +287,7 @@ const canEdit = computed(() => {
               </div>
             </div>
 
-            <div>
+            <div class="mb-4">
               <label for="status" class="block text-black font-bold mb-2"
                 >Status</label
               >
@@ -304,26 +306,18 @@ const canEdit = computed(() => {
               </select>
             </div>
 
-            <p v-if="editMode" class="text-red-400">
-              {{ errorTask.status }}
-            </p>
+            <p v-if="editMode" class="text-red-400">{{ errorTask.status }}</p>
 
             <div v-if="task?.id" class="mt-5">
-              <p
-                class="itbkk-timezone pl-3 font-semibold text-sm text-black"
-              >
+              <p class="itbkk-timezone pl-3 font-semibold text-sm text-black">
                 Time Zone :
                 {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
               </p>
-              <p
-                class="itbkk-created-on pl-3 font-semibold text-sm text-black"
-              >
+              <p class="itbkk-created-on pl-3 font-semibold text-sm text-black">
                 Created On :
                 {{ new Date(task.createdOn).toLocaleString("en-GB") }}
               </p>
-              <p
-                class="itbkk-updated-on pl-3 font-semibold text-sm text-black"
-              >
+              <p class="itbkk-updated-on pl-3 font-semibold text-sm text-black">
                 Updated On :
                 {{ new Date(task.updatedOn).toLocaleString("en-GB") }}
               </p>
@@ -332,7 +326,7 @@ const canEdit = computed(() => {
           </div>
         </div>
         <div class="flex justify-end mt-4">
-          <div v-if="canEdit" class="flex">
+          <div v-if="canEdit">
             <router-link
               v-if="task?.id"
               :to="{
@@ -343,7 +337,7 @@ const canEdit = computed(() => {
               <button
                 v-if="!editMode"
                 @click="enableEditMode"
-                class="btn bg-blue-400 text-white h-2 mr-3"
+                class="btn bg-blue-400 text-white mr-2"
               >
                 Edit
               </button>
@@ -352,7 +346,7 @@ const canEdit = computed(() => {
 
           <button
             v-show="editMode"
-            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200 mb-2"
             @click="addEditSave(newTask)"
             :disabled="changeTask"
           >

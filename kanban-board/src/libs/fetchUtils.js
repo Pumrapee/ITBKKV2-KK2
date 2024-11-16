@@ -113,7 +113,6 @@ async function getItems(url) {
 
     const items = await data.json()
 
-    console.log(items)
     return items
   } catch (error) {
     if (data.status === 404) return 404
