@@ -58,7 +58,7 @@ const removeAlert = (index) => {
         @click="removeAlert(index)"
       >
         <svg
-          class="w-3 h-3"
+          class="w-3 h-3 ml-2"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

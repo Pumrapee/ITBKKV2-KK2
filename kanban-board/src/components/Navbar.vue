@@ -148,14 +148,9 @@ function toggleSidebar() {
     class="backdrop-blur fixed top-0 left-0 z-[1] w-64 h-screen transition-transform sm:shadow-lg bg-white/20 dark:bg-gray-800"
     aria-label="Sidebar"
   >
-    <!-- <div
-      class="h-full px-3 py-4 overflow-y-auto backdrop-blur-lg dark:bg-gray-800"
-    >
-      <ul class="space-y-2 font-medium mt-16"> -->
-
     <div class="h-full px-3 py-4 overflow-y-auto">
       <!-- Existing sidebar items -->
-      <ul class="space-y-2 font-medium mt-24">
+      <ul class="space-y-2 font-medium mt-20">
         <li>
           <!-- Toggle button for the dropdown -->
           <button
@@ -263,8 +258,11 @@ function toggleSidebar() {
           <span>Hi, {{ userName }}</span>
         </div>
         <ul class="menu bg-base-100 rounded-box w-full p-2 shadow">
-          <li><a>Profile</a></li>
-          <li @click="logout"><a>Logout</a></li>
+          <li v-if="userName !== `Guest`"><a>Profile</a></li>
+          <li v-if="userName !== `Guest`" @click="logout"><a>Logout</a></li>
+          <RouterLink :to="{ name: 'login' }">
+            <li v-if="userName === `Guest`"><a>Login</a></li>
+          </RouterLink>
         </ul>
       </div>
     </div>

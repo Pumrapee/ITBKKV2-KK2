@@ -159,9 +159,15 @@ const canEdit = computed(() => {
 <template>
   <!-- Modal window -->
   <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15] px-4">
-      <div class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl">
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b-2 pb-2">
+    <div
+      class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
+    >
+      <div
+        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl"
+      >
+        <div
+          class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b-2 pb-2"
+        >
           <h2 class="text-xl sm:text-2xl font-bold text-black mb-2 sm:mb-0">
             {{
               task?.id === undefined
@@ -186,7 +192,9 @@ const canEdit = computed(() => {
         </div>
 
         <div class="mb-4">
-          <label for="title" class="block text-black font-bold mb-2">Title</label>
+          <label for="title" class="block text-black font-bold mb-2"
+            >Title</label
+          >
           <input
             type="text"
             id="title"
@@ -212,7 +220,9 @@ const canEdit = computed(() => {
 
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="w-full sm:w-2/3">
-            <label for="description" class="block text-black font-bold mb-2">Description</label>
+            <label for="description" class="block text-black font-bold mb-2"
+              >Description</label
+            >
             <textarea
               id="description"
               :readonly="!editMode"
@@ -247,7 +257,9 @@ const canEdit = computed(() => {
 
           <div class="w-full sm:w-1/3">
             <div class="mb-4">
-              <label for="assignees" class="block text-black font-bold mb-2">Assignees</label>
+              <label for="assignees" class="block text-black font-bold mb-2"
+                >Assignees</label
+              >
               <textarea
                 id="assignees"
                 :readonly="!editMode"
@@ -261,7 +273,9 @@ const canEdit = computed(() => {
                 placeholder="Unassigned"
               ></textarea>
               <div v-if="editMode" class="flex justify-between mt-1">
-                <p class="text-red-400 text-sm w-40">{{ errorTask.assignees }}</p>
+                <p class="text-red-400 text-sm w-40">
+                  {{ errorTask.assignees }}
+                </p>
                 <p
                   class="text-gray-300 text-sm text-end"
                   :class="{
@@ -274,7 +288,9 @@ const canEdit = computed(() => {
             </div>
 
             <div class="mb-4">
-              <label for="status" class="block text-black font-bold mb-2">Status</label>
+              <label for="status" class="block text-black font-bold mb-2"
+                >Status</label
+              >
               <select
                 v-model="newTask.status"
                 :disabled="!editMode"
@@ -309,8 +325,8 @@ const canEdit = computed(() => {
             <div v-else class="mt-5"></div>
           </div>
         </div>
-        <div class="flex flex-col sm:flex-row justify-end mt-4 gap-2 sm:gap-4">
-          <div v-if="canEdit" class="flex">
+        <div class="flex justify-end mt-4">
+          <div v-if="canEdit">
             <router-link
               v-if="task?.id"
               :to="{
@@ -321,7 +337,7 @@ const canEdit = computed(() => {
               <button
                 v-if="!editMode"
                 @click="enableEditMode"
-                class="btn bg-blue-400 text-white h-2 mr-3"
+                class="btn bg-blue-400 text-white mr-2"
               >
                 Edit
               </button>
@@ -330,13 +346,15 @@ const canEdit = computed(() => {
 
           <button
             v-show="editMode"
-            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200 mb-2 sm:mb-0"
+            class="itbkk-button-confirm btn mr-3 bg-green-400 disabled:bg-green-200 mb-2"
             @click="addEditSave(newTask)"
             :disabled="changeTask"
           >
             Save
           </button>
-          <button class="itbkk-button-cancel btn" @click="closeModal">Cancel</button>
+          <button class="itbkk-button-cancel btn" @click="closeModal">
+            Cancel
+          </button>
         </div>
       </div>
     </div>

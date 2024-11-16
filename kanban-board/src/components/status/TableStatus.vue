@@ -429,7 +429,7 @@ watch(
 <template>
   <div class="flex flex-col items-center mt-32 md:ml-40 mb-10 px-10 md:px-12">
     <!-- Navigation -->
-    <div class="flex flex-wrap justify-between items-center w-full md:w-3/5 mb-4">
+    <div class="flex flex-wrap justify-between items-center w-full md:w-8/12">
       <div class="text-sm breadcrumbs text-black">
         <ul class="flex flex-wrap">
           <li class="itbkk-button-home">
@@ -441,7 +441,6 @@ watch(
       <div class="flex items-center mt-4 md:mt-0">
         <RouterLink :to="{ name: 'task' }">
           <button
-            @click="openAddStatus"
             class="itbkk-button-home btn mr-2 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
           >
             <img src="/icons/home.png" class="w-4" />
@@ -463,22 +462,24 @@ watch(
               v-if="disabledIfNotOwner"
               class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
             >
-            You need to be board owner or has write access to perform this
-          </div>
+              You need to be board owner or has write access to perform this
+            </div>
           </div>
         </RouterLink>
       </div>
     </div>
 
     <!-- Status Table -->
-    <div class="overflow-x-auto border border-black rounded-md w-full md:w-3/5 mt-4">
+    <div
+      class="overflow-x-auto border border-black rounded-md w-full md:w-8/12 mt-4"
+    >
       <table class="table w-full text-xs md:text-sm">
         <thead class="bg-black">
           <tr class="text-white">
-            <th class="px-4 py-2">No.</th>
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">Description</th>
-            <th class="px-4 py-2">Action</th>
+            <th class="px-4 py-2 sm:pl-20 text-sm hidden md:table-cell">No.</th>
+            <th class="px-4 py-2 sm:pl-20 text-sm ">Name</th>
+            <th class="px-4 py-2 sm:pl-18 text-sm ">Description</th>
+            <th class="px-4 py-2 sm:pl-20 text-sm ">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -487,11 +488,11 @@ watch(
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-black px-4 py-2">{{ index + 1 }}</th>
+            <th class="text-black sm:pl-20 hidden md:table-cell">{{ index + 1 }}</th>
 
             <td class="itbkk-status-name px-4 py-2 w-1/3">
               <p
-                class="shadow-md rounded-full h-auto max-w-full font-medium text-center p-3 break-words"
+                class="shadow-md rounded-full h-auto max-w-40 font-medium text-center p-3 break-words"
                 :style="{ 'background-color': task.color }"
               >
                 {{ task.name }}
@@ -520,7 +521,7 @@ watch(
                     <button
                       :disabled="disabledIfNotOwner"
                       @click="openEditStatus(task.id)"
-                      class="btn btn-ghost h-auto bg-yellow-100"
+                      class="btn btn-ghost h-auto bg-yellow-100 w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
                     >
                       <img src="/icons/pen.png" class="w-4 ml-2" />
                     </button>
@@ -530,15 +531,16 @@ watch(
                       v-if="disabledIfNotOwner"
                       class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                     >
-                    You need to be board owner or has write access to perform this
-                  </div>
+                      You need to be board owner or has write access to perform
+                      this
+                    </div>
                   </div>
                 </router-link>
               </div>
               <div class="relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
-                  class="itbkk-button-delete btn bg-red-500"
+                  class="itbkk-button-delete btn bg-red-500 w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
                   @click="openDeleteModal(task.id, task.name)"
                 >
                   <img src="/icons/delete.png" class="w-4" />
@@ -549,11 +551,14 @@ watch(
                   v-if="disabledIfNotOwner"
                   class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                 >
-                You need to be board owner or has write access to perform this
-              </div>
+                  You need to be board owner or has write access to perform this
+                </div>
               </div>
             </td>
-            <td v-else="task.name !== 'No Status' && task.name !== 'Done'" class="px-4 py-2"></td>
+            <td
+              v-else="task.name !== 'No Status' && task.name !== 'Done'"
+              class="px-4 py-2"
+            ></td>
           </tr>
         </tbody>
       </table>

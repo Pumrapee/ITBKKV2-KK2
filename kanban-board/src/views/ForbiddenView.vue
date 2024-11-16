@@ -18,9 +18,6 @@ onMounted(() => {
   <section class="bg-white dark:bg-gray-900 flex justify-center items-center h-screen relative z-10">
     <div class="container min-h-screen px-6 py-12 mx-auto lg:flex lg:items-center lg:gap-12">
       <div class="w-full lg:w-1/2 text-center lg:text-left">
-        <div class="relative w-full mt-8 lg:w-1/2 lg:mt-0">
-        <img class="w-32 h-32 " src="/icons/logo1.png">
-      </div>
         <h1 class="mt-3 text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl">Access forbidden</h1>
         <p class="mt-4 text-gray-500 dark:text-gray-400">Sorry, you don't have permission to access this page.</p>
 
@@ -36,6 +33,10 @@ onMounted(() => {
 
          
         </div>
+      </div>
+
+      <div class="relative w-full mt-8 lg:w-1/2 lg:mt-0">
+        <img class="w-full lg:h-[32rem] h-80 md:h-96 rounded-lg object-cover" src="/icons/403.png" >
       </div>
 
       

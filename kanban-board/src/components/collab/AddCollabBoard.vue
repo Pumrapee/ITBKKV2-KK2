@@ -78,19 +78,19 @@ watch(props, () => {
               id="email"
               placeholder="Enter Email here..."
               v-model="newCollab.email"
-              class="itbkk-collaborator-email border border-black rounded-lg py-2 px-3 input input-ghost w-96"
+              class="itbkk-collaborator-email border border-black rounded-lg py-2 px-3 input input-ghost w-64 sm:w-96"
             />
             <p class="text-red-400 pt-2 pl-2">
               {{ errorTask.email }}
             </p>
           </div>
           <div>
-            <label for="title" class="block text-black font-bold mb-2 ml-5"
+            <label for="title" class="block text-black font-bold mb-2 sm:ml-5"
               >Access Right</label
             >
 
             <select
-              class="itbkk-access-right pl-10 border border-black rounded-lg h-10 pr-5 w-full ml-3"
+              class="itbkk-access-right pl-10 border border-black rounded-lg h-10 pr-5 w-full sm:ml-3"
               v-model="newCollab.accessRight"
             >
               <option value="READ">READ</option>

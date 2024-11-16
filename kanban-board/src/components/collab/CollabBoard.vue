@@ -315,7 +315,7 @@ const confirmAccessRightChange = async () => {
     class="bounce-in-top flex flex-col items-center mt-28 lg:ml-36 lg:mt-32 md:mt-12 sm:mt-8 px-4 md:px-10"
   >
     <div
-      class="font-bold text-4xl lg:text-3xl md:text-2xl sm:text-xl text-black self-center pb-5 flex items-center justify-center ml-20 lg:ml-12 md:ml-8 sm:ml-2"
+      class="font-bold text-4xl lg:text-3xl md:text-2xl sm:text-xl text-black self-center pb-5 flex items-center justify-center ml-8 lg:ml-12 md:ml-8 sm:ml-2"
     >
       Collaborator Management
     </div>
@@ -325,7 +325,7 @@ const confirmAccessRightChange = async () => {
       class="bounce-in-top flex flex-col lg:flex-row justify-center lg:justify-between w-full lg:w-4/5 flex-wrap mb-4"
     >
       <div
-        class="flex text-sm breadcrumbs text-black mb-4 md:mb-0 justify-center lg:justify-start"
+        class="flex text-sm breadcrumbs text-black mb-4  md:mb-0 justify-center lg:justify-start"
       >
         <ul class="flex flex-wrap">
           <li class="itbkk-board-name font-bold text-base md:text-sm">
@@ -340,7 +340,7 @@ const confirmAccessRightChange = async () => {
       >
         <RouterLink :to="{ name: 'task' }">
           <button
-            class="itbkk-button-home btn bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
+          class="itbkk-button-home btn mr-2 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
           >
             <img src="/icons/home.png" class="w-4 mr-1" /> Home
           </button>
@@ -376,7 +376,7 @@ const confirmAccessRightChange = async () => {
         <!-- head -->
         <thead class="bg-black">
           <tr class="text-white text-sm">
-            <th class="pl-20">No.</th>
+            <th class="pl-20 hidden md:table-cell">No.</th>
             <th class="pl-20">Name</th>
             <th class="pl-32">Email</th>
             <th class="pl-16">Access Right</th>
@@ -391,7 +391,7 @@ const confirmAccessRightChange = async () => {
             :key="collab.oid"
             class="itbkk-item"
           >
-            <th class="text-black pl-20">{{ index + 1 }}</th>
+            <th class="text-black pl-20 hidden md:table-cell">{{ index + 1 }}</th>
 
             <td class="itbkk-name pl-10">
               {{ collab.name }}
@@ -452,7 +452,7 @@ const confirmAccessRightChange = async () => {
               <div class="ml-16 relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
-                  class="itbkk-button-delete btn bg-red-500 rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+                  class="itbkk-button-delete btn bg-red-500 rounded-full w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
                   @click="openDeleteModal(collab.oid, collab.name)"
                 >
                   <img src="/icons/delete.png" class="w-4" />
@@ -609,7 +609,7 @@ const confirmAccessRightChange = async () => {
     margin-bottom: 5px;
   }
   .itbkk-collaborator-add {
-    width: 20%;
+    width: 30%;
     margin-bottom: 5px;
   }
   .table {

@@ -150,7 +150,7 @@ const declineInvitation = async () => {
 </script>
 
 <template>
-  <div class="bounce-in-top flex flex-col items-center mt-28 ml-60">
+  <div class="bounce-in-top flex flex-col items-center mt-14 sm:mt-28 sm:ml-60">
     <div class="flex items-center justify-center">
       <!-- Loading State -->
       <div

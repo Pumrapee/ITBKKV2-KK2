@@ -335,7 +335,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
             <table class="table w-full">
               <thead class="bg-black">
                 <tr class="text-white text-sm">
-                  <th class="pl-4 sm:pl-16">No.</th>
+                  <th class="pl-4 sm:pl-16 hidden md:table-cell">No.</th>
                   <th class="pl-4 sm:pl-16">Name</th>
                   <th class="pl-4">Visibility</th>
                   <th>Action</th>
@@ -346,7 +346,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 v-if="myBoard.getBoards().length > 0"
               >
                 <tr v-for="(board, index) in myBoard.getBoards()">
-                  <th class="text-black pl-4 sm:pl-20">{{ index + 1 }}</th>
+                  <th class="text-black pl-4 sm:pl-20 hidden md:table-cell">{{ index + 1 }}</th>
                   <th>
                     <router-link
                       :to="{ name: 'task', params: { id: board.id } }"
@@ -407,9 +407,9 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
           <table class="table w-full">
             <thead class="bg-black">
               <tr class="text-white text-sm">
-                <th class="pl-4 sm:pl-16">No.</th>
+                <th class="pl-4 sm:pl-16 hidden md:table-cell">No.</th>
                 <th class="pl-4 sm:pl-16">Name</th>
-                <th class="pl-4 sm:pl-16">Owner</th>
+                <th class="pl-4 sm:pl-16 hidden md:table-cell">Owner</th>
                 <th class="pl-4 sm:pl-10">Access Right</th>
                 <th>Action</th>
               </tr>
@@ -419,7 +419,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
               v-if="myBoard.getBoardCollab().length > 0"
             >
               <tr v-for="(boardCollab, index) in myBoard.getBoardCollab()">
-                <th class="text-black pl-4 sm:pl-20">{{ index + 1 }}</th>
+                <th class="text-black pl-4 sm:pl-20 hidden md:table-cell">{{ index + 1 }}</th>
 
                 <th>
                   <router-link
@@ -436,8 +436,8 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                     </button>
                   </router-link>
                 </th>
-                <th>
-                  <p class="itbkk-owner-name h-2 mb-8 ml-2 sm:ml-12">
+                <th class="hidden md:table-cell">
+                  <p class="itbkk-owner-name h-2 mb-8 ml-2 sm:ml-12 ">
                     {{ boardCollab.owner.name }}
                   </p>
                 </th>
