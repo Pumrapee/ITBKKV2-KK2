@@ -460,7 +460,7 @@ watch(
             <!-- Tooltip -->
             <div
               v-if="disabledIfNotOwner"
-              class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+              class="absolute bottom-full w-32 mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
             >
               You need to be board owner or has write access to perform this
             </div>
@@ -477,9 +477,9 @@ watch(
         <thead class="bg-black">
           <tr class="text-white">
             <th class="px-4 py-2 sm:pl-20 text-sm hidden md:table-cell">No.</th>
-            <th class="px-4 py-2 sm:pl-20 text-sm ">Name</th>
-            <th class="px-4 py-2 sm:pl-18 text-sm ">Description</th>
-            <th class="px-4 py-2 sm:pl-20 text-sm ">Action</th>
+            <th class="px-4 py-2 sm:pl-20 text-sm">Name</th>
+            <th class="px-4 py-2 sm:pl-18 text-sm">Description</th>
+            <th class="px-4 py-2 sm:pl-20 text-sm">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -488,7 +488,9 @@ watch(
             :key="task.id"
             class="itbkk-item"
           >
-            <th class="text-black sm:pl-20 hidden md:table-cell">{{ index + 1 }}</th>
+            <th class="text-black sm:pl-20 hidden md:table-cell">
+              {{ index + 1 }}
+            </th>
 
             <td class="itbkk-status-name px-4 py-2 w-1/3">
               <p
@@ -521,7 +523,7 @@ watch(
                     <button
                       :disabled="disabledIfNotOwner"
                       @click="openEditStatus(task.id)"
-                      class="btn btn-ghost h-auto bg-yellow-100 w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
+                      class="btn btn-ghost bg-yellow-100 w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
                     >
                       <img src="/icons/pen.png" class="w-4 ml-2" />
                     </button>
@@ -529,7 +531,7 @@ watch(
                     <!-- Tooltip -->
                     <div
                       v-if="disabledIfNotOwner"
-                      class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                      class="absolute bottom-full w-28 mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                     >
                       You need to be board owner or has write access to perform
                       this
@@ -549,7 +551,7 @@ watch(
                 <!-- Tooltip -->
                 <div
                   v-if="disabledIfNotOwner"
-                  class="absolute bottom-full mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+                  class="absolute bottom-full w-28 mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
                 >
                   You need to be board owner or has write access to perform this
                 </div>
