@@ -49,3 +49,12 @@ CREATE TABLE `collabs` (
   PRIMARY KEY (`boardId`, `userOid`),
   CONSTRAINT `collabs_ibfk_1` FOREIGN KEY (`boardId`) REFERENCES `boards` (`boardId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `attachments` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `filename` VARCHAR(255) NOT NULL,
+    `file_path` VARCHAR(500) NOT NULL,
+    `taskId` int NOT NULL,
+    FOREIGN KEY (`taskId`) REFERENCES `tasks`(`taskId`) ON DELETE CASCADE,
+    UNIQUE KEY (`taskId`, `filename`)
+);

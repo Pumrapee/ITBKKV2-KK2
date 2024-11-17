@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,6 +42,9 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "taskStatus")
     private Status taskStatus;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attachment> attachments = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "boardId", nullable = false)
