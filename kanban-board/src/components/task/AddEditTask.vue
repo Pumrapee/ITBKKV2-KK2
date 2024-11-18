@@ -1,12 +1,16 @@
 <script setup>
-import { defineProps, ref, watch, computed, defineEmits } from "vue"
+import { defineProps, ref, watch, computed, defineEmits, onMounted } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
+import { previewBinaryFile } from "../../libs/previewBinary"
+import { useRoute } from "vue-router"
+import { getItems, downloadAttachment } from "@/libs/fetchUtils"
 
 const props = defineProps({
   showModal: Boolean,
   task: Object,
+  getAttactment: Array,
   ownerBoard: String,
   editModeModal: Boolean,
   editDrop: Boolean,
@@ -17,12 +21,29 @@ const myLimit = useLimitStore()
 const myTask = useTaskStore()
 const editMode = ref(props.editModeModal)
 const newTask = ref({}) // Create a local copy of the task object
+const route = useRoute()
+
+const boardId = ref(route.params.id)
+const taskId = ref()
 const errorTask = ref({
   title: "",
   description: "",
   assignees: "",
   status: "",
 })
+
+// onMounted(() => {
+//   if (Array.isArray(props.getAttactment) && props.getAttactment.length > 0) {
+//     previewAdded(props.getAttactment)
+//   }
+// })
+
+// Files
+const uploadedFileNames = ref([])
+const previewDocURLs = ref([])
+const previewImageURLs = ref([])
+const uploadedFiles = ref([])
+const attachmentFile = ref(props.getAttactment)
 
 const addEditSave = (editTask) => {
   const editedTask = { ...editTask }
@@ -44,11 +65,15 @@ const addEditSave = (editTask) => {
   setTimeout(() => {
     editMode.value = false
   }, 500)
-  emits("saveAddEdit", editedTask)
+  emits("saveAddEdit", editedTask, uploadedFiles.value)
 }
 
 const closeModal = () => {
   editMode.value = false
+  // Reset arrays
+  previewDocURLs.value = []
+  previewImageURLs.value = []
+  uploadedFileNames.value = []
   emits("closeModal")
 }
 
@@ -145,6 +170,8 @@ const changeTask = computed(() => {
 watch(props, () => {
   if (props.showModal) {
     Object.assign(newTask.value, props.task)
+    taskId.value = newTask.value.id
+    console.log(newTask.value)
   }
   if (props.editModeModal) {
     editMode.value = props.editModeModal
@@ -154,6 +181,76 @@ const canEdit = computed(() => {
   const userName = localStorage.getItem("user")
   return userName === props.ownerBoard
 })
+
+const preview = (event) => {
+  const files = event.target.files
+  console.log(files)
+
+  Array.from(files).forEach(async (file) => {
+    uploadedFiles.value.push(file)
+
+    // Push file name to the list
+    if (!uploadedFileNames.value.includes(file.name)) {
+      uploadedFileNames.value.push(file.name)
+
+      // Check file type and generate preview
+      if (file.name.endsWith(".pdf")) {
+        previewDocURLs.value.push(previewBinaryFile(file)) // Generate document URL
+        console.log(previewDocURLs.value)
+      } else {
+        previewImageURLs.value.push(previewBinaryFile(file)) // Generate image preview URL
+        previewDocURLs.value.push(previewBinaryFile(file)) // Generate document URL
+        console.log(previewImageURLs.value)
+      }
+    }
+  })
+}
+
+const removeFile = (index) => {
+  uploadedFileNames.value.splice(index, 1) // Remove file name
+  previewDocURLs.value.splice(index, 1) // Remove document preview (if exists)
+  previewImageURLs.value.splice(index, 1) // Remove image preview (if exists)
+}
+
+const previewAdded = () => {
+  attachmentFile.value.forEach(async (attachment) => {
+    const previewUrl = await downloadAttachment(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+        taskId.value
+      }/attachments/${attachment.id}/download`
+    )
+
+    console.log(previewUrl)
+    uploadedFileNames.value.push(attachment.filename)
+
+    if (
+      attachment.filename.endsWith(".png") ||
+      attachment.filename.endsWith(".jpg") ||
+      attachment.filename.endsWith(".jpeg") ||
+      attachment.filename.endsWith(".gif")
+    ) {
+      previewImageURLs.value.push(previewUrl)
+      previewDocURLs.value.push(previewUrl)
+
+      console.log(previewImageURLs.value)
+    } else if (attachment.filename.endsWith(".pdf")) {
+      previewDocURLs.value.push(previewUrl)
+      console.log(previewDocURLs.value)
+    }
+  })
+}
+
+watch(
+  () => props.getAttactment,
+  (newValue) => {
+    if (Array.isArray(newValue)) {
+      attachmentFile.value = newValue
+      taskId.value = route.params.taskId
+      previewAdded(newValue)
+    }
+  },
+  { immediate: true } // Run immediately on mount
+)
 </script>
 
 <template>
@@ -227,7 +324,7 @@ const canEdit = computed(() => {
               id="description"
               :readonly="!editMode"
               v-model="newTask.description"
-              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-72 textarea textarea-ghost"
+              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-60 textarea textarea-ghost scrollbar-hidden"
               :class="
                 newTask.description
                   ? 'bg-white text-black'
@@ -264,7 +361,7 @@ const canEdit = computed(() => {
                 id="assignees"
                 :readonly="!editMode"
                 v-model="newTask.assignees"
-                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-32 textarea textarea-ghost"
+                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-14 textarea textarea-ghost"
                 :class="
                   newTask.assignees
                     ? 'bg-white text-black'
@@ -272,7 +369,7 @@ const canEdit = computed(() => {
                 "
                 placeholder="Unassigned"
               ></textarea>
-              <div v-if="editMode" class="flex justify-between mt-1">
+              <div v-if="editMode" class="flex justify-between">
                 <p class="text-red-400 text-sm w-40">
                   {{ errorTask.assignees }}
                 </p>
@@ -288,7 +385,7 @@ const canEdit = computed(() => {
             </div>
 
             <div class="mb-4">
-              <label for="status" class="block text-black font-bold mb-2"
+              <label for="status" class="block text-black font-bold"
                 >Status</label
               >
               <select
@@ -308,7 +405,7 @@ const canEdit = computed(() => {
 
             <p v-if="editMode" class="text-red-400">{{ errorTask.status }}</p>
 
-            <div v-if="task?.id" class="mt-5">
+            <div v-if="task?.id">
               <p class="itbkk-timezone pl-3 font-semibold text-sm text-black">
                 Time Zone :
                 {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
@@ -325,6 +422,58 @@ const canEdit = computed(() => {
             <div v-else class="mt-5"></div>
           </div>
         </div>
+
+        <div class="mb-6" v-if="task?.id">
+          <label class="block font-bold mb-1">Attachments</label>
+          <input
+            type="file"
+            accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
+            multiple
+            :disabled="!editMode"
+            class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+            @change="preview"
+          />
+
+          <div
+            v-if="uploadedFileNames.length > 0"
+            class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
+          >
+            <div
+              v-for="(name, index) in uploadedFileNames"
+              :key="index"
+              class="relative flex flex-col items-center min-w-[120px] space-y-2"
+            >
+              <!-- Image Preview -->
+              <div class="relative w-16 h-16">
+                <img
+                  v-if="previewImageURLs[index]"
+                  :src="previewImageURLs[index]"
+                  :alt="name"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                />
+                <!-- Delete Button -->
+                <button
+                  v-if="editMode"
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
+                  @click="removeFile(index)"
+                >
+                  <img src="/icons/delete.png" class="w-3 h-3" />
+                </button>
+              </div>
+
+              <!-- Document Preview -->
+              <a
+                v-if="previewDocURLs[index]"
+                :href="previewDocURLs[index]"
+                target="_blank"
+                class="italic hover:text-blue-400 text-xs text-center block"
+              >
+                <p class="break-words w-24">{{ name }}</p>
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div class="flex justify-end mt-4">
           <div v-if="canEdit">
             <router-link
@@ -361,4 +510,13 @@ const canEdit = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.scrollbar-hidden {
+  overflow-x: auto;
+  scrollbar-width: none; /* For Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+</style>

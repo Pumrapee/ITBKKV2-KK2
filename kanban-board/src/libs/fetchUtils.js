@@ -1,3 +1,4 @@
+import { previewBinaryFile } from "./previewBinary"
 //function ที่ติดต่อ back-end.
 let tokenStorage = undefined
 let refresh_token = localStorage.getItem("refreshToken")
@@ -379,6 +380,75 @@ async function patchItem(url, newItem) {
   } catch (error) {}
 }
 
+async function uploadAttachment(url, file) {
+  getToken()
+  let response
+
+  const formData = new FormData()
+  formData.append("files", file)
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${tokenStorage}`,
+      },
+      body: formData,
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized")
+    }
+
+    const uploadedFile = await response.json()
+    return uploadedFile
+  } catch (error) {}
+}
+
+async function downloadAttachment(url) {
+  getToken()
+  let response
+
+  try {
+    response = await fetch(url, {
+      method: "GET",
+      headers: tokenIsNull(tokenStorage),
+    })
+
+    if (response.status === 200) {
+      console.log("test")
+      const blob = await response.blob()
+      console.log(blob)
+      return previewBinaryFile(blob)
+    } else {
+      console.log("test22")
+      return response.status
+    }
+  } catch (error) {}
+}
+
+async function getAttachment(url) {
+  getToken()
+  let data
+  try {
+    data = await fetch(url, {
+      method: "GET",
+      headers: tokenIsNull(tokenStorage),
+    })
+
+    if (data.status === 401) {
+      throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
+    }
+
+    // if (data.status === 403) {
+    //   router.push({ name: "forbidden" })
+    // }
+
+    const items = await data.json()
+
+    return items
+  } catch (error) {}
+}
 export {
   getItems,
   getItemById,
@@ -397,4 +467,7 @@ export {
   getBoardItems,
   patchItem,
   invitation,
+  uploadAttachment,
+  getAttachment,
+  downloadAttachment,
 }
