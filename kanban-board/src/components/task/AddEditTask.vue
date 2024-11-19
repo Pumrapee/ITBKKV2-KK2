@@ -1,12 +1,16 @@
 <script setup>
-import { defineProps, ref, watch, computed, defineEmits } from "vue"
+import { defineProps, ref, watch, computed, defineEmits, onMounted } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
+import { previewBinaryFile } from "../../libs/previewBinary"
+import { useRoute } from "vue-router"
+import { getItems, downloadAttachment } from "@/libs/fetchUtils"
 
 const props = defineProps({
   showModal: Boolean,
   task: Object,
+  getAttactment: Array,
   ownerBoard: String,
   editModeModal: Boolean,
   editDrop: Boolean,
@@ -17,12 +21,29 @@ const myLimit = useLimitStore()
 const myTask = useTaskStore()
 const editMode = ref(props.editModeModal)
 const newTask = ref({}) // Create a local copy of the task object
+const route = useRoute()
+
+const boardId = ref(route.params.id)
+const taskId = ref()
 const errorTask = ref({
   title: "",
   description: "",
   assignees: "",
   status: "",
 })
+
+// onMounted(() => {
+//   if (Array.isArray(props.getAttactment) && props.getAttactment.length > 0) {
+//     previewAdded(props.getAttactment)
+//   }
+// })
+
+// Files
+const uploadedFileNames = ref([])
+const previewURLs = ref([])
+const uploadedFiles = ref([])
+const attachmentFile = ref(props.getAttactment)
+const selectedFile = ref(null) // Selected file for the preview modal
 
 const addEditSave = (editTask) => {
   const editedTask = { ...editTask }
@@ -43,12 +64,19 @@ const addEditSave = (editTask) => {
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
   setTimeout(() => {
     editMode.value = false
+    uploadedFiles.value = []
+    previewURLs.value = []
+    uploadedFileNames.value = []
   }, 500)
-  emits("saveAddEdit", editedTask)
+  emits("saveAddEdit", editedTask, uploadedFiles.value)
 }
 
 const closeModal = () => {
   editMode.value = false
+  // Reset arrays
+  uploadedFiles.value = []
+  previewURLs.value = []
+  uploadedFileNames.value = []
   emits("closeModal")
 }
 
@@ -145,6 +173,8 @@ const changeTask = computed(() => {
 watch(props, () => {
   if (props.showModal) {
     Object.assign(newTask.value, props.task)
+    taskId.value = newTask.value.id
+    console.log(newTask.value)
   }
   if (props.editModeModal) {
     editMode.value = props.editModeModal
@@ -154,6 +184,99 @@ const canEdit = computed(() => {
   const userName = localStorage.getItem("user")
   return userName === props.ownerBoard
 })
+
+const preview = (event) => {
+  const files = event.target.files
+  console.log(files)
+
+  Array.from(files).forEach(async (file) => {
+    uploadedFiles.value.push(file)
+
+    // Push file name to the list
+    if (!uploadedFileNames.value.includes(file.name)) {
+      uploadedFileNames.value.push(file.name)
+
+      if (
+        file.name.endsWith(".png") ||
+        file.name.endsWith(".jpg") ||
+        file.name.endsWith(".jpeg") ||
+        file.name.endsWith(".gif")
+      ) {
+        previewURLs.value.push({ type: "media", url: previewBinaryFile(file) })
+      } else if (file.name.endsWith(".mp4") || file.name.endsWith(".avi")) {
+        previewURLs.value.push({ type: "video", url: previewBinaryFile(file) })
+      } else if (file.name.endsWith(".pdf")) {
+        previewURLs.value.push({ type: "PDF", url: previewBinaryFile(file) })
+      } else {
+        previewURLs.value.push({
+          type: "document",
+          url: previewBinaryFile(file),
+        })
+      }
+    }
+  })
+}
+
+const removeFile = (index) => {
+  uploadedFileNames.value.splice(index, 1) // Remove file name
+  previewURLs.value.splice(index, 1) // Remove image preview (if exists)
+}
+
+const previewAdded = async () => {
+  console.log(attachmentFile.value)
+
+  for (const attachment of attachmentFile.value) {
+    const previewUrl = await downloadAttachment(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+        taskId.value
+      }/attachments/${attachment.id}/download`
+    )
+
+    // Push filename and preview URL in the correct order
+    uploadedFileNames.value.push(attachment.filename)
+
+    if (
+      attachment.filename.endsWith(".png") ||
+      attachment.filename.endsWith(".jpg") ||
+      attachment.filename.endsWith(".jpeg") ||
+      attachment.filename.endsWith(".gif")
+    ) {
+      previewURLs.value.push({ type: "media", url: previewUrl })
+    } else if (
+      attachment.filename.endsWith(".mp4") ||
+      attachment.filename.endsWith(".avi")
+    ) {
+      previewURLs.value.push({ type: "video", url: previewUrl })
+    } else if (attachment.filename.endsWith(".pdf")) {
+      previewURLs.value.push({ type: "PDF", url: previewUrl })
+    } else {
+      previewURLs.value.push({ type: "document", url: previewUrl })
+    }
+    // previewURLs.value.push(previewUrl)
+
+    console.log(previewURLs.value)
+  }
+}
+watch(
+  () => props.getAttactment,
+  (newValue) => {
+    if (Array.isArray(newValue)) {
+      attachmentFile.value = newValue
+      taskId.value = route.params.taskId
+      previewAdded(newValue)
+    }
+  },
+  { immediate: true } // Run immediately on mount
+)
+
+const openPreview = (fileURL) => {
+  console.log(fileURL)
+  selectedFile.value = fileURL
+}
+
+const closePreview = () => {
+  selectedFile.value = null
+}
 </script>
 
 <template>
@@ -227,7 +350,7 @@ const canEdit = computed(() => {
               id="description"
               :readonly="!editMode"
               v-model="newTask.description"
-              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-72 textarea textarea-ghost"
+              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-60 textarea textarea-ghost scrollbar-hidden"
               :class="
                 newTask.description
                   ? 'bg-white text-black'
@@ -264,7 +387,7 @@ const canEdit = computed(() => {
                 id="assignees"
                 :readonly="!editMode"
                 v-model="newTask.assignees"
-                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-32 textarea textarea-ghost"
+                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-14 textarea textarea-ghost"
                 :class="
                   newTask.assignees
                     ? 'bg-white text-black'
@@ -272,7 +395,7 @@ const canEdit = computed(() => {
                 "
                 placeholder="Unassigned"
               ></textarea>
-              <div v-if="editMode" class="flex justify-between mt-1">
+              <div v-if="editMode" class="flex justify-between">
                 <p class="text-red-400 text-sm w-40">
                   {{ errorTask.assignees }}
                 </p>
@@ -288,7 +411,7 @@ const canEdit = computed(() => {
             </div>
 
             <div class="mb-4">
-              <label for="status" class="block text-black font-bold mb-2"
+              <label for="status" class="block text-black font-bold"
                 >Status</label
               >
               <select
@@ -308,7 +431,7 @@ const canEdit = computed(() => {
 
             <p v-if="editMode" class="text-red-400">{{ errorTask.status }}</p>
 
-            <div v-if="task?.id" class="mt-5">
+            <div v-if="task?.id">
               <p class="itbkk-timezone pl-3 font-semibold text-sm text-black">
                 Time Zone :
                 {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
@@ -325,6 +448,251 @@ const canEdit = computed(() => {
             <div v-else class="mt-5"></div>
           </div>
         </div>
+
+        <div class="mb-6" v-if="task?.id">
+          <label class="block font-bold mb-1">Attachments</label>
+          <input
+            type="file"
+            accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
+            multiple
+            :disabled="!editMode"
+            class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+            @change="preview"
+          />
+
+          <div
+            v-if="uploadedFileNames.length > 0"
+            class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
+          >
+            <div
+              v-for="(name, index) in uploadedFileNames"
+              :key="index"
+              class="relative flex flex-col items-center min-w-[120px] space-y-2"
+            >
+              <!-- Image Preview -->
+
+              <div class="relative w-16 h-16">
+                <img
+                  v-if="previewURLs[index]?.type === 'media'"
+                  :src="previewURLs[index].url"
+                  :alt="name"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                  @click="openPreview(previewURLs[index])"
+                />
+                <video
+                  v-else-if="previewURLs[index]?.type === 'video'"
+                  :src="previewURLs[index].url"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                  @click="openPreview(previewURLs[index])"
+                ></video>
+
+                <div
+                  v-else-if="previewURLs[index]?.type === 'PDF'"
+                  class="w-16 h-16 flex items-center justify-center border rounded-md"
+                  @click="openPreview(previewURLs[index])"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-8 h-8"
+                  >
+                    <!-- Background Rectangle -->
+                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                    <!-- Document Icon -->
+                    <path
+                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M34 14V22H42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <text
+                      x="32"
+                      y="36"
+                      text-anchor="middle"
+                      fill="#A0AEC0"
+                      font-size="10"
+                      font-family="Arial, sans-serif"
+                    >
+                      PDF
+                    </text>
+                  </svg>
+                </div>
+
+                <!-- Document Download -->
+                <a
+                  v-else-if="previewURLs[index]?.type === 'document'"
+                  :href="previewURLs[index].url"
+                  :download="name"
+                  class="w-16 h-16 flex items-center justify-center border rounded-md"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-8 h-8"
+                  >
+                    <!-- Background Rectangle -->
+                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                    <!-- Document Shape -->
+                    <path
+                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M34 14V22H42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+
+                    <!-- Lines in the document -->
+                    <line
+                      x1="25"
+                      y1="30"
+                      x2="37"
+                      y2="30"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="25"
+                      y1="36"
+                      x2="37"
+                      y2="36"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="25"
+                      y1="42"
+                      x2="33"
+                      y2="42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </a>
+                <!-- Delete Button -->
+                <button
+                  v-if="editMode"
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
+                  @click="removeFile(index)"
+                >
+                  <img src="/icons/delete.png" class="w-3 h-3" />
+                </button>
+
+                <!-- Download Button-->
+                <a
+                  v-if="!editMode"
+                  class="absolute top-1 right-1 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                  :href="previewURLs[index].url"
+                  :download="name"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-8 h-8"
+                  >
+                    <!-- Background Circle -->
+                    <circle cx="32" cy="32" r="30" fill="#f0f4ff" />
+                    <!-- Arrow -->
+                    <path
+                      d="M32 16v20"
+                      stroke="#4f46e5"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M24 32l8 8 8-8"
+                      stroke="#4f46e5"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <!-- Download Bar -->
+                    <line
+                      x1="20"
+                      y1="46"
+                      x2="44"
+                      y2="46"
+                      stroke="#4f46e5"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </a>
+              </div>
+
+              <!-- Document Preview -->
+              <!-- <a class="italic text-xs text-center block">
+                <p class="break-words w-24">{{ name }}</p>
+              </a> -->
+
+              <a
+                :href="previewURLs[index].url"
+                target="_blank"
+                class="italic hover:text-blue-400 text-xs text-center block"
+              >
+                <p class="break-words w-24">{{ name }}</p>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div
+          v-if="selectedFile"
+          class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          @click="closePreview"
+        >
+          <div class="relative bg-white p-4 rounded-lg shadow-lg" @click.stop>
+            <!-- Image Preview -->
+            <img
+              v-if="selectedFile.type === 'media'"
+              :src="selectedFile.url"
+              alt="Selected Preview"
+              class="w-full max-w-3xl max-h-[80vh] object-contain"
+            />
+            <!-- PDF Preview -->
+            <iframe
+              v-else-if="selectedFile.type === 'PDF'"
+              :src="selectedFile.url"
+              class="w-full h-[85vh]"
+              type="application/pdf"
+              frameborder="0"
+            ></iframe>
+            <!-- Video Preview -->
+            <video
+              v-else-if="selectedFile.type === 'video'"
+              :src="selectedFile.url"
+              class="w-full max-w-3xl max-h-[80vh] object-contain"
+              controls
+              autoplay
+            ></video>
+
+            <!-- Close Button -->
+            <button
+              class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
+              @click="closePreview"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
         <div class="flex justify-end mt-4">
           <div v-if="canEdit">
             <router-link
@@ -361,4 +729,13 @@ const canEdit = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.scrollbar-hidden {
+  overflow-x: auto;
+  scrollbar-width: none; /* For Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+</style>

@@ -14,6 +14,8 @@ import {
   Visibility,
   checkAndRefreshToken,
   editLimitStatus,
+  uploadAttachment,
+  getAttachment,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -56,6 +58,9 @@ const isPublic = ref(false)
 const showModalVisibility = ref(false)
 const originalIsPublic = ref(isPublic.value)
 
+//File
+const attachments = ref()
+
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
@@ -87,6 +92,16 @@ const openModalEdit = async (id, boolean) => {
       id
     )
     tasks.value = taskDetail
+
+    const attachment = await getAttachment(
+      `${import.meta.env.VITE_API_URL}v3/boards/${
+        boardId.value
+      }/tasks/${id}/attachments`
+    )
+
+    console.log(attachment)
+
+    attachments.value = attachment
 
     if (taskDetail.status === 404) {
       router.push({ name: "TaskNotFound" })
@@ -144,7 +159,7 @@ const openLimitModal = () => {
 
 //Close modal
 // Add Edit Modal
-const closeAddEdit = async (task) => {
+const closeAddEdit = async (task, file) => {
   myUser.setToken()
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -167,6 +182,17 @@ const closeAddEdit = async (task) => {
           status: task.status,
         }
       )
+
+      console.log(file)
+      for (const files of file) {
+        const uploadedFile = await uploadAttachment(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+            task.id
+          }/attachments`,
+          files
+        )
+        console.log("Uploaded file:", uploadedFile)
+      }
 
       if (statusCode === 200) {
         myTask.updateTask(editedItem)
@@ -1055,6 +1081,7 @@ async function fetchBoardData(id) {
   <AddEditTask
     :showModal="openModal"
     :task="tasks"
+    :getAttactment="attachments"
     :editModeModal="editMode"
     :ownerBoard="nameOwnerBoard"
     @saveAddEdit="closeAddEdit"
