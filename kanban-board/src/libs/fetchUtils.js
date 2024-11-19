@@ -419,6 +419,7 @@ async function downloadAttachment(url) {
       console.log("test")
       const blob = await response.blob()
       console.log(blob)
+      console.log(previewBinaryFile(blob))
       return previewBinaryFile(blob)
     } else {
       console.log("test22")
