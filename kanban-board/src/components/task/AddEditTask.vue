@@ -30,13 +30,8 @@ const errorTask = ref({
   description: "",
   assignees: "",
   status: "",
+  attachment: "",
 })
-
-// onMounted(() => {
-//   if (Array.isArray(props.getAttactment) && props.getAttactment.length > 0) {
-//     previewAdded(props.getAttactment)
-//   }
-// })
 
 // Files
 const uploadedFileNames = ref([])
@@ -44,6 +39,8 @@ const previewURLs = ref([])
 const uploadedFiles = ref([])
 const attachmentFile = ref(props.getAttactment)
 const selectedFile = ref(null) // Selected file for the preview modal
+const MAX_FILES = 10
+const MAX_FILE_SIZE = 20 * 1024 * 1024
 
 const addEditSave = (editTask) => {
   const editedTask = { ...editTask }
@@ -67,6 +64,7 @@ const addEditSave = (editTask) => {
     uploadedFiles.value = []
     previewURLs.value = []
     uploadedFileNames.value = []
+    errorTask.value.attachment = ""
   }, 500)
   emits("saveAddEdit", editedTask, uploadedFiles.value)
 }
@@ -77,6 +75,7 @@ const closeModal = () => {
   uploadedFiles.value = []
   previewURLs.value = []
   uploadedFileNames.value = []
+  errorTask.value.attachment = ""
   emits("closeModal")
 }
 
@@ -99,12 +98,15 @@ const changeTask = computed(() => {
     description: props.task.description,
     assignees: props.task.assignees,
     status: props.task.status,
+    attachments:
+      props.getAttactment?.map((attachment) => attachment.filename) || [],
   }
 
   const newTitle = trimAndCheckNull(newTask.value.title)
   const newDescription = trimAndCheckNull(newTask.value.description)
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
   const newStatus = newTask.value.status // รับค่า newStatus จากการเลือกของผู้ใช้
+  const newAttachments = uploadedFileNames.value
 
   // ตรวจสอบความยาวของ title, description, และ assignees
   const isTitleTooLong = newTitle?.length > 100
@@ -124,11 +126,16 @@ const changeTask = computed(() => {
     ? "Assignees exceeds the limit of 30 characters."
     : ""
 
+  const isAttachmentsUnchanged =
+    oldTask.attachments.length === newAttachments.length &&
+    oldTask.attachments.every((file) => newAttachments.includes(file))
+
   const isUnchanged =
     oldTask.title === newTitle &&
     oldTask.description === newDescription &&
     oldTask.assignees === newAssignees &&
-    oldTask.status === newStatus
+    oldTask.status === newStatus &&
+    isAttachmentsUnchanged
 
   if (myLimit.getLimit().taskLimitEnabled === true) {
     const statusCount = myTask.matchStatus(newStatus).length
@@ -158,7 +165,6 @@ const changeTask = computed(() => {
 
   const isStatusExceeded = errorTask.value.status !== ""
 
-  // ตรวจสอบเงื่อนไขทั้งหมดรวมถึงการเปลี่ยนแปลงของข้อมูล
   return (
     isTitleTooLong ||
     isDescriptionTooLong ||
@@ -187,34 +193,89 @@ const canEdit = computed(() => {
 
 const preview = (event) => {
   const files = event.target.files
+  errorTask.value.attachment = ""
+
+  const notAddedFiles = {
+    exceededMaxFiles: [],
+    exceededMaxSize: [],
+    duplicateFilenames: [],
+  }
   console.log(files)
 
-  Array.from(files).forEach(async (file) => {
+  Array.from(files).forEach(async (file, index) => {
+    // ไฟล์ที่ชื่อซ้ำ
+    if (uploadedFileNames.value.includes(file.name)) {
+      notAddedFiles.duplicateFilenames.push(file.name)
+      return
+    }
+
+    // ไฟล์ที่ขนาดเกิน
+    if (file.size > MAX_FILE_SIZE) {
+      notAddedFiles.exceededMaxSize.push(file.name)
+      return
+    }
+
+    // เกินจำนวนไฟล์ที่กำหนด
+    if (uploadedFileNames.value.length >= MAX_FILES) {
+      notAddedFiles.exceededMaxFiles.push(file.name)
+      return
+    }
+
+    uploadedFileNames.value.push(file.name)
     uploadedFiles.value.push(file)
 
-    // Push file name to the list
-    if (!uploadedFileNames.value.includes(file.name)) {
-      uploadedFileNames.value.push(file.name)
-
-      if (
-        file.name.endsWith(".png") ||
-        file.name.endsWith(".jpg") ||
-        file.name.endsWith(".jpeg") ||
-        file.name.endsWith(".gif")
-      ) {
-        previewURLs.value.push({ type: "media", url: previewBinaryFile(file) })
-      } else if (file.name.endsWith(".mp4") || file.name.endsWith(".avi")) {
-        previewURLs.value.push({ type: "video", url: previewBinaryFile(file) })
-      } else if (file.name.endsWith(".pdf")) {
-        previewURLs.value.push({ type: "PDF", url: previewBinaryFile(file) })
-      } else {
-        previewURLs.value.push({
-          type: "document",
-          url: previewBinaryFile(file),
-        })
+    if (
+      file.name.endsWith(".png") ||
+      file.name.endsWith(".jpg") ||
+      file.name.endsWith(".jpeg") ||
+      file.name.endsWith(".gif")
+    ) {
+      previewURLs.value.push({ type: "media", url: previewBinaryFile(file) })
+    } else if (file.name.endsWith(".txt")) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const textContent = event.target.result
+        previewURLs.value.push({ type: "txt", content: textContent })
       }
+      console.log(file)
+      reader.readAsText(file)
+    } else if (file.name.endsWith(".mp4") || file.name.endsWith(".avi")) {
+      previewURLs.value.push({ type: "video", url: previewBinaryFile(file) })
+    } else if (file.name.endsWith(".pdf")) {
+      previewURLs.value.push({ type: "PDF", url: previewBinaryFile(file) })
+    } else {
+      previewURLs.value.push({
+        type: "document",
+        url: previewBinaryFile(file),
+      })
     }
   })
+
+  // ตรวจสอบและอัปเดตข้อความแจ้งเตือน
+  if (notAddedFiles.exceededMaxFiles.length > 0) {
+    errorTask.value.attachment = `- Each task can have at most ${MAX_FILES} files.<br>`
+  }
+
+  if (notAddedFiles.exceededMaxSize.length > 0) {
+    errorTask.value.attachment += `- Each file cannot be larger than ${
+      MAX_FILE_SIZE / (1024 * 1024)
+    } MB.<br>`
+  }
+
+  if (notAddedFiles.duplicateFilenames.length > 0) {
+    errorTask.value.attachment += `- File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file.<br>`
+  }
+
+  if (
+    notAddedFiles.exceededMaxFiles.length > 0 ||
+    notAddedFiles.exceededMaxSize.length > 0
+  ) {
+    errorTask.value.attachment += `The following files are not added: ${[
+      ...notAddedFiles.exceededMaxFiles,
+      ...notAddedFiles.exceededMaxSize,
+      ...notAddedFiles.duplicateFilenames, //ยังไม่แน่ใจอันนี้ต้องรวมด้วยไหม
+    ].join(", ")}`
+  }
 }
 
 const removeFile = (index) => {
@@ -232,7 +293,6 @@ const previewAdded = async () => {
       }/attachments/${attachment.id}/download`
     )
 
-    // Push filename and preview URL in the correct order
     uploadedFileNames.value.push(attachment.filename)
 
     if (
@@ -249,25 +309,29 @@ const previewAdded = async () => {
       previewURLs.value.push({ type: "video", url: previewUrl })
     } else if (attachment.filename.endsWith(".pdf")) {
       previewURLs.value.push({ type: "PDF", url: previewUrl })
+    } else if (attachment.filename.endsWith(".txt")) {
+      try {
+        const response = await fetch(previewUrl)
+        if (response.ok) {
+          const blob = await response.blob()
+
+          const reader = new FileReader()
+          reader.onload = (event) => {
+            const textContent = event.target.result
+            previewURLs.value.push({ type: "txt", content: textContent })
+          }
+          reader.readAsText(blob)
+        }
+      } catch (error) {
+        console.error("Error reading .txt file:", error)
+      }
     } else {
       previewURLs.value.push({ type: "document", url: previewUrl })
     }
-    // previewURLs.value.push(previewUrl)
 
     console.log(previewURLs.value)
   }
 }
-watch(
-  () => props.getAttactment,
-  (newValue) => {
-    if (Array.isArray(newValue)) {
-      attachmentFile.value = newValue
-      taskId.value = route.params.taskId
-      previewAdded(newValue)
-    }
-  },
-  { immediate: true } // Run immediately on mount
-)
 
 const openPreview = (fileURL) => {
   console.log(fileURL)
@@ -277,6 +341,18 @@ const openPreview = (fileURL) => {
 const closePreview = () => {
   selectedFile.value = null
 }
+
+watch(
+  () => props.getAttactment,
+  (newValue) => {
+    if (Array.isArray(newValue)) {
+      attachmentFile.value = newValue
+      taskId.value = route.params.taskId
+      previewAdded(newValue)
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -286,7 +362,7 @@ const closePreview = () => {
       class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
     >
       <div
-        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl"
+        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl scrollbar-hidden"
       >
         <div
           class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b-2 pb-2"
@@ -451,14 +527,20 @@ const closePreview = () => {
 
         <div class="mb-6" v-if="task?.id">
           <label class="block font-bold mb-1">Attachments</label>
-          <input
-            type="file"
-            accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
-            multiple
-            :disabled="!editMode"
-            class="file-input file-input-bordered file-input-sm w-full max-w-xs"
-            @change="preview"
-          />
+          <div class="flex">
+            <input
+              type="file"
+              accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
+              multiple
+              :disabled="!editMode"
+              class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+              @change="preview"
+            />
+            <p
+              v-html="errorTask.attachment"
+              class="text-red-400 text-sm w-full pl-2 pt-1"
+            ></p>
+          </div>
 
           <div
             v-if="uploadedFileNames.length > 0"
@@ -470,7 +552,6 @@ const closePreview = () => {
               class="relative flex flex-col items-center min-w-[120px] space-y-2"
             >
               <!-- Image Preview -->
-
               <div class="relative w-16 h-16">
                 <img
                   v-if="previewURLs[index]?.type === 'media'"
@@ -485,6 +566,45 @@ const closePreview = () => {
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
                   @click="openPreview(previewURLs[index])"
                 ></video>
+
+                <div
+                  v-else-if="previewURLs[index]?.type === 'txt'"
+                  class="w-16 h-16 flex items-center justify-center border rounded-md bg-gray-100 cursor-pointer"
+                  @click="openPreview(previewURLs[index])"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-8 h-8"
+                  >
+                    <!-- Background Rectangle -->
+                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                    <!-- Document Icon -->
+                    <path
+                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M34 14V22H42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <text
+                      x="32"
+                      y="36"
+                      text-anchor="middle"
+                      fill="#A0AEC0"
+                      font-size="10"
+                      font-family="Arial, sans-serif"
+                    >
+                      TXT
+                    </text>
+                  </svg>
+                </div>
 
                 <div
                   v-else-if="previewURLs[index]?.type === 'PDF'"
@@ -642,7 +762,6 @@ const closePreview = () => {
               </a> -->
 
               <a
-                :href="previewURLs[index].url"
                 target="_blank"
                 class="italic hover:text-blue-400 text-xs text-center block"
               >
@@ -666,14 +785,7 @@ const closePreview = () => {
               alt="Selected Preview"
               class="w-full max-w-3xl max-h-[80vh] object-contain"
             />
-            <!-- PDF Preview -->
-            <iframe
-              v-else-if="selectedFile.type === 'PDF'"
-              :src="selectedFile.url"
-              class="w-full h-[85vh]"
-              type="application/pdf"
-              frameborder="0"
-            ></iframe>
+
             <!-- Video Preview -->
             <video
               v-else-if="selectedFile.type === 'video'"
@@ -682,6 +794,10 @@ const closePreview = () => {
               controls
               autoplay
             ></video>
+            <!-- Text Preview -->
+            <div v-if="selectedFile.type === 'txt'" class="text-preview">
+              <pre>{{ selectedFile.content }}</pre>
+            </div>
 
             <!-- Close Button -->
             <button
@@ -690,6 +806,35 @@ const closePreview = () => {
             >
               ✕
             </button>
+          </div>
+        </div>
+
+        <div
+          v-if="selectedFile && selectedFile.type === 'PDF'"
+          class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
+        >
+          <!-- Modal Container -->
+          <div class="bg-white w-[95%] h-[95%] relative rounded-lg shadow-lg">
+            <!-- Toolbar -->
+            <div
+              class="flex justify-end items-center px-4 py-2 bg-gray-100 border-b"
+            >
+              <button @click="closePreview" class="text-red-500 font-bold">
+                ✕
+              </button>
+            </div>
+
+            <!-- PDF Viewer -->
+            <div class="overflow-auto h-full">
+              <div class="pdf-container w-full h-full">
+                <iframe
+                  :src="selectedFile.url"
+                  class="w-full h-full"
+                  frameborder="0"
+                  type="application/pdf"
+                ></iframe>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -730,6 +875,11 @@ const closePreview = () => {
 </template>
 
 <style scoped>
+.itbkk-modal-task {
+  max-height: 90vh; /* Limit height of modal */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
 .scrollbar-hidden {
   overflow-x: auto;
   scrollbar-width: none; /* For Firefox */
@@ -737,5 +887,37 @@ const closePreview = () => {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none; /* For Chrome, Safari, and Opera */
+}
+
+.text-preview {
+  white-space: pre-wrap; /* Preserve line breaks */
+  font-family: monospace; /* ใช้ฟอนต์ที่เหมาะสำหรับแสดงข้อความ */
+  padding: 1rem; /* เพิ่มระยะห่างภายใน */
+  border: 1px solid #ddd; /* เส้นขอบ */
+  background: #f9f9f9; /* สีพื้นหลัง */
+  max-height: 85vh; /* ขนาดสูงสุดที่ 85% ของความสูงหน้าจอ */
+  max-width: 90vw; /* ขนาดกว้างสุดที่ 90% ของความกว้างหน้าจอ */
+  overflow: auto; /* แสดง scroll bar หากเนื้อหาเกินขอบเขต */
+  width: auto; /* ปรับขนาดตามเนื้อหา */
+  height: auto; /* ปรับขนาดตามเนื้อหา */
+  box-sizing: border-box; /* รวม padding และ border ในขนาด */
+}
+
+.pdf-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.fixed {
+  max-height: 100vh; /* Prevent the modal from exceeding viewport height */
 }
 </style>

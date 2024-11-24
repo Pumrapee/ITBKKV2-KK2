@@ -58,7 +58,7 @@ const isPublic = ref(false)
 const showModalVisibility = ref(false)
 const originalIsPublic = ref(isPublic.value)
 
-//File
+//Attachment
 const attachments = ref()
 
 onMounted(async () => {
@@ -102,6 +102,7 @@ const openModalEdit = async (id, boolean) => {
     console.log(attachment)
 
     attachments.value = attachment
+    console.log(attachments.value)
 
     if (taskDetail.status === 404) {
       router.push({ name: "TaskNotFound" })
@@ -183,7 +184,6 @@ const closeAddEdit = async (task, file) => {
         }
       )
 
-      console.log(file)
       for (const files of file) {
         const uploadedFile = await uploadAttachment(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
@@ -191,7 +191,7 @@ const closeAddEdit = async (task, file) => {
           }/attachments`,
           files
         )
-        console.log("Uploaded file:", uploadedFile)
+        console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
       }
 
       if (statusCode === 200) {
@@ -935,6 +935,7 @@ async function fetchBoardData(id) {
             <th class="pl-4 md:pl-20 hidden md:table-cell">No.</th>
             <th class="pl-4 md:pl-15">Title</th>
             <th class="pl-4 md:pl-20">Assignees</th>
+            <th class="pl-4 md:pl-20">Attachment</th>
             <th class="pl-4 md:pl-20">
               <button
                 @click="handleSortChange(sortStatus)"
@@ -975,7 +976,7 @@ async function fetchBoardData(id) {
           </tr>
         </thead>
 
-        <tbody class="" v-if="myTask.getTasks().length > 0">
+        <tbody v-if="myTask.getTasks().length > 0">
           <!-- row -->
           <tr
             v-for="(task, index) in filteredTasks"
@@ -997,12 +998,13 @@ async function fetchBoardData(id) {
                 </button>
               </router-link>
             </td>
-            <td class="itbkk-assignees pl-4">
+            <td class="itbkk-assignees pl-20">
               <p v-if="task.assignees">
                 {{ task.assignees }}
               </p>
               <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
             </td>
+            <td class="itbkk-attactment pl-4">{{}}</td>
             <td class="itbkk-status pl-4 md:pl-20">
               <div
                 class="shadow-md rounded-full p-2 text-black w-full md:w-36 text-center font-medium"
