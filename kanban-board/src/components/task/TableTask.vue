@@ -14,6 +14,9 @@ import {
   Visibility,
   checkAndRefreshToken,
   editLimitStatus,
+  uploadAttachment,
+  getAttachment,
+  removeAttachment,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -56,6 +59,10 @@ const isPublic = ref(false)
 const showModalVisibility = ref(false)
 const originalIsPublic = ref(isPublic.value)
 
+//Attachment
+const attachments = ref()
+const attachmentCounts = ref({})
+
 onMounted(async () => {
   myUser.setToken()
   expiredToken.value = false
@@ -87,6 +94,13 @@ const openModalEdit = async (id, boolean) => {
       id
     )
     tasks.value = taskDetail
+
+    const attachment = await getAttachment(
+      `${import.meta.env.VITE_API_URL}v3/boards/${
+        boardId.value
+      }/tasks/${id}/attachments`
+    )
+    attachments.value = attachment
 
     if (taskDetail.status === 404) {
       router.push({ name: "TaskNotFound" })
@@ -144,7 +158,7 @@ const openLimitModal = () => {
 
 //Close modal
 // Add Edit Modal
-const closeAddEdit = async (task) => {
+const closeAddEdit = async (task, file, deleteFiles) => {
   myUser.setToken()
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -169,6 +183,39 @@ const closeAddEdit = async (task) => {
       )
 
       if (statusCode === 200) {
+        //Delete
+        for (const deleted of deleteFiles) {
+          const deleteResponse = await removeAttachment(
+            `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+              task.id
+            }/attachments`,
+            deleted
+          )
+        }
+
+        const attachment = await getAttachment(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+            task.id
+          }/attachments`
+        )
+
+        const newFiles = file.filter(
+          (fileUpload) =>
+            !attachment.some(
+              (attachment) => attachment.filename === fileUpload.filename
+            )
+        )
+
+        //Upload
+        for (const files of newFiles) {
+          const uploadedFile = await uploadAttachment(
+            `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+              task.id
+            }/attachments`,
+            files.files
+          )
+          console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
+        }
         myTask.updateTask(editedItem)
         showAlert("The task has been updated", "success")
       }
@@ -194,6 +241,7 @@ const closeAddEdit = async (task) => {
       )
 
       if (statusCode === 201) {
+        attachmentCounts.value[newTask.id] = 0
         myTask.addTask(newTask)
         showAlert("The task has been successfully added", "success")
       }
@@ -435,8 +483,18 @@ const removeFilter = (index) => {
 //ตอน Edit status จะเปลี่ยนเมื่อมีการเปลี่ยนแปลง
 watch(
   () => myTask.getTasks(),
-  (newTasks) => {
+  async (newTasks) => {
     listTaskStore.value = newTasks
+    const counts = {}
+    for (const task of newTasks) {
+      const attachments = await getAttachment(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+          task.id
+        }/attachments`
+      )
+      counts[task.id] = attachments.length || 0
+    }
+    attachmentCounts.value = counts
   },
   { immediate: true }
 )
@@ -508,6 +566,17 @@ async function fetchBoardData(id) {
       const listTasks = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${id}/tasks`
       )
+
+      const counts = {}
+      for (const task of listTasks) {
+        const attachments = await getAttachment(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+            task.id
+          }/attachments`
+        )
+        counts[task.id] = attachments.length
+      }
+      attachmentCounts.value = counts // อัปเดตค่าหลังโหลดใหม่
 
       if (listTasks === 401) {
         expiredToken.value = true
@@ -909,6 +978,7 @@ async function fetchBoardData(id) {
             <th class="pl-4 md:pl-20 hidden md:table-cell">No.</th>
             <th class="pl-4 md:pl-15">Title</th>
             <th class="pl-4 md:pl-20">Assignees</th>
+            <th class="pl-4 md:pl-20">Attachment</th>
             <th class="pl-4 md:pl-20">
               <button
                 @click="handleSortChange(sortStatus)"
@@ -949,9 +1019,10 @@ async function fetchBoardData(id) {
           </tr>
         </thead>
 
-        <tbody class="" v-if="myTask.getTasks().length > 0">
+        <tbody v-if="myTask.getTasks().length > 0">
           <!-- row -->
           <tr
+            v-if="filteredTasks.length > 0"
             v-for="(task, index) in filteredTasks"
             :key="task.id"
             class="itbkk-item"
@@ -971,11 +1042,22 @@ async function fetchBoardData(id) {
                 </button>
               </router-link>
             </td>
-            <td class="itbkk-assignees pl-4">
+            <td class="itbkk-assignees pl-20">
               <p v-if="task.assignees">
                 {{ task.assignees }}
               </p>
               <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
+            </td>
+            <td class="itbkk-attactment pl-14 font-medium">
+              <div
+                class="w-8 h-8 bg-slate-500 opacity-50 text-white font-bold rounded-full flex items-center justify-center mx-auto"
+              >
+                {{
+                  attachmentCounts[task.id] !== 0
+                    ? attachmentCounts[task.id]
+                    : "-"
+                }}
+              </div>
             </td>
             <td class="itbkk-status pl-4 md:pl-20">
               <div
@@ -1038,6 +1120,12 @@ async function fetchBoardData(id) {
               </div>
             </td>
           </tr>
+
+          <tr v-else>
+            <td colspan="" class="text-center py-4 text-gray-500 font-medium">
+              No task
+            </td>
+          </tr>
         </tbody>
 
         <tbody v-else>
@@ -1055,6 +1143,7 @@ async function fetchBoardData(id) {
   <AddEditTask
     :showModal="openModal"
     :task="tasks"
+    :getAttactment="attachments"
     :editModeModal="editMode"
     :ownerBoard="nameOwnerBoard"
     @saveAddEdit="closeAddEdit"
@@ -1109,5 +1198,9 @@ async function fetchBoardData(id) {
 .button-container {
   position: relative;
   display: inline-block;
+}
+
+.table-fixed {
+  table-layout: fixed;
 }
 </style>
