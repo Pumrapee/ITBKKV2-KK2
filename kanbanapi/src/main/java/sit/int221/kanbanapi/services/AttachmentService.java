@@ -49,6 +49,11 @@ public class AttachmentService {
     }
 
     public FileUploadResponseDTO uploadAttachments(Integer taskId, MultipartFile[] files) {
+        // Create new directory
+        java.io.File newUploadDir = new java.io.File(uploadDir);
+        if (!newUploadDir.exists()) {
+            newUploadDir.mkdirs();
+        }
         // Fetch current attachments
         List<Attachment> existingAttachments = getAttachmentsByTaskId(taskId);
         if (existingAttachments.size() >= MAX_FILES) {
