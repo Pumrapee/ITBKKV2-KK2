@@ -80,12 +80,12 @@ onMounted(async () => {
       myBoard.getBoardCollab().length === 0
     ) {
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-    } else if (
-      myBoard.getBoards().length === 1 &&
-      myBoard.navBoard &&
-      myBoard.getBoardCollab().length === 0
-    ) {
-      router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
+    // } else if (
+    //   myBoard.getBoards().length === 1 &&
+    //   myBoard.navBoard &&
+    //   myBoard.getBoardCollab().length === 0
+    // ) {
+    //   router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
     } else if (myBoard.navBoard) {
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false

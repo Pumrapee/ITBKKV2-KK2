@@ -416,13 +416,9 @@ async function downloadAttachment(url) {
     })
 
     if (response.status === 200) {
-      console.log("test")
       const blob = await response.blob()
-      console.log(blob)
-      console.log(previewBinaryFile(blob))
       return previewBinaryFile(blob)
     } else {
-      console.log("test22")
       return response.status
     }
   } catch (error) {}
@@ -441,15 +437,27 @@ async function getAttachment(url) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
 
-    // if (data.status === 403) {
-    //   router.push({ name: "forbidden" })
-    // }
-
     const items = await data.json()
 
     return items
   } catch (error) {}
 }
+
+
+async function removeAttachment(url, id) {
+  //DELETE Method
+  getToken()
+  try {
+    const res = await fetch(`${url}/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${tokenStorage}`,
+      },
+    })
+    return res.status
+  } catch (error) {}
+}
+
 export {
   getItems,
   getItemById,
@@ -471,4 +479,5 @@ export {
   uploadAttachment,
   getAttachment,
   downloadAttachment,
+  removeAttachment
 }

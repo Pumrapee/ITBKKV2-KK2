@@ -16,6 +16,7 @@ import {
   editLimitStatus,
   uploadAttachment,
   getAttachment,
+  removeAttachment,
 } from "@/libs/fetchUtils"
 import { defineEmits, computed, ref, watch, onMounted } from "vue"
 import AddEditTask from "./AddEditTask.vue"
@@ -60,6 +61,7 @@ const originalIsPublic = ref(isPublic.value)
 
 //Attachment
 const attachments = ref()
+const attachmentCounts = ref({})
 
 onMounted(async () => {
   myUser.setToken()
@@ -98,11 +100,7 @@ const openModalEdit = async (id, boolean) => {
         boardId.value
       }/tasks/${id}/attachments`
     )
-
-    console.log(attachment)
-
     attachments.value = attachment
-    console.log(attachments.value)
 
     if (taskDetail.status === 404) {
       router.push({ name: "TaskNotFound" })
@@ -160,7 +158,7 @@ const openLimitModal = () => {
 
 //Close modal
 // Add Edit Modal
-const closeAddEdit = async (task, file) => {
+const closeAddEdit = async (task, file, deleteFiles) => {
   myUser.setToken()
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -184,17 +182,40 @@ const closeAddEdit = async (task, file) => {
         }
       )
 
-      for (const files of file) {
-        const uploadedFile = await uploadAttachment(
+      if (statusCode === 200) {
+        //Delete
+        for (const deleted of deleteFiles) {
+          const deleteResponse = await removeAttachment(
+            `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+              task.id
+            }/attachments`,
+            deleted
+          )
+        }
+
+        const attachment = await getAttachment(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
             task.id
-          }/attachments`,
-          files
+          }/attachments`
         )
-        console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
-      }
 
-      if (statusCode === 200) {
+        const newFiles = file.filter(
+          (fileUpload) =>
+            !attachment.some(
+              (attachment) => attachment.filename === fileUpload.filename
+            )
+        )
+
+        //Upload
+        for (const files of newFiles) {
+          const uploadedFile = await uploadAttachment(
+            `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+              task.id
+            }/attachments`,
+            files.files
+          )
+          console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
+        }
         myTask.updateTask(editedItem)
         showAlert("The task has been updated", "success")
       }
@@ -220,6 +241,7 @@ const closeAddEdit = async (task, file) => {
       )
 
       if (statusCode === 201) {
+        attachmentCounts.value[newTask.id] = 0
         myTask.addTask(newTask)
         showAlert("The task has been successfully added", "success")
       }
@@ -461,8 +483,18 @@ const removeFilter = (index) => {
 //ตอน Edit status จะเปลี่ยนเมื่อมีการเปลี่ยนแปลง
 watch(
   () => myTask.getTasks(),
-  (newTasks) => {
+  async (newTasks) => {
     listTaskStore.value = newTasks
+    const counts = {}
+    for (const task of newTasks) {
+      const attachments = await getAttachment(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+          task.id
+        }/attachments`
+      )
+      counts[task.id] = attachments.length || 0
+    }
+    attachmentCounts.value = counts
   },
   { immediate: true }
 )
@@ -534,6 +566,17 @@ async function fetchBoardData(id) {
       const listTasks = await getItems(
         `${import.meta.env.VITE_API_URL}v3/boards/${id}/tasks`
       )
+
+      const counts = {}
+      for (const task of listTasks) {
+        const attachments = await getAttachment(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+            task.id
+          }/attachments`
+        )
+        counts[task.id] = attachments.length
+      }
+      attachmentCounts.value = counts // อัปเดตค่าหลังโหลดใหม่
 
       if (listTasks === 401) {
         expiredToken.value = true
@@ -979,6 +1022,7 @@ async function fetchBoardData(id) {
         <tbody v-if="myTask.getTasks().length > 0">
           <!-- row -->
           <tr
+            v-if="filteredTasks.length > 0"
             v-for="(task, index) in filteredTasks"
             :key="task.id"
             class="itbkk-item"
@@ -1004,7 +1048,17 @@ async function fetchBoardData(id) {
               </p>
               <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
             </td>
-            <td class="itbkk-attactment pl-4">{{}}</td>
+            <td class="itbkk-attactment pl-14 font-medium">
+              <div
+                class="w-8 h-8 bg-slate-500 opacity-50 text-white font-bold rounded-full flex items-center justify-center mx-auto"
+              >
+                {{
+                  attachmentCounts[task.id] !== 0
+                    ? attachmentCounts[task.id]
+                    : "-"
+                }}
+              </div>
+            </td>
             <td class="itbkk-status pl-4 md:pl-20">
               <div
                 class="shadow-md rounded-full p-2 text-black w-full md:w-36 text-center font-medium"
@@ -1064,6 +1118,12 @@ async function fetchBoardData(id) {
                   </li>
                 </ul>
               </div>
+            </td>
+          </tr>
+
+          <tr v-else>
+            <td colspan="" class="text-center py-4 text-gray-500 font-medium">
+              No task
             </td>
           </tr>
         </tbody>
@@ -1138,5 +1198,9 @@ async function fetchBoardData(id) {
 .button-container {
   position: relative;
   display: inline-block;
+}
+
+.table-fixed {
+  table-layout: fixed;
 }
 </style>

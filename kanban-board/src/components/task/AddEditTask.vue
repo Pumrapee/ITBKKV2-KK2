@@ -5,7 +5,7 @@ import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
 import { previewBinaryFile } from "../../libs/previewBinary"
 import { useRoute } from "vue-router"
-import { getItems, downloadAttachment } from "@/libs/fetchUtils"
+import { downloadAttachment } from "@/libs/fetchUtils"
 
 const props = defineProps({
   showModal: Boolean,
@@ -34,11 +34,10 @@ const errorTask = ref({
 })
 
 // Files
-const uploadedFileNames = ref([])
-const previewURLs = ref([])
-const uploadedFiles = ref([])
+const uploadedFilesData = ref([])
 const attachmentFile = ref(props.getAttactment)
 const selectedFile = ref(null) // Selected file for the preview modal
+const deleteFiles = ref([])
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 20 * 1024 * 1024
 
@@ -61,20 +60,21 @@ const addEditSave = (editTask) => {
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
   setTimeout(() => {
     editMode.value = false
-    uploadedFiles.value = []
-    previewURLs.value = []
-    uploadedFileNames.value = []
+    uploadedFilesData.value = []
+    deleteFiles.value = []
     errorTask.value.attachment = ""
-  }, 500)
-  emits("saveAddEdit", editedTask, uploadedFiles.value)
+  }, 1500)
+
+  console.log(uploadedFilesData.value)
+
+  emits("saveAddEdit", editedTask, uploadedFilesData.value, deleteFiles.value)
 }
 
 const closeModal = () => {
   editMode.value = false
   // Reset arrays
-  uploadedFiles.value = []
-  previewURLs.value = []
-  uploadedFileNames.value = []
+  uploadedFilesData.value = []
+  deleteFiles.value = []
   errorTask.value.attachment = ""
   emits("closeModal")
 }
@@ -105,8 +105,8 @@ const changeTask = computed(() => {
   const newTitle = trimAndCheckNull(newTask.value.title)
   const newDescription = trimAndCheckNull(newTask.value.description)
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
-  const newStatus = newTask.value.status // รับค่า newStatus จากการเลือกของผู้ใช้
-  const newAttachments = uploadedFileNames.value
+  const newStatus = newTask.value.status
+  const newAttachments = uploadedFilesData.value.map((file) => file.filename)
 
   // ตรวจสอบความยาวของ title, description, และ assignees
   const isTitleTooLong = newTitle?.length > 100
@@ -128,7 +128,7 @@ const changeTask = computed(() => {
 
   const isAttachmentsUnchanged =
     oldTask.attachments.length === newAttachments.length &&
-    oldTask.attachments.every((file) => newAttachments.includes(file))
+    oldTask.attachments.every((filename) => newAttachments.includes(filename))
 
   const isUnchanged =
     oldTask.title === newTitle &&
@@ -204,7 +204,7 @@ const preview = (event) => {
 
   Array.from(files).forEach(async (file, index) => {
     // ไฟล์ที่ชื่อซ้ำ
-    if (uploadedFileNames.value.includes(file.name)) {
+    if (uploadedFilesData.value.some((f) => f.filename === file.name)) {
       notAddedFiles.duplicateFilenames.push(file.name)
       return
     }
@@ -216,39 +216,47 @@ const preview = (event) => {
     }
 
     // เกินจำนวนไฟล์ที่กำหนด
-    if (uploadedFileNames.value.length >= MAX_FILES) {
+    if (uploadedFilesData.value.length >= MAX_FILES) {
       notAddedFiles.exceededMaxFiles.push(file.name)
       return
     }
 
-    uploadedFileNames.value.push(file.name)
-    uploadedFiles.value.push(file)
-
+    console.log(file)
+    const previewData = {
+      filename: file.name,
+      files: file,
+      type: "document",
+      url: "",
+      content: null,
+    }
     if (
       file.name.endsWith(".png") ||
       file.name.endsWith(".jpg") ||
       file.name.endsWith(".jpeg") ||
       file.name.endsWith(".gif")
     ) {
-      previewURLs.value.push({ type: "media", url: previewBinaryFile(file) })
+      previewData.type = "media"
+      previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".txt")) {
       const reader = new FileReader()
       reader.onload = (event) => {
         const textContent = event.target.result
-        previewURLs.value.push({ type: "txt", content: textContent })
+        previewData.type = "txt"
+        previewData.content = textContent
       }
       console.log(file)
       reader.readAsText(file)
     } else if (file.name.endsWith(".mp4") || file.name.endsWith(".avi")) {
-      previewURLs.value.push({ type: "video", url: previewBinaryFile(file) })
+      previewData.type = "video"
+      previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".pdf")) {
-      previewURLs.value.push({ type: "PDF", url: previewBinaryFile(file) })
+      previewData.type = "PDF"
+      previewData.url = previewBinaryFile(file)
     } else {
-      previewURLs.value.push({
-        type: "document",
-        url: previewBinaryFile(file),
-      })
+      previewData.type = "document"
+      previewData.url = previewBinaryFile(file)
     }
+    uploadedFilesData.value.push(previewData)
   })
 
   // ตรวจสอบและอัปเดตข้อความแจ้งเตือน
@@ -278,9 +286,34 @@ const preview = (event) => {
   }
 }
 
-const removeFile = (index) => {
-  uploadedFileNames.value.splice(index, 1) // Remove file name
-  previewURLs.value.splice(index, 1) // Remove image preview (if exists)
+const removeFile = async (index) => {
+  const fileToRemove = uploadedFilesData.value[index].filename
+  console.log(fileToRemove)
+  console.log(attachmentFile.value)
+
+  const attachment = attachmentFile.value
+    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
+    : null
+
+  const attachmentId = attachment?.id
+  console.log(attachmentId)
+
+  if (!attachmentId) {
+    // ลบไฟล์ที่เพิ่มใหม่ (local files)
+    uploadedFilesData.value.splice(index, 1)
+    console.log(uploadedFilesData.value)
+    console.log("File removed locally:", fileToRemove)
+    return
+  }
+
+  if (attachmentId) {
+    // ลบไฟล์ที่ BE
+    uploadedFilesData.value.splice(index, 1)
+    console.log(uploadedFilesData.value)
+
+    deleteFiles.value.push(attachmentId)
+    console.log(deleteFiles.value)
+  }
 }
 
 const previewAdded = async () => {
@@ -293,7 +326,15 @@ const previewAdded = async () => {
       }/attachments/${attachment.id}/download`
     )
 
-    uploadedFileNames.value.push(attachment.filename)
+    console.log(previewUrl)
+
+    const previewData = {
+      filename: attachment.filename,
+      files: null,
+      type: "document",
+      url: previewUrl,
+      content: null,
+    }
 
     if (
       attachment.filename.endsWith(".png") ||
@@ -301,14 +342,14 @@ const previewAdded = async () => {
       attachment.filename.endsWith(".jpeg") ||
       attachment.filename.endsWith(".gif")
     ) {
-      previewURLs.value.push({ type: "media", url: previewUrl })
+      previewData.type = "media"
     } else if (
       attachment.filename.endsWith(".mp4") ||
       attachment.filename.endsWith(".avi")
     ) {
-      previewURLs.value.push({ type: "video", url: previewUrl })
+      previewData.type = "video"
     } else if (attachment.filename.endsWith(".pdf")) {
-      previewURLs.value.push({ type: "PDF", url: previewUrl })
+      previewData.type = "PDF"
     } else if (attachment.filename.endsWith(".txt")) {
       try {
         const response = await fetch(previewUrl)
@@ -318,7 +359,8 @@ const previewAdded = async () => {
           const reader = new FileReader()
           reader.onload = (event) => {
             const textContent = event.target.result
-            previewURLs.value.push({ type: "txt", content: textContent })
+            previewData.type = "txt"
+            previewData.content = textContent
           }
           reader.readAsText(blob)
         }
@@ -326,10 +368,10 @@ const previewAdded = async () => {
         console.error("Error reading .txt file:", error)
       }
     } else {
-      previewURLs.value.push({ type: "document", url: previewUrl })
+      previewData.type = "document"
     }
 
-    console.log(previewURLs.value)
+    uploadedFilesData.value.push(previewData)
   }
 }
 
@@ -532,7 +574,7 @@ watch(
               type="file"
               accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
               multiple
-              :disabled="!editMode"
+              :disabled="!editMode || uploadedFilesData.length === 10"
               class="file-input file-input-bordered file-input-sm w-full max-w-xs"
               @change="preview"
             />
@@ -543,34 +585,34 @@ watch(
           </div>
 
           <div
-            v-if="uploadedFileNames.length > 0"
+            v-if="uploadedFilesData.length > 0"
             class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
           >
             <div
-              v-for="(name, index) in uploadedFileNames"
+              v-for="(file, index) in uploadedFilesData"
               :key="index"
               class="relative flex flex-col items-center min-w-[120px] space-y-2"
             >
               <!-- Image Preview -->
               <div class="relative w-16 h-16">
                 <img
-                  v-if="previewURLs[index]?.type === 'media'"
-                  :src="previewURLs[index].url"
-                  :alt="name"
+                  v-if="file.type === 'media'"
+                  :src="file.url"
+                  :alt="file.filename"
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
-                  @click="openPreview(previewURLs[index])"
+                  @click="openPreview(file)"
                 />
                 <video
-                  v-else-if="previewURLs[index]?.type === 'video'"
-                  :src="previewURLs[index].url"
+                  v-if="file.type === 'video'"
+                  :src="file.url"
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
-                  @click="openPreview(previewURLs[index])"
+                  @click="openPreview(file)"
                 ></video>
 
                 <div
-                  v-else-if="previewURLs[index]?.type === 'txt'"
+                  v-if="file.type === 'txt'"
                   class="w-16 h-16 flex items-center justify-center border rounded-md bg-gray-100 cursor-pointer"
-                  @click="openPreview(previewURLs[index])"
+                  @click="openPreview(file)"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -607,9 +649,9 @@ watch(
                 </div>
 
                 <div
-                  v-else-if="previewURLs[index]?.type === 'PDF'"
+                  v-if="file.type === 'PDF'"
                   class="w-16 h-16 flex items-center justify-center border rounded-md"
-                  @click="openPreview(previewURLs[index])"
+                  @click="openPreview(file)"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -647,9 +689,9 @@ watch(
 
                 <!-- Document Download -->
                 <a
-                  v-else-if="previewURLs[index]?.type === 'document'"
-                  :href="previewURLs[index].url"
-                  :download="name"
+                  v-if="file.type === 'document'"
+                  :href="file.url"
+                  :download="file.filename"
                   class="w-16 h-16 flex items-center justify-center border rounded-md"
                 >
                   <svg
@@ -708,7 +750,7 @@ watch(
                 <button
                   v-if="editMode"
                   class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
-                  @click="removeFile(index)"
+                  @click="removeFile(index, name)"
                 >
                   <img src="/icons/delete.png" class="w-3 h-3" />
                 </button>
@@ -717,8 +759,8 @@ watch(
                 <a
                   v-if="!editMode"
                   class="absolute top-1 right-1 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                  :href="previewURLs[index].url"
-                  :download="name"
+                  :href="file.url"
+                  :download="file.filename"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -761,11 +803,8 @@ watch(
                 <p class="break-words w-24">{{ name }}</p>
               </a> -->
 
-              <a
-                target="_blank"
-                class="italic hover:text-blue-400 text-xs text-center block"
-              >
-                <p class="break-words w-24">{{ name }}</p>
+              <a target="_blank" class="italic text-xs text-center block">
+                <p class="break-words w-24">{{ file.filename }}</p>
               </a>
             </div>
           </div>
@@ -795,8 +834,29 @@ watch(
               autoplay
             ></video>
             <!-- Text Preview -->
-            <div v-if="selectedFile.type === 'txt'" class="text-preview">
-              <pre>{{ selectedFile.content }}</pre>
+            <div v-else-if="selectedFile.type === 'txt'" class="text-preview">
+              <pre v-if="selectedFile.content">
+    {{ selectedFile.content }}
+  </pre
+              >
+              <div
+                v-else
+                class="w-full h-64 flex items-center justify-center border border-gray-300 bg-gray-100"
+              >
+                <p class="text-gray-500 text-center">
+                  No content available in this file.
+                </p>
+              </div>
+            </div>
+
+            <!-- Default Preview -->
+            <div
+              v-else
+              class="w-full h-98 flex items-center justify-center border border-gray-300 bg-gray-100"
+            >
+              <p class="text-gray-500 text-center">
+                No content available for preview.
+              </p>
             </div>
 
             <!-- Close Button -->
