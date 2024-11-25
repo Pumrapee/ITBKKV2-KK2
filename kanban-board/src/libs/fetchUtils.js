@@ -450,6 +450,26 @@ async function getAttachment(url) {
     return items
   } catch (error) {}
 }
+async function removeAttachment(url, attachmentId) {
+  getToken() // ดึง Token จาก Local Storage
+  try {
+    const response = await fetch(`${url}/${attachmentId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${tokenStorage}`,
+      },
+    });
+
+   
+
+    console.log("Attachment removed successfully");
+    return response.status
+  } catch (error) {
+    console.error("Error removing attachment:", error);
+    return 500
+  }
+}
+
 export {
   getItems,
   getItemById,
@@ -471,4 +491,5 @@ export {
   uploadAttachment,
   getAttachment,
   downloadAttachment,
+  removeAttachment,
 }

@@ -5,7 +5,7 @@ import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
 import { previewBinaryFile } from "../../libs/previewBinary"
 import { useRoute } from "vue-router"
-import { getItems, downloadAttachment } from "@/libs/fetchUtils"
+import { getItems, downloadAttachment, removeAttachment } from "@/libs/fetchUtils"
 
 const props = defineProps({
   showModal: Boolean,
@@ -278,10 +278,45 @@ const preview = (event) => {
   }
 }
 
-const removeFile = (index) => {
-  uploadedFileNames.value.splice(index, 1) // Remove file name
-  previewURLs.value.splice(index, 1) // Remove image preview (if exists)
-}
+const removeFile = async (index) => {
+  const fileToRemove = uploadedFileNames.value[index];
+
+  // ตรวจสอบว่า attachmentFile.value มีค่าหรือไม่ และเป็นอาร์เรย์
+  const attachment = Array.isArray(attachmentFile.value)
+    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
+    : null;
+
+  const attachmentId = attachment?.id;
+
+  if (!attachmentId) {
+    // ลบไฟล์ที่เพิ่มใหม่ (local files)
+    uploadedFiles.value.splice(index, 1);
+    uploadedFileNames.value.splice(index, 1);
+    previewURLs.value.splice(index, 1);
+    console.log("File removed locally:", fileToRemove);
+    return;
+  }
+
+  // ลบไฟล์ใน Back-end
+  const url = `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${taskId.value}/attachments`;
+  const deleteResponse = await removeAttachment(url, attachmentId);
+
+  if (deleteResponse === 200) {
+    // อัปเดต UI หลังลบสำเร็จ
+    uploadedFileNames.value.splice(index, 1);
+    previewURLs.value.splice(index, 1);
+    attachmentFile.value = attachmentFile.value.filter(
+      (file) => file.id !== attachmentId
+    );
+    console.log("Attachment removed successfully:", fileToRemove);
+    
+  } else if (deleteResponse === 404) {
+    showAlert("Attachment not found.", "error");
+  } else {
+    showAlert("Failed to remove the attachment. Please try again.", "error");
+  }
+};
+
 
 const previewAdded = async () => {
   console.log(attachmentFile.value)
