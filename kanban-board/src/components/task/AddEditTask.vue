@@ -63,7 +63,7 @@ const addEditSave = (editTask) => {
     uploadedFilesData.value = []
     deleteFiles.value = []
     errorTask.value.attachment = ""
-  }, 1500)
+  }, 2000)
 
   console.log(uploadedFilesData.value)
 
@@ -237,25 +237,27 @@ const preview = (event) => {
     ) {
       previewData.type = "media"
       previewData.url = previewBinaryFile(file)
-    } else if (file.name.endsWith(".txt")) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const textContent = event.target.result
-        previewData.type = "txt"
-        previewData.content = textContent
-      }
-      console.log(file)
-      reader.readAsText(file)
     } else if (file.name.endsWith(".mp4") || file.name.endsWith(".avi")) {
       previewData.type = "video"
       previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".pdf")) {
       previewData.type = "PDF"
       previewData.url = previewBinaryFile(file)
+    } else if (file.name.endsWith(".txt")) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        previewData.type = "txt"
+        previewData.content = event.target.result || "This file is empty."
+        uploadedFilesData.value = [...uploadedFilesData.value, previewData]
+      }
+      reader.readAsText(file)
+      return
     } else {
       previewData.type = "document"
       previewData.url = previewBinaryFile(file)
     }
+
+    console.log(previewData)
     uploadedFilesData.value.push(previewData)
   })
 
