@@ -206,16 +206,19 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             )
         )
 
+        console.log(newFiles)
+
         //Upload
-        for (const files of newFiles) {
-          const uploadedFile = await uploadAttachment(
-            `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-              task.id
-            }/attachments`,
-            files.files
-          )
-          console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
-        }
+        // for (const files of newFiles) {
+        const uploadedFile = await uploadAttachment(
+          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+            task.id
+          }/attachments`,
+          // files.files
+          newFiles
+        )
+        console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
+        // }
         myTask.updateTask(editedItem)
         showAlert("The task has been updated", "success")
       }

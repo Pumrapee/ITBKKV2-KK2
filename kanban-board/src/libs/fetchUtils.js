@@ -385,7 +385,9 @@ async function uploadAttachment(url, file) {
   let response
 
   const formData = new FormData()
-  formData.append("files", file)
+  file.forEach((fileUpload) => {
+    formData.append("files", fileUpload.files)
+  })
 
   try {
     response = await fetch(url, {
@@ -443,7 +445,6 @@ async function getAttachment(url) {
   } catch (error) {}
 }
 
-
 async function removeAttachment(url, id) {
   //DELETE Method
   getToken()
@@ -479,5 +480,5 @@ export {
   uploadAttachment,
   getAttachment,
   downloadAttachment,
-  removeAttachment
+  removeAttachment,
 }
