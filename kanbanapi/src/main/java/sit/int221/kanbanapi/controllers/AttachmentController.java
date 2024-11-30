@@ -78,5 +78,16 @@ public class AttachmentController {
         attachmentService.deleteAttachment(attachmentId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{attachmentId}/thumbnail")
+    public ResponseEntity<byte[]> getThumbnail(
+            @PathVariable Integer taskId,
+            @PathVariable Integer attachmentId) {
+        Attachment attachment = attachmentService.getAttachment(taskId, attachmentId);
+        byte[] thumbnailBytes = attachmentService.generateThumbnail(attachment);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(thumbnailBytes);
+    }
 }
 
