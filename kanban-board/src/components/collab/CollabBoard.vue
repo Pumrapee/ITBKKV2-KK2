@@ -15,7 +15,6 @@ import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "../collab/AddCollabBoard.vue"
 import { showAlert } from "../../libs/alertUtils"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
-import router from "@/router"
 
 //store
 const myBoard = useBoardStore()
@@ -180,13 +179,6 @@ const closeAddCollab = async (newCollab) => {
     openModal.value = false
   }
 }
-
-// const sentInvitation = () => {
-//   myUser.accessDenied()
-//   localStorage.clear()
-//   localStorage.setItem("user", "Guest")
-//   router.push({ name: "invitations", params: { id: boardId.value } })
-// }
 
 const closeModal = () => {
   openModal.value = false

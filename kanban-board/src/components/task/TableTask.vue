@@ -100,6 +100,7 @@ const openModalEdit = async (id, boolean) => {
         boardId.value
       }/tasks/${id}/attachments`
     )
+
     attachments.value = attachment
 
     if (taskDetail.status === 404) {
@@ -209,16 +210,14 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         console.log(newFiles)
 
         //Upload
-        // for (const files of newFiles) {
         const uploadedFile = await uploadAttachment(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
             task.id
           }/attachments`,
-          // files.files
           newFiles
         )
         console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
-        // }
+
         myTask.updateTask(editedItem)
         showAlert("The task has been updated", "success")
       }
