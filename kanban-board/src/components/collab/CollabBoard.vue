@@ -325,23 +325,21 @@ const confirmAccessRightChange = async () => {
         </ul>
       </div>
 
-      <div
-        class="flex items-center justify-center w-full md:w-auto lg:justify-end"
-      >
+      <div class="flex flex-row justify-center lg:justify-end">
         <RouterLink :to="{ name: 'task' }">
           <button
-            class="itbkk-button-home btn mr-2 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
+            class="itbkk-button-home btn ml-10 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
           >
             <img src="/icons/home.png" class="w-4 mr-1" /> Home
           </button>
         </RouterLink>
 
         <div
-          class="items-center justify-center w-full md:w-auto lg:justify-end relative group"
+          class="justify-center w-full md:w-auto lg:justify-end relative group"
         >
           <button
             @click="openModalAdd"
-            class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-12 md:ml-2"
             :disabled="disabledIfNotOwner"
           >
             <img src="/icons/plus.png" class="w-4" />
@@ -463,7 +461,7 @@ const confirmAccessRightChange = async () => {
               <div class="ml-16 relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
-                  class="btn rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+                  class="btn rounded-full w-14 h-8 sm:w-10 sm:h-10 md:w-14 md:h-12 md:rounded-md"
                   @click="openCancelModal(collab.oid, collab.name)"
                 >
                   Cancel

@@ -7,6 +7,7 @@ import { previewBinaryFile } from "../../libs/previewBinary"
 import { useRoute } from "vue-router"
 import { downloadAttachment } from "@/libs/fetchUtils"
 import previewFile from "./PreviewFile.vue"
+import * as pdfjsLib from "pdfjs-dist/webpack"
 
 const props = defineProps({
   showModal: Boolean,
@@ -183,6 +184,36 @@ const canEdit = computed(() => {
   return userName === props.ownerBoard
 })
 
+const generatePDFThumbnail = async (file) => {
+  // ตรวจสอบว่า file เป็น Blob หรือไม่
+  const fileURL = file instanceof Blob ? URL.createObjectURL(file) : file
+
+  // โหลด PDF
+  const pdf = await pdfjsLib.getDocument(fileURL).promise
+  const page = await pdf.getPage(1) // ดึงหน้าแรกของ PDF
+  const viewport = page.getViewport({ scale: 1 }) // ตั้งค่า scale
+  const canvas = document.createElement("canvas") // สร้าง canvas
+  const context = canvas.getContext("2d")
+
+  // ตั้งขนาด canvas
+  canvas.width = viewport.width
+  canvas.height = viewport.height
+
+  // เรนเดอร์ PDF บน canvas
+  await page.render({
+    canvasContext: context,
+    viewport,
+  }).promise
+
+  // แปลง canvas เป็น Blob URL
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      const blobURL = URL.createObjectURL(blob)
+      resolve(blobURL) // ส่ง Blob URL กลับ
+    }, "image/png") // ใช้ PNG เป็นฟอร์แมต
+  })
+}
+
 const preview = (event) => {
   const files = event.target.files
   errorTask.value.attachment = ""
@@ -224,6 +255,7 @@ const preview = (event) => {
       files: file,
       type: "document",
       url: "",
+      urlPDF: "",
       content: null,
     }
     if (
@@ -239,6 +271,7 @@ const preview = (event) => {
       previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".pdf")) {
       previewData.type = "PDF"
+      previewData.urlPDF = await generatePDFThumbnail(file)
       previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".txt")) {
       const reader = new FileReader()
@@ -296,11 +329,18 @@ const previewAdded = async () => {
     )
     console.log(previewUrl)
 
-    const thumbnails = await downloadAttachment(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-        taskId.value
-      }/attachments/${attachment.id}/thumbnail`
-    )
+    let thumbnails = null
+    if (attachment.filename.endsWith(".pdf")) {
+      // สร้าง Thumbnail สำหรับ PDF
+      thumbnails = await generatePDFThumbnail(previewUrl)
+    } else {
+      thumbnails = await downloadAttachment(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+          taskId.value
+        }/attachments/${attachment.id}/thumbnail`
+      )
+    }
+
     console.log(thumbnails)
 
     const previewData = {
@@ -308,6 +348,7 @@ const previewAdded = async () => {
       files: null,
       type: "document",
       url: thumbnails,
+      urlPDF: thumbnails,
       download: previewUrl,
       content: null,
     }
@@ -374,7 +415,6 @@ const removeFile = async (index) => {
     deleteFiles.value.push(attachmentId)
   }
 }
-
 
 const openPreview = (file) => {
   selectedFile.value = {
@@ -623,6 +663,15 @@ watch(
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
                   @click="openPreview(file)"
                 />
+
+                <img
+                  v-if="file.type === 'PDF'"
+                  :src="file.urlPDF"
+                  :alt="file.filename"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                  @click="openPreview(file)"
+                />
+
                 <video
                   v-if="file.type === 'video'"
                   :src="file.url"
@@ -665,45 +714,6 @@ watch(
                       font-family="Arial, sans-serif"
                     >
                       TXT
-                    </text>
-                  </svg>
-                </div>
-
-                <div
-                  v-if="file.type === 'PDF'"
-                  class="w-20 h-20 flex items-center justify-center border rounded-md"
-                  @click="openPreview(file)"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 64 64"
-                    fill="none"
-                    class="w-14 h-14"
-                  >
-                    <!-- Background Rectangle -->
-                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
-
-                    <!-- Document Icon -->
-                    <path
-                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
-                      fill="white"
-                    />
-                    <path
-                      d="M34 14V22H42"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <text
-                      x="32"
-                      y="36"
-                      text-anchor="middle"
-                      fill="#A0AEC0"
-                      font-size="10"
-                      font-family="Arial, sans-serif"
-                    >
-                      PDF
                     </text>
                   </svg>
                 </div>
