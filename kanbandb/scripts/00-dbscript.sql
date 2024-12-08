@@ -58,3 +58,11 @@ CREATE TABLE `attachments` (
     FOREIGN KEY (`taskId`) REFERENCES `tasks`(`taskId`) ON DELETE CASCADE,
     UNIQUE KEY (`taskId`, `filename`)
 );
+
+CREATE TABLE `msusers` (
+  `id` varchar(36) NOT NULL,
+  `displayName` varchar(100) NOT NULL,
+  `mail` varchar(100) NOT NULL,
+  PRIMARY KEY (`oid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+

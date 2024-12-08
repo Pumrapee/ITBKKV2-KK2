@@ -9,6 +9,8 @@ import sit.int221.kanbanapi.databases.kanbandb.entities.Collab;
 import sit.int221.kanbanapi.databases.kanbandb.entities.CollabId;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.BoardRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.CollabRepository;
+import sit.int221.kanbanapi.databases.kanbandb.repositories.MsUserRepository;
+import sit.int221.kanbanapi.databases.userdb.entities.AuthUser;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.databases.userdb.repositories.UserRepository;
 import sit.int221.kanbanapi.dtos.*;
@@ -30,6 +32,8 @@ public class CollabService {
     private ModelMapper mapper;
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
+    @Autowired
+    private MsUserRepository msUserRepository;
 
     public List<Collab> getAllBoardCollaborators(String boardId) {
         return collabRepository.findByBoardId(boardId);
@@ -41,17 +45,23 @@ public class CollabService {
 
     @Transactional
     public CollabAddRespondDTO addCollaborator(String boardId, CollabAddRequestDTO collabAddRequestDTO) {
+        String newCollabOid = null;
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
-        User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("User not found"));
-        if (collabRepository.existsById(new CollabId(boardId, newCollab.getOid()))) {
+        User newCollab = userRepository.findByEmail(collabAddRequestDTO.getEmail()).orElse(null);
+        if (newCollab == null) {
+            newCollabOid = msUserRepository.findByMail(collabAddRequestDTO.getEmail()).orElseThrow(() -> new ItemNotFoundException("User not found")).getId();
+        } else {
+            newCollabOid = newCollab.getOid();
+        }
+        if (collabRepository.existsById(new CollabId(boardId, newCollabOid))) {
             throw new CollaboratorConflict("Collaborator already exist!!!");
         }
-        if (board.getOwnerId().equals(newCollab.getOid())) {
+        if (board.getOwnerId().equals(newCollabOid)) {
             throw new CollaboratorConflict("You are a board owner.");
         }
         Collab collab = new Collab();
         collab.setBoardId(boardId);
-        collab.setUserOid(newCollab.getOid());
+        collab.setUserOid(newCollabOid);
         collab.setAccessRight(collabAddRequestDTO.getAccess_right());
         CollabAddRespondDTO collaboratorDTO = mapper.map(collabRepository.save(collab), CollabAddRespondDTO.class);
         mapper.map(newCollab, collaboratorDTO);
@@ -60,14 +70,13 @@ public class CollabService {
 
     @Transactional
     public void inviteCollaborator(String boardId, BoardInvitationRequestDTO invitation) {
-        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, currentUser.getOid()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
+        AuthUser currentUser = jwtUserDetailsService.getCurrentUser();
+        Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, currentUser.getUserOid()).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
         boolean isAccept = invitation.getInvitation().equals(Invitation.ACCEPT);
         if (isAccept) {
             collab.setStatus(Collab.Status.MEMBER);
             collabRepository.save(collab);
         } else {
-
             collabRepository.delete(collab);
         }
     }
@@ -83,8 +92,8 @@ public class CollabService {
     public Collab deleteCollaborator(String boardId, String userOid) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ItemNotFoundException("Board not found"));
         Collab collab = collabRepository.findByBoardIdAndUserOid(boardId, userOid).orElseThrow(() -> new ItemNotFoundException("Collaborator not found"));
-        User currentUser = userRepository.findByUsername(jwtUserDetailsService.getCurrentUser().getUsername());
-        if (!currentUser.getOid().equals(board.getOwnerId()) && !currentUser.getOid().equals(userOid)) {
+        AuthUser currentUser = jwtUserDetailsService.getCurrentUser();
+        if (!currentUser.getUserOid().equals(board.getOwnerId()) && !currentUser.getUserOid().equals(userOid)) {
             throw new AuthenticationFailed("You do not have permission to perform this action.");
         }
         collabRepository.delete(collab);

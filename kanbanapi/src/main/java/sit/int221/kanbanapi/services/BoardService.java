@@ -48,16 +48,16 @@ public class BoardService {
 
     @Autowired
     private ModelMapper mapper;
+    @Autowired
+    private UserService userService;
 
-    public BoardAndCollabBoardListDTO getUserBoards(String user) {
-        String userOid = userRepository.findByUsername(user).getOid();
+    public BoardAndCollabBoardListDTO getUserBoards(String userOid) {
 
         // Fetch owned boards
         List<Board> ownedBoards = boardRepository.findByOwnerId(userOid);
         List<BoardListDTO> ownedBoardListDTOS = ownedBoards.stream()
                 .map(board -> {
-                    User boardUser = userRepository.findById(board.getOwnerId())
-                            .orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
+                    User boardUser = userService.getUserById(board.getOwnerId());
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
                     boardListDTO.setRole("OWNER");
                     boardListDTO.setAccessRight("OWNER");
@@ -72,9 +72,7 @@ public class BoardService {
                 .map(collab -> {
                     Board board = boardRepository.findById(collab.getBoardId())
                             .orElseThrow(() -> new ItemNotFoundException("Board not found for id: " + collab.getBoardId()));
-                    User boardUser = userRepository.findById(board.getOwnerId())
-                            .orElseThrow(() -> new ItemNotFoundException("Owner not found for id: " + board.getOwnerId()));
-
+                    User boardUser = userService.getUserById(board.getOwnerId());
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
                     boardListDTO.setRole("COLLABORATOR");
                     boardListDTO.setAccessRight(collab.getAccessRight().toString());
@@ -97,7 +95,7 @@ public class BoardService {
     }
 
     @Transactional
-    public Board createBoard(UserDetails owner, String boardName) {
+    public Board createBoard(String ownerId, String boardName) {
         Board board = new Board();
         String boardId = NanoId.generate(10);
         while (boardRepository.existsById(boardId)) {
@@ -105,7 +103,7 @@ public class BoardService {
         }
         board.setBoardId(boardId);
         board.setBoardName(boardName);
-        board.setOwnerId(userRepository.findByUsername(owner.getUsername()).getOid());
+        board.setOwnerId(ownerId);
         board.setTaskLimitEnabled(Boolean.FALSE);
         board.setMaxTasksPerStatus(10);
         Board savedBoard = boardRepository.save(board);

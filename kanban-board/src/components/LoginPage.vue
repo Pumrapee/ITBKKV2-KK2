@@ -4,13 +4,13 @@ import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
 import { getToken } from "@/libs/fetchUtils"
 import { useRouter, useRoute } from "vue-router"
+import { msalInstance, state } from "../configs/msalConfig.js";
 
 const username = ref("")
 const password = ref("")
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
-
 const isButtonDisabled = computed(() => {
   return (
     username.value.trim() === "" ||
@@ -55,6 +55,46 @@ const loginHandler = async () => {
     showAlert.value = true
   }
 }
+
+const microsoftLoginHandler = async () => {
+  try {
+    const loginResponse = await msalInstance.loginPopup({
+      scopes: ["User.Read"],
+    });
+
+    const tokenResponse = await msalInstance.acquireTokenSilent({
+      scopes: ["User.Read"],
+      account: loginResponse.account,
+    });
+
+    const accessToken = tokenResponse.accessToken;
+    authStore.login({ access_token: accessToken, refresh_token: "" });
+    const redirect = route.query.redirect;
+    const boardId = route.query.boardId;
+
+    if (redirect) {
+      if (redirect === "invitations" && boardId) {
+        router.push({ name: redirect, params: { id: boardId } });
+      } else {
+        router.push({ name: redirect });
+      }
+    } else {
+      router.push({ name: "board" });
+    }
+  } catch (error) {
+    alertMessage.value = "Microsoft Login failed. Please try again.";
+    showAlert.value = true;
+  }
+};
+
+onMounted(async () => {
+  try {
+    await msalInstance.initialize();
+  } catch (error) {
+    alertMessage.value = "Failed to initialize authentication. Please refresh the page.";
+    showAlert.value = true;
+  }
+});
 </script>
 
 <template>
