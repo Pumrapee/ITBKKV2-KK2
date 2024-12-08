@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref } from "vue"
+import { defineProps, defineEmits, ref, watch } from "vue"
 
 const props = defineProps({
   filePre: Object,
@@ -40,6 +40,16 @@ const handleDrag = (event) => {
     translateY.value += event.movementY
   }
 }
+
+// ถ้าเปิด preview ใหม่จะ reset zoom เสมอ
+watch(
+  () => props.filePre,
+  (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+      resetZoom()
+    }
+  }
+)
 </script>
 <template>
   <!-- Preview Modal -->

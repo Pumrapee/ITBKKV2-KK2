@@ -1,12 +1,12 @@
 <script setup>
-import { defineProps, ref, watch, computed, defineEmits, onMounted } from "vue"
+import { defineProps, ref, watch, computed, defineEmits } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
 import { previewBinaryFile } from "../../libs/previewBinary"
 import { useRoute } from "vue-router"
-import { downloadAttachment, getAttachment } from "@/libs/fetchUtils"
-import previewFile from "./previewFile.vue"
+import { downloadAttachment } from "@/libs/fetchUtils"
+import previewFile from "./PreviewFile.vue"
 
 const props = defineProps({
   showModal: Boolean,
@@ -41,6 +41,7 @@ const selectedFile = ref(null) // Selected file for the preview modal
 const deleteFiles = ref([])
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 20 * 1024 * 1024
+const countFile = ref()
 
 const addEditSave = (editTask) => {
   const editedTask = { ...editTask }
@@ -177,16 +178,6 @@ const changeTask = computed(() => {
   )
 })
 
-watch(props, () => {
-  if (props.showModal) {
-    Object.assign(newTask.value, props.task)
-    taskId.value = newTask.value.id
-    console.log(newTask.value)
-  }
-  if (props.editModeModal) {
-    editMode.value = props.editModeModal
-  }
-})
 const canEdit = computed(() => {
   const userName = localStorage.getItem("user")
   return userName === props.ownerBoard
@@ -204,6 +195,11 @@ const preview = (event) => {
   console.log(files)
 
   Array.from(files).forEach(async (file, index) => {
+    console.log(file)
+    if (file) {
+      countFile.value -= 1
+    }
+
     // ไฟล์ที่ชื่อซ้ำ
     if (uploadedFilesData.value.some((f) => f.filename === file.name)) {
       notAddedFiles.duplicateFilenames.push(file.name)
@@ -289,27 +285,6 @@ const preview = (event) => {
   }
 }
 
-const removeFile = async (index) => {
-  const fileToRemove = uploadedFilesData.value[index].filename
-  const attachment = attachmentFile.value
-    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
-    : null
-
-  const attachmentId = attachment?.id
-
-  if (!attachmentId) {
-    // ลบไฟล์ที่เพิ่มใหม่ (local files)
-    uploadedFilesData.value.splice(index, 1)
-    return
-  }
-
-  if (attachmentId) {
-    // ลบไฟล์ที่ BE
-    uploadedFilesData.value.splice(index, 1)
-    deleteFiles.value.push(attachmentId)
-  }
-}
-
 const previewAdded = async () => {
   console.log(attachmentFile.value)
 
@@ -378,12 +353,35 @@ const previewAdded = async () => {
   }
 }
 
+const removeFile = async (index) => {
+  const fileToRemove = uploadedFilesData.value[index].filename
+  const attachment = attachmentFile.value
+    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
+    : null
+
+  const attachmentId = attachment?.id
+  countFile.value += 1
+
+  if (!attachmentId) {
+    // ลบไฟล์ที่เพิ่มใหม่ (local files)
+    uploadedFilesData.value.splice(index, 1)
+    return
+  }
+
+  if (attachmentId) {
+    // ลบไฟล์ที่ BE
+    uploadedFilesData.value.splice(index, 1)
+    deleteFiles.value.push(attachmentId)
+  }
+}
+
+
 const openPreview = (file) => {
   selectedFile.value = {
     filename: file.filename,
     type: file.type,
     content: file.content || null,
-    url: file.download || file.url, 
+    url: file.download || file.url,
   }
 }
 
@@ -391,12 +389,23 @@ const closePreview = () => {
   selectedFile.value = null
 }
 
+watch(props, () => {
+  if (props.showModal) {
+    Object.assign(newTask.value, props.task)
+    taskId.value = newTask.value.id
+  }
+  if (props.editModeModal) {
+    editMode.value = props.editModeModal
+  }
+})
+
 watch(
   () => props.getAttactment,
   (newValue) => {
-    if (Array.isArray(newValue)) {
+    if (newValue) {
       attachmentFile.value = newValue
       taskId.value = route.params.taskId
+      countFile.value = MAX_FILES - newValue.length // อัปเดตค่า countFile
       previewAdded(newValue)
     }
   },
@@ -576,6 +585,7 @@ watch(
 
         <div class="mb-6" v-if="task?.id">
           <label class="block font-bold mb-1">Attachments</label>
+
           <div class="flex">
             <input
               type="file"
@@ -589,6 +599,9 @@ watch(
               v-html="errorTask.attachment"
               class="text-red-400 text-sm w-full pl-2 pt-1"
             ></p>
+          </div>
+          <div class="mt-2 text-sm text-gray-500">
+            Can upload File: <span class="font-bold">{{ countFile }}</span>
           </div>
 
           <!-- Preview thumnail -->
