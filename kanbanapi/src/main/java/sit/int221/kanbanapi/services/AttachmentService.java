@@ -1,6 +1,7 @@
 package sit.int221.kanbanapi.services;
 
 import jakarta.annotation.Resource;
+import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
@@ -14,9 +15,13 @@ import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.AttachmentRepository;
 import sit.int221.kanbanapi.databases.kanbandb.repositories.TaskRepository;
 import sit.int221.kanbanapi.dtos.FileUploadResponseDTO;
+import sit.int221.kanbanapi.exceptions.BadRequestException;
 import sit.int221.kanbanapi.exceptions.ItemNotFoundException;
 import sit.int221.kanbanapi.exceptions.TaskLimitExceededException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -50,7 +55,7 @@ public class AttachmentService {
 
     public FileUploadResponseDTO uploadAttachments(Integer taskId, MultipartFile[] files) {
         // Create new directory
-        java.io.File newUploadDir = new java.io.File(uploadDir);
+        java.io.File newUploadDir = new java.io.File(uploadDir + "/" + taskId);
         if (!newUploadDir.exists()) {
             newUploadDir.mkdirs();
         }
@@ -83,7 +88,7 @@ public class AttachmentService {
             }
 
             try {
-                String filePath = Paths.get(uploadDir, filename).toString();
+                String filePath = Paths.get(uploadDir + "/" + taskId, filename).toString();
                 Files.copy(file.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
                 Attachment attachment = new Attachment();
                 attachment.setFilename(filename);
@@ -114,4 +119,21 @@ public class AttachmentService {
             throw new RuntimeException("Could not delete file " + attachment.getFile_path(), ex);
         }
     }
+
+    public byte[] generateThumbnail(Attachment attachment) {
+        try {
+            // Load the original file
+            Path originalFilePath = Paths.get(attachment.getFile_path());
+            BufferedImage originalImage = ImageIO.read(originalFilePath.toFile());
+
+            // Generate a thumbnail in memory
+            BufferedImage thumbnailImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.AUTOMATIC, 150, 150);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(thumbnailImage, "png", outputStream);
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            throw new BadRequestException("Could not generate thumbnail for file " + attachment.getFilename());
+        }
+    }
+
 }

@@ -48,4 +48,10 @@ public class User {
     public String getCollaboratorEmail() {
         return email;
     }
+
+    public User(String oid,String name, String email) {
+        this.oid = oid;
+        this.name = name;
+        this.email = email;
+    }
 }

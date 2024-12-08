@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Board;
+import sit.int221.kanbanapi.databases.userdb.entities.AuthUser;
 import sit.int221.kanbanapi.databases.userdb.entities.User;
 import sit.int221.kanbanapi.dtos.*;
 import sit.int221.kanbanapi.exceptions.AuthenticationFailed;
@@ -42,11 +43,11 @@ public class BoardController {
 
     @GetMapping("")
     public ResponseEntity<BoardAndCollabBoardListDTO> getAllBoard() {
-        UserDetails user = jwtUserDetailsService.getCurrentUser();
+        AuthUser user = jwtUserDetailsService.getCurrentUser();
         if (user == null) {
             throw new AuthenticationFailed("No user");
         }
-        BoardAndCollabBoardListDTO boardListDTOS = boardService.getUserBoards(user.getUsername());
+        BoardAndCollabBoardListDTO boardListDTOS = boardService.getUserBoards(user.getUserOid());
         return ResponseEntity.ok(boardListDTOS);
     }
 
@@ -67,8 +68,8 @@ public class BoardController {
 
     @PostMapping("")
     public ResponseEntity<BoardResponseDTO> createNewBoard(@Valid @RequestBody BoardCreateRequestDTO newBoard) {
-        UserDetails user = jwtUserDetailsService.getCurrentUser();
-        Board board = boardService.createBoard(user, newBoard.getName());
+        AuthUser user = jwtUserDetailsService.getCurrentUser();
+        Board board = boardService.createBoard(user.getUserOid(), newBoard.getName());
         BoardResponseDTO newBoardDTO = new BoardResponseDTO(board.getBoardId(), board.getBoardName(), board.getVisibility(), new Owner(board.getOwnerId(), user.getUsername()));
         return ResponseEntity.status(HttpStatus.CREATED).body(newBoardDTO);
     }
