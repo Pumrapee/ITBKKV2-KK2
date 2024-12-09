@@ -1,6 +1,5 @@
 import { ref } from "vue"
 import { defineStore, acceptHMRUpdate } from "pinia"
-// import { assign } from "cypress/types/lodash"
 
 export const useTaskStore = defineStore("task", () => {
   //state

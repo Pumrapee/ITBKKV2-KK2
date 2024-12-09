@@ -4,7 +4,7 @@ import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
 import { getToken } from "@/libs/fetchUtils"
 import { useRouter, useRoute } from "vue-router"
-import { msalInstance, state } from "../configs/msalConfig.js";
+import { msalInstance } from "../configs/msalConfig.js";
 
 const username = ref("")
 const password = ref("")

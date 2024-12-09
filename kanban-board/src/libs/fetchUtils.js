@@ -8,7 +8,6 @@ function getToken() {
 }
 
 function tokenIsNull(token) {
-  // return token ? { Authorization: `Bearer ${token}` } : {}
   return !token || token === "null" || token === null || token === ""
     ? {}
     : { Authorization: `Bearer ${token}` }
@@ -16,12 +15,6 @@ function tokenIsNull(token) {
 
 //เช็คว่า Token หมดอายุ
 function isTokenExpired(token) {
-  // if (!token) return true
-
-  // if (!token) {
-  //   return false
-  // }
-
   // Validate the token format
   if (
     (!token && !refresh_token) ||
@@ -30,10 +23,6 @@ function isTokenExpired(token) {
   ) {
     return false
   }
-
-  // if (token === "null") {
-  //   return false
-  // }
 
   const tokenParts = token?.split(".")
   if (tokenParts?.length !== 3) return true
@@ -98,19 +87,12 @@ async function getItems(url) {
     data = await fetch(url, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
 
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
-
-    // if (data.status === 403) {
-    //   router.push({ name: "forbidden" })
-    // }
 
     const items = await data.json()
 
@@ -129,9 +111,6 @@ async function getStatusLimits(url) {
     data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
     const items = await data.json()
@@ -149,9 +128,6 @@ async function getItemById(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
 
@@ -162,8 +138,6 @@ async function getItemById(url, id) {
     const item = await data.json()
     return item
   } catch (error) {
-    // return { error: error.message }
-
     if (data.status === 404) return 404
     if (data.status === 401) return 401
   }
@@ -175,9 +149,6 @@ async function findStatus(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
     return data.status
@@ -192,9 +163,7 @@ async function deleteItemById(url, id) {
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${tokenStorage}`,
-      },
+      headers: tokenIsNull(tokenStorage),
     })
     return res.status
   } catch (error) {}
@@ -206,9 +175,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
   try {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${tokenStorage}`,
-      },
+      headers: tokenIsNull(tokenStorage),
     })
     return res.status
   } catch (error) {}
@@ -392,9 +359,7 @@ async function uploadAttachment(url, file) {
   try {
     response = await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${tokenStorage}`,
-      },
+      headers: tokenIsNull(tokenStorage),
       body: formData,
     })
 
@@ -451,9 +416,7 @@ async function removeAttachment(url, id) {
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${tokenStorage}`,
-      },
+      headers: tokenIsNull(tokenStorage),
     })
     return res.status
   } catch (error) {}
