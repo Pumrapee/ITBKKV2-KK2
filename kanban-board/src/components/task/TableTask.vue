@@ -100,6 +100,7 @@ const openModalEdit = async (id, boolean) => {
         boardId.value
       }/tasks/${id}/attachments`
     )
+
     attachments.value = attachment
 
     if (taskDetail.status === 404) {
@@ -209,18 +210,20 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         console.log(newFiles)
 
         //Upload
-        // for (const files of newFiles) {
         const uploadedFile = await uploadAttachment(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
             task.id
           }/attachments`,
-          // files.files
           newFiles
         )
         console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
-        // }
-        myTask.updateTask(editedItem)
-        showAlert("The task has been updated", "success")
+
+        if (uploadedFile) {
+          myTask.updateTask(editedItem)
+          showAlert("The task has been updated", "success")
+        } else {
+          showAlert("The task has not been updated", "error")
+        }
       }
 
       if (statusCode === 400 || statusCode === 404) {
@@ -545,7 +548,6 @@ watch(
   { immediate: true }
 )
 
-// ฟังก์ชันสำหรับดึงข้อมูลใหม่เมื่อ boardId เปลี่ยน
 async function fetchBoardData(id) {
   myTask.clearTask()
   myStatus.clearStatus()
@@ -972,14 +974,14 @@ async function fetchBoardData(id) {
 
     <!-- Table -->
     <div
-      class="border border-black rounded-md w-30 md:w-4/5 mt-4 lg:overflow-x-visible"
+      class="overflow-x-auto max-h-[400px] border border-black rounded-md w-full md:w-4/5 mt-4 lg:overflow-x-visible"
     >
       <table class="table w-full">
         <!-- head -->
         <thead class="bg-black">
           <tr class="text-white text-sm">
             <th class="pl-4 md:pl-20 hidden md:table-cell">No.</th>
-            <th class="pl-4 md:pl-15">Title</th>
+            <th class="pl-14 md:pl-8">Title</th>
             <th class="pl-4 md:pl-20">Assignees</th>
             <th class="pl-4 md:pl-20">Attachment</th>
             <th class="pl-4 md:pl-20">
@@ -1033,7 +1035,7 @@ async function fetchBoardData(id) {
             <th class="text-black pl-4 md:pl-20 hidden md:table-cell">
               {{ index + 1 }}
             </th>
-            <td class="itbkk-title itbkk-button-edit pl-4 md:pl-15">
+            <td class="itbkk-title itbkk-button-edit pl-15 md:pl-15">
               <router-link
                 :to="{ name: 'detailTask', params: { taskId: task.id } }"
               >
@@ -1045,7 +1047,7 @@ async function fetchBoardData(id) {
                 </button>
               </router-link>
             </td>
-            <td class="itbkk-assignees pl-20">
+            <td class="itbkk-assignees pl-5 md:pl-20">
               <p v-if="task.assignees">
                 {{ task.assignees }}
               </p>
@@ -1109,7 +1111,7 @@ async function fetchBoardData(id) {
                       @click="openModalEdit(task.id, true)"
                       class="itbkk-button-edit"
                     >
-                      <a>Edit<img src="/icons/pen.png" class="w-4" /></a>
+                      <a><img src="/icons/pen.png" class="w-4 mr-2" />Edit</a>
                     </li>
                   </router-link>
 
@@ -1117,7 +1119,7 @@ async function fetchBoardData(id) {
                     @click="openDeleteModal(task.id, task.title, index)"
                     class="itbkk-button-delete"
                   >
-                    <a>Delete<img src="/icons/trash.png" class="w-6" /></a>
+                    <a><img src="/icons/trash.png" class="w-6" />Delete</a>
                   </li>
                 </ul>
               </div>

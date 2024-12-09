@@ -90,7 +90,7 @@ watch(props, () => {
             >
 
             <select
-              class="itbkk-access-right pl-10 border border-black rounded-lg h-10 pr-5 w-full sm:ml-3"
+              class="itbkk-access-right pl-10 border border-black rounded-lg h-10 pr-5 w-full sm:ml-4"
               v-model="newCollab.accessRight"
             >
               <option value="READ">READ</option>

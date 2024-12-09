@@ -1,11 +1,13 @@
 <script setup>
-import { defineProps, ref, watch, computed, defineEmits, onMounted } from "vue"
+import { defineProps, ref, watch, computed, defineEmits } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
 import { previewBinaryFile } from "../../libs/previewBinary"
 import { useRoute } from "vue-router"
 import { downloadAttachment } from "@/libs/fetchUtils"
+import previewFile from "./PreviewFile.vue"
+import * as pdfjsLib from "pdfjs-dist/webpack"
 
 const props = defineProps({
   showModal: Boolean,
@@ -40,6 +42,7 @@ const selectedFile = ref(null) // Selected file for the preview modal
 const deleteFiles = ref([])
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 20 * 1024 * 1024
+const countFile = ref()
 
 const addEditSave = (editTask) => {
   const editedTask = { ...editTask }
@@ -63,7 +66,7 @@ const addEditSave = (editTask) => {
     uploadedFilesData.value = []
     deleteFiles.value = []
     errorTask.value.attachment = ""
-  }, 2000)
+  }, 1500)
 
   console.log(uploadedFilesData.value)
 
@@ -176,20 +179,40 @@ const changeTask = computed(() => {
   )
 })
 
-watch(props, () => {
-  if (props.showModal) {
-    Object.assign(newTask.value, props.task)
-    taskId.value = newTask.value.id
-    console.log(newTask.value)
-  }
-  if (props.editModeModal) {
-    editMode.value = props.editModeModal
-  }
-})
 const canEdit = computed(() => {
   const userName = localStorage.getItem("user")
   return userName === props.ownerBoard
 })
+
+const generatePDFThumbnail = async (file) => {
+  // ตรวจสอบว่า file เป็น Blob หรือไม่
+  const fileURL = file instanceof Blob ? URL.createObjectURL(file) : file
+
+  // โหลด PDF
+  const pdf = await pdfjsLib.getDocument(fileURL).promise
+  const page = await pdf.getPage(1) // ดึงหน้าแรกของ PDF
+  const viewport = page.getViewport({ scale: 1 }) // ตั้งค่า scale
+  const canvas = document.createElement("canvas") // สร้าง canvas
+  const context = canvas.getContext("2d")
+
+  // ตั้งขนาด canvas
+  canvas.width = viewport.width
+  canvas.height = viewport.height
+
+  // เรนเดอร์ PDF บน canvas
+  await page.render({
+    canvasContext: context,
+    viewport,
+  }).promise
+
+  // แปลง canvas เป็น Blob URL
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      const blobURL = URL.createObjectURL(blob)
+      resolve(blobURL) // ส่ง Blob URL กลับ
+    }, "image/png") // ใช้ PNG เป็นฟอร์แมต
+  })
+}
 
 const preview = (event) => {
   const files = event.target.files
@@ -203,6 +226,11 @@ const preview = (event) => {
   console.log(files)
 
   Array.from(files).forEach(async (file, index) => {
+    console.log(file)
+    if (file) {
+      countFile.value -= 1
+    }
+
     // ไฟล์ที่ชื่อซ้ำ
     if (uploadedFilesData.value.some((f) => f.filename === file.name)) {
       notAddedFiles.duplicateFilenames.push(file.name)
@@ -227,6 +255,7 @@ const preview = (event) => {
       files: file,
       type: "document",
       url: "",
+      urlPDF: "",
       content: null,
     }
     if (
@@ -242,6 +271,7 @@ const preview = (event) => {
       previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".pdf")) {
       previewData.type = "PDF"
+      previewData.urlPDF = await generatePDFThumbnail(file)
       previewData.url = previewBinaryFile(file)
     } else if (file.name.endsWith(".txt")) {
       const reader = new FileReader()
@@ -288,36 +318,6 @@ const preview = (event) => {
   }
 }
 
-const removeFile = async (index) => {
-  const fileToRemove = uploadedFilesData.value[index].filename
-  console.log(fileToRemove)
-  console.log(attachmentFile.value)
-
-  const attachment = attachmentFile.value
-    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
-    : null
-
-  const attachmentId = attachment?.id
-  console.log(attachmentId)
-
-  if (!attachmentId) {
-    // ลบไฟล์ที่เพิ่มใหม่ (local files)
-    uploadedFilesData.value.splice(index, 1)
-    console.log(uploadedFilesData.value)
-    console.log("File removed locally:", fileToRemove)
-    return
-  }
-
-  if (attachmentId) {
-    // ลบไฟล์ที่ BE
-    uploadedFilesData.value.splice(index, 1)
-    console.log(uploadedFilesData.value)
-
-    deleteFiles.value.push(attachmentId)
-    console.log(deleteFiles.value)
-  }
-}
-
 const previewAdded = async () => {
   console.log(attachmentFile.value)
 
@@ -327,14 +327,29 @@ const previewAdded = async () => {
         taskId.value
       }/attachments/${attachment.id}/download`
     )
-
     console.log(previewUrl)
+
+    let thumbnails = null
+    if (attachment.filename.endsWith(".pdf")) {
+      // สร้าง Thumbnail สำหรับ PDF
+      thumbnails = await generatePDFThumbnail(previewUrl)
+    } else {
+      thumbnails = await downloadAttachment(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+          taskId.value
+        }/attachments/${attachment.id}/thumbnail`
+      )
+    }
+
+    console.log(thumbnails)
 
     const previewData = {
       filename: attachment.filename,
       files: null,
       type: "document",
-      url: previewUrl,
+      url: thumbnails,
+      urlPDF: thumbnails,
+      download: previewUrl,
       content: null,
     }
 
@@ -358,13 +373,15 @@ const previewAdded = async () => {
         if (response.ok) {
           const blob = await response.blob()
 
-          const reader = new FileReader()
-          reader.onload = (event) => {
-            const textContent = event.target.result
-            previewData.type = "txt"
-            previewData.content = textContent
-          }
-          reader.readAsText(blob)
+          const textContent = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = (event) => resolve(event.target.result)
+            reader.onerror = (error) => reject(error)
+            reader.readAsText(blob)
+          })
+
+          previewData.type = "txt"
+          previewData.content = textContent
         }
       } catch (error) {
         console.error("Error reading .txt file:", error)
@@ -377,21 +394,58 @@ const previewAdded = async () => {
   }
 }
 
-const openPreview = (fileURL) => {
-  console.log(fileURL)
-  selectedFile.value = fileURL
+const removeFile = async (index) => {
+  const fileToRemove = uploadedFilesData.value[index].filename
+  const attachment = attachmentFile.value
+    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
+    : null
+
+  const attachmentId = attachment?.id
+  countFile.value += 1
+
+  if (!attachmentId) {
+    // ลบไฟล์ที่เพิ่มใหม่ (local files)
+    uploadedFilesData.value.splice(index, 1)
+    return
+  }
+
+  if (attachmentId) {
+    // ลบไฟล์ที่ BE
+    uploadedFilesData.value.splice(index, 1)
+    deleteFiles.value.push(attachmentId)
+  }
+}
+
+const openPreview = (file) => {
+  selectedFile.value = {
+    filename: file.filename,
+    type: file.type,
+    content: file.content || null,
+    url: file.download || file.url,
+  }
 }
 
 const closePreview = () => {
   selectedFile.value = null
 }
 
+watch(props, () => {
+  if (props.showModal) {
+    Object.assign(newTask.value, props.task)
+    taskId.value = newTask.value.id
+  }
+  if (props.editModeModal) {
+    editMode.value = props.editModeModal
+  }
+})
+
 watch(
   () => props.getAttactment,
   (newValue) => {
-    if (Array.isArray(newValue)) {
+    if (newValue) {
       attachmentFile.value = newValue
       taskId.value = route.params.taskId
+      countFile.value = MAX_FILES - newValue.length // อัปเดตค่า countFile
       previewAdded(newValue)
     }
   },
@@ -571,6 +625,7 @@ watch(
 
         <div class="mb-6" v-if="task?.id">
           <label class="block font-bold mb-1">Attachments</label>
+
           <div class="flex">
             <input
               type="file"
@@ -585,7 +640,11 @@ watch(
               class="text-red-400 text-sm w-full pl-2 pt-1"
             ></p>
           </div>
+          <div class="mt-2 text-sm text-gray-500">
+            Can upload File: <span class="font-bold">{{ countFile }}</span>
+          </div>
 
+          <!-- Preview thumnail -->
           <div
             v-if="uploadedFilesData.length > 0"
             class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
@@ -596,7 +655,7 @@ watch(
               class="relative flex flex-col items-center min-w-[120px] space-y-2"
             >
               <!-- Image Preview -->
-              <div class="relative w-16 h-16">
+              <div class="relative w-20 h-20">
                 <img
                   v-if="file.type === 'media'"
                   :src="file.url"
@@ -604,6 +663,15 @@ watch(
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
                   @click="openPreview(file)"
                 />
+
+                <img
+                  v-if="file.type === 'PDF'"
+                  :src="file.urlPDF"
+                  :alt="file.filename"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                  @click="openPreview(file)"
+                />
+
                 <video
                   v-if="file.type === 'video'"
                   :src="file.url"
@@ -613,14 +681,14 @@ watch(
 
                 <div
                   v-if="file.type === 'txt'"
-                  class="w-16 h-16 flex items-center justify-center border rounded-md bg-gray-100 cursor-pointer"
+                  class="w-20 h-20 flex items-center justify-center border rounded-md cursor-pointer"
                   @click="openPreview(file)"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 64 64"
                     fill="none"
-                    class="w-8 h-8"
+                    class="w-14 h-14"
                   >
                     <!-- Background Rectangle -->
                     <rect width="64" height="64" rx="8" fill="#E6EAF0" />
@@ -650,57 +718,18 @@ watch(
                   </svg>
                 </div>
 
-                <div
-                  v-if="file.type === 'PDF'"
-                  class="w-16 h-16 flex items-center justify-center border rounded-md"
-                  @click="openPreview(file)"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 64 64"
-                    fill="none"
-                    class="w-8 h-8"
-                  >
-                    <!-- Background Rectangle -->
-                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
-
-                    <!-- Document Icon -->
-                    <path
-                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
-                      fill="white"
-                    />
-                    <path
-                      d="M34 14V22H42"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <text
-                      x="32"
-                      y="36"
-                      text-anchor="middle"
-                      fill="#A0AEC0"
-                      font-size="10"
-                      font-family="Arial, sans-serif"
-                    >
-                      PDF
-                    </text>
-                  </svg>
-                </div>
-
                 <!-- Document Download -->
                 <a
                   v-if="file.type === 'document'"
                   :href="file.url"
                   :download="file.filename"
-                  class="w-16 h-16 flex items-center justify-center border rounded-md"
+                  class="w-20 h-20 flex items-center justify-center border rounded-md"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 64 64"
                     fill="none"
-                    class="w-8 h-8"
+                    class="w-14 h-14"
                   >
                     <!-- Background Rectangle -->
                     <rect width="64" height="64" rx="8" fill="#E6EAF0" />
@@ -800,102 +829,9 @@ watch(
                 </a>
               </div>
 
-              <!-- Document Preview -->
-              <!-- <a class="italic text-xs text-center block">
-                <p class="break-words w-24">{{ name }}</p>
-              </a> -->
-
               <a target="_blank" class="italic text-xs text-center block">
                 <p class="break-words w-24">{{ file.filename }}</p>
               </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Preview Modal -->
-        <div
-          v-if="selectedFile"
-          class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-          @click="closePreview"
-        >
-          <div class="relative bg-white p-4 rounded-lg shadow-lg" @click.stop>
-            <!-- Image Preview -->
-            <img
-              v-if="selectedFile.type === 'media'"
-              :src="selectedFile.url"
-              alt="Selected Preview"
-              class="w-full max-w-3xl max-h-[80vh] object-contain"
-            />
-
-            <!-- Video Preview -->
-            <video
-              v-else-if="selectedFile.type === 'video'"
-              :src="selectedFile.url"
-              class="w-full max-w-3xl max-h-[80vh] object-contain"
-              controls
-              autoplay
-            ></video>
-            <!-- Text Preview -->
-            <div v-else-if="selectedFile.type === 'txt'" class="text-preview">
-              <pre v-if="selectedFile.content">
-    {{ selectedFile.content }}
-  </pre
-              >
-              <div
-                v-else
-                class="w-full h-64 flex items-center justify-center border border-gray-300 bg-gray-100"
-              >
-                <p class="text-gray-500 text-center">
-                  No content available in this file.
-                </p>
-              </div>
-            </div>
-
-            <!-- Default Preview -->
-            <div
-              v-else
-              class="w-full h-98 flex items-center justify-center border border-gray-300 bg-gray-100"
-            >
-              <p class="text-gray-500 text-center">
-                No content available for preview.
-              </p>
-            </div>
-
-            <!-- Close Button -->
-            <button
-              class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
-              @click="closePreview"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <div
-          v-if="selectedFile && selectedFile.type === 'PDF'"
-          class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
-        >
-          <!-- Modal Container -->
-          <div class="bg-white w-[95%] h-[95%] relative rounded-lg shadow-lg">
-            <!-- Toolbar -->
-            <div
-              class="flex justify-end items-center px-4 py-2 bg-gray-100 border-b"
-            >
-              <button @click="closePreview" class="text-red-500 font-bold">
-                ✕
-              </button>
-            </div>
-
-            <!-- PDF Viewer -->
-            <div class="overflow-auto h-full">
-              <div class="pdf-container w-full h-full">
-                <iframe
-                  :src="selectedFile.url"
-                  class="w-full h-full"
-                  frameborder="0"
-                  type="application/pdf"
-                ></iframe>
-              </div>
             </div>
           </div>
         </div>
@@ -934,6 +870,8 @@ watch(
       </div>
     </div>
   </div>
+
+  <previewFile :filePre="selectedFile" @closePreview="closePreview" />
 </template>
 
 <style scoped>

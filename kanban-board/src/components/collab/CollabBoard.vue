@@ -15,7 +15,6 @@ import ExpireToken from "../toast/ExpireToken.vue"
 import AddCollabBoard from "../collab/AddCollabBoard.vue"
 import { showAlert } from "../../libs/alertUtils"
 import RemoveCollaborator from "../collab/RemoveCollaborator.vue"
-import router from "@/router"
 
 //store
 const myBoard = useBoardStore()
@@ -126,23 +125,21 @@ const closeAddCollab = async (newCollab) => {
       )
       collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
 
-      setTimeout(() => {
-        loadingEmail.value = false
-        myBoard.clearCollaborator()
-        myBoard.addCollabs(collabList)
+      loadingEmail.value = false
+      myBoard.clearCollaborator()
+      myBoard.addCollabs(collabList)
 
-        if (statusCode === 201) {
-          showAlert("The collaborator has been successfully added.", "success")
-        } else if (statusCode === 503) {
-          NotSendEmail.value = true
-          showAlert("The collaborator has been successfully added.", "success")
+      if (statusCode === 201) {
+        showAlert("The collaborator has been successfully added.", "success")
+      } else if (statusCode === 503) {
+        NotSendEmail.value = true
+        showAlert("The collaborator has been successfully added.", "success")
 
-          const collabName = collabList.find(
-            (collab) => collab.email === newCollab.value.email
-          )
-          collabIsNotSentEmail.value = collabName
-        }
-      }, 5000)
+        const collabName = collabList.find(
+          (collab) => collab.email === newCollab.value.email
+        )
+        collabIsNotSentEmail.value = collabName
+      }
     } else {
       setTimeout(() => {
         loadingEmail.value = false
@@ -180,13 +177,6 @@ const closeAddCollab = async (newCollab) => {
     openModal.value = false
   }
 }
-
-// const sentInvitation = () => {
-//   myUser.accessDenied()
-//   localStorage.clear()
-//   localStorage.setItem("user", "Guest")
-//   router.push({ name: "invitations", params: { id: boardId.value } })
-// }
 
 const closeModal = () => {
   openModal.value = false
@@ -325,7 +315,7 @@ const confirmAccessRightChange = async () => {
       class="bounce-in-top flex flex-col lg:flex-row justify-center lg:justify-between w-full lg:w-4/5 flex-wrap mb-4"
     >
       <div
-        class="flex text-sm breadcrumbs text-black mb-4  md:mb-0 justify-center lg:justify-start"
+        class="flex text-sm breadcrumbs text-black mb-4 md:mb-0 justify-center lg:justify-start"
       >
         <ul class="flex flex-wrap">
           <li class="itbkk-board-name font-bold text-base md:text-sm">
@@ -335,23 +325,21 @@ const confirmAccessRightChange = async () => {
         </ul>
       </div>
 
-      <div
-        class="flex items-center justify-center w-full md:w-auto lg:justify-end"
-      >
+      <div class="flex flex-row justify-center lg:justify-end">
         <RouterLink :to="{ name: 'task' }">
           <button
-          class="itbkk-button-home btn mr-2 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
+            class="itbkk-button-home btn ml-10 bg-black text-white text-sm md:text-base w-full md:w-auto mb-2 md:mb-0"
           >
             <img src="/icons/home.png" class="w-4 mr-1" /> Home
           </button>
         </RouterLink>
 
         <div
-          class="items-center justify-center w-full md:w-auto lg:justify-end relative group"
+          class="justify-center w-full md:w-auto lg:justify-end relative group"
         >
           <button
             @click="openModalAdd"
-            class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-2"
+            class="itbkk-collaborator-add btn btn-circle border-black0 bg-black text-white ml-12 md:ml-2"
             :disabled="disabledIfNotOwner"
           >
             <img src="/icons/plus.png" class="w-4" />
@@ -391,7 +379,9 @@ const confirmAccessRightChange = async () => {
             :key="collab.oid"
             class="itbkk-item"
           >
-            <th class="text-black pl-20 hidden md:table-cell">{{ index + 1 }}</th>
+            <th class="text-black pl-20 hidden md:table-cell">
+              {{ index + 1 }}
+            </th>
 
             <td class="itbkk-name pl-10">
               {{ collab.name }}
@@ -471,7 +461,7 @@ const confirmAccessRightChange = async () => {
               <div class="ml-16 relative group inline-block">
                 <button
                   :disabled="disabledIfNotOwner"
-                  class="btn rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+                  class="btn rounded-full w-14 h-8 sm:w-10 sm:h-10 md:w-14 md:h-12 md:rounded-md"
                   @click="openCancelModal(collab.oid, collab.name)"
                 >
                   Cancel
