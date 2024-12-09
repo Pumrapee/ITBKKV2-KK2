@@ -207,22 +207,27 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             )
         )
 
-        console.log(newFiles)
-
         //Upload
-        const uploadedFile = await uploadAttachment(
-          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-            task.id
-          }/attachments`,
-          newFiles
-        )
-        console.log(uploadedFile) //ไว้เช็คดูเงื่อนไขต่างๆ
+        if (newFiles.length > 0) {
+          const uploadedFile = await uploadAttachment(
+            `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+              task.id
+            }/attachments`,
+            newFiles
+          )
 
-        if (uploadedFile) {
-          myTask.updateTask(editedItem)
-          showAlert("The task has been updated", "success")
+          if (uploadedFile) {
+            myTask.updateTask(editedItem)
+            showAlert("The task has been updated", "success")
+          } else {
+            showAlert("The task has not been updated", "error")
+          }
         } else {
-          showAlert("The task has not been updated", "error")
+          myTask.updateTask(editedItem)
+          openModal.value = false
+          router.push({ name: "task" })
+          editMode.value = false
+          showAlert("The task has been updated", "success")
         }
       }
 

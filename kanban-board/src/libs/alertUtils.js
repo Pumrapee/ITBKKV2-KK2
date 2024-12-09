@@ -1,4 +1,3 @@
-// alertService.js
 import { ref } from "vue"
 
 // สร้าง list ของ alert

@@ -67,9 +67,6 @@ const addEditSave = (editTask) => {
     deleteFiles.value = []
     errorTask.value.attachment = ""
   }, 1500)
-
-  console.log(uploadedFilesData.value)
-
   emits("saveAddEdit", editedTask, uploadedFilesData.value, deleteFiles.value)
 }
 
@@ -223,10 +220,8 @@ const preview = (event) => {
     exceededMaxSize: [],
     duplicateFilenames: [],
   }
-  console.log(files)
 
   Array.from(files).forEach(async (file, index) => {
-    console.log(file)
     if (file) {
       countFile.value -= 1
     }
@@ -249,7 +244,6 @@ const preview = (event) => {
       return
     }
 
-    console.log(file)
     const previewData = {
       filename: file.name,
       files: file,
@@ -287,7 +281,6 @@ const preview = (event) => {
       previewData.url = previewBinaryFile(file)
     }
 
-    console.log(previewData)
     uploadedFilesData.value.push(previewData)
   })
 
@@ -319,29 +312,32 @@ const preview = (event) => {
 }
 
 const previewAdded = async () => {
-  console.log(attachmentFile.value)
-
   for (const attachment of attachmentFile.value) {
     const previewUrl = await downloadAttachment(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
         taskId.value
       }/attachments/${attachment.id}/download`
     )
-    console.log(previewUrl)
 
     let thumbnails = null
     if (attachment.filename.endsWith(".pdf")) {
       // สร้าง Thumbnail สำหรับ PDF
       thumbnails = await generatePDFThumbnail(previewUrl)
-    } else {
+    } else if (
+      attachment.filename.endsWith(".png") ||
+      attachment.filename.endsWith(".jpg") ||
+      attachment.filename.endsWith(".jpeg") ||
+      attachment.filename.endsWith(".gif")
+    ) {
       thumbnails = await downloadAttachment(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
           taskId.value
         }/attachments/${attachment.id}/thumbnail`
       )
+    } else {
+      thumbnails = previewUrl
     }
 
-    console.log(thumbnails)
 
     const previewData = {
       filename: attachment.filename,
@@ -641,7 +637,8 @@ watch(
             ></p>
           </div>
           <div class="mt-2 text-sm text-gray-500">
-            Can upload File: <span class="font-bold">{{ countFile }}</span>
+            Files remaining to upload:
+            <span class="font-bold">{{ countFile }}</span>
           </div>
 
           <!-- Preview thumnail -->
@@ -652,16 +649,22 @@ watch(
             <div
               v-for="(file, index) in uploadedFilesData"
               :key="index"
-              class="relative flex flex-col items-center min-w-[120px] space-y-2"
+              class="relative flex flex-col items-center min-w-[120px] space-y-2 group"
             >
               <!-- Image Preview -->
-              <div class="relative w-20 h-20">
+              <div
+                class="relative w-20 h-20"
+                :class="{
+                  'cursor-pointer': ['media', 'PDF', 'video', 'txt'].includes(
+                    file.type
+                  ),
+                }"
+              >
                 <img
                   v-if="file.type === 'media'"
                   :src="file.url"
                   :alt="file.filename"
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
-                  @click="openPreview(file)"
                 />
 
                 <img
@@ -669,20 +672,17 @@ watch(
                   :src="file.urlPDF"
                   :alt="file.filename"
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
-                  @click="openPreview(file)"
                 />
 
                 <video
                   v-if="file.type === 'video'"
                   :src="file.url"
                   class="w-full h-full rounded-md border border-gray-300 object-cover"
-                  @click="openPreview(file)"
                 ></video>
 
                 <div
                   v-if="file.type === 'txt'"
                   class="w-20 h-20 flex items-center justify-center border rounded-md cursor-pointer"
-                  @click="openPreview(file)"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -716,6 +716,15 @@ watch(
                       TXT
                     </text>
                   </svg>
+                </div>
+
+                <!-- Hover Overlay -->
+                <div
+                  v-if="['media', 'PDF', 'video', 'txt'].includes(file.type)"
+                  class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  @click="openPreview(file)"
+                >
+                  <span class="text-white font-medium text-sm">Preview</span>
                 </div>
 
                 <!-- Document Download -->
@@ -790,7 +799,7 @@ watch(
                 <a
                   v-if="!editMode"
                   class="absolute top-1 right-1 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                  :href="file.url"
+                  :href="file.download"
                   :download="file.filename"
                 >
                   <svg

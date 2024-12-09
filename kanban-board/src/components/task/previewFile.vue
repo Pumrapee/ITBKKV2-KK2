@@ -70,7 +70,7 @@ watch(
       <video
         v-if="props.filePre.type === 'video'"
         :src="props.filePre.url"
-        class="w-auto h-auto max-w-5xl max-h-full object-contain"
+        class="w-auto h-auto max-w-4xl max-h-full object-contain"
         controls
         autoplay
       ></video>
