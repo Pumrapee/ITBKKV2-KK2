@@ -85,11 +85,11 @@ const closelimitModal = async (maxlimit) => {
 const errorLimit = ref("")
 
 const changeLimit = computed(() => {
-  const limitMore = maxTasks.value > 30
+  const limitMore = maxTasks.value > 10
   const limitLess = maxTasks.value < 1
 
   errorLimit.value = limitMore
-    ? "Limit status not more than 30"
+    ? "Limit status not more than 10"
     : limitLess
     ? "Limit status not less than 1"
     : ""
