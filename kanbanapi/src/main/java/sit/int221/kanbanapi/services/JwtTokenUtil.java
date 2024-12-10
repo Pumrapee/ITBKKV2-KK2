@@ -127,7 +127,7 @@ public class JwtTokenUtil {
             return msUser;
 
         } catch (Exception e) {
-            throw new AuthenticationFailed("Error while fetching user data from Microsoft Graph API: " + e.getMessage());
+            throw new AuthenticationFailed("Invalid Token");
         }
     }
 }

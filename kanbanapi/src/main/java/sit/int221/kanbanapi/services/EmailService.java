@@ -63,7 +63,7 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-            helper.setFrom(mailSenderEmail, inviterName);
+            helper.setFrom(mailSenderEmail, "ITBKK-KK2");
             helper.setReplyTo("noreply@intproj23.sit.kmutt.ac.th", "DO NOT REPLY");
             helper.setTo(recipientEmail);
             helper.setSubject(subject);
