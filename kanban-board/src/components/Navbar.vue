@@ -128,7 +128,7 @@ function toggleSidebar() {
         tabindex="0"
         class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-4 w-40 p-2 shadow"
       >
-        <li v-if="userName !== `Guest`"><a>Profile</a></li>
+        
         <li v-if="userName !== `Guest`" @click="logout"><a>Logout</a></li>
         <RouterLink :to="{ name: 'login' }">
           <li v-if="userName === `Guest`"><a>Login</a></li>
@@ -258,7 +258,6 @@ function toggleSidebar() {
           <span>Hi, {{ userName }}</span>
         </div>
         <ul class="menu bg-base-100 rounded-box w-full p-2 shadow">
-          <li v-if="userName !== `Guest`"><a>Profile</a></li>
           <li v-if="userName !== `Guest`" @click="logout"><a>Logout</a></li>
           <RouterLink :to="{ name: 'login' }">
             <li v-if="userName === `Guest`"><a>Login</a></li>
