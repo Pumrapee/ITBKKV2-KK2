@@ -12,7 +12,8 @@ const removeAlert = (index) => {
   <div
     v-for="(alert, index) in listAlert"
     :key="index"
-    class="fixed bottom-6 right-4 mb-0 mr-1 z-50 w-full max-w-xs space-y-4 md:bottom-6 md:right-6 md:mr-1 md:mb-0 md:w-auto"
+    class="fixed bottom-6 right-4 w-full max-w-xs space-y-4 md:bottom-6 md:right-6 md:mr-1 md:mb-0 md:w-auto"
+    :style="{ zIndex: 50 + index, transform: `translateY(-${index * 80}px)` }"
   >
     <div
       class="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800"

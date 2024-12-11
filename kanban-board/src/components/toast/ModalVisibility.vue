@@ -1,4 +1,3 @@
-<!-- VisibilityModal.vue -->
 <script setup>
 import { defineEmits, defineProps } from 'vue'
 
@@ -21,7 +20,7 @@ const cancelVisibilityChange = () => {
 <template>
   <div
     v-if="showModalVisibility"
-    class="itbkk-modal-alert fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4 md:p-0"
+    class="itbkk-modal-alert fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4 md:p-0 z-[50]"
   >
     <div class="card bg-base-100 w-full max-w-sm md:w-96 shadow-xl">
       <div class="itbkk-message card-body font-medium">

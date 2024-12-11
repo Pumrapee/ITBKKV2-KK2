@@ -46,54 +46,6 @@ const userName = localStorage.getItem("user")
 onMounted(async () => {
   myUser.setToken()
 
-  const boardIdNumber = await getItemById(
-    `${import.meta.env.VITE_API_URL}v3/boards`,
-    boardId.value
-  )
-
-  //Collab
-  if (myBoard.getCollabs().length === 0) {
-    const collabList = await getItems(
-      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
-    )
-    if (collabList === 401) {
-      expiredToken.value = true
-    } else {
-      if (myBoard.getCollabs().length === 0) {
-        collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-
-        myBoard.addCollabs(collabList)
-      }
-    }
-  }
-
-  nameOwnerBoard.value = boardIdNumber.owner.name
-  function validateBoardAccess(isOwner, userOid) {
-    if (isOwner) {
-      return false
-    }
-    const collab = myBoard.getCollabs().find((collab) => collab.oid === userOid)
-    let accessRight
-    if (collab !== undefined) {
-      accessRight = collab.accessRight
-    }
-    if (accessRight !== undefined) {
-      // If the user has WRITE access, they can manage tasks and statuses
-      if (accessRight === "WRITE" && collab.status === "MEMBER") {
-        return false
-      }
-    }
-    return true
-  }
-  if (
-    validateBoardAccess(
-      nameOwnerBoard.value === userName,
-      localStorage.getItem("oid")
-    )
-  ) {
-    disabledIfNotOwner.value = true
-  }
-
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
     myUser.token,
@@ -117,6 +69,56 @@ onMounted(async () => {
         myStatus.addStatus(listStatus)
       }
     }
+
+    const boardIdNumber = await getItemById(
+      `${import.meta.env.VITE_API_URL}v3/boards`,
+      boardId.value
+    )
+
+    //Collab
+    if (myBoard.getCollabs().length === 0) {
+      const collabList = await getItems(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/collabs`
+      )
+      if (collabList === 401) {
+        expiredToken.value = true
+      } else {
+        if (myBoard.getCollabs().length === 0) {
+          collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
+
+          myBoard.addCollabs(collabList)
+        }
+      }
+    }
+
+    nameOwnerBoard.value = boardIdNumber.owner.name
+    function validateBoardAccess(isOwner, userOid) {
+      if (isOwner) {
+        return false
+      }
+      const collab = myBoard
+        .getCollabs()
+        .find((collab) => collab.oid === userOid)
+      let accessRight
+      if (collab !== undefined) {
+        accessRight = collab.accessRight
+      }
+      if (accessRight !== undefined) {
+        // If the user has WRITE access, they can manage tasks and statuses
+        if (accessRight === "WRITE" && collab.status === "MEMBER") {
+          return false
+        }
+      }
+      return true
+    }
+    if (
+      validateBoardAccess(
+        nameOwnerBoard.value === userName,
+        localStorage.getItem("oid")
+      )
+    ) {
+      disabledIfNotOwner.value = true
+    }
   }
 
   if (checkToken.statusCode === 401) {
@@ -124,7 +126,8 @@ onMounted(async () => {
   }
 })
 
-//เปิด Modal
+//Open Modal
+//Edit
 const openEditStatus = async (idStatus) => {
   myUser.setToken()
 
@@ -165,6 +168,7 @@ const openEditStatus = async (idStatus) => {
   }
 }
 
+//Add
 const openModalAdd = () => {
   openModal.value = true
   statusItems.value = {
@@ -175,6 +179,7 @@ const openModalAdd = () => {
   }
 }
 
+//Delete
 const openDeleteModal = async (id, name) => {
   myUser.setToken()
 
@@ -206,8 +211,6 @@ const openDeleteModal = async (id, name) => {
       showDeleteModal.value = true
     }
     if (showStatus === 401) {
-      // showTransferModal.value = false
-      // showDeleteModal.value = false
       expiredToken.value = true
     }
 
@@ -220,12 +223,11 @@ const openDeleteModal = async (id, name) => {
 
   if (checkToken.statusCode === 401) {
     expiredToken.value = true
-    // showTransferModal.value = false
-    // showDeleteModal.value = false
   }
 }
 
-//ปิด Modal
+//Close Modal
+//Add , Edit
 const closeAddEdit = async (status) => {
   myUser.setToken()
 
@@ -304,6 +306,7 @@ const closeAddEdit = async (status) => {
   }
 }
 
+//Delete
 const closeDeleteStatus = async (selectedStatus, filteredStatus) => {
   myUser.setToken()
 

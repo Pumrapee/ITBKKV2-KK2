@@ -6,7 +6,7 @@ import { useTaskStore } from "@/stores/taskStore"
 import { useStatusStore } from "@/stores/statusStore"
 import { useLimitStore } from "./limitStore"
 import router from "@/router"
-import { msalInstance, loginRequest } from "@/configs/msalConfig";
+import { msalInstance, loginRequest } from "@/configs/msalConfig"
 
 export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false)
@@ -36,21 +36,23 @@ export const useAuthStore = defineStore("auth", () => {
 
   const microsoftLogin = async () => {
     try {
-      const loginResponse = await msalInstance.loginPopup(loginRequest); // Use popup or redirect as preferred
-      const msToken = loginResponse.accessToken;
-      isAuthenticated.value = true;
-      isMicrosoftLogin.value = true; // Mark as Microsoft login
-      token.value = msToken;
-      user.value = msalInstance.getAccountByHomeId(loginResponse.account.homeAccountId);
-      userName.value = user.value.name;
-      localStorage.setItem("token", msToken);
-      localStorage.setItem("user", user.value.name);
-      localStorage.setItem("oid", user.value.localAccountId);
-      router.push({ name: "board" });
+      const loginResponse = await msalInstance.loginPopup(loginRequest) // Use popup or redirect as preferred
+      const msToken = loginResponse.accessToken
+      isAuthenticated.value = true
+      isMicrosoftLogin.value = true // Mark as Microsoft login
+      token.value = msToken
+      user.value = msalInstance.getAccountByHomeId(
+        loginResponse.account.homeAccountId
+      )
+      userName.value = user.value.name
+      localStorage.setItem("token", msToken)
+      localStorage.setItem("user", user.value.name)
+      localStorage.setItem("oid", user.value.localAccountId)
+      router.push({ name: "board" })
     } catch (error) {
-      console.error("Microsoft Login Error:", error);
+      console.error("Microsoft Login Error:", error)
     }
-  };
+  }
 
   const logout = async () => {
     try {
@@ -68,7 +70,7 @@ export const useAuthStore = defineStore("auth", () => {
       localStorage.clear()
       router.push({ name: "login" })
     } catch (error) {
-      console.error("Microsoft Logout Error:", error);
+      console.error("Microsoft Logout Error:", error)
     }
   }
 
@@ -83,11 +85,6 @@ export const useAuthStore = defineStore("auth", () => {
     myStatus.clearStatus()
     myTask.clearTask()
     myLimit.clearLimit()
-  }
-
-  // เพิ่มฟังก์ชัน getUserId
-  const getUserId = () => {
-    return user.value ? user.value.id : null // คืนค่า ID ของผู้ใช้หาก login แล้ว
   }
 
   const setNewToken = (newRefreshToken) => {
@@ -106,6 +103,5 @@ export const useAuthStore = defineStore("auth", () => {
     setNewToken,
     userName,
     accessDenied,
-    getUserId, // เพิ่มการคืนค่า getUserId
   }
 })

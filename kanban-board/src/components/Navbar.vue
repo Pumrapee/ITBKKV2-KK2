@@ -81,22 +81,24 @@ function toggleSidebar() {
 <template>
   <!-- Navbar -->
   <div
-    class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex justify-between items-center p-3 sm:p-3"
-  >
-    <!-- Navbar Content -->
-    <div class="navbar-start font-custom flex items-center">
-      <button
-        class="btn btn-ghost bg-white pl-3 flex items-center text-xl sm:text-2xl text-black"
-        @click="boardAll"
-      >
-        <!-- Logo -->
-        <img src="/icons/logonavbar2.png" class="w-8 sm:w-10 m-2" />
-        <RouterLink :to="{ name: 'board' }">
-          <span>KRADAN KANBAN</span>
-        </RouterLink>
-      </button>
-    </div>
+  class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex items-center p-3 sm:p-3"
+>
+  <!-- Navbar Content -->
+  <div class="navbar-start font-custom flex items-center">
+    <button
+      class="btn btn-ghost bg-white pl-3 flex items-center text-xl sm:text-2xl text-black"
+      @click="boardAll"
+    >
+      <!-- Logo -->
+      <img src="/icons/logonavbar2.png" class="w-8 sm:w-10 m-2" />
+      <RouterLink :to="{ name: 'board' }">
+        <span>KRADAN KANBAN</span>
+      </RouterLink>
+    </button>
+  </div>
 
+  <!-- User Info and Mobile Toggle -->
+  <div class="flex items-center ml-auto space-x-3">
     <!-- Mobile Toggle Button -->
     <button class="block sm:hidden p-2" @click="toggleSidebar">
       <svg
@@ -114,8 +116,9 @@ function toggleSidebar() {
         />
       </svg>
     </button>
-    <!-- user name (Desktop only) -->
-    <div class="hidden sm:block itbkk-fullname navbar-end pr-5">
+
+    <!-- User Info -->
+    <div class="hidden sm:block itbkk-fullname pr-5">
       Hi, {{ userName }}
     </div>
     <div class="hidden sm:block cursor-pointer dropdown dropdown-end">
@@ -134,6 +137,7 @@ function toggleSidebar() {
       </ul>
     </div>
   </div>
+</div>
 
   <!-- Sidebar -->
   <aside

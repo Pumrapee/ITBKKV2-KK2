@@ -15,9 +15,11 @@ import { useBoardStore } from "@/stores/boardStore.js"
 import { useAuthStore } from "@/stores/loginStore"
 import ExpireToken from "../toast/ExpireToken.vue"
 
-const openModal = ref()
+// Store
 const myBoard = useBoardStore()
 const myUser = useAuthStore()
+
+const openModal = ref()
 const expiredToken = ref(false)
 const showDeleteModal = ref(false)
 const showLeaveModal = ref(false)
@@ -59,7 +61,6 @@ onMounted(async () => {
         const listCollabSort = listBoard.collab.sort(
           (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
         )
-
         myBoard.addBoardsCollab(listCollabSort)
       }
     } else {
@@ -70,23 +71,18 @@ onMounted(async () => {
       myBoard.addBoardsCollab(listCollabSort)
     }
 
-    if (myBoard.navBarCollab && myBoard.navBoard) {
+    // Route Board
+    if (myBoard.navBarCollab && myBoard.navBoard) { //กด collab ที่ side bar
       activeTab.value = "collab"
       myBoard.navBarCollab = false
       myBoard.navBoard = false
-    } else if (
+    } else if ( 
       myBoard.getBoards().length === 1 &&
       !myBoard.navBoard &&
       myBoard.getBoardCollab().length === 0
-    ) {
+    ) { //ถ้ามี Board 1 อัน และไม่มี Collab board และ ไม่ใช่การกดจาก side bar ให้ไป Board แรกที่มี
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-    // } else if (
-    //   myBoard.getBoards().length === 1 &&
-    //   myBoard.navBoard &&
-    //   myBoard.getBoardCollab().length === 0
-    // ) {
-    //   router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-    } else if (myBoard.navBoard) {
+    } else if (myBoard.navBoard) { //กด All ที่ side bar
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
@@ -97,25 +93,33 @@ onMounted(async () => {
   }
 })
 
+//Open Modal
+//Add
 const openModalAdd = () => {
   openModal.value = true
 }
 
+//Leave
 const openLeaveModal = async (boardId, collabName) => {
   showLeaveModal.value = true
   boardIdDelete.value = boardId
   collabsName.value = collabName
 }
 
+//Delete
 const openDeleteModal = (id) => {
   showDeleteModal.value = true
   boardIdDelete.value = id
 }
 
+//Invitation
 const openInvitations = (collabId) => {
   router.push({ name: "invitations", params: { id: collabId } })
 }
 
+
+//Close Modal
+//Add
 const closeAdd = async (nameBoard) => {
   myUser.setToken()
 
@@ -155,13 +159,7 @@ const closeAdd = async (nameBoard) => {
   }
 }
 
-const closeModal = () => {
-  openModal.value = false
-  showDeleteModal.value = false
-  showLeaveModal.value = false
-  router.push({ name: "board" })
-}
-
+//Delete
 const closeDeleteModal = async () => {
   myUser.setToken()
 
@@ -197,6 +195,7 @@ const closeDeleteModal = async () => {
   }
 }
 
+//Leave
 const closeLeaveModal = async () => {
   myUser.setToken()
 
@@ -243,6 +242,12 @@ const closeLeaveModal = async () => {
   }
 }
 
+const closeModal = () => {
+  openModal.value = false
+  showDeleteModal.value = false
+  showLeaveModal.value = false
+  router.push({ name: "board" })
+}
 const activeTab = ref("personal") // ค่าเริ่มต้นเป็น 'profile'
 </script>
 
@@ -346,7 +351,9 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                 v-if="myBoard.getBoards().length > 0"
               >
                 <tr v-for="(board, index) in myBoard.getBoards()">
-                  <th class="text-black pl-4 sm:pl-20 hidden md:table-cell">{{ index + 1 }}</th>
+                  <th class="text-black pl-4 sm:pl-20 hidden md:table-cell">
+                    {{ index + 1 }}
+                  </th>
                   <th>
                     <router-link
                       :to="{ name: 'task', params: { id: board.id } }"
@@ -419,7 +426,9 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
               v-if="myBoard.getBoardCollab().length > 0"
             >
               <tr v-for="(boardCollab, index) in myBoard.getBoardCollab()">
-                <th class="text-black pl-4 sm:pl-20 hidden md:table-cell">{{ index + 1 }}</th>
+                <th class="text-black pl-4 sm:pl-20 hidden md:table-cell">
+                  {{ index + 1 }}
+                </th>
 
                 <th>
                   <router-link
@@ -437,7 +446,7 @@ const activeTab = ref("personal") // ค่าเริ่มต้นเป็�
                   </router-link>
                 </th>
                 <th class="hidden md:table-cell">
-                  <p class="itbkk-owner-name h-2 mb-8 ml-2 sm:ml-12 ">
+                  <p class="itbkk-owner-name h-2 mb-8 ml-2 sm:ml-12">
                     {{ boardCollab.owner.name }}
                   </p>
                 </th>

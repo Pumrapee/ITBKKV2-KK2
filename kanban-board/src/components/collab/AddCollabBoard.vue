@@ -3,12 +3,14 @@ import { ref, defineProps, defineEmits, computed, watch } from "vue"
 import { useAuthStore } from "@/stores/loginStore"
 import { jwtDecode } from "jwt-decode"
 
+//Store
+const myUser = useAuthStore()
+
 const props = defineProps({
   showModal: Boolean,
   collabs: Object,
 })
 const emits = defineEmits(["addCollab", "closeModal"])
-const myUser = useAuthStore()
 
 const newCollab = ref({})
 const errorTask = ref({

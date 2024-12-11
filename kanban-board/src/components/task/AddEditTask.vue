@@ -9,6 +9,11 @@ import { downloadAttachment } from "@/libs/fetchUtils"
 import previewFile from "./PreviewFile.vue"
 import * as pdfjsLib from "pdfjs-dist/webpack"
 
+//store
+const myStatus = useStatusStore()
+const myLimit = useLimitStore()
+const myTask = useTaskStore()
+
 const props = defineProps({
   showModal: Boolean,
   task: Object,
@@ -16,17 +21,15 @@ const props = defineProps({
   ownerBoard: String,
   editModeModal: Boolean,
   editDrop: Boolean,
+  load: Boolean,
 })
 const emits = defineEmits(["saveAddEdit", "closeModal"])
-const myStatus = useStatusStore()
-const myLimit = useLimitStore()
-const myTask = useTaskStore()
 const editMode = ref(props.editModeModal)
 const newTask = ref({}) // Create a local copy of the task object
 const route = useRoute()
-
 const boardId = ref(route.params.id)
 const taskId = ref()
+const loading = ref(false)
 const errorTask = ref({
   title: "",
   description: "",
@@ -61,13 +64,26 @@ const addEditSave = (editTask) => {
   }
 
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
-  setTimeout(() => {
+  // setTimeout(() => {
+  //   editMode.value = false
+  //   uploadedFilesData.value = []
+  //   deleteFiles.value = []
+  //   errorTask.value.attachment = ""
+  // }, 1500)
+
+  // editMode.value = false
+  // uploadedFilesData.value = []
+  // deleteFiles.value = []
+
+  if (uploadedFilesData.value.length > 0) {
     editMode.value = false
-    uploadedFilesData.value = []
-    deleteFiles.value = []
     errorTask.value.attachment = ""
-  }, 1500)
-  emits("saveAddEdit", editedTask, uploadedFilesData.value, deleteFiles.value)
+    emits("saveAddEdit", editedTask, uploadedFilesData.value, deleteFiles.value)
+  } else {
+    editMode.value = false
+    errorTask.value.attachment = ""
+    emits("saveAddEdit", editedTask, uploadedFilesData.value, deleteFiles.value)
+  }
 }
 
 const closeModal = () => {
@@ -183,6 +199,7 @@ const canEdit = computed(() => {
 
 const generatePDFThumbnail = async (file) => {
   // ตรวจสอบว่า file เป็น Blob หรือไม่
+  // ถ้า file ถูกสร้างมาจากคลาส Blob หรือเป็นคลาสลูกที่สืบทอดจาก Blob จะคืนค่า true
   const fileURL = file instanceof Blob ? URL.createObjectURL(file) : file
 
   // โหลด PDF
@@ -222,10 +239,6 @@ const preview = (event) => {
   }
 
   Array.from(files).forEach(async (file, index) => {
-    if (file) {
-      countFile.value -= 1
-    }
-
     // ไฟล์ที่ชื่อซ้ำ
     if (uploadedFilesData.value.some((f) => f.filename === file.name)) {
       notAddedFiles.duplicateFilenames.push(file.name)
@@ -282,6 +295,7 @@ const preview = (event) => {
     }
 
     uploadedFilesData.value.push(previewData)
+    countFile.value = Math.max(0, MAX_FILES - uploadedFilesData.value.length)
   })
 
   // ตรวจสอบและอัปเดตข้อความแจ้งเตือน
@@ -312,6 +326,8 @@ const preview = (event) => {
 }
 
 const previewAdded = async () => {
+  uploadedFilesData.value = []
+  deleteFiles.value = []
   for (const attachment of attachmentFile.value) {
     const previewUrl = await downloadAttachment(
       `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
@@ -321,7 +337,6 @@ const previewAdded = async () => {
 
     let thumbnails = null
     if (attachment.filename.endsWith(".pdf")) {
-      // สร้าง Thumbnail สำหรับ PDF
       thumbnails = await generatePDFThumbnail(previewUrl)
     } else if (
       attachment.filename.endsWith(".png") ||
@@ -337,7 +352,6 @@ const previewAdded = async () => {
     } else {
       thumbnails = previewUrl
     }
-
 
     const previewData = {
       filename: attachment.filename,
@@ -436,6 +450,13 @@ watch(props, () => {
 })
 
 watch(
+  () => props.load, // ใช้ getter function เพื่อรับค่า props.load
+  (newValue) => {
+    loading.value = newValue
+  }
+)
+
+watch(
   () => props.getAttactment,
   (newValue) => {
     if (newValue) {
@@ -456,10 +477,11 @@ watch(
       class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
     >
       <div
-        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl scrollbar-hidden"
+        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl relative max-h-[90vh] overflow-y-auto flex flex-col"
       >
+        <!-- Header Section (Locked) -->
         <div
-          class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b-2 pb-2"
+          class="bg-white z-50 flex flex-col sm:flex-row justify-between items-center border-b-2 pb-2 sticky top-0 bg-white z-20"
         >
           <h2 class="text-xl sm:text-2xl font-bold text-black mb-2 sm:mb-0">
             {{
@@ -484,367 +506,388 @@ watch(
           </div>
         </div>
 
-        <div class="mb-4">
-          <label for="title" class="block text-black font-bold mb-2"
-            >Title</label
-          >
-          <input
-            type="text"
-            id="title"
-            v-model="newTask.title"
-            :readonly="!editMode"
-            placeholder="Enter Title here..."
-            class="itbkk-title w-full border border-black rounded-lg py-2 px-3 input input-ghost"
-          />
-          <div v-if="editMode" class="flex justify-between mt-1">
-            <p class="text-red-400">{{ errorTask.title }}</p>
-            <p
-              class="text-gray-300 whitespace-nowrap text-sm text-end"
-              :class="{
-                'text-red-400':
-                  newTask.title?.trim()?.length > 100 ||
-                  newTask.title?.trim()?.length === 0,
-              }"
-            >
-              {{ newTask.title?.trim()?.length || 0 }} / 100
-            </p>
-          </div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="w-full sm:w-2/3">
-            <label for="description" class="block text-black font-bold mb-2"
-              >Description</label
-            >
-            <textarea
-              id="description"
-              :readonly="!editMode"
-              v-model="newTask.description"
-              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-60 textarea textarea-ghost scrollbar-hidden"
-              :class="
-                newTask.description
-                  ? 'bg-white text-black'
-                  : 'italic text-gray-500'
-              "
-              placeholder="No Description Provided"
-            >
-            {{
-                newTask.description
-                  ? newTask.description
-                  : "No Description Provided"
-              }}
-          </textarea
-            >
-            <div v-if="editMode" class="flex justify-between mt-1">
-              <p class="text-red-400">{{ errorTask.description }}</p>
-              <p
-                class="text-gray-300 text-sm text-end"
-                :class="{
-                  'text-red-400': newTask.description?.trim()?.length > 500,
-                }"
-              >
-                {{ newTask.description?.trim()?.length || 0 }} / 500
-              </p>
-            </div>
-          </div>
-
-          <div class="w-full sm:w-1/3">
+        <!-- Scrollable Content Section -->
+        <div class="flex flex-col sm:flex-row gap-4 overflow-y-auto flex-grow">
+          <div class="w-full sm:w-3/3">
             <div class="mb-4">
-              <label for="assignees" class="block text-black font-bold mb-2"
-                >Assignees</label
+              <label for="title" class="block text-black font-bold mb-2"
+                >Title</label
               >
-              <textarea
-                id="assignees"
+              <input
+                type="text"
+                id="title"
+                v-model="newTask.title"
                 :readonly="!editMode"
-                v-model="newTask.assignees"
-                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-14 textarea textarea-ghost"
-                :class="
-                  newTask.assignees
-                    ? 'bg-white text-black'
-                    : 'italic text-gray-500'
-                "
-                placeholder="Unassigned"
-              ></textarea>
-              <div v-if="editMode" class="flex justify-between">
-                <p class="text-red-400 text-sm w-40">
-                  {{ errorTask.assignees }}
-                </p>
+                placeholder="Enter Title here..."
+                class="itbkk-title w-full border border-black rounded-lg py-2 px-3 input input-ghost"
+              />
+              <div v-if="editMode" class="flex justify-between mt-1">
+                <p class="text-red-400">{{ errorTask.title }}</p>
                 <p
-                  class="text-gray-300 text-sm text-end"
+                  class="text-gray-300 whitespace-nowrap text-sm text-end"
                   :class="{
-                    'text-red-400': newTask.assignees?.trim()?.length > 30,
+                    'text-red-400':
+                      newTask.title?.trim()?.length > 100 ||
+                      newTask.title?.trim()?.length === 0,
                   }"
                 >
-                  {{ newTask.assignees?.trim()?.length || 0 }} / 30
+                  {{ newTask.title?.trim()?.length || 0 }} / 100
                 </p>
               </div>
             </div>
 
-            <div class="mb-4">
-              <label for="status" class="block text-black font-bold"
-                >Status</label
-              >
-              <select
-                v-model="newTask.status"
-                :disabled="!editMode"
-                class="itbkk-status pl-5 border-2 rounded-md h-10 pr-5 w-full"
-              >
-                <option
-                  v-for="(status, index) in myStatus.getStatus()"
-                  :key="index"
-                  :value="status.name"
+            <div class="flex flex-col sm:flex-row gap-4">
+              <div class="w-full sm:w-2/3">
+                <label for="description" class="block text-black font-bold mb-2"
+                  >Description</label
                 >
-                  {{ status.name }}
-                </option>
-              </select>
-            </div>
-
-            <p v-if="editMode" class="text-red-400">{{ errorTask.status }}</p>
-
-            <div v-if="task?.id">
-              <p class="itbkk-timezone pl-3 font-semibold text-sm text-black">
-                Time Zone :
-                {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
-              </p>
-              <p class="itbkk-created-on pl-3 font-semibold text-sm text-black">
-                Created On :
-                {{ new Date(task.createdOn).toLocaleString("en-GB") }}
-              </p>
-              <p class="itbkk-updated-on pl-3 font-semibold text-sm text-black">
-                Updated On :
-                {{ new Date(task.updatedOn).toLocaleString("en-GB") }}
-              </p>
-            </div>
-            <div v-else class="mt-5"></div>
-          </div>
-        </div>
-
-        <div class="mb-6" v-if="task?.id">
-          <label class="block font-bold mb-1">Attachments</label>
-
-          <div class="flex">
-            <input
-              type="file"
-              accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
-              multiple
-              :disabled="!editMode || uploadedFilesData.length === 10"
-              class="file-input file-input-bordered file-input-sm w-full max-w-xs"
-              @change="preview"
-            />
-            <p
-              v-html="errorTask.attachment"
-              class="text-red-400 text-sm w-full pl-2 pt-1"
-            ></p>
-          </div>
-          <div class="mt-2 text-sm text-gray-500">
-            Files remaining to upload:
-            <span class="font-bold">{{ countFile }}</span>
-          </div>
-
-          <!-- Preview thumnail -->
-          <div
-            v-if="uploadedFilesData.length > 0"
-            class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
-          >
-            <div
-              v-for="(file, index) in uploadedFilesData"
-              :key="index"
-              class="relative flex flex-col items-center min-w-[120px] space-y-2 group"
-            >
-              <!-- Image Preview -->
-              <div
-                class="relative w-20 h-20"
-                :class="{
-                  'cursor-pointer': ['media', 'PDF', 'video', 'txt'].includes(
-                    file.type
-                  ),
-                }"
-              >
-                <img
-                  v-if="file.type === 'media'"
-                  :src="file.url"
-                  :alt="file.filename"
-                  class="w-full h-full rounded-md border border-gray-300 object-cover"
-                />
-
-                <img
-                  v-if="file.type === 'PDF'"
-                  :src="file.urlPDF"
-                  :alt="file.filename"
-                  class="w-full h-full rounded-md border border-gray-300 object-cover"
-                />
-
-                <video
-                  v-if="file.type === 'video'"
-                  :src="file.url"
-                  class="w-full h-full rounded-md border border-gray-300 object-cover"
-                ></video>
-
-                <div
-                  v-if="file.type === 'txt'"
-                  class="w-20 h-20 flex items-center justify-center border rounded-md cursor-pointer"
+                <textarea
+                  id="description"
+                  :readonly="!editMode"
+                  v-model="newTask.description"
+                  class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-60 textarea textarea-ghost scrollbar-hidden"
+                  :class="
+                    newTask.description
+                      ? 'bg-white text-black'
+                      : 'italic text-gray-500'
+                  "
+                  placeholder="No Description Provided"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 64 64"
-                    fill="none"
-                    class="w-14 h-14"
+            {{
+                    newTask.description
+                      ? newTask.description
+                      : "No Description Provided"
+                  }}
+          </textarea
+                >
+                <div v-if="editMode" class="flex justify-between mt-1">
+                  <p class="text-red-400">{{ errorTask.description }}</p>
+                  <p
+                    class="text-gray-300 text-sm text-end"
+                    :class="{
+                      'text-red-400': newTask.description?.trim()?.length > 500,
+                    }"
                   >
-                    <!-- Background Rectangle -->
-                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
-
-                    <!-- Document Icon -->
-                    <path
-                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
-                      fill="white"
-                    />
-                    <path
-                      d="M34 14V22H42"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <text
-                      x="32"
-                      y="36"
-                      text-anchor="middle"
-                      fill="#A0AEC0"
-                      font-size="10"
-                      font-family="Arial, sans-serif"
-                    >
-                      TXT
-                    </text>
-                  </svg>
+                    {{ newTask.description?.trim()?.length || 0 }} / 500
+                  </p>
                 </div>
-
-                <!-- Hover Overlay -->
-                <div
-                  v-if="['media', 'PDF', 'video', 'txt'].includes(file.type)"
-                  class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                  @click="openPreview(file)"
-                >
-                  <span class="text-white font-medium text-sm">Preview</span>
-                </div>
-
-                <!-- Document Download -->
-                <a
-                  v-if="file.type === 'document'"
-                  :href="file.url"
-                  :download="file.filename"
-                  class="w-20 h-20 flex items-center justify-center border rounded-md"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 64 64"
-                    fill="none"
-                    class="w-14 h-14"
-                  >
-                    <!-- Background Rectangle -->
-                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
-
-                    <!-- Document Shape -->
-                    <path
-                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
-                      fill="white"
-                    />
-                    <path
-                      d="M34 14V22H42"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-
-                    <!-- Lines in the document -->
-                    <line
-                      x1="25"
-                      y1="30"
-                      x2="37"
-                      y2="30"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                    />
-                    <line
-                      x1="25"
-                      y1="36"
-                      x2="37"
-                      y2="36"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                    />
-                    <line
-                      x1="25"
-                      y1="42"
-                      x2="33"
-                      y2="42"
-                      stroke="#A0AEC0"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </a>
-                <!-- Delete Button -->
-                <button
-                  v-if="editMode"
-                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
-                  @click="removeFile(index, name)"
-                >
-                  <img src="/icons/delete.png" class="w-3 h-3" />
-                </button>
-
-                <!-- Download Button-->
-                <a
-                  v-if="!editMode"
-                  class="absolute top-1 right-1 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                  :href="file.download"
-                  :download="file.filename"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 64 64"
-                    fill="none"
-                    class="w-8 h-8"
-                  >
-                    <!-- Background Circle -->
-                    <circle cx="32" cy="32" r="30" fill="#f0f4ff" />
-                    <!-- Arrow -->
-                    <path
-                      d="M32 16v20"
-                      stroke="#4f46e5"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                    />
-                    <path
-                      d="M24 32l8 8 8-8"
-                      stroke="#4f46e5"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <!-- Download Bar -->
-                    <line
-                      x1="20"
-                      y1="46"
-                      x2="44"
-                      y2="46"
-                      stroke="#4f46e5"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </a>
               </div>
 
-              <a target="_blank" class="italic text-xs text-center block">
-                <p class="break-words w-24">{{ file.filename }}</p>
-              </a>
+              <div class="w-full sm:w-1/3">
+                <div class="mb-4">
+                  <label for="assignees" class="block text-black font-bold mb-2"
+                    >Assignees</label
+                  >
+                  <textarea
+                    id="assignees"
+                    :readonly="!editMode"
+                    v-model="newTask.assignees"
+                    class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-14 textarea textarea-ghost"
+                    :class="
+                      newTask.assignees
+                        ? 'bg-white text-black'
+                        : 'italic text-gray-500'
+                    "
+                    placeholder="Unassigned"
+                  ></textarea>
+                  <div v-if="editMode" class="flex justify-between">
+                    <p class="text-red-400 text-sm w-40">
+                      {{ errorTask.assignees }}
+                    </p>
+                    <p
+                      class="text-gray-300 text-sm text-end"
+                      :class="{
+                        'text-red-400': newTask.assignees?.trim()?.length > 30,
+                      }"
+                    >
+                      {{ newTask.assignees?.trim()?.length || 0 }} / 30
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="status" class="block text-black font-bold"
+                    >Status</label
+                  >
+                  <select
+                    v-model="newTask.status"
+                    :disabled="!editMode"
+                    class="itbkk-status pl-5 border-2 rounded-md h-10 pr-5 w-full"
+                  >
+                    <option
+                      v-for="(status, index) in myStatus.getStatus()"
+                      :key="index"
+                      :value="status.name"
+                    >
+                      {{ status.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <p v-if="editMode" class="text-red-400">
+                  {{ errorTask.status }}
+                </p>
+
+                <div v-if="task?.id">
+                  <p
+                    class="itbkk-timezone pl-3 font-semibold text-sm text-black"
+                  >
+                    Time Zone :
+                    {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
+                  </p>
+                  <p
+                    class="itbkk-created-on pl-3 font-semibold text-sm text-black"
+                  >
+                    Created On :
+                    {{ new Date(task.createdOn).toLocaleString("en-GB") }}
+                  </p>
+                  <p
+                    class="itbkk-updated-on pl-3 font-semibold text-sm text-black"
+                  >
+                    Updated On :
+                    {{ new Date(task.updatedOn).toLocaleString("en-GB") }}
+                  </p>
+                </div>
+                <div v-else class="mt-5"></div>
+              </div>
+            </div>
+
+            <div class="mb-6" v-if="task?.id">
+              <label class="block font-bold mb-1">Attachments</label>
+
+              <div class="flex">
+                <input
+                  type="file"
+                  accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
+                  multiple
+                  :disabled="!editMode || uploadedFilesData.length === 10"
+                  class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+                  @change="preview"
+                />
+                <p
+                  v-html="errorTask.attachment"
+                  class="text-red-400 text-sm w-full pl-2 pt-1"
+                ></p>
+              </div>
+              <div class="mt-2 text-sm text-gray-500">
+                Files remaining to upload:
+                <span class="font-bold">{{ countFile }}</span>
+              </div>
+
+              <!-- Preview thumnail -->
+              <div
+                v-if="uploadedFilesData.length > 0"
+                class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
+              >
+                <div
+                  v-for="(file, index) in uploadedFilesData"
+                  :key="index"
+                  class="relative flex flex-col items-center min-w-[120px] space-y-2 group"
+                >
+                  <!-- Image Preview -->
+                  <div
+                    class="relative w-20 h-20"
+                    :class="{
+                      'cursor-pointer': [
+                        'media',
+                        'PDF',
+                        'video',
+                        'txt',
+                      ].includes(file.type),
+                    }"
+                  >
+                    <img
+                      v-if="file.type === 'media'"
+                      :src="file.url"
+                      :alt="file.filename"
+                      class="w-full h-full rounded-md border border-gray-300 object-cover"
+                    />
+
+                    <img
+                      v-if="file.type === 'PDF'"
+                      :src="file.urlPDF"
+                      :alt="file.filename"
+                      class="w-full h-full rounded-md border border-gray-300 object-cover"
+                    />
+
+                    <video
+                      v-if="file.type === 'video'"
+                      :src="file.url"
+                      class="w-full h-full rounded-md border border-gray-300 object-cover"
+                    ></video>
+
+                    <div
+                      v-if="file.type === 'txt'"
+                      class="w-20 h-20 flex items-center justify-center border rounded-md cursor-pointer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 64 64"
+                        fill="none"
+                        class="w-14 h-14"
+                      >
+                        <!-- Background Rectangle -->
+                        <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                        <!-- Document Icon -->
+                        <path
+                          d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                          fill="white"
+                        />
+                        <path
+                          d="M34 14V22H42"
+                          stroke="#A0AEC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <text
+                          x="32"
+                          y="36"
+                          text-anchor="middle"
+                          fill="#A0AEC0"
+                          font-size="10"
+                          font-family="Arial, sans-serif"
+                        >
+                          TXT
+                        </text>
+                      </svg>
+                    </div>
+
+                    <!-- Hover Overlay -->
+                    <div
+                      v-if="
+                        ['media', 'PDF', 'video', 'txt'].includes(file.type)
+                      "
+                      class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      @click="openPreview(file)"
+                    >
+                      <span class="text-white font-medium text-sm"
+                        >Preview</span
+                      >
+                    </div>
+
+                    <!-- Document Download -->
+                    <a
+                      v-if="file.type === 'document'"
+                      :href="file.url"
+                      :download="file.filename"
+                      class="w-20 h-20 flex items-center justify-center border rounded-md"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 64 64"
+                        fill="none"
+                        class="w-14 h-14"
+                      >
+                        <!-- Background Rectangle -->
+                        <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                        <!-- Document Shape -->
+                        <path
+                          d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                          fill="white"
+                        />
+                        <path
+                          d="M34 14V22H42"
+                          stroke="#A0AEC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+
+                        <!-- Lines in the document -->
+                        <line
+                          x1="25"
+                          y1="30"
+                          x2="37"
+                          y2="30"
+                          stroke="#A0AEC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                        />
+                        <line
+                          x1="25"
+                          y1="36"
+                          x2="37"
+                          y2="36"
+                          stroke="#A0AEC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                        />
+                        <line
+                          x1="25"
+                          y1="42"
+                          x2="33"
+                          y2="42"
+                          stroke="#A0AEC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    </a>
+                    <!-- Delete Button -->
+                    <button
+                      v-if="editMode"
+                      class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
+                      @click="removeFile(index, name)"
+                    >
+                      <img src="/icons/delete.png" class="w-3 h-3" />
+                    </button>
+
+                    <!-- Download Button-->
+                    <a
+                      v-if="!editMode"
+                      class="absolute top-1 right-1 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                      :href="file.download"
+                      :download="file.filename"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 64 64"
+                        fill="none"
+                        class="w-8 h-8"
+                      >
+                        <!-- Background Circle -->
+                        <circle cx="32" cy="32" r="30" fill="#f0f4ff" />
+                        <!-- Arrow -->
+                        <path
+                          d="M32 16v20"
+                          stroke="#4f46e5"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M24 32l8 8 8-8"
+                          stroke="#4f46e5"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <!-- Download Bar -->
+                        <line
+                          x1="20"
+                          y1="46"
+                          x2="44"
+                          y2="46"
+                          stroke="#4f46e5"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+
+                  <a target="_blank" class="italic text-xs text-center block">
+                    <p class="break-words w-24">{{ file.filename }}</p>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Action Buttons (Locked) -->
         <div class="flex justify-end mt-4">
           <div v-if="canEdit">
             <router-link
@@ -877,6 +920,22 @@ watch(
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Loading -->
+  <div
+    v-if="loading"
+    class="fixed z-10 inset-0 flex items-center justify-center bg-black/[.5]"
+  >
+    <div
+      class="bg-white p-4 sm:p-6 rounded-lg w-full sm:w-2/12 max-w-3xl relative max-h-[90vh] flex flex-col items-center justify-center"
+    >
+      <img src="/icons/document.gif" alt="Loading" class="w-36 mb-4" />
+      <p class="text-center flex items-end justify-center text-xl">
+        Loading
+        <span class="loading loading-dots loading-xs ml-2"></span>
+      </p>
     </div>
   </div>
 

@@ -35,6 +35,7 @@ const myLimit = useLimitStore()
 const myUser = useAuthStore()
 const myBoard = useBoardStore()
 
+//Task
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -50,6 +51,7 @@ const emits = defineEmits(["closeAddModal"])
 const disabledIfnotOwner = ref(false)
 const nameOwnerBoard = ref()
 const disabledVisibility = ref()
+const loadingFile = ref(false)
 
 // user name login
 const userName = localStorage.getItem("user")
@@ -100,7 +102,6 @@ const openModalEdit = async (id, boolean) => {
         boardId.value
       }/tasks/${id}/attachments`
     )
-
     attachments.value = attachment
 
     if (taskDetail.status === 404) {
@@ -160,6 +161,7 @@ const openLimitModal = () => {
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task, file, deleteFiles) => {
+  console.log(openModal.value)
   myUser.setToken()
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -170,7 +172,9 @@ const closeAddEdit = async (task, file, deleteFiles) => {
   if (checkToken.statusCode === 200) {
     //กรณีที่ token หมดอายุ ให้ต่ออายุ token
     myUser.setNewToken(checkToken.accessNewToken)
+    // openModal.value = false
 
+    //Task
     if (task.id !== undefined) {
       const { editedItem, statusCode } = await editItem(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
@@ -183,6 +187,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         }
       )
 
+      //Files
       if (statusCode === 200) {
         //Delete
         for (const deleted of deleteFiles) {
@@ -200,6 +205,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
           }/attachments`
         )
 
+        //Filter เอาเฉพาะไฟล์ที่ไม่เคยมีอยู่ใน attachment เท่านั้น
         const newFiles = file.filter(
           (fileUpload) =>
             !attachment.some(
@@ -207,8 +213,11 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             )
         )
 
-        //Upload
+        //Upload File
         if (newFiles.length > 0) {
+          console.log(newFiles)
+          loadingFile.value = true
+          openModal.value = false
           const uploadedFile = await uploadAttachment(
             `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
               task.id
@@ -216,17 +225,26 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             newFiles
           )
 
+          console.log(uploadedFile)
+
           if (uploadedFile) {
+            console.log("test")
             myTask.updateTask(editedItem)
+            loadingFile.value = false
+            router.push({ name: "task" })
+
             showAlert("The task has been updated", "success")
           } else {
+            router.push({ name: "task" })
+            openModal.value = false
+            loadingFile.value = false
             showAlert("The task has not been updated", "error")
           }
         } else {
+          //แก้เฉพาะ Task
           myTask.updateTask(editedItem)
           openModal.value = false
           router.push({ name: "task" })
-          editMode.value = false
           showAlert("The task has been updated", "success")
         }
       }
@@ -240,6 +258,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         expiredToken.value = true
       }
     } else {
+      console.log(openModal.value)
       openModal.value = false
       router.push({ name: "task" })
       editMode.value = false
@@ -266,9 +285,11 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         expiredToken.value = true
       }
     } else {
-      openModal.value = false
-      router.push({ name: "task" })
-      editMode.value = false
+      console.log(openModal.value)
+      // openModal.value = false
+      // router.push({ name: "task" })
+      // editMode.value = false
+      console.log(openModal.value)
     }
   }
 
@@ -277,6 +298,8 @@ const closeAddEdit = async (task, file, deleteFiles) => {
     openModal.value = false
     editMode.value = false
   }
+
+  console.log(openModal.value)
 }
 
 // Delete Modal
@@ -979,7 +1002,7 @@ async function fetchBoardData(id) {
 
     <!-- Table -->
     <div
-      class="overflow-x-auto max-h-[400px] border border-black rounded-md w-full md:w-4/5 mt-4 lg:overflow-x-visible"
+      class="border border-black rounded-md w-full md:w-4/5 mt-4 overflow-x-auto md:overflow-x-visible"
     >
       <table class="table w-full">
         <!-- head -->
@@ -1107,7 +1130,7 @@ async function fetchBoardData(id) {
 
                 <ul
                   tabindex="0"
-                  class="itbkk-button-action z-[100] dropdown-content menu bg-base-100 rounded-box w-36 p-2 shadow"
+                  class="itbkk-button-action z-[1] dropdown-content menu bg-base-100 rounded-box w-36 p-2 shadow"
                 >
                   <router-link
                     :to="{ name: 'editTask', params: { taskId: task.id } }"
@@ -1156,6 +1179,7 @@ async function fetchBoardData(id) {
     :getAttactment="attachments"
     :editModeModal="editMode"
     :ownerBoard="nameOwnerBoard"
+    :load="loadingFile"
     @saveAddEdit="closeAddEdit"
     @closeModal="closeModal"
   />
