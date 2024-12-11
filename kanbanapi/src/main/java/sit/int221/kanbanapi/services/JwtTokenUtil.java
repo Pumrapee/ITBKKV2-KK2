@@ -3,6 +3,7 @@ package sit.int221.kanbanapi.services;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.json.JSONObject;
@@ -107,7 +108,7 @@ public class JwtTokenUtil {
         try {
             Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
             return true;
-        } catch (Exception e) {
+        } catch (SignatureException | IllegalArgumentException e) {
             return false;
         }
     }

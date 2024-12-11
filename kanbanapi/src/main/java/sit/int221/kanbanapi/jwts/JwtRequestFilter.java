@@ -27,6 +27,7 @@ import sit.int221.kanbanapi.services.*;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 
 @Component
@@ -165,11 +166,11 @@ import java.io.IOException;
             return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/(tasks|statuses|collabs)(/.*)?");
         }
 
-        private boolean isSelfCollabRemovalRequest(String requestMethod, String requestURI, String userOid) {
-            return (requestMethod.equals("DELETE") && requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs/" + userOid));
-        }
+    private boolean isSelfCollabRemovalRequest(String requestMethod, String requestURI, String userOid) {
+        return (requestMethod.equals("DELETE") && requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs/" + Pattern.quote(userOid)));
+    }
 
-        private boolean isCollabRequest(String requestURI) {
+    private boolean isCollabRequest(String requestURI) {
             return requestURI.matches(".*/boards/[a-zA-Z0-9_-]+/collabs(/.*)?");
         }
 

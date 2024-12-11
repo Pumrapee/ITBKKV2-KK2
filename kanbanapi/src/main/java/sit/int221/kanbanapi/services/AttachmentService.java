@@ -55,52 +55,72 @@ public class AttachmentService {
     }
 
     public FileUploadResponseDTO uploadAttachments(Integer taskId, MultipartFile[] files) {
-        // Create new directory
-        java.io.File newUploadDir = new java.io.File(uploadDir + "/" + taskId);
-        if (!newUploadDir.exists()) {
-            newUploadDir.mkdirs();
+        Path taskUploadDir = Paths.get(uploadDir, String.valueOf(taskId)).normalize();
+
+        try {
+            // Ensure the directory exists
+            if (!Files.exists(taskUploadDir)) {
+                Files.createDirectories(taskUploadDir);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create directory for task " + taskId, e);
         }
+
         // Fetch current attachments
         List<Attachment> existingAttachments = getAttachmentsByTaskId(taskId);
         if (existingAttachments.size() >= MAX_FILES) {
             throw new TaskLimitExceededException("Each task can have at most " + MAX_FILES + " files.");
         }
 
-        // Validate and process each file
         List<String> addedFiles = new ArrayList<>();
         List<String> existingFiles = new ArrayList<>();
         List<String> notAddedFiles = new ArrayList<>();
+
         for (MultipartFile file : files) {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
+
+            if (filename.contains("..")) {
+                notAddedFiles.add(filename);
+                continue;
+            }
+
             if (existingAttachments.stream().anyMatch(att -> att.getFilename().equals(filename))) {
-                // Skip duplicate filenames within the task
-                existingFiles.add(file.getOriginalFilename());
+                existingFiles.add(filename);
                 continue;
             }
 
             if (existingAttachments.size() + addedFiles.size() >= MAX_FILES) {
-                notAddedFiles.add(file.getOriginalFilename());
+                notAddedFiles.add(filename);
                 continue;
             }
 
             if (file.getSize() > MAX_FILE_SIZE) {
-                notAddedFiles.add(file.getOriginalFilename());
+                notAddedFiles.add(filename);
+                continue;
+            }
+
+            Path targetPath = taskUploadDir.resolve(filename).normalize();
+
+            // Ensure the target path is within the intended directory
+            if (!targetPath.startsWith(taskUploadDir)) {
+                notAddedFiles.add(filename);
                 continue;
             }
 
             try {
-                String filePath = Paths.get(uploadDir + "/" + taskId, filename).toString();
-                Files.copy(file.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
                 Attachment attachment = new Attachment();
                 attachment.setFilename(filename);
-                attachment.setFile_path(filePath);
-                attachment.setTask(taskRepository.findById(taskId).orElseThrow(() -> new ItemNotFoundException("Task " + taskId + " does not exist !!!")));
+                attachment.setFile_path(targetPath.toString());
+                attachment.setTask(taskRepository.findById(taskId)
+                        .orElseThrow(() -> new ItemNotFoundException("Task " + taskId + " does not exist !!!")));
                 attachmentRepository.save(attachment);
-                addedFiles.add(file.getOriginalFilename());
+                addedFiles.add(filename);
             } catch (IOException ex) {
-                throw new RuntimeException("Could not store file " + filename, ex);
+                notAddedFiles.add(filename);
             }
         }
+
         FileUploadResponseDTO fileUploadResponseDTO = new FileUploadResponseDTO();
         fileUploadResponseDTO.setAddedFiles(addedFiles);
         fileUploadResponseDTO.setExistingFiles(existingFiles);
