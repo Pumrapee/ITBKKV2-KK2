@@ -523,9 +523,9 @@ watch(
                     <button
                       :disabled="disabledIfNotOwner"
                       @click="openEditStatus(task.id)"
-                      class="btn btn-ghost bg-yellow-100 w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
+                      class="btn btn-ghost bg-yellow-200 w-12 h-12 sm:w-10 sm:h-10 md:w-12 md:h-12"
                     >
-                      <img src="/icons/pen.png" class="w-4 ml-2" />
+                      <img src="/icons/pen.png" class="w-4" />
                     </button>
 
                     <!-- Tooltip -->

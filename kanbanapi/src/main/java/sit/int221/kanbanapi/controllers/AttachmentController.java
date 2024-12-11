@@ -21,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v3/boards/{boardId}/tasks/{taskId}/attachments")
+@CrossOrigin(origins = {"http://ip23kk2.sit.kmutt.ac.th", "http://localhost:5173", "http://intproj23.sit.kmutt.ac.th", "https://intproj23.sit.kmutt.ac.th"})
 public class AttachmentController {
     @Autowired
     private AttachmentService attachmentService;

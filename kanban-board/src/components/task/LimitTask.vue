@@ -85,11 +85,11 @@ const closelimitModal = async (maxlimit) => {
 const errorLimit = ref("")
 
 const changeLimit = computed(() => {
-  const limitMore = maxTasks.value > 30
+  const limitMore = maxTasks.value > 10
   const limitLess = maxTasks.value < 1
 
   errorLimit.value = limitMore
-    ? "Limit status not more than 30"
+    ? "Limit status not more than 10"
     : limitLess
     ? "Limit status not less than 1"
     : ""
@@ -126,8 +126,12 @@ watch(
 <template>
   <!-- Modal limit -->
   <div v-if="showLimitModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15] px-4">
-      <div class="itbkk-modal-setting modal-box w-full max-w-lg sm:w-3/4 md:w-2/3 lg:w-1/3 p-6">
+    <div
+      class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
+    >
+      <div
+        class="itbkk-modal-setting modal-box w-full max-w-lg sm:w-3/4 md:w-2/3 lg:w-1/3 p-6"
+      >
         <h3 class="font-bold text-lg text-slate-700">Status Settings</h3>
         <p class="py-4">
           Users can limit the number of tasks in a status by setting the Maximum
@@ -159,16 +163,26 @@ watch(
             min="0"
             max="30"
           />
+
+          <p v-if="errorLimit" class="text-red-500 text-xs mt-1">
+            {{ errorLimit }}
+          </p>
         </div>
 
-        <div class="modal-action mt-6 flex flex-col md:flex-row md:justify-end space-y-4 md:space-y-0 md:space-x-4">
+        <div
+          class="modal-action mt-6 flex flex-col md:flex-row md:justify-end space-y-4 md:space-y-0 md:space-x-4"
+        >
           <button
             @click="closelimitModal(maxTasks)"
             class="itbkk-button-confirm btn bg-green-400 text-white disabled:bg-green-200 disabled:text-white px-4 py-2 rounded-md hover:bg-green-500 w-full md:w-auto"
+            :disabled="changeLimit"
           >
             Save
           </button>
-          <button @click="closeCancel()" class="itbkk-button-cancel btn bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 w-full md:w-auto">
+          <button
+            @click="closeCancel()"
+            class="itbkk-button-cancel btn bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 w-full md:w-auto"
+          >
             Cancel
           </button>
         </div>
@@ -178,8 +192,12 @@ watch(
 
   <!-- Modal warning -->
   <div v-if="showWarning" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen bg-black/[.15] px-4">
-      <div class="itbkk-modal-setting modal-box w-full max-w-lg sm:w-3/4 md:w-2/3 lg:w-1/3 p-6">
+    <div
+      class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
+    >
+      <div
+        class="itbkk-modal-setting modal-box w-full max-w-lg sm:w-3/4 md:w-2/3 lg:w-1/3 p-6"
+      >
         <div class="flex justify-center">
           <img src="/icons/caution.png" alt="caution" class="h-28" />
         </div>
@@ -209,21 +227,26 @@ watch(
         </table>
 
         <div>
-        <div class="pt-5" v-if="isLimitEnabled">
-          <p v-for="(status, index) in showLimitStatus" :key="index">
-            <template v-if="status.excessCount > 0">
-              {{ status.name }}: {{ status.excessCount }}
-            </template>
-          </p>
-        </div>
+          <div class="pt-5" v-if="isLimitEnabled">
+            <p v-for="(status, index) in showLimitStatus" :key="index">
+              <template v-if="status.excessCount > 0">
+                {{ status.name }}: {{ status.excessCount }}
+              </template>
+            </p>
+          </div>
 
-        <div class="modal-action mt-6 flex flex-col md:flex-row md:justify-end space-y-4 md:space-y-0 md:space-x-4">
-          <button @click="closeCancel()" class="itbkk-button-cancel btn bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 w-full md:w-auto">
-            Cancel
-          </button>
+          <div
+            class="modal-action mt-6 flex flex-col md:flex-row md:justify-end space-y-4 md:space-y-0 md:space-x-4"
+          >
+            <button
+              @click="closeCancel()"
+              class="itbkk-button-cancel btn bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 w-full md:w-auto"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   </div>
 

@@ -1,3 +1,4 @@
+import { previewBinaryFile } from "./previewBinary"
 //function ที่ติดต่อ back-end.
 let tokenStorage = undefined
 let refresh_token = localStorage.getItem("refreshToken")
@@ -7,7 +8,6 @@ function getToken() {
 }
 
 function tokenIsNull(token) {
-  // return token ? { Authorization: `Bearer ${token}` } : {}
   return !token || token === "null" || token === null || token === ""
     ? {}
     : { Authorization: `Bearer ${token}` }
@@ -15,12 +15,6 @@ function tokenIsNull(token) {
 
 //เช็คว่า Token หมดอายุ
 function isTokenExpired(token) {
-  // if (!token) return true
-
-  // if (!token) {
-  //   return false
-  // }
-
   // Validate the token format
   if (
     (!token && !refresh_token) ||
@@ -29,10 +23,6 @@ function isTokenExpired(token) {
   ) {
     return false
   }
-
-  // if (token === "null") {
-  //   return false
-  // }
 
   const tokenParts = token?.split(".")
   if (tokenParts?.length !== 3) return true
@@ -97,19 +87,12 @@ async function getItems(url) {
     data = await fetch(url, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
 
     if (data.status === 401) {
       throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
     }
-
-    // if (data.status === 403) {
-    //   router.push({ name: "forbidden" })
-    // }
 
     const items = await data.json()
 
@@ -128,9 +111,6 @@ async function getStatusLimits(url) {
     data = await fetch(`${url}/maximum-task`, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
     const items = await data.json()
@@ -148,9 +128,6 @@ async function getItemById(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
 
@@ -161,8 +138,6 @@ async function getItemById(url, id) {
     const item = await data.json()
     return item
   } catch (error) {
-    // return { error: error.message }
-
     if (data.status === 404) return 404
     if (data.status === 401) return 401
   }
@@ -174,9 +149,6 @@ async function findStatus(url, id) {
     data = await fetch(`${url}/${id}`, {
       //GET Method
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${tokenStorage}`,
-      // },
       headers: tokenIsNull(tokenStorage),
     })
     return data.status
@@ -191,9 +163,7 @@ async function deleteItemById(url, id) {
   try {
     const res = await fetch(`${url}/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${tokenStorage}`,
-      },
+      headers: tokenIsNull(tokenStorage),
     })
     return res.status
   } catch (error) {}
@@ -205,9 +175,7 @@ async function deleteItemByIdToNewId(url, oldId, newId) {
   try {
     const res = await fetch(`${url}/${oldId}/${newId}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${tokenStorage}`,
-      },
+      headers: tokenIsNull(tokenStorage),
     })
     return res.status
   } catch (error) {}
@@ -379,6 +347,81 @@ async function patchItem(url, newItem) {
   } catch (error) {}
 }
 
+async function uploadAttachment(url, file) {
+  getToken()
+  let response
+
+  const formData = new FormData()
+  file.forEach((fileUpload) => {
+    formData.append("files", fileUpload.files)
+  })
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: tokenIsNull(tokenStorage),
+      body: formData,
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized")
+    }
+
+    const uploadedFile = await response.json()
+    return uploadedFile
+  } catch (error) {}
+}
+
+async function downloadAttachment(url) {
+  getToken()
+  let response
+
+  try {
+    response = await fetch(url, {
+      method: "GET",
+      headers: tokenIsNull(tokenStorage),
+    })
+
+    if (response.status === 200) {
+      const blob = await response.blob()
+      return previewBinaryFile(blob)
+    } else {
+      return response.status
+    }
+  } catch (error) {}
+}
+
+async function getAttachment(url) {
+  getToken()
+  let data
+  try {
+    data = await fetch(url, {
+      method: "GET",
+      headers: tokenIsNull(tokenStorage),
+    })
+
+    if (data.status === 401) {
+      throw new Error("Unauthorized") // คุณสามารถปรับข้อความ error ได้
+    }
+
+    const items = await data.json()
+
+    return items
+  } catch (error) {}
+}
+
+async function removeAttachment(url, id) {
+  //DELETE Method
+  getToken()
+  try {
+    const res = await fetch(`${url}/${id}`, {
+      method: "DELETE",
+      headers: tokenIsNull(tokenStorage),
+    })
+    return res.status
+  } catch (error) {}
+}
+
 export {
   getItems,
   getItemById,
@@ -397,4 +440,8 @@ export {
   getBoardItems,
   patchItem,
   invitation,
+  uploadAttachment,
+  getAttachment,
+  downloadAttachment,
+  removeAttachment,
 }

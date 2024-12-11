@@ -22,8 +22,6 @@ const logout = () => {
 }
 
 const boardAll = () => {
-  // myBoard.clearBoard()
-  // myBoard.clearBoardCollab()
   myStatus.clearStatus()
   myTask.clearTask()
   myBoard.navBoard = true

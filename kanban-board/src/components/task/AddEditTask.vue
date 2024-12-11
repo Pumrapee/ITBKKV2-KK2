@@ -3,10 +3,16 @@ import { defineProps, ref, watch, computed, defineEmits } from "vue"
 import { useStatusStore } from "../../stores/statusStore"
 import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "../../stores/taskStore"
+import { previewBinaryFile } from "../../libs/previewBinary"
+import { useRoute } from "vue-router"
+import { downloadAttachment } from "@/libs/fetchUtils"
+import previewFile from "./PreviewFile.vue"
+import * as pdfjsLib from "pdfjs-dist/webpack"
 
 const props = defineProps({
   showModal: Boolean,
   task: Object,
+  getAttactment: Array,
   ownerBoard: String,
   editModeModal: Boolean,
   editDrop: Boolean,
@@ -17,12 +23,26 @@ const myLimit = useLimitStore()
 const myTask = useTaskStore()
 const editMode = ref(props.editModeModal)
 const newTask = ref({}) // Create a local copy of the task object
+const route = useRoute()
+
+const boardId = ref(route.params.id)
+const taskId = ref()
 const errorTask = ref({
   title: "",
   description: "",
   assignees: "",
   status: "",
+  attachment: "",
 })
+
+// Files
+const uploadedFilesData = ref([])
+const attachmentFile = ref(props.getAttactment)
+const selectedFile = ref(null) // Selected file for the preview modal
+const deleteFiles = ref([])
+const MAX_FILES = 10
+const MAX_FILE_SIZE = 20 * 1024 * 1024
+const countFile = ref()
 
 const addEditSave = (editTask) => {
   const editedTask = { ...editTask }
@@ -43,12 +63,19 @@ const addEditSave = (editTask) => {
   //เพิ่มเพราะเหมือนจะไปติดอะไรสักอย่างตอน limit
   setTimeout(() => {
     editMode.value = false
-  }, 500)
-  emits("saveAddEdit", editedTask)
+    uploadedFilesData.value = []
+    deleteFiles.value = []
+    errorTask.value.attachment = ""
+  }, 1500)
+  emits("saveAddEdit", editedTask, uploadedFilesData.value, deleteFiles.value)
 }
 
 const closeModal = () => {
   editMode.value = false
+  // Reset arrays
+  uploadedFilesData.value = []
+  deleteFiles.value = []
+  errorTask.value.attachment = ""
   emits("closeModal")
 }
 
@@ -71,12 +98,15 @@ const changeTask = computed(() => {
     description: props.task.description,
     assignees: props.task.assignees,
     status: props.task.status,
+    attachments:
+      props.getAttactment?.map((attachment) => attachment.filename) || [],
   }
 
   const newTitle = trimAndCheckNull(newTask.value.title)
   const newDescription = trimAndCheckNull(newTask.value.description)
   const newAssignees = trimAndCheckNull(newTask.value.assignees)
-  const newStatus = newTask.value.status // รับค่า newStatus จากการเลือกของผู้ใช้
+  const newStatus = newTask.value.status
+  const newAttachments = uploadedFilesData.value.map((file) => file.filename)
 
   // ตรวจสอบความยาวของ title, description, และ assignees
   const isTitleTooLong = newTitle?.length > 100
@@ -96,11 +126,16 @@ const changeTask = computed(() => {
     ? "Assignees exceeds the limit of 30 characters."
     : ""
 
+  const isAttachmentsUnchanged =
+    oldTask.attachments.length === newAttachments.length &&
+    oldTask.attachments.every((filename) => newAttachments.includes(filename))
+
   const isUnchanged =
     oldTask.title === newTitle &&
     oldTask.description === newDescription &&
     oldTask.assignees === newAssignees &&
-    oldTask.status === newStatus
+    oldTask.status === newStatus &&
+    isAttachmentsUnchanged
 
   if (myLimit.getLimit().taskLimitEnabled === true) {
     const statusCount = myTask.matchStatus(newStatus).length
@@ -130,7 +165,6 @@ const changeTask = computed(() => {
 
   const isStatusExceeded = errorTask.value.status !== ""
 
-  // ตรวจสอบเงื่อนไขทั้งหมดรวมถึงการเปลี่ยนแปลงของข้อมูล
   return (
     isTitleTooLong ||
     isDescriptionTooLong ||
@@ -142,18 +176,277 @@ const changeTask = computed(() => {
   )
 })
 
+const canEdit = computed(() => {
+  const userName = localStorage.getItem("user")
+  return userName === props.ownerBoard
+})
+
+const generatePDFThumbnail = async (file) => {
+  // ตรวจสอบว่า file เป็น Blob หรือไม่
+  const fileURL = file instanceof Blob ? URL.createObjectURL(file) : file
+
+  // โหลด PDF
+  const pdf = await pdfjsLib.getDocument(fileURL).promise
+  const page = await pdf.getPage(1) // ดึงหน้าแรกของ PDF
+  const viewport = page.getViewport({ scale: 1 }) // ตั้งค่า scale
+  const canvas = document.createElement("canvas") // สร้าง canvas
+  const context = canvas.getContext("2d")
+
+  // ตั้งขนาด canvas
+  canvas.width = viewport.width
+  canvas.height = viewport.height
+
+  // เรนเดอร์ PDF บน canvas
+  await page.render({
+    canvasContext: context,
+    viewport,
+  }).promise
+
+  // แปลง canvas เป็น Blob URL
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      const blobURL = URL.createObjectURL(blob)
+      resolve(blobURL) // ส่ง Blob URL กลับ
+    }, "image/png") // ใช้ PNG เป็นฟอร์แมต
+  })
+}
+
+const preview = (event) => {
+  const files = event.target.files
+  errorTask.value.attachment = ""
+
+  const notAddedFiles = {
+    exceededMaxFiles: [],
+    exceededMaxSize: [],
+    duplicateFilenames: [],
+  }
+
+  Array.from(files).forEach(async (file, index) => {
+    if (file) {
+      countFile.value -= 1
+    }
+
+    // ไฟล์ที่ชื่อซ้ำ
+    if (uploadedFilesData.value.some((f) => f.filename === file.name)) {
+      notAddedFiles.duplicateFilenames.push(file.name)
+      return
+    }
+
+    // ไฟล์ที่ขนาดเกิน
+    if (file.size > MAX_FILE_SIZE) {
+      notAddedFiles.exceededMaxSize.push(file.name)
+      return
+    }
+
+    // เกินจำนวนไฟล์ที่กำหนด
+    if (uploadedFilesData.value.length >= MAX_FILES) {
+      notAddedFiles.exceededMaxFiles.push(file.name)
+      return
+    }
+
+    const previewData = {
+      filename: file.name,
+      files: file,
+      type: "document",
+      url: "",
+      urlPDF: "",
+      content: null,
+    }
+    if (
+      file.name.endsWith(".png") ||
+      file.name.endsWith(".jpg") ||
+      file.name.endsWith(".jpeg") ||
+      file.name.endsWith(".gif")
+    ) {
+      previewData.type = "media"
+      previewData.url = previewBinaryFile(file)
+    } else if (file.name.endsWith(".mp4") || file.name.endsWith(".avi")) {
+      previewData.type = "video"
+      previewData.url = previewBinaryFile(file)
+    } else if (file.name.endsWith(".pdf")) {
+      previewData.type = "PDF"
+      previewData.urlPDF = await generatePDFThumbnail(file)
+      previewData.url = previewBinaryFile(file)
+    } else if (file.name.endsWith(".txt")) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        previewData.type = "txt"
+        previewData.content = event.target.result || "This file is empty."
+        uploadedFilesData.value = [...uploadedFilesData.value, previewData]
+      }
+      reader.readAsText(file)
+      return
+    } else {
+      previewData.type = "document"
+      previewData.url = previewBinaryFile(file)
+    }
+
+    uploadedFilesData.value.push(previewData)
+  })
+
+  // ตรวจสอบและอัปเดตข้อความแจ้งเตือน
+  if (notAddedFiles.exceededMaxFiles.length > 0) {
+    errorTask.value.attachment = `- Each task can have at most ${MAX_FILES} files.<br>`
+  }
+
+  if (notAddedFiles.exceededMaxSize.length > 0) {
+    errorTask.value.attachment += `- Each file cannot be larger than ${
+      MAX_FILE_SIZE / (1024 * 1024)
+    } MB.<br>`
+  }
+
+  if (notAddedFiles.duplicateFilenames.length > 0) {
+    errorTask.value.attachment += `- File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file.<br>`
+  }
+
+  if (
+    notAddedFiles.exceededMaxFiles.length > 0 ||
+    notAddedFiles.exceededMaxSize.length > 0
+  ) {
+    errorTask.value.attachment += `The following files are not added: ${[
+      ...notAddedFiles.exceededMaxFiles,
+      ...notAddedFiles.exceededMaxSize,
+      ...notAddedFiles.duplicateFilenames, //ยังไม่แน่ใจอันนี้ต้องรวมด้วยไหม
+    ].join(", ")}`
+  }
+}
+
+const previewAdded = async () => {
+  for (const attachment of attachmentFile.value) {
+    const previewUrl = await downloadAttachment(
+      `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+        taskId.value
+      }/attachments/${attachment.id}/download`
+    )
+
+    let thumbnails = null
+    if (attachment.filename.endsWith(".pdf")) {
+      // สร้าง Thumbnail สำหรับ PDF
+      thumbnails = await generatePDFThumbnail(previewUrl)
+    } else if (
+      attachment.filename.endsWith(".png") ||
+      attachment.filename.endsWith(".jpg") ||
+      attachment.filename.endsWith(".jpeg") ||
+      attachment.filename.endsWith(".gif")
+    ) {
+      thumbnails = await downloadAttachment(
+        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
+          taskId.value
+        }/attachments/${attachment.id}/thumbnail`
+      )
+    } else {
+      thumbnails = previewUrl
+    }
+
+
+    const previewData = {
+      filename: attachment.filename,
+      files: null,
+      type: "document",
+      url: thumbnails,
+      urlPDF: thumbnails,
+      download: previewUrl,
+      content: null,
+    }
+
+    if (
+      attachment.filename.endsWith(".png") ||
+      attachment.filename.endsWith(".jpg") ||
+      attachment.filename.endsWith(".jpeg") ||
+      attachment.filename.endsWith(".gif")
+    ) {
+      previewData.type = "media"
+    } else if (
+      attachment.filename.endsWith(".mp4") ||
+      attachment.filename.endsWith(".avi")
+    ) {
+      previewData.type = "video"
+    } else if (attachment.filename.endsWith(".pdf")) {
+      previewData.type = "PDF"
+    } else if (attachment.filename.endsWith(".txt")) {
+      try {
+        const response = await fetch(previewUrl)
+        if (response.ok) {
+          const blob = await response.blob()
+
+          const textContent = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = (event) => resolve(event.target.result)
+            reader.onerror = (error) => reject(error)
+            reader.readAsText(blob)
+          })
+
+          previewData.type = "txt"
+          previewData.content = textContent
+        }
+      } catch (error) {
+        console.error("Error reading .txt file:", error)
+      }
+    } else {
+      previewData.type = "document"
+    }
+
+    uploadedFilesData.value.push(previewData)
+  }
+}
+
+const removeFile = async (index) => {
+  const fileToRemove = uploadedFilesData.value[index].filename
+  const attachment = attachmentFile.value
+    ? attachmentFile.value.find((file) => file.filename === fileToRemove)
+    : null
+
+  const attachmentId = attachment?.id
+  countFile.value += 1
+
+  if (!attachmentId) {
+    // ลบไฟล์ที่เพิ่มใหม่ (local files)
+    uploadedFilesData.value.splice(index, 1)
+    return
+  }
+
+  if (attachmentId) {
+    // ลบไฟล์ที่ BE
+    uploadedFilesData.value.splice(index, 1)
+    deleteFiles.value.push(attachmentId)
+  }
+}
+
+const openPreview = (file) => {
+  selectedFile.value = {
+    filename: file.filename,
+    type: file.type,
+    content: file.content || null,
+    url: file.download || file.url,
+  }
+}
+
+const closePreview = () => {
+  selectedFile.value = null
+}
+
 watch(props, () => {
   if (props.showModal) {
     Object.assign(newTask.value, props.task)
+    taskId.value = newTask.value.id
   }
   if (props.editModeModal) {
     editMode.value = props.editModeModal
   }
 })
-const canEdit = computed(() => {
-  const userName = localStorage.getItem("user")
-  return userName === props.ownerBoard
-})
+
+watch(
+  () => props.getAttactment,
+  (newValue) => {
+    if (newValue) {
+      attachmentFile.value = newValue
+      taskId.value = route.params.taskId
+      countFile.value = MAX_FILES - newValue.length // อัปเดตค่า countFile
+      previewAdded(newValue)
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -163,7 +456,7 @@ const canEdit = computed(() => {
       class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
     >
       <div
-        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl"
+        class="itbkk-modal-task bg-white p-4 sm:p-6 rounded-lg w-full sm:w-11/12 max-w-3xl scrollbar-hidden"
       >
         <div
           class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b-2 pb-2"
@@ -227,7 +520,7 @@ const canEdit = computed(() => {
               id="description"
               :readonly="!editMode"
               v-model="newTask.description"
-              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-72 textarea textarea-ghost"
+              class="itbkk-description w-full border border-black rounded-lg py-3 px-3 h-40 sm:h-60 textarea textarea-ghost scrollbar-hidden"
               :class="
                 newTask.description
                   ? 'bg-white text-black'
@@ -264,7 +557,7 @@ const canEdit = computed(() => {
                 id="assignees"
                 :readonly="!editMode"
                 v-model="newTask.assignees"
-                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-32 textarea textarea-ghost"
+                class="itbkk-assignees w-full border border-black rounded-lg py-2 px-3 h-14 textarea textarea-ghost"
                 :class="
                   newTask.assignees
                     ? 'bg-white text-black'
@@ -272,7 +565,7 @@ const canEdit = computed(() => {
                 "
                 placeholder="Unassigned"
               ></textarea>
-              <div v-if="editMode" class="flex justify-between mt-1">
+              <div v-if="editMode" class="flex justify-between">
                 <p class="text-red-400 text-sm w-40">
                   {{ errorTask.assignees }}
                 </p>
@@ -288,7 +581,7 @@ const canEdit = computed(() => {
             </div>
 
             <div class="mb-4">
-              <label for="status" class="block text-black font-bold mb-2"
+              <label for="status" class="block text-black font-bold"
                 >Status</label
               >
               <select
@@ -308,7 +601,7 @@ const canEdit = computed(() => {
 
             <p v-if="editMode" class="text-red-400">{{ errorTask.status }}</p>
 
-            <div v-if="task?.id" class="mt-5">
+            <div v-if="task?.id">
               <p class="itbkk-timezone pl-3 font-semibold text-sm text-black">
                 Time Zone :
                 {{ Intl.DateTimeFormat().resolvedOptions().timeZone }}
@@ -325,6 +618,233 @@ const canEdit = computed(() => {
             <div v-else class="mt-5"></div>
           </div>
         </div>
+
+        <div class="mb-6" v-if="task?.id">
+          <label class="block font-bold mb-1">Attachments</label>
+
+          <div class="flex">
+            <input
+              type="file"
+              accept="image/*,.pdf,.txt,.doc,.docx,.xlsx,.csv,.mp4,.avi"
+              multiple
+              :disabled="!editMode || uploadedFilesData.length === 10"
+              class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+              @change="preview"
+            />
+            <p
+              v-html="errorTask.attachment"
+              class="text-red-400 text-sm w-full pl-2 pt-1"
+            ></p>
+          </div>
+          <div class="mt-2 text-sm text-gray-500">
+            Files remaining to upload:
+            <span class="font-bold">{{ countFile }}</span>
+          </div>
+
+          <!-- Preview thumnail -->
+          <div
+            v-if="uploadedFilesData.length > 0"
+            class="flex space-x-4 overflow-x-auto mt-4 p-2 border rounded-md"
+          >
+            <div
+              v-for="(file, index) in uploadedFilesData"
+              :key="index"
+              class="relative flex flex-col items-center min-w-[120px] space-y-2 group"
+            >
+              <!-- Image Preview -->
+              <div
+                class="relative w-20 h-20"
+                :class="{
+                  'cursor-pointer': ['media', 'PDF', 'video', 'txt'].includes(
+                    file.type
+                  ),
+                }"
+              >
+                <img
+                  v-if="file.type === 'media'"
+                  :src="file.url"
+                  :alt="file.filename"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                />
+
+                <img
+                  v-if="file.type === 'PDF'"
+                  :src="file.urlPDF"
+                  :alt="file.filename"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                />
+
+                <video
+                  v-if="file.type === 'video'"
+                  :src="file.url"
+                  class="w-full h-full rounded-md border border-gray-300 object-cover"
+                ></video>
+
+                <div
+                  v-if="file.type === 'txt'"
+                  class="w-20 h-20 flex items-center justify-center border rounded-md cursor-pointer"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-14 h-14"
+                  >
+                    <!-- Background Rectangle -->
+                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                    <!-- Document Icon -->
+                    <path
+                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M34 14V22H42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <text
+                      x="32"
+                      y="36"
+                      text-anchor="middle"
+                      fill="#A0AEC0"
+                      font-size="10"
+                      font-family="Arial, sans-serif"
+                    >
+                      TXT
+                    </text>
+                  </svg>
+                </div>
+
+                <!-- Hover Overlay -->
+                <div
+                  v-if="['media', 'PDF', 'video', 'txt'].includes(file.type)"
+                  class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  @click="openPreview(file)"
+                >
+                  <span class="text-white font-medium text-sm">Preview</span>
+                </div>
+
+                <!-- Document Download -->
+                <a
+                  v-if="file.type === 'document'"
+                  :href="file.url"
+                  :download="file.filename"
+                  class="w-20 h-20 flex items-center justify-center border rounded-md"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-14 h-14"
+                  >
+                    <!-- Background Rectangle -->
+                    <rect width="64" height="64" rx="8" fill="#E6EAF0" />
+
+                    <!-- Document Shape -->
+                    <path
+                      d="M20 16C20 14.8954 20.8954 14 22 14H34L42 22V48C42 49.1046 41.1046 50 40 50H22C20.8954 50 20 49.1046 20 48V16Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M34 14V22H42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+
+                    <!-- Lines in the document -->
+                    <line
+                      x1="25"
+                      y1="30"
+                      x2="37"
+                      y2="30"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="25"
+                      y1="36"
+                      x2="37"
+                      y2="36"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="25"
+                      y1="42"
+                      x2="33"
+                      y2="42"
+                      stroke="#A0AEC0"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </a>
+                <!-- Delete Button -->
+                <button
+                  v-if="editMode"
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
+                  @click="removeFile(index, name)"
+                >
+                  <img src="/icons/delete.png" class="w-3 h-3" />
+                </button>
+
+                <!-- Download Button-->
+                <a
+                  v-if="!editMode"
+                  class="absolute top-1 right-1 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                  :href="file.download"
+                  :download="file.filename"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 64 64"
+                    fill="none"
+                    class="w-8 h-8"
+                  >
+                    <!-- Background Circle -->
+                    <circle cx="32" cy="32" r="30" fill="#f0f4ff" />
+                    <!-- Arrow -->
+                    <path
+                      d="M32 16v20"
+                      stroke="#4f46e5"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M24 32l8 8 8-8"
+                      stroke="#4f46e5"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <!-- Download Bar -->
+                    <line
+                      x1="20"
+                      y1="46"
+                      x2="44"
+                      y2="46"
+                      stroke="#4f46e5"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </a>
+              </div>
+
+              <a target="_blank" class="italic text-xs text-center block">
+                <p class="break-words w-24">{{ file.filename }}</p>
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div class="flex justify-end mt-4">
           <div v-if="canEdit">
             <router-link
@@ -359,6 +879,54 @@ const canEdit = computed(() => {
       </div>
     </div>
   </div>
+
+  <previewFile :filePre="selectedFile" @closePreview="closePreview" />
 </template>
 
-<style scoped></style>
+<style scoped>
+.itbkk-modal-task {
+  max-height: 90vh; /* Limit height of modal */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.scrollbar-hidden {
+  overflow-x: auto;
+  scrollbar-width: none; /* For Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+
+.text-preview {
+  white-space: pre-wrap; /* Preserve line breaks */
+  font-family: monospace; /* ใช้ฟอนต์ที่เหมาะสำหรับแสดงข้อความ */
+  padding: 1rem; /* เพิ่มระยะห่างภายใน */
+  border: 1px solid #ddd; /* เส้นขอบ */
+  background: #f9f9f9; /* สีพื้นหลัง */
+  max-height: 85vh; /* ขนาดสูงสุดที่ 85% ของความสูงหน้าจอ */
+  max-width: 90vw; /* ขนาดกว้างสุดที่ 90% ของความกว้างหน้าจอ */
+  overflow: auto; /* แสดง scroll bar หากเนื้อหาเกินขอบเขต */
+  width: auto; /* ปรับขนาดตามเนื้อหา */
+  height: auto; /* ปรับขนาดตามเนื้อหา */
+  box-sizing: border-box; /* รวม padding และ border ในขนาด */
+}
+
+.pdf-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.fixed {
+  max-height: 100vh; /* Prevent the modal from exceeding viewport height */
+}
+</style>

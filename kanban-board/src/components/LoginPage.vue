@@ -4,7 +4,7 @@ import { login } from "../libs/fetchUtils"
 import { useAuthStore } from "@/stores/loginStore"
 import { getToken } from "@/libs/fetchUtils"
 import { useRouter, useRoute } from "vue-router"
-import { msalInstance, state } from "../configs/msalConfig.js";
+import { msalInstance } from "../configs/msalConfig.js";
 
 const username = ref("")
 const password = ref("")
@@ -202,26 +202,24 @@ onMounted(async () => {
       <!-- Microsoft Login Button -->
       <button
         @click="microsoftLoginHandler"
-        class="w-full bg-black text-white font-semibold mt-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full bg-black text-white font-semibold h-12 mt-4 py-2 px-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <!-- Microsoft SVG Icon -->
         <div class="flex items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 1024 1024"
-            fill="none"
-            width="40"
-            height="40"
-            class="mt-6 "
+            width="18"
+            height="18"
           >
             <g>
-              <rect width="240" height="240" fill="#F25022" />
-              <rect x="240" width="240" height="240" fill="#7FBA00" />
-              <rect y="240" width="240" height="240" fill="#00A4EF" />
-              <rect x="240" y="240" width="240" height="240" fill="#FFB900" />
+              <rect x="0" y="0" width="512" height="512" fill="#F25022" />
+              <rect x="512" y="0" width="512" height="512" fill="#7FBA00" />
+              <rect x="0" y="512" width="512" height="512" fill="#00A4EF" />
+              <rect x="512" y="512" width="512" height="512" fill="#FFB900" />
             </g>
           </svg>
-          <span>Sign in with Microsoft</span>
+          <span class="text-sm pl-2">Sign in with Microsoft</span>
         </div>
       </button>
     </div>
