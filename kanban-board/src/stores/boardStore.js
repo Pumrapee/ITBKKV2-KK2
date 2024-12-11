@@ -51,7 +51,6 @@ export const useBoardStore = defineStore("board", () => {
 
   const updateBoard = (updatedBoard) => {
     board.value = board.value.map((todo) => {
-      //จะสร้าง object ใหม่ที่รวม properties ของ todo และ updatedTask เข้าด้วยกัน
       return todo.id === updatedBoard.id ? { ...todo, ...updatedBoard } : todo
     })
   }

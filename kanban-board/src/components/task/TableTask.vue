@@ -63,7 +63,6 @@ const originalIsPublic = ref(isPublic.value)
 
 //Attachment
 const attachments = ref()
-const attachmentCounts = ref({})
 
 onMounted(async () => {
   myUser.setToken()
@@ -161,7 +160,6 @@ const openLimitModal = () => {
 //Close modal
 // Add Edit Modal
 const closeAddEdit = async (task, file, deleteFiles) => {
-  console.log(openModal.value)
   myUser.setToken()
   const checkToken = await checkAndRefreshToken(
     `${import.meta.env.VITE_API_URL}token`,
@@ -173,7 +171,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
     //กรณีที่ token หมดอายุ ให้ต่ออายุ token
     myUser.setNewToken(checkToken.accessNewToken)
     // openModal.value = false
-
     //Task
     if (task.id !== undefined) {
       const { editedItem, statusCode } = await editItem(
@@ -198,6 +195,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             deleted
           )
         }
+        myTask.decreaseCountAttachment(task.id, deleteFiles.length)
 
         const attachment = await getAttachment(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
@@ -215,7 +213,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
 
         //Upload File
         if (newFiles.length > 0) {
-          console.log(newFiles)
+          myTask.increaseCountAttachment(task.id, newFiles.length)
           loadingFile.value = true
           openModal.value = false
           const uploadedFile = await uploadAttachment(
@@ -225,10 +223,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             newFiles
           )
 
-          console.log(uploadedFile)
-
           if (uploadedFile) {
-            console.log("test")
             myTask.updateTask(editedItem)
             loadingFile.value = false
             router.push({ name: "task" })
@@ -258,7 +253,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         expiredToken.value = true
       }
     } else {
-      console.log(openModal.value)
       openModal.value = false
       router.push({ name: "task" })
       editMode.value = false
@@ -271,7 +265,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
       )
 
       if (statusCode === 201) {
-        attachmentCounts.value[newTask.id] = 0
         myTask.addTask(newTask)
         showAlert("The task has been successfully added", "success")
       }
@@ -284,12 +277,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
       if (statusCode === 401) {
         expiredToken.value = true
       }
-    } else {
-      console.log(openModal.value)
-      // openModal.value = false
-      // router.push({ name: "task" })
-      // editMode.value = false
-      console.log(openModal.value)
     }
   }
 
@@ -299,7 +286,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
     editMode.value = false
   }
 
-  console.log(openModal.value)
 }
 
 // Delete Modal
@@ -519,16 +505,6 @@ watch(
   () => myTask.getTasks(),
   async (newTasks) => {
     listTaskStore.value = newTasks
-    const counts = {}
-    for (const task of newTasks) {
-      const attachments = await getAttachment(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-          task.id
-        }/attachments`
-      )
-      counts[task.id] = attachments.length || 0
-    }
-    attachmentCounts.value = counts
   },
   { immediate: true }
 )
@@ -600,17 +576,6 @@ async function fetchBoardData(id) {
         `${import.meta.env.VITE_API_URL}v3/boards/${id}/tasks`
       )
 
-      const counts = {}
-      for (const task of listTasks) {
-        const attachments = await getAttachment(
-          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-            task.id
-          }/attachments`
-        )
-        counts[task.id] = attachments.length
-      }
-      attachmentCounts.value = counts // อัปเดตค่าหลังโหลดใหม่
-
       if (listTasks === 401) {
         expiredToken.value = true
       } else if (listTasks.status === 404) {
@@ -627,7 +592,6 @@ async function fetchBoardData(id) {
     )
 
     nameOwnerBoard.value = boardIdNumber.owner.name
-
     boardName.value = boardIdNumber.name
 
     if (boardIdNumber.visibility === "PRIVATE") {
@@ -700,13 +664,6 @@ async function fetchBoardData(id) {
       }
       return true
     }
-
-    myBoard.clearCollaborator()
-    const collabList = await getItems(
-      `${import.meta.env.VITE_API_URL}v3/boards/${id}/collabs`
-    )
-    collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-    myBoard.addCollabs(collabList)
 
     if (
       validateBoardAccess(
@@ -1085,11 +1042,7 @@ async function fetchBoardData(id) {
               <div
                 class="w-8 h-8 bg-slate-500 opacity-50 text-white font-bold rounded-full flex items-center justify-center mx-auto"
               >
-                {{
-                  attachmentCounts[task.id] !== 0
-                    ? attachmentCounts[task.id]
-                    : "-"
-                }}
+                {{ task.attachmentCount === 0 ? "-" : task.attachmentCount }}
               </div>
             </td>
             <td class="itbkk-status pl-4 md:pl-20">

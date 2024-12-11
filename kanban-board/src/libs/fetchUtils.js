@@ -316,13 +316,12 @@ async function getBoardItems(url) {
     return // Exit the function if there is no token
   }
 
-  const headers = tokenIsNull(tokenStorage) // Set headers with the token
   try {
-    // const response = await fetch(url, { headers })
+    const response = await fetch(url, { headers: tokenIsNull(tokenStorage) })
     const items = await response.json()
     return items
   } catch (error) {
-    return 500
+    return
   }
 }
 

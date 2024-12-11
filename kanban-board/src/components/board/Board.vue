@@ -72,17 +72,20 @@ onMounted(async () => {
     }
 
     // Route Board
-    if (myBoard.navBarCollab && myBoard.navBoard) { //กด collab ที่ side bar
+    if (myBoard.navBarCollab && myBoard.navBoard) {
+      //กด collab ที่ side bar
       activeTab.value = "collab"
       myBoard.navBarCollab = false
       myBoard.navBoard = false
-    } else if ( 
+    } else if (
       myBoard.getBoards().length === 1 &&
       !myBoard.navBoard &&
       myBoard.getBoardCollab().length === 0
-    ) { //ถ้ามี Board 1 อัน และไม่มี Collab board และ ไม่ใช่การกดจาก side bar ให้ไป Board แรกที่มี
+    ) {
+      //ถ้ามี Board 1 อัน และไม่มี Collab board และ ไม่ใช่การกดจาก side bar ให้ไป Board แรกที่มี
       router.push({ name: "task", params: { id: myBoard.getBoards()[0].id } })
-    } else if (myBoard.navBoard) { //กด All ที่ side bar
+    } else if (myBoard.navBoard) {
+      //กด All ที่ side bar
       router.push({ name: "board" }) // นำทางไปยังหน้า board เมื่อค่า navBoard เป็น true
       myBoard.navBoard = false
     }
@@ -116,7 +119,6 @@ const openDeleteModal = (id) => {
 const openInvitations = (collabId) => {
   router.push({ name: "invitations", params: { id: collabId } })
 }
-
 
 //Close Modal
 //Add

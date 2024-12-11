@@ -508,7 +508,7 @@ watch(
 
         <!-- Scrollable Content Section -->
         <div class="flex flex-col sm:flex-row gap-4 overflow-y-auto flex-grow">
-          <div class="w-full sm:w-3/3">
+          <div class="w-full sm:w-3/3 sm:p-2">
             <div class="mb-4">
               <label for="title" class="block text-black font-bold mb-2"
                 >Title</label
