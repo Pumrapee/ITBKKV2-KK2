@@ -707,15 +707,42 @@ async function fetchBoardData(id) {
 
 <template>
   <!-- Head -->
-  <div class="flex flex-col items-center mt-28 ml-4 md:mt-28 md:ml-60">
+  <div class="flex flex-col items-center mt-28 ml-4 md:mt-28 md:ml-48">
     <div
-      class="font-bold text-2xl md:text-4xl text-black self-center pb-3 md:pb-5 flex items-center justify-between md:ml-20"
+      class="w-full md:w-3/5 font-bold text-2xl md:text-4xl text-black self-center pb-3 md:pb-5 flex items-center justify-between backdrop-blur-md bg-white/10 rounded-2xl shadow-xl p-6"
     >
       <span>{{ boardName }}</span>
+      <!-- Add Button -->
+      <div class="relative group mb-3 md:mb-0 md:mr-4">
+        <router-link :to="{ name: 'addTask' }">
+          <button
+            @click="openModalAdd"
+            :disabled="disabledIfnotOwner"
+            :class="{ disabled: disabledIfnotOwner }"
+            class="itbkk-button-add btn btn-circle border-black0 bg-black text-white"
+          >
+            <img src="/icons/plus.png" class="w-4" />
+          </button>
+          <!-- Tooltip -->
+          <div
+            class="absolute left-full ml-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
+          >
+            Add task
+          </div>
+        </router-link>
+
+        <!-- Tooltip -->
+        <div
+          v-if="disabledIfnotOwner"
+          class="absolute bottom-full w-32 mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+        >
+          You need to be board owner or has write access to perform this
+        </div>
+      </div>
     </div>
 
     <!-- Filter Search-->
-    <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 px-2">
+    <div class="flex flex-col md:flex-row justify-between w-full md:w-3/5 px-2">
       <div class="flex justify-center items-center mt-4 w-full md:w-auto">
         <div class="relative w-full md:w-auto max-w-2xl">
           <div class="dropdown">
@@ -739,7 +766,7 @@ async function fetchBoardData(id) {
                 role="button"
                 class="p-1 text-gray-400 flex-grow min-w-[120px] outline-none cursor-pointer"
               >
-                {{ filterStatus.length > 0 ? "" : "Filter Enter..." }}
+                {{ filterStatus.length > 0 ? '' : 'Filter Enter...' }}
               </div>
             </div>
             <ul
@@ -762,7 +789,7 @@ async function fetchBoardData(id) {
                     <div
                       class="shadow-md rounded-full font-medium p-2 text-black w-full md:w-full h-10 text-center mb-2 break-all"
                       :style="{
-                        backgroundColor: myStatus.getStatusColor(status.name),
+                        backgroundColor: myStatus.getStatusColor(status.name)
                       }"
                     >
                       <span class="label-text">{{ status.name }}</span>
@@ -793,6 +820,47 @@ async function fetchBoardData(id) {
             />
           </svg>
         </div>
+
+        <!-- Sort Button -->
+<div class="flex justify-center">
+  <button
+    @click="handleSortChange(sortStatus)"
+    class="btn mb-4 rounded-full w-10 h-10 backdrop-blur bg-white/60 shadow-lg ml-1 itbkk-status-sort md:w-auto text-xs md:text-base"
+  >
+    <div class="font-normal text-xs md:text-sm hidden md:block">Sort</div>
+    
+    <svg
+      v-if="sortStatus"
+      xmlns="http://www.w3.org/2000/svg"
+      :class="{
+        'text-blue-500': sortStatus === 'default',
+        '': sortStatus !== 'default'
+      }"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+    >
+      <g fill="none" fill-rule="evenodd">
+        <path
+          d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036c-.01-.003-.019 0-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+        />
+        <path
+          fill="currentColor"
+          :d="
+            {
+              default:
+                'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
+              asc: 'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
+              desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z'
+            }[sortStatus]
+          "
+        />
+      </g>
+    </svg>
+  </button>
+</div>
+
+
       </div>
 
       <!-- Mobile -->
@@ -875,9 +943,9 @@ async function fetchBoardData(id) {
         <div
           class="itbkk-board-visibility form-control relative group mb-3 md:mb-0 md:ml-3"
         >
-          <label class="label cursor-pointer flex flex-col items-center">
-            <span class="label-text font-bold">{{
-              isPublic ? "Public" : "Private"
+          <label class="label cursor-pointer flex items-center">
+            <span class="label-text font-bold mr-2">{{
+              isPublic ? 'Public' : 'Private'
             }}</span>
             <input
               :disabled="disabledVisibility"
@@ -889,6 +957,13 @@ async function fetchBoardData(id) {
           </label>
           <!-- Tooltip -->
           <div
+            class="absolute left-full ml-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
+          >
+          Board Visibility
+          </div>
+
+          <!-- Tooltip -->
+          <div
             v-if="disabledVisibility"
             class="absolute bottom-full mb-2 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
           >
@@ -898,254 +973,208 @@ async function fetchBoardData(id) {
 
         <div
           class="hidden md:flex flex-wrap justify-end items-center mt-4 w-full md:w-auto"
+        ></div>
+      </div>
+    </div>
+
+    <!-- right side bar -->
+    <div
+      class="fixed top-0 right-0 h-full w-64 bg-transparent z-10 hidden md:block"
+    >
+      <div
+        class="flex flex-col justify-center mt-72 items-center p-4 space-y-4"
+      >
+        <!-- Collaborator -->
+        <router-link
+          :to="{ name: 'collabBoard', params: { id: boardId } }"
+          class="group relative"
         >
-          <!-- Collaborator -->
-          <router-link :to="{ name: 'collabBoard', params: { id: boardId } }">
-            <button
-              class="itbkk-manage-collaborator btn text-sm md:text-l bg-black text-white mb-3 md:mb-0 md:ml-1"
+          <button
+            class="itbkk-manage-collaborator rounded-full btn text-sm md:text-l bg-black text-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
             >
-              Manage Collaborator
-            </button>
-          </router-link>
-          <!-- Status -->
-          <router-link :to="{ name: 'tableStatus', params: { id: boardId } }">
-            <button
-              class="itbkk-manage-status btn text-sm md:text-l bg-black text-white mb-3 md:mb-0 md:ml-1"
-            >
-              <svg
-                class="flex-shrink-0 w-5 h-5 text-white transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
+              <path
                 fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
-                />
-                <path
-                  d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
-                />
-                <path
-                  d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
-                />
-              </svg>
-              Status
-            </button>
-          </router-link>
-
-          <!-- Limit Button -->
-          <div class="relative group mb-3 md:mb-0 md:ml-1">
-            <button
-              @click="openLimitModal"
-              :disabled="disabledIfnotOwner"
-              class="flex btn text-sm md:text-l bg-black text-white"
-            >
-              <img src="/icons/limit.png" class="w-6" />
-              Limit
-            </button>
-            <!-- Tooltip -->
-            <div
-              v-if="disabledIfnotOwner"
-              class="absolute bottom-full w-32 mb-2 hidden px-2 py-1 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 group-hover:block transition-opacity duration-300"
-            >
-              You need to be board owner or has write access to perform this
-            </div>
+                d="M15 21h-2a2 2 0 0 1 0-4h2v-2h-2a4 4 0 0 0 0 8h2Zm8-2a4 4 0 0 1-4 4h-2v-2h2a2 2 0 0 0 0-4h-2v-2h2a4 4 0 0 1 4 4"
+              />
+              <path
+                fill="currentColor"
+                d="M14 18h4v2h-4zm-7 1a6 6 0 0 1 .09-1H3v-1.4c0-2 4-3.1 6-3.1a8.6 8.6 0 0 1 1.35.125A5.95 5.95 0 0 1 13 13h5V4a2.006 2.006 0 0 0-2-2h-4.18a2.988 2.988 0 0 0-5.64 0H2a2.006 2.006 0 0 0-2 2v14a2.006 2.006 0 0 0 2 2h5.09A6 6 0 0 1 7 19M9 2a1 1 0 1 1-1 1a1.003 1.003 0 0 1 1-1m0 4a3 3 0 1 1-3 3a2.996 2.996 0 0 1 3-3"
+              />
+            </svg>
+          </button>
+          <!-- Tooltip -->
+          <div
+            class="absolute right-full mr-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
+          >
+            Manage Collaborator
           </div>
+        </router-link>
 
-          <!-- Add Button -->
-          <div class="relative group mb-3 md:mb-0 md:ml-1">
-            <router-link :to="{ name: 'addTask' }">
-              <button
-                @click="openModalAdd"
-                :disabled="disabledIfnotOwner"
-                :class="{ disabled: disabledIfnotOwner }"
-                class="itbkk-button-add btn btn-circle border-black0 bg-black text-white"
-              >
-                <img src="/icons/plus.png" class="w-4" />
-              </button>
-            </router-link>
-
-            <!-- Tooltip -->
-            <div
-              v-if="disabledIfnotOwner"
-              class="absolute bottom-full w-32 mb-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2 z-10"
+        <!-- Status -->
+        <router-link
+          :to="{ name: 'tableStatus', params: { id: boardId } }"
+          class="group relative"
+        >
+          <button
+            class="itbkk-manage-status btn rounded-full text-sm md:text-l bg-black text-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
             >
-              You need to be board owner or has write access to perform this
-            </div>
+              <g fill="none">
+                <path
+                  d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M19 3a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7.333L4 21.5c-.824.618-2 .03-2-1V6a3 3 0 0 1 3-3zm0 2H5a1 1 0 0 0-1 1v13l2.133-1.6a2 2 0 0 1 1.2-.4H19a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1m-8 7a1 1 0 0 1 .117 1.993L11 14H8a1 1 0 0 1-.117-1.993L8 12zm5-4a1 1 0 1 1 0 2H8a1 1 0 0 1 0-2z"
+                />
+              </g>
+            </svg>
+          </button>
+          <!-- Tooltip -->
+          <div
+            class="absolute right-full mr-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
+          >
+            Manage Status
+          </div>
+        </router-link>
+
+        <!-- Limit Button -->
+        <div class="relative group mb-3 md:mb-0 md:ml-1">
+          <button
+            @click="openLimitModal"
+            :disabled="disabledIfnotOwner"
+            class="flex btn text-sm md:text-l rounded-full bg-black text-white"
+          >
+            <img src="/icons/limit.png" class="w-8" />
+          </button>
+          <!-- Tooltip -->
+          <div
+            class="absolute right-full mr-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
+          >
+            Limit
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Table -->
-    <div
-      class="overflow-x-auto max-h-[400px] border border-black rounded-md w-full md:w-4/5 mt-4 lg:overflow-x-visible"
-    >
-      <table class="table w-full">
-        <!-- head -->
-        <thead class="bg-black">
-          <tr class="text-white text-sm">
-            <th class="pl-4 md:pl-20 hidden md:table-cell">No.</th>
-            <th class="pl-14 md:pl-8">Title</th>
-            <th class="pl-4 md:pl-20">Assignees</th>
-            <th class="pl-4 md:pl-20">Attachment</th>
-            <th class="pl-4 md:pl-20">
-              <button
-                @click="handleSortChange(sortStatus)"
-                class="btn btn-ghost itbkk-status-sort"
-              >
-                <div>Status</div>
-                <svg
-                  v-if="sortStatus"
-                  xmlns="http://www.w3.org/2000/svg"
-                  :class="{
-                    'text-blue-500': sortStatus === 'default',
-                    '': sortStatus !== 'default',
-                  }"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                >
-                  <g fill="none" fill-rule="evenodd">
-                    <path
-                      d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036c-.01-.003-.019 0-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
-                    />
-                    <path
-                      fill="currentColor"
-                      :d="
-                        {
-                          default:
-                            'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
-                          asc: 'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
-                          desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z',
-                        }[sortStatus]
-                      "
-                    />
-                  </g>
-                </svg>
-              </button>
-            </th>
-            <th></th>
-          </tr>
-        </thead>
+    <!-- Card Layout for Tasks -->
+    <div class="w-full md:w-3/5 mt-4 lg:overflow-x-visible">
+      <div v-if="myTask.getTasks().length > 0">
+        <!-- Task List -->
+        <div
+          v-for="(task, index) in filteredTasks"
+          :key="task.id"
+          class="itbkk-item bg-white p-8 mb-4 rounded-3xl shadow-2xl relative"
+        >
+          <div class="flex flex-wrap justify-between items-center">
+            <div class="flex items-center">
+              <!-- No. -->
+              <span class="font-medium text-lg">{{ index + 1 }}</span>
 
-        <tbody v-if="myTask.getTasks().length > 0">
-          <!-- row -->
-          <tr
-            v-if="filteredTasks.length > 0"
-            v-for="(task, index) in filteredTasks"
-            :key="task.id"
-            class="itbkk-item"
-          >
-            <th class="text-black pl-4 md:pl-20 hidden md:table-cell">
-              {{ index + 1 }}
-            </th>
-            <td class="itbkk-title itbkk-button-edit pl-15 md:pl-15">
+              <!-- Title -->
               <router-link
                 :to="{ name: 'detailTask', params: { taskId: task.id } }"
               >
                 <button
                   @click="openModalEdit(task.id)"
-                  class="btn btn-ghost h-2"
+                  class="btn btn-ghost text-blue-500 text-lg"
                 >
                   {{ task.title }}
                 </button>
               </router-link>
-            </td>
-            <td class="itbkk-assignees pl-5 md:pl-20">
-              <p v-if="task.assignees">
-                {{ task.assignees }}
-              </p>
-              <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
-            </td>
-            <td class="itbkk-attactment pl-14 font-medium">
-              <div
-                class="w-8 h-8 bg-slate-500 opacity-50 text-white font-bold rounded-full flex items-center justify-center mx-auto"
-              >
-                {{
-                  attachmentCounts[task.id] !== 0
-                    ? attachmentCounts[task.id]
-                    : "-"
-                }}
-              </div>
-            </td>
-            <td class="itbkk-status pl-4 md:pl-20">
-              <div
-                class="shadow-md rounded-full p-2 text-black w-full md:w-36 text-center font-medium"
-                :style="{
-                  'background-color': myStatus.getStatusColor(task.status),
-                }"
-              >
-                {{ task.status }}
-              </div>
-            </td>
-            <td>
-              <div
-                v-if="!disabledIfnotOwner"
-                class="dropdown sm:dropdown-right dropdown-end mr-4 md:mr-10 itbkk-button-action"
-              >
-                <div tabindex="0" role="button" class="m-1">
-                  <svg
-                    class="h-4"
-                    fill="#000000"
-                    viewBox="0 0 1024 1024"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <path
-                        d="M388.8 896.4v-27.198c.6-2.2 1.6-4.2 2-6.4 8.8-57.2 56.4-102.4 112.199-106.2 62.4-4.4 115.2 31.199 132.4 89.199 2.2 7.6 3.8 15.6 5.8 23.4v27.2c-.6 1.8-1.6 3.399-1.8 5.399-8.6 52.8-46.6 93-98.6 104.4-4 .8-8 2-12 3h-27.2c-1.8-.6-3.6-1.6-5.4-1.8-52-8.4-91.599-45.4-103.6-96.8-1.2-5-2.6-9.6-3.8-14.2zm252.4-768.797l-.001 27.202c-.6 2.2-1.6 4.2-1.8 6.4-9 57.6-56.8 102.6-113.2 106.2-62.2 4-114.8-32-131.8-90.2-2.2-7.401-3.8-15-5.6-22.401v-27.2c.6-1.8 1.6-3.4 2-5.2 9.6-52 39.8-86 90.2-102.2 6.6-2.2 13.6-3.4 20.4-5.2h27.2c1.8.6 3.6 1.6 5.4 1.8 52.2 8.6 91.6 45.4 103.6 96.8 1.201 4.8 2.401 9.4 3.601 13.999zm-.001 370.801v27.2c-.6 2.2-1.6 4.2-2 6.4-9 57.4-58.6 103.6-114.6 106-63 2.8-116.4-35.2-131.4-93.8-1.6-6.2-3-12.4-4.4-18.6v-27.2c.6-2.2 1.6-4.2 2-6.4 8.8-57.4 58.6-103.601 114.6-106.2 63-3 116.4 35.2 131.4 93.8 1.6 6.4 3 12.6 4.4 18.8z"
-                      ></path>
-                    </g>
-                  </svg>
-                </div>
+            </div>
 
-                <ul
-                  tabindex="0"
-                  class="itbkk-button-action z-[100] dropdown-content menu bg-base-100 rounded-box w-36 p-2 shadow"
+            <!-- Status -->
+            <div
+              class="shadow-md rounded-full p-2 text-black w-full md:w-36 text-center font-medium mt-2 md:mt-0"
+              :style="{
+                'background-color': myStatus.getStatusColor(task.status)
+              }"
+            >
+              {{ task.status }}
+            </div>
+          </div>
+
+          <!-- Assignees -->
+          <div class="mt-2">
+            <strong>Assignees: </strong>
+            <p v-if="task.assignees" class="text-blue-500">
+              {{ task.assignees }}
+            </p>
+            <p v-else class="text-gray-500 font-medium italic">Unassigned</p>
+          </div>
+
+          <!-- Attachment (if any) -->
+          <div class="mt-2">
+            <strong>Attachment: </strong>
+            <p class="text-gray-500 font-medium italic">
+              {{ task.attachment || 'No attachment' }}
+            </p>
+          </div>
+
+          <!-- Actions (Dropdown) -->
+          <div
+            v-if="!disabledIfnotOwner"
+            class="dropdown sm:dropdown-left absolute bottom-4 right-4 z-50"
+          >
+            <div tabindex="0" role="button" class="m-1">
+              <svg
+                class="h-4"
+                fill="#000000"
+                viewBox="0 0 1024 1024"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M388.8 896.4v-27.198c.6-2.2 1.6-4.2 2-6.4 8.8-57.2 56.4-102.4 112.199-106.2 62.4-4.4 115.2 31.199 132.4 89.199 2.2 7.6 3.8 15.6 5.8 23.4v27.2c-.6 1.8-1.6 3.399-1.8 5.399-8.6 52.8-46.6 93-98.6 104.4-4 .8-8 2-12 3h-27.2c-1.8-.6-3.6-1.6-5.4-1.8-52-8.4-91.599-45.4-103.6-96.8-1.2-5-2.6-9.6-3.8-14.2zm252.4-768.797l-.001 27.202c-.6 2.2-1.6 4.2-1.8 6.4-9 57.6-56.8 102.6-113.2 106.2-62.2 4-114.8-32-131.8-90.2-2.2-7.401-3.8-15-5.6-22.401v-27.2c.6-1.8 1.6-3.4 2-5.2 9.6-52 39.8-86 90.2-102.2 6.6-2.2 13.6-3.4 20.4-5.2h27.2c1.8.6 3.6 1.6 5.4 1.8 52.2 8.6 91.6 45.4 103.6 96.8 1.201 4.8 2.401 9.4 3.601 13.999zm-.001 370.801v27.2c-.6 2.2-1.6 4.2-2 6.4-9 57.4-58.6 103.6-114.6 106-63 2.8-116.4-35.2-131.4-93.8-1.6-6.2-3-12.4-4.4-18.6v-27.2c.6-2.2 1.6-4.2 2-6.4 8.8-57.4 58.6-103.601 114.6-106.2 63-3 116.4 35.2 131.4 93.8 1.6 6.4 3 12.6 4.4 18.8z"
+                ></path>
+              </svg>
+            </div>
+
+            <ul
+              tabindex="0"
+              class="dropdown-content menu bg-black/10 backdrop-blur-md rounded-box w-36 p-2 shadow max-h-60 overflow-y-auto"
+            >
+              <router-link
+                :to="{ name: 'editTask', params: { taskId: task.id } }"
+              >
+                <li
+                  @click="openModalEdit(task.id, true)"
+                  class="itbkk-button-edit"
                 >
-                  <router-link
-                    :to="{ name: 'editTask', params: { taskId: task.id } }"
-                  >
-                    <li
-                      @click="openModalEdit(task.id, true)"
-                      class="itbkk-button-edit"
-                    >
-                      <a><img src="/icons/pen.png" class="w-4 mr-2" />Edit</a>
-                    </li>
-                  </router-link>
+                  <a>Edit<img src="/icons/pen.png" class="w-4" /></a>
+                </li>
+              </router-link>
 
-                  <li
-                    @click="openDeleteModal(task.id, task.title, index)"
-                    class="itbkk-button-delete"
-                  >
-                    <a><img src="/icons/trash.png" class="w-6" />Delete</a>
-                  </li>
-                </ul>
-              </div>
-            </td>
-          </tr>
+              <li
+                @click="openDeleteModal(task.id, task.title, index)"
+                class="itbkk-button-delete"
+              >
+                <a>Delete<img src="/icons/trash.png" class="w-6" /></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-          <tr v-else>
-            <td colspan="" class="text-center py-4 text-gray-500 font-medium">
-              No task
-            </td>
-          </tr>
-        </tbody>
+      <div v-else class="flex justify-center items-center py-6">
+  <div class="max-w-sm w-full bg-white/20 backdrop-blur-md shadow-xl rounded-2xl p-6 flex flex-col items-center">
+    
+    <p class="text-xl font-medium text-gray-700">No tasks</p>
+    <p class="mt-2 text-sm text-gray-500">You don't have any tasks to display. <br> Try adding some new tasks!</p>
+  </div>
+</div>
 
-        <tbody v-else>
-          <tr>
-            <td colspan="5" class="text-center py-4 text-gray-500 font-medium">
-              No task
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 
@@ -1185,32 +1214,44 @@ async function fetchBoardData(id) {
 </template>
 
 <style scoped>
-.scrollbar-hidden {
-  overflow-x: auto;
-  scrollbar-width: none; /* For Firefox */
+.task-cards-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
-.scrollbar-hidden::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
+.task-card {
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.itbkk-title {
-  /* กำหนดความกว้างสูงสุดของ column title */
-  max-width: 600px; /* ปรับค่าตามต้องการ */
-  word-break: break-all; /* ใช้ให้เกิดการตัดบรรทัด (line break) เมื่อข้อความยาวเกินขอบเขตของคอลัมน์ */
+@media (min-width: 640px) {
+  .task-cards-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.itbkk-status {
-  max-width: 600px;
-  word-break: break-all;
+@media (min-width: 1024px) {
+  .task-cards-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.button-container {
-  position: relative;
-  display: inline-block;
+@media (min-width: 1280px) {
+  .task-cards-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-.table-fixed {
-  table-layout: fixed;
+.dropdown-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform-origin: top right;
+}
+.dropdown-content.flip-left {
+  transform: scaleX(-1);
 }
 </style>
