@@ -125,7 +125,7 @@ watch(
 
 <template>
   <!-- Modal limit -->
-  <div v-if="showLimitModal" class="fixed z-10 inset-0 overflow-y-auto">
+  <div v-if="showLimitModal" class="fixed z-20 inset-0 overflow-y-auto">
     <div
       class="flex items-center justify-center min-h-screen bg-black/[.15] px-4"
     >

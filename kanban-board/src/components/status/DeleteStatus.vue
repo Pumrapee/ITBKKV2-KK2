@@ -64,7 +64,7 @@ const deleteButton = computed(() => {
 
 <template>
     <!-- Modal Delete -->
-    <div v-if="showDeleteStatus" class="fixed z-10 inset-0 overflow-y-auto">
+    <div v-if="showDeleteStatus" class="fixed z-20 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15]">
       <div class="bg-white p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
         <div class=" text-lg font-semibold text-center break-words">
