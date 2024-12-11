@@ -18,7 +18,7 @@ const cancelDelete = () => {
 
 <template>
   <!-- Modal Delete -->
-  <div v-if="showDelete" class="fixed z-10 inset-0 overflow-y-auto">
+  <div v-if="showDelete" class="fixed z-20 inset-0 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen bg-black/[.15] px-4">
       <div class="bg-white p-6 sm:p-10 rounded-lg w-full max-w-lg sm:w-1/2 lg:w-1/3">
         <div class="itbkk-message text-lg font-semibold text-center">

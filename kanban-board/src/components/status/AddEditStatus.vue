@@ -104,7 +104,7 @@ watch(props, () => {
   <!-- Modal window -->
   <div
     v-if="showModal"
-    class="fixed z-10 inset-0 overflow-y-auto flex items-center justify-center bg-black/[.15]"
+    class="fixed z-20 inset-0 overflow-y-auto flex items-center justify-center bg-black/[.15]"
   >
     <div class="bg-white p-6 rounded-lg w-11/12 max-w-xl">
       <h2 class="text-2xl font-bold text-black mb-4 border-b-2">
