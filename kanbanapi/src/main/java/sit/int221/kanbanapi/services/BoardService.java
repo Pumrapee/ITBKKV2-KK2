@@ -59,7 +59,6 @@ public class BoardService {
                 .map(board -> {
                     User boardUser = userService.getUserById(board.getOwnerId());
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
-                    boardListDTO.setRole("OWNER");
                     boardListDTO.setAccessRight("OWNER");
                     boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));
                     return boardListDTO;
@@ -74,7 +73,6 @@ public class BoardService {
                             .orElseThrow(() -> new ItemNotFoundException("Board not found for id: " + collab.getBoardId()));
                     User boardUser = userService.getUserById(board.getOwnerId());
                     BoardListDTO boardListDTO = mapper.map(board, BoardListDTO.class);
-                    boardListDTO.setRole("COLLABORATOR");
                     boardListDTO.setAccessRight(collab.getAccessRight().toString());
                     boardListDTO.setStatus(collab.getStatus());
                     boardListDTO.setOwner(new Owner(boardUser.getOid(), boardUser.getName()));

@@ -222,7 +222,7 @@ import java.io.IOException;
 
         private void buildErrorResponse(HttpServletResponse response, Exception exception,
                                         HttpStatus httpStatus, HttpServletRequest request) throws IOException {
-            ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), exception.toString(), request.getRequestURI());
+            ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), exception.getMessage(), request.getRequestURI());
             response.setStatus(httpStatus.value());
             response.setContentType("application/json");
             response.getWriter().write(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(errorResponse));
