@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -70,20 +71,20 @@ public class AttachmentService {
         List<String> existingFiles = new ArrayList<>();
         List<String> notAddedFiles = new ArrayList<>();
         for (MultipartFile file : files) {
-            if (existingAttachments.size() >= MAX_FILES) {
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            if (existingAttachments.stream().anyMatch(att -> att.getFilename().equals(filename))) {
+                // Skip duplicate filenames within the task
+                existingFiles.add(file.getOriginalFilename());
+                continue;
+            }
+
+            if (existingAttachments.size() + addedFiles.size() >= MAX_FILES) {
                 notAddedFiles.add(file.getOriginalFilename());
                 continue;
             }
 
             if (file.getSize() > MAX_FILE_SIZE) {
                 notAddedFiles.add(file.getOriginalFilename());
-                continue;
-            }
-
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            if (existingAttachments.stream().anyMatch(att -> att.getFilename().equals(filename))) {
-                // Skip duplicate filenames within the task
-                existingFiles.add(file.getOriginalFilename());
                 continue;
             }
 
@@ -117,6 +118,22 @@ public class AttachmentService {
             Files.deleteIfExists(Paths.get(attachment.getFile_path()));
         } catch (IOException ex) {
             throw new RuntimeException("Could not delete file " + attachment.getFile_path(), ex);
+        }
+    }
+
+    public void deleteAttachmentDir(Integer taskId) {
+        java.io.File taskDirectory = new java.io.File(uploadDir + "/" + taskId);
+
+        if (taskDirectory.exists()) {
+            try {
+                // Use Files.walk to traverse and delete all files and subdirectories
+                Files.walk(taskDirectory.toPath())
+                        .sorted(Comparator.reverseOrder()) // Delete files and directories in reverse order
+                        .map(Path::toFile)
+                        .forEach(java.io.File::delete);
+            } catch (IOException ex) {
+                throw new RuntimeException("Could not delete task directory: " + taskDirectory.getPath(), ex);
+            }
         }
     }
 

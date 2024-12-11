@@ -12,7 +12,6 @@ public class BoardListDTO {
     private String id;
     private String name;
     private String visibility;
-    private String role;
     private String accessRight;
     private Collab.Status status;
     private OffsetDateTime createdOn;
