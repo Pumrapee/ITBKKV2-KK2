@@ -83,7 +83,7 @@ function toggleSidebar() {
 <template>
   <!-- Navbar -->
   <div
-    class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex justify-between items-center p-3 sm:p-3"
+    class="navbar bg-white border-b border-gray z-[12] fixed w-full top-0 flex justify-between items-center p-3 sm:p-3"
   >
     <!-- Navbar Content -->
     <div class="navbar-start font-custom flex items-center">
