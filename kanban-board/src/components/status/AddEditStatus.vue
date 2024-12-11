@@ -2,15 +2,16 @@
 import { defineProps, defineEmits, watch, ref, computed } from "vue"
 import { useStatusStore } from "@/stores/statusStore"
 
+//Store
+const myStatus = useStatusStore()
+
 const props = defineProps({
   showModal: Boolean,
   taskStatus: Object,
   editModeModal: Boolean,
 })
 const emits = defineEmits(["closeModal", "saveAddEdit"])
-
 const newStatus = ref({})
-const myStatus = useStatusStore()
 const errorStatus = ref({
   name: "",
   description: "",
@@ -49,13 +50,13 @@ const changeStatus = computed(() => {
   )
 
   // จัดการข้อความข้อผิดพลาด
-    errorStatus.value.name = isNameTooLong
-      ? "Name exceeds the limit of 50 characters."
-      : isNameEmpty
-      ? "Name is required."
-      : isNameUnique
-      ? "Status name must be unique, please choose another name."
-      : ""
+  errorStatus.value.name = isNameTooLong
+    ? "Name exceeds the limit of 50 characters."
+    : isNameEmpty
+    ? "Name is required."
+    : isNameUnique
+    ? "Status name must be unique, please choose another name."
+    : ""
 
   errorStatus.value.description = isDescriptionTooLong
     ? "Description exceeds the limit of 200 characters."
@@ -88,7 +89,7 @@ const addEditSave = (newStatus) => {
   if (editStatus.description === "") {
     editStatus.description = null
   }
-
+  errorStatus.value.name = ""
   emits("saveAddEdit", newStatus)
 }
 
@@ -111,9 +112,7 @@ watch(props, () => {
       </h2>
 
       <div class="itbkk-modal-status mb-4">
-        <label for="name" class="block text-black font-bold mb-2"
-          >Name</label
-        >
+        <label for="name" class="block text-black font-bold mb-2">Name</label>
         <input
           type="text"
           id="name"

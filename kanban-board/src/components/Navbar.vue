@@ -59,13 +59,16 @@ watch(
   () => boardList,
   async (newBoard) => {
     if (newBoard.value === undefined || boardList.value.length === 0) {
+      if (!authStore.token || authStore.token === "null") {
+        return // ไม่ทำการ fetch ข้อมูลถ้าไม่มี token
+      }
+
       const boardFetch = await getBoardItems(
         `${import.meta.env.VITE_API_URL}v3/boards`
       )
       const boardFetchSort = boardFetch?.owner?.sort(
         (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
       )
-
       boardList.value = boardFetchSort
     }
   },
@@ -81,7 +84,7 @@ function toggleSidebar() {
 <template>
   <!-- Navbar -->
   <div
-    class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex justify-between items-center p-3 sm:p-3"
+    class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex items-center p-3 sm:p-3"
   >
     <!-- Navbar Content -->
     <div class="navbar-start font-custom flex items-center">
@@ -97,41 +100,43 @@ function toggleSidebar() {
       </button>
     </div>
 
-    <!-- Mobile Toggle Button -->
-    <button class="block sm:hidden p-2" @click="toggleSidebar">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-6 w-6 text-black"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M4 6h16M4 12h16m-7 6h7"
-        />
-      </svg>
-    </button>
-    <!-- user name (Desktop only) -->
-    <div class="hidden sm:block itbkk-fullname navbar-end pr-5">
-      Hi, {{ userName }}
-    </div>
-    <div class="hidden sm:block cursor-pointer dropdown dropdown-end">
-      <div tabindex="0">
-        <img src="/icons/profile-user.png" alt="profile" class="h-8" />
+    <!-- User Info and Mobile Toggle -->
+    <div class="flex items-center ml-auto space-x-3">
+      <!-- Mobile Toggle Button -->
+      <button class="block sm:hidden p-2" @click="toggleSidebar">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 text-black"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4 6h16M4 12h16m-7 6h7"
+          />
+        </svg>
+      </button>
+
+      <!-- User Info -->
+      <div class="hidden sm:block itbkk-fullname pr-5">Hi, {{ userName }}</div>
+      <div class="hidden sm:block cursor-pointer dropdown dropdown-end">
+        <div tabindex="0">
+          <img src="/icons/profile-user.png" alt="profile" class="h-8" />
+        </div>
+        <ul
+          tabindex="0"
+          class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-4 w-40 p-2 shadow"
+        >
+          <li v-if="userName !== `Guest`"><a>Profile</a></li>
+          <li v-if="userName !== `Guest`" @click="logout"><a>Logout</a></li>
+          <RouterLink :to="{ name: 'login' }">
+            <li v-if="userName === `Guest`"><a>Login</a></li>
+          </RouterLink>
+        </ul>
       </div>
-      <ul
-        tabindex="0"
-        class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-4 w-40 p-2 shadow"
-      >
-        <li v-if="userName !== `Guest`"><a>Profile</a></li>
-        <li v-if="userName !== `Guest`" @click="logout"><a>Logout</a></li>
-        <RouterLink :to="{ name: 'login' }">
-          <li v-if="userName === `Guest`"><a>Login</a></li>
-        </RouterLink>
-      </ul>
     </div>
   </div>
 

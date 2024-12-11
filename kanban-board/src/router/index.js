@@ -22,6 +22,7 @@ const checkBoardAccess = async (to, from, next) => {
     )
 
     if (token === "null" || (!token && response.visibility === "PUBLIC")) {
+      //ถ้าไม่มี Token
       if (
         (to.name === "addTask" ||
           to.name === "editTask" ||
@@ -34,37 +35,38 @@ const checkBoardAccess = async (to, from, next) => {
         return next()
       }
     } else {
+      //ถ้ามี Token
       const board = await getItems(`${import.meta.env.VITE_API_URL}v3/boards`)
 
       //check ว่า เป็น collab มั้ย
-      const checkIsCollab = board.collab?.some((boarded) => {
+      const checkIsCollab = board.collab?.find((boarded) => {
         return boarded.owner.oid === response.owner.oid
       })
 
-      //ไม่แน่ใจว่าต้องมีมั้ย
-      if (response.visibility === "PUBLIC") {
-        if (
-          to.name === "addTask" ||
-          to.name === "editTask" ||
-          to.name === "AddStatus" ||
-          to.name === "EditStatus"
-          // (!token || token === "null")
-        ) {
-          return next({ name: "forbidden" })
-        } else {
-          return next() // ถ้าเป็น PUBLIC และไม่ใช่ action ที่ต้องการ token ก็ให้เข้าถึง board ได้ตามปกติ
-        }
-      }
-
       //ถ้าเป็น collab
       if (checkIsCollab) {
-        if (
-          to.name === "addTask" ||
-          to.name === "editTask" ||
-          to.name === "AddStatus" ||
-          to.name === "EditStatus"
-        ) {
-          return next({ name: "forbidden" })
+        if (checkIsCollab.accessRight === "WRITE") { //access "WRITE"
+          if (
+            to.name === "addTask" ||
+            to.name === "editTask" ||
+            to.name === "AddStatus" ||
+            to.name === "EditStatus"
+          ) {
+            return next() // ถ้าเป็น collab และมี accessRight เป็น WRITE ก็ให้เข้าถึงหน้า addTask หรือ editTask ได้
+          } else {
+            return next() // ถ้าไม่ใช่ add/edit task ก็ให้เข้าถึงหน้าปกติ
+          }
+        } else { //access "READ"
+          if (
+            to.name === "addTask" ||
+            to.name === "editTask" ||
+            to.name === "AddStatus" ||
+            to.name === "EditStatus"
+          ) {
+            return next({ name: "forbidden" }) // ถ้าไม่มี accessRight เป็น WRITE ก็ให้ไปหน้า forbidden
+          } else {
+            return next() // หากไม่ใช่หน้า add/edit task ให้เข้าถึงได้ตามปกติ
+          }
         }
       }
 
@@ -217,9 +219,6 @@ router.beforeEach(async (to, from, next) => {
   if (
     (to.name === "board" && !token) ||
     (to.name === "board" && token === "null")
-    // ||
-    // (to.name === "invitations" && !token) ||
-    // (to.name === "invitations" && token === "null")
   ) {
     return next({ name: "login" })
   }

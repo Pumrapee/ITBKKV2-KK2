@@ -1,4 +1,3 @@
-<!-- VisibilityModal.vue -->
 <script setup>
 import { defineEmits, defineProps } from 'vue'
 

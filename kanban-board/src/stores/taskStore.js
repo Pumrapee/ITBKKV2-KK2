@@ -48,6 +48,26 @@ export const useTaskStore = defineStore("task", () => {
   const clearTask = () => {
     return (task.value = [])
   }
+
+  const increaseCountAttachment = (id, number) => {
+    const selected = task.value.find((tasked) => {
+      return tasked.id === id
+    })
+
+    if (selected) {
+      selected.attachmentCount += number
+    }
+  }
+
+  const decreaseCountAttachment = (id, number) => {
+    const selected = task.value.find((tasked) => {
+      return tasked.id === id
+    })
+
+    if (selected) {
+      selected.attachmentCount -= number
+    }
+  }
   return {
     getTasks,
     addTasks,
@@ -57,6 +77,8 @@ export const useTaskStore = defineStore("task", () => {
     updateTaskStatus,
     clearTask,
     matchStatus,
+    increaseCountAttachment,
+    decreaseCountAttachment,
   }
 })
 
