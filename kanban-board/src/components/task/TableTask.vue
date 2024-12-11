@@ -935,7 +935,7 @@ async function fetchBoardData(id) {
   </button>
   <!-- Tooltip -->
   <div
-    class="absolute right-full ml-2 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
+    class="absolute right-full mr-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
   >
     Manage Status
   </div>
