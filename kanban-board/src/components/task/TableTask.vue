@@ -908,7 +908,7 @@ async function fetchBoardData(id) {
     </div>
      
     <!-- right side bar -->
-<div class="fixed top-0 right-0 h-full w-64 bg-transparent z-10 hidden md:block">
+<div class="fixed top-0 right-0 h-full w-64 bg-transparent z-5 hidden md:block">
   <div class="flex flex-col justify-center mt-72 items-center p-4 space-y-4">
     
     <!-- Collaborator -->
