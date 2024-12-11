@@ -35,6 +35,7 @@ const myLimit = useLimitStore()
 const myUser = useAuthStore()
 const myBoard = useBoardStore()
 
+//Task
 const openModal = ref(false)
 const tasks = ref()
 const editMode = ref(false)
@@ -50,6 +51,7 @@ const emits = defineEmits(["closeAddModal"])
 const disabledIfnotOwner = ref(false)
 const nameOwnerBoard = ref()
 const disabledVisibility = ref()
+const loadingFile = ref(false)
 
 // user name login
 const userName = localStorage.getItem("user")
@@ -61,7 +63,6 @@ const originalIsPublic = ref(isPublic.value)
 
 //Attachment
 const attachments = ref()
-const attachmentCounts = ref({})
 
 onMounted(async () => {
   myUser.setToken()
@@ -100,7 +101,6 @@ const openModalEdit = async (id, boolean) => {
         boardId.value
       }/tasks/${id}/attachments`
     )
-
     attachments.value = attachment
 
     if (taskDetail.status === 404) {
@@ -170,7 +170,8 @@ const closeAddEdit = async (task, file, deleteFiles) => {
   if (checkToken.statusCode === 200) {
     //กรณีที่ token หมดอายุ ให้ต่ออายุ token
     myUser.setNewToken(checkToken.accessNewToken)
-
+    // openModal.value = false
+    //Task
     if (task.id !== undefined) {
       const { editedItem, statusCode } = await editItem(
         `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks`,
@@ -183,6 +184,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
         }
       )
 
+      //Files
       if (statusCode === 200) {
         //Delete
         for (const deleted of deleteFiles) {
@@ -193,6 +195,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             deleted
           )
         }
+        myTask.decreaseCountAttachment(task.id, deleteFiles.length)
 
         const attachment = await getAttachment(
           `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
@@ -200,6 +203,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
           }/attachments`
         )
 
+        //Filter เอาเฉพาะไฟล์ที่ไม่เคยมีอยู่ใน attachment เท่านั้น
         const newFiles = file.filter(
           (fileUpload) =>
             !attachment.some(
@@ -207,8 +211,11 @@ const closeAddEdit = async (task, file, deleteFiles) => {
             )
         )
 
-        //Upload
+        //Upload File
         if (newFiles.length > 0) {
+          myTask.increaseCountAttachment(task.id, newFiles.length)
+          loadingFile.value = true
+          openModal.value = false
           const uploadedFile = await uploadAttachment(
             `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
               task.id
@@ -218,15 +225,21 @@ const closeAddEdit = async (task, file, deleteFiles) => {
 
           if (uploadedFile) {
             myTask.updateTask(editedItem)
+            loadingFile.value = false
+            router.push({ name: "task" })
+
             showAlert("The task has been updated", "success")
           } else {
+            router.push({ name: "task" })
+            openModal.value = false
+            loadingFile.value = false
             showAlert("The task has not been updated", "error")
           }
         } else {
+          //แก้เฉพาะ Task
           myTask.updateTask(editedItem)
           openModal.value = false
           router.push({ name: "task" })
-          editMode.value = false
           showAlert("The task has been updated", "success")
         }
       }
@@ -252,7 +265,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
       )
 
       if (statusCode === 201) {
-        attachmentCounts.value[newTask.id] = 0
         myTask.addTask(newTask)
         showAlert("The task has been successfully added", "success")
       }
@@ -265,10 +277,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
       if (statusCode === 401) {
         expiredToken.value = true
       }
-    } else {
-      openModal.value = false
-      router.push({ name: "task" })
-      editMode.value = false
     }
   }
 
@@ -277,6 +285,7 @@ const closeAddEdit = async (task, file, deleteFiles) => {
     openModal.value = false
     editMode.value = false
   }
+
 }
 
 // Delete Modal
@@ -496,16 +505,6 @@ watch(
   () => myTask.getTasks(),
   async (newTasks) => {
     listTaskStore.value = newTasks
-    const counts = {}
-    for (const task of newTasks) {
-      const attachments = await getAttachment(
-        `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-          task.id
-        }/attachments`
-      )
-      counts[task.id] = attachments.length || 0
-    }
-    attachmentCounts.value = counts
   },
   { immediate: true }
 )
@@ -577,17 +576,6 @@ async function fetchBoardData(id) {
         `${import.meta.env.VITE_API_URL}v3/boards/${id}/tasks`
       )
 
-      const counts = {}
-      for (const task of listTasks) {
-        const attachments = await getAttachment(
-          `${import.meta.env.VITE_API_URL}v3/boards/${boardId.value}/tasks/${
-            task.id
-          }/attachments`
-        )
-        counts[task.id] = attachments.length
-      }
-      attachmentCounts.value = counts // อัปเดตค่าหลังโหลดใหม่
-
       if (listTasks === 401) {
         expiredToken.value = true
       } else if (listTasks.status === 404) {
@@ -604,7 +592,6 @@ async function fetchBoardData(id) {
     )
 
     nameOwnerBoard.value = boardIdNumber.owner.name
-
     boardName.value = boardIdNumber.name
 
     if (boardIdNumber.visibility === "PRIVATE") {
@@ -677,13 +664,6 @@ async function fetchBoardData(id) {
       }
       return true
     }
-
-    myBoard.clearCollaborator()
-    const collabList = await getItems(
-      `${import.meta.env.VITE_API_URL}v3/boards/${id}/collabs`
-    )
-    collabList.sort((a, b) => new Date(a.addedOn) - new Date(b.addedOn))
-    myBoard.addCollabs(collabList)
 
     if (
       validateBoardAccess(
@@ -1068,6 +1048,7 @@ async function fetchBoardData(id) {
       </div>
     </div>
 
+
     <!-- Card Layout for Tasks -->
     <div class="w-full md:w-3/5 mt-4 lg:overflow-x-visible">
       <div v-if="myTask.getTasks().length > 0">
@@ -1083,6 +1064,7 @@ async function fetchBoardData(id) {
               <span class="font-medium text-lg">{{ index + 1 }}</span>
 
               <!-- Title -->
+
               <router-link
                 :to="{ name: 'detailTask', params: { taskId: task.id } }"
               >
@@ -1147,6 +1129,7 @@ async function fetchBoardData(id) {
             >
               <router-link
                 :to="{ name: 'editTask', params: { taskId: task.id } }"
+
               >
                 <li
                   @click="openModalEdit(task.id, true)"
@@ -1185,6 +1168,7 @@ async function fetchBoardData(id) {
     :getAttactment="attachments"
     :editModeModal="editMode"
     :ownerBoard="nameOwnerBoard"
+    :load="loadingFile"
     @saveAddEdit="closeAddEdit"
     @closeModal="closeModal"
   />

@@ -59,13 +59,16 @@ watch(
   () => boardList,
   async (newBoard) => {
     if (newBoard.value === undefined || boardList.value.length === 0) {
+      if (!authStore.token || authStore.token === "null") {
+        return // ไม่ทำการ fetch ข้อมูลถ้าไม่มี token
+      }
+
       const boardFetch = await getBoardItems(
         `${import.meta.env.VITE_API_URL}v3/boards`
       )
       const boardFetchSort = boardFetch?.owner?.sort(
         (a, b) => new Date(a.createdOn) - new Date(b.createdOn)
       )
-
       boardList.value = boardFetchSort
     }
   },
@@ -81,7 +84,7 @@ function toggleSidebar() {
 <template>
   <!-- Navbar -->
   <div
-    class="navbar bg-white border-b border-gray z-[12] fixed w-full top-0 flex justify-between items-center p-3 sm:p-3"
+    class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex items-center p-3 sm:p-3"
   >
     <!-- Navbar Content -->
     <div class="navbar-start font-custom flex items-center">
@@ -96,6 +99,7 @@ function toggleSidebar() {
         </RouterLink>
       </button>
     </div>
+
 
     <!-- Mobile Toggle Button -->
     <button class="block sm:hidden p-2" @click="toggleSidebar">
@@ -137,6 +141,7 @@ function toggleSidebar() {
           <li v-if="userName === `Guest`"><a>Login</a></li>
         </RouterLink>
       </ul>
+
     </div>
   </div>
 

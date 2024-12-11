@@ -76,7 +76,7 @@ async function checkAndRefreshToken(url, tokenExpired, refreshToken) {
       return { statusCode: 500, accessNewToken: null } // คืนค่า statusCode 500 เมื่อเกิดข้อผิดพลาด
     }
   } else {
-    return { statusCode: 200, accessNewToken: tokenExpired } // คืนค่า statusCode 500 เมื่อเกิดข้อผิดพลาด
+    return { statusCode: 200, accessNewToken: tokenExpired }
   }
 }
 
@@ -316,12 +316,13 @@ async function getBoardItems(url) {
     return // Exit the function if there is no token
   }
 
-  const headers = { Authorization: `Bearer ${tokenStorage}` } // Set headers with the token
   try {
-    const response = await fetch(url, { headers })
+    const response = await fetch(url, { headers: tokenIsNull(tokenStorage) })
     const items = await response.json()
     return items
-  } catch (error) {}
+  } catch (error) {
+    return
+  }
 }
 
 async function patchItem(url, newItem) {

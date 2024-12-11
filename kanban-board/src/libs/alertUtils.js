@@ -1,6 +1,5 @@
 import { ref } from "vue"
 
-// สร้าง list ของ alert
 export const listAlert = ref([])
 
 // ฟังก์ชันเพื่อแสดง alert ใหม่

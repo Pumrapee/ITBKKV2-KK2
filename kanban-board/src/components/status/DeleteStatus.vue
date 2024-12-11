@@ -5,18 +5,20 @@ import { useLimitStore } from "../../stores/limitStore"
 import { useTaskStore } from "@/stores/taskStore"
 import { ref } from "vue"
 
+//Store
+const myStatus = useStatusStore()
+const myLimit = useLimitStore()
+const myTask = useTaskStore()
+
 const props = defineProps({
     showDeleteStatus: Boolean,
     showTransferModal: Boolean,
   detailStatus: Object,
 })
 const emits = defineEmits(["closeModal" , "closeDeleteStatus"])
-
-const myStatus = useStatusStore()
-const myLimit = useLimitStore()
-const myTask = useTaskStore()
 const selectedStatus = ref()
 const errorAlert = ref({ status : ""})
+
 const filteredStatus = computed(() => {
   return myStatus
     .getStatus()

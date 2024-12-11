@@ -9,7 +9,6 @@ export const useBoardStore = defineStore("board", () => {
   const navBoard = ref(false)
   const navBarCollab = ref(false)
   const boardName = ref("")
-  const boardOwnerId = ref(null) // เพิ่มฟิลด์สำหรับเก็บ ID เจ้าของบอร์ด
   const collaborator = ref([])
 
   // view
@@ -21,34 +20,37 @@ export const useBoardStore = defineStore("board", () => {
     return boardCollab.value
   }
 
-  const getBoardOwnerId = () => {
-    return boardOwnerId.value // ฟังก์ชันเพื่อดึง ownerId ของบอร์ด
+  const getCollabs = () => {
+    return collaborator.value
   }
 
   // actions
   const addBoards = (newBoard) => {
-    // loop array
     newBoard.forEach(addBoard)
   }
 
   const addBoard = (obj) => {
-    // push object เข้า task
     board.value.push({ ...obj })
   }
 
   const addBoardsCollab = (newBoardCollab) => {
-    // loop array
     newBoardCollab.forEach(addBoardCollab)
   }
 
   const addBoardCollab = (obj) => {
-    // push object เข้า task
     boardCollab.value.push({ ...obj })
+  }
+
+  const addCollabs = (newCollab) => {
+    newCollab.forEach(addCollab)
+  }
+
+  const addCollab = (obj) => {
+    collaborator.value.push({ ...obj })
   }
 
   const updateBoard = (updatedBoard) => {
     board.value = board.value.map((todo) => {
-      //จะสร้าง object ใหม่ที่รวม properties ของ todo และ updatedTask เข้าด้วยกัน
       return todo.id === updatedBoard.id ? { ...todo, ...updatedBoard } : todo
     })
   }
@@ -57,10 +59,6 @@ export const useBoardStore = defineStore("board", () => {
     board.value = board.value.map((todo) => {
       return todo.id === boardId ? { ...todo, ...updateVis } : todo
     })
-  }
-
-  const setBoardOwner = (ownerId) => {
-    boardOwnerId.value = ownerId // ฟังก์ชันสำหรับตั้งค่า ownerId ของบอร์ด
   }
 
   const removeBoards = (removeId) => {
@@ -96,20 +94,6 @@ export const useBoardStore = defineStore("board", () => {
     return (collaborator.value = [])
   }
 
-  const getCollabs = () => {
-    return collaborator.value
-  }
-
-  const addCollabs = (newCollab) => {
-    // loop array
-    newCollab.forEach(addCollab)
-  }
-
-  const addCollab = (obj) => {
-    // push object เข้า task
-    collaborator.value.push({ ...obj })
-  }
-
   return {
     getBoards,
     addBoards,
@@ -125,8 +109,6 @@ export const useBoardStore = defineStore("board", () => {
     getCollabs,
     removeCollab,
     removeBoardCollab,
-    getBoardOwnerId, // เพิ่มการคืนค่า getBoardOwnerId
-    setBoardOwner, // เพิ่มฟังก์ชันสำหรับตั้งค่าเจ้าของบอร์ด
     updateVisibility,
     addBoardsCollab,
     getBoardCollab,
