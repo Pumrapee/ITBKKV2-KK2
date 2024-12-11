@@ -285,7 +285,6 @@ const closeAddEdit = async (task, file, deleteFiles) => {
     openModal.value = false
     editMode.value = false
   }
-
 }
 
 // Delete Modal
@@ -746,7 +745,7 @@ async function fetchBoardData(id) {
                 role="button"
                 class="p-1 text-gray-400 flex-grow min-w-[120px] outline-none cursor-pointer"
               >
-                {{ filterStatus.length > 0 ? '' : 'Filter Enter...' }}
+                {{ filterStatus.length > 0 ? "" : "Filter Enter..." }}
               </div>
             </div>
             <ul
@@ -769,7 +768,7 @@ async function fetchBoardData(id) {
                     <div
                       class="shadow-md rounded-full font-medium p-2 text-black w-full md:w-full h-10 text-center mb-2 break-all"
                       :style="{
-                        backgroundColor: myStatus.getStatusColor(status.name)
+                        backgroundColor: myStatus.getStatusColor(status.name),
                       }"
                     >
                       <span class="label-text">{{ status.name }}</span>
@@ -802,45 +801,45 @@ async function fetchBoardData(id) {
         </div>
 
         <!-- Sort Button -->
-<div class="flex justify-center">
-  <button
-    @click="handleSortChange(sortStatus)"
-    class="btn mb-4 rounded-full w-10 h-10 backdrop-blur bg-white/60 shadow-lg ml-1 itbkk-status-sort md:w-auto text-xs md:text-base"
-  >
-    <div class="font-normal text-xs md:text-sm hidden md:block">Sort</div>
-    
-    <svg
-      v-if="sortStatus"
-      xmlns="http://www.w3.org/2000/svg"
-      :class="{
-        'text-blue-500': sortStatus === 'default',
-        '': sortStatus !== 'default'
-      }"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-    >
-      <g fill="none" fill-rule="evenodd">
-        <path
-          d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036c-.01-.003-.019 0-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
-        />
-        <path
-          fill="currentColor"
-          :d="
-            {
-              default:
-                'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
-              asc: 'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
-              desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z'
-            }[sortStatus]
-          "
-        />
-      </g>
-    </svg>
-  </button>
-</div>
+        <div class="flex justify-center">
+          <button
+            @click="handleSortChange(sortStatus)"
+            class="btn mb-4 rounded-full w-10 h-10 backdrop-blur bg-white/60 shadow-lg ml-1 itbkk-status-sort md:w-auto text-xs md:text-base"
+          >
+            <div class="font-normal text-xs md:text-sm hidden md:block">
+              Sort
+            </div>
 
-
+            <svg
+              v-if="sortStatus"
+              xmlns="http://www.w3.org/2000/svg"
+              :class="{
+                'text-blue-500': sortStatus === 'default',
+                '': sortStatus !== 'default',
+              }"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <g fill="none" fill-rule="evenodd">
+                <path
+                  d="M24 0v24H0V0zM12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036c-.01-.003-.019 0-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+                />
+                <path
+                  fill="currentColor"
+                  :d="
+                    {
+                      default:
+                        'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
+                      asc: 'M10.759 13c.94 0 1.43 1.092.855 1.792l-.078.086L7.414 19H11a1 1 0 0 1 .117 1.993L11 21H5.241c-.94 0-1.43-1.092-.855-1.792l.078-.086L8.586 15H5a1 1 0 0 1-.117-1.993L5 13zM17 4a1 1 0 0 1 1 1v12.414l1.121-1.121a1 1 0 0 1 1.415 1.414l-2.829 2.828a1 1 0 0 1-1.414 0l-2.828-2.828a1 1 0 0 1 1.414-1.414L16 17.414V5a1 1 0 0 1 1-1M8 3c.674 0 1.28.396 1.556 1.002l.054.133l2.332 6.529a1 1 0 0 1-1.838.78l-.046-.108L9.581 10H6.419l-.477 1.336a1 1 0 0 1-1.917-.56l.033-.112l2.332-6.53A1.71 1.71 0 0 1 8 3m0 2.573L7.133 8h1.734z',
+                      desc: 'M4.664 11.942a1 1 0 0 0 1.278-.606L6.419 10h3.162l.477 1.336a1 1 0 0 0 1.884-.672L9.61 4.134a1.71 1.71 0 0 0-3.22 0l-2.332 6.53a1 1 0 0 0 .606 1.278M8 5.573L8.867 8H7.133zm8.293-1.28a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1-1.415 1.415L18 7.414V20a1 1 0 1 1-2 0V7.414l-1.121 1.122a1 1 0 1 1-1.415-1.415zM5 13a1 1 0 1 0 0 2h3.586l-4.122 4.122C3.77 19.815 4.26 21 5.24 21H11a1 1 0 1 0 0-2H7.414l4.122-4.122c.693-.693.203-1.878-.777-1.878z',
+                    }[sortStatus]
+                  "
+                />
+              </g>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Mobile -->
@@ -925,7 +924,7 @@ async function fetchBoardData(id) {
         >
           <label class="label cursor-pointer flex items-center">
             <span class="label-text font-bold mr-2">{{
-              isPublic ? 'Public' : 'Private'
+              isPublic ? "Public" : "Private"
             }}</span>
             <input
               :disabled="disabledVisibility"
@@ -939,7 +938,7 @@ async function fetchBoardData(id) {
           <div
             class="absolute left-full ml-1 bottom-0 w-32 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700/30 backdrop-blur-sm text-white font-semibold text-sm rounded-2xl p-3 z-50"
           >
-          Board Visibility
+            Board Visibility
           </div>
 
           <!-- Tooltip -->
@@ -959,7 +958,7 @@ async function fetchBoardData(id) {
 
     <!-- right side bar -->
     <div
-      class="fixed top-0 right-0 h-full w-64 bg-transparent z-10 hidden md:block"
+      class="fixed top-0 right-0 h-full w-64 bg-transparent z-1 hidden md:block"
     >
       <div
         class="flex flex-col justify-center mt-72 items-center p-4 space-y-4"
@@ -1048,7 +1047,6 @@ async function fetchBoardData(id) {
       </div>
     </div>
 
-
     <!-- Card Layout for Tasks -->
     <div class="w-full md:w-3/5 mt-4 lg:overflow-x-visible">
       <div v-if="myTask.getTasks().length > 0">
@@ -1081,7 +1079,7 @@ async function fetchBoardData(id) {
             <div
               class="shadow-md rounded-full p-2 text-black w-full md:w-36 text-center font-medium mt-2 md:mt-0"
               :style="{
-                'background-color': myStatus.getStatusColor(task.status)
+                'background-color': myStatus.getStatusColor(task.status),
               }"
             >
               {{ task.status }}
@@ -1101,14 +1099,14 @@ async function fetchBoardData(id) {
           <div class="mt-2">
             <strong>Attachment: </strong>
             <p class="text-gray-500 font-medium italic">
-              {{ task.attachment || 'No attachment' }}
+              {{ task.attachmentCount || "No attachment" }}
             </p>
           </div>
 
           <!-- Actions (Dropdown) -->
           <div
             v-if="!disabledIfnotOwner"
-            class="dropdown sm:dropdown-left absolute bottom-4 right-4 z-50"
+            class="dropdown sm:dropdown-left absolute bottom-4 right-4 z-10"
           >
             <div tabindex="0" role="button" class="m-1">
               <svg
@@ -1125,11 +1123,10 @@ async function fetchBoardData(id) {
 
             <ul
               tabindex="0"
-              class="dropdown-content menu bg-black/10 backdrop-blur-md rounded-box w-36 p-2 shadow max-h-60 overflow-y-auto"
+              class="dropdown-content menu bg-black/10 backdrop-blur-md rounded-box w-36 p-2 shadow max-h-60 overflow-y-auto "
             >
               <router-link
                 :to="{ name: 'editTask', params: { taskId: task.id } }"
-
               >
                 <li
                   @click="openModalEdit(task.id, true)"
@@ -1151,13 +1148,16 @@ async function fetchBoardData(id) {
       </div>
 
       <div v-else class="flex justify-center items-center py-6">
-  <div class="max-w-sm w-full bg-white/20 backdrop-blur-md shadow-xl rounded-2xl p-6 flex flex-col items-center">
-    
-    <p class="text-xl font-medium text-gray-700">No tasks</p>
-    <p class="mt-2 text-sm text-gray-500">You don't have any tasks to display. <br> Try adding some new tasks!</p>
-  </div>
-</div>
-
+        <div
+          class="max-w-sm w-full bg-white/20 backdrop-blur-md shadow-xl rounded-2xl p-6 flex flex-col items-center"
+        >
+          <p class="text-xl font-medium text-gray-700">No tasks</p>
+          <p class="mt-2 text-sm text-gray-500">
+            You don't have any tasks to display. <br />
+            Try adding some new tasks!
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 
