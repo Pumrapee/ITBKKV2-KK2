@@ -13,6 +13,7 @@ import sit.int221.kanbanapi.dtos.TaskCreateUpdateDTO;
 import sit.int221.kanbanapi.dtos.SimpleTaskDTO;
 import sit.int221.kanbanapi.dtos.TaskDTO;
 import sit.int221.kanbanapi.databases.kanbandb.entities.Task;
+import sit.int221.kanbanapi.services.AttachmentService;
 import sit.int221.kanbanapi.services.BoardService;
 import sit.int221.kanbanapi.services.StatusService;
 import sit.int221.kanbanapi.services.TaskService;
@@ -33,6 +34,8 @@ public class TaskController {
 
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private AttachmentService attachmentService;
 
     @GetMapping("")
     public ResponseEntity<List<SimpleTaskDTO>> getAllTaskFilteredSorted(
@@ -41,7 +44,11 @@ public class TaskController {
             @PathVariable String boardId) {
         List<Task> tasks = taskService.getAllTaskFilteredSorted(filterStatuses, sortBy, boardId);
         List<SimpleTaskDTO> taskDTOS = tasks.stream()
-                .map(task -> modelMapper.map(task, SimpleTaskDTO.class))
+                .map(task -> {
+                    SimpleTaskDTO taskDTO = modelMapper.map(task, SimpleTaskDTO.class);
+                    taskDTO.setAttachmentCount(attachmentService.getAttachmentsByTaskId(task.getId()).size());
+                    return taskDTO;
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskDTOS);
     }
@@ -80,6 +87,7 @@ public class TaskController {
     public ResponseEntity<SimpleTaskDTO> removeTask(@PathVariable Integer id,
                                                     @PathVariable String boardId) {
         Task deletedTask = taskService.removeTask(boardId, id);
+        attachmentService.deleteAttachmentDir(id);
         SimpleTaskDTO taskDTO = modelMapper.map(deletedTask, SimpleTaskDTO.class);
         return ResponseEntity.ok(taskDTO);
     }
