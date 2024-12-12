@@ -82,68 +82,80 @@ function toggleSidebar() {
 </script>
 
 <template>
-  <!-- Navbar -->
   <div
-    class="navbar bg-white border-b border-gray z-[2] fixed w-full top-0 flex items-center p-3 sm:p-3"
-  >
-    <!-- Navbar Content -->
-    <div class="navbar-start font-custom flex items-center">
-      <button
-        class="btn btn-ghost bg-white pl-3 flex items-center text-xl sm:text-2xl text-black"
-        @click="boardAll"
-      >
-        <!-- Logo -->
-        <img src="/icons/logonavbar2.png" class="w-8 sm:w-10 m-2" />
-        <RouterLink :to="{ name: 'board' }">
-          <span>KRADAN KANBAN</span>
-        </RouterLink>
-      </button>
-    </div>
-
-
-    <!-- Mobile Toggle Button -->
-    <button class="block sm:hidden p-2" @click="toggleSidebar">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-6 w-6 text-black"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M4 6h16M4 12h16m-7 6h7"
-        />
-      </svg>
+  class="navbar bg-white border-b border-gray z-[12] fixed w-full top-0 flex items-center p-3 sm:p-3 justify-between"
+>
+  <!-- Navbar Content -->
+  <div class="navbar-start font-custom flex items-center">
+    <button
+      class="btn btn-ghost bg-white pl-3 flex items-center text-xl sm:text-2xl text-black"
+      @click="boardAll"
+    >
+      <!-- Logo -->
+      <img src="/icons/logonavbar2.png" class="w-8 sm:w-10 m-2" />
+      <RouterLink :to="{ name: 'board' }">
+        <span>KRADAN KANBAN</span>
+      </RouterLink>
     </button>
-    
-    <div class="hidden sm:block cursor-pointer dropdown dropdown-end">
-      <div class="flex items-center">
-      <!-- user name (Desktop only) -->
-    <div class="hidden sm:block itbkk-fullname navbar-end pr-5">
-      Hi, {{ userName }}
-    </div>
-      <div tabindex="0">
-        <img src="/icons/profile-user.png" alt="profile" class="h-8" />
-      </div>
-    </div>
-      <ul
-        tabindex="0"
-        class="menu dropdown-content bg-base-100 rounded-box z-[12] mt-4 mr-8 w-40 p-2 shadow"
-      >
-        
-        <li v-if="userName !== `Guest`" @click="logout"><a class="text-red-400 font-bold">Logout
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h7v-2H5zm16 7l-4-4v3H9v2h8v3z"/></svg>
-        </a></li>
-        <RouterLink :to="{ name: 'login' }">
-          <li v-if="userName === `Guest`"><a>Login</a></li>
-        </RouterLink>
-      </ul>
-
-    </div>
   </div>
+
+  <!-- Mobile Toggle Button -->
+  <button class="block sm:hidden p-2" @click="toggleSidebar">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-6 w-6 text-black"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M4 6h16M4 12h16m-7 6h7"
+      />
+    </svg>
+  </button>
+
+ <!-- Dropdown and User Info -->
+<div class="hidden sm:flex items-center space-x-3 sm:space-x-5">
+  <!-- user name (Desktop only) -->
+  <div class="hidden sm:block itbkk-fullname navbar-end pr-2">
+    Hi, {{ userName }}
+  </div>
+
+  <!-- Dropdown -->
+  <div class="cursor-pointer dropdown dropdown-end">
+    <div tabindex="0">
+      <img src="/icons/profile-user.png" alt="profile" class="h-8" />
+    </div>
+    <ul
+      tabindex="0"
+      class="menu dropdown-content bg-base-100 rounded-box z-[12] mt-4 w-40 p-2 shadow"
+    >
+      <li v-if="userName !== `Guest`" @click="logout">
+        <a class="text-red-400 font-bold">
+          Logout
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M5 5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h7v-2H5zm16 7l-4-4v3H9v2h8v3z"
+            />
+          </svg>
+        </a>
+      </li>
+      <RouterLink :to="{ name: 'login' }">
+        <li v-if="userName === `Guest`"><a>Login</a></li>
+      </RouterLink>
+    </ul>
+  </div>
+</div>
+</div>
 
   <!-- Sidebar -->
   <aside
