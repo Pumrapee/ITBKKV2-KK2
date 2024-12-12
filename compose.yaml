@@ -28,6 +28,9 @@ services:
 
   api:
     image: kanbanapi-release
+    env_file: kanbanapi/api-env.sh
+    volumes:
+      - attachment-dir:/src/main/resources/uploads
     build: 
       context: kanbanapi
     environment:
@@ -49,7 +52,7 @@ services:
     env_file: kanbandb/db-env.sh
     volumes: 
       - ./kanbandb/scripts:/docker-entrypoint-initdb.d
-      # - db-datadir:/var/lib/mysql
+      - db-datadir:/var/lib/mysql
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       interval: 2s
@@ -62,8 +65,9 @@ services:
           - kanban-db
     restart: unless-stopped
 
-# volumes:
-#   db-datadir:
+volumes:
+  db-datadir:
+  attachment-dir:
 
 networks:
   kanban-front-network:
